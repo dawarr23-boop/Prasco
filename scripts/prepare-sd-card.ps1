@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     PRASCO SD-Karten Vorbereitungs-Skript für Raspberry Pi
     
@@ -112,7 +112,7 @@ function Get-UserInput {
 function Get-YesNo {
     param([string]$Prompt, [bool]$Default = $true)
     
-    $defaultText = if ($Default) { "[J/n]" } else { "[j/N]" }
+    $defaultText = if ($Default) { '(J/n)' } else { '(j/N)' }
     Write-ColorOutput "? " "Yellow" -NoNewline
     Write-Host "$Prompt $defaultText " -NoNewline
     $response = Read-Host
@@ -120,7 +120,7 @@ function Get-YesNo {
     if ([string]::IsNullOrEmpty($response)) {
         return $Default
     }
-    return $response -match "^[jJyY]"
+    return $response -match '^[jJyY]'
 }
 
 # Konfiguration
@@ -143,9 +143,9 @@ Write-Header
 Write-ColorOutput "Willkommen beim PRASCO SD-Karten Vorbereitungs-Tool!" "Cyan"
 Write-Host ""
 Write-Host "Dieses Skript bereitet eine SD-Karte vor, die:"
-Write-Host "  • Raspberry Pi OS (64-bit Lite) enthält"
-Write-Host "  • Beim ersten Start automatisch PRASCO installiert"
-Write-Host "  • Die interaktive Konfiguration startet"
+Write-Host "  - Raspberry Pi OS 64-bit Lite enthaelt"
+Write-Host "  - Beim ersten Start automatisch PRASCO installiert"
+Write-Host "  - Die interaktive Konfiguration startet"
 Write-Host ""
 
 #===============================================================================
@@ -278,7 +278,7 @@ $driveList = @()
 foreach ($drive in $removableDrives) {
     $sizeGB = [math]::Round($drive.Size / 1GB, 1)
     $driveList += $drive
-    Write-Host "  $i) $($drive.Model) - $sizeGB GB [$($drive.DeviceID)]" -ForegroundColor Yellow
+    Write-Host ("  {0}) {1} - {2} GB ({3})" -f $i, $drive.Model, $sizeGB, $drive.DeviceID) -ForegroundColor Yellow
     $i++
 }
 
@@ -368,67 +368,68 @@ Write-ColorOutput "`n━━━━━━━━━━━━━━━━━━━�
 Write-ColorOutput "Schritt 5: Image auf SD-Karte schreiben" "White"
 Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
 
-# SD-Karte vorbereiten mit diskpart
-Write-Step "Bereite SD-Karte vor..."
+# Prüfe auf verfügbare Flash-Tools
+Write-Step "Suche Flash-Tool..."
 
-$diskpartScript = @"
-select disk $diskNumber
-clean
-create partition primary
-format fs=fat32 quick
-assign
-"@
-
-$diskpartScriptPath = Join-Path $Config.TempDir "diskpart-script.txt"
-$diskpartScript | Out-File -FilePath $diskpartScriptPath -Encoding ASCII
-
-diskpart /s $diskpartScriptPath | Out-Null
-Start-Sleep -Seconds 3
-
-Write-Success "SD-Karte formatiert"
-
-# Verwende dd-ähnliches Tool oder Raspberry Pi Imager CLI falls verfügbar
-Write-Step "Schreibe Image auf SD-Karte..."
-Write-Warning2 "Dies kann 10-20 Minuten dauern. Bitte warten..."
-
-# Prüfe ob rpi-imager CLI verfügbar ist
+$balenaEtcher = "$env:LOCALAPPDATA\balena_etcher\balenaEtcher.exe"
 $rpiImager = Get-Command "rpi-imager" -ErrorAction SilentlyContinue
+$ddPath = Get-Command "dd" -ErrorAction SilentlyContinue
 
-if ($rpiImager) {
-    # Verwende Raspberry Pi Imager CLI
+if (Test-Path $balenaEtcher) {
+    Write-Success "balenaEtcher gefunden"
+    
+    Write-Host ""
+    Write-ColorOutput "╔═══════════════════════════════════════════════════════════════╗" "Yellow"
+    Write-ColorOutput "║           balenaEtcher wird geöffnet                          ║" "Yellow"
+    Write-ColorOutput "╠═══════════════════════════════════════════════════════════════╣" "Yellow"
+    Write-ColorOutput "║  1. Klicke 'Flash from file'                                  ║" "Yellow"
+    Write-ColorOutput "║  2. Wähle: $imgFile" "Yellow"
+    Write-ColorOutput "║  3. Wähle die SD-Karte als Ziel                               ║" "Yellow"
+    Write-ColorOutput "║  4. Klicke 'Flash!'                                           ║" "Yellow"
+    Write-ColorOutput "║  5. Warte bis der Vorgang abgeschlossen ist                   ║" "Yellow"
+    Write-ColorOutput "║  6. Kehre hierher zurück und drücke ENTER                     ║" "Yellow"
+    Write-ColorOutput "╚═══════════════════════════════════════════════════════════════╝" "Yellow"
+    Write-Host ""
+    
+    # Kopiere Image-Pfad in Zwischenablage
+    $imgFile | Set-Clipboard
+    Write-Host "  (Image-Pfad wurde in die Zwischenablage kopiert)" -ForegroundColor Gray
+    Write-Host ""
+    
+    # Öffne balenaEtcher
+    Start-Process $balenaEtcher
+    
+    Write-Host ""
+    Write-ColorOutput "Warte auf Abschluss des Flash-Vorgangs..." "Cyan"
+    Write-Host "Drücke ENTER wenn das Flashen abgeschlossen ist..." -ForegroundColor Yellow
+    Read-Host
+    
+    Write-Success "Flash-Vorgang bestätigt"
+    
+} elseif ($rpiImager) {
+    Write-Success "Raspberry Pi Imager gefunden"
+    Write-Step "Schreibe Image auf SD-Karte..."
+    Write-Warning2 "Dies kann 10-20 Minuten dauern. Bitte warten..."
     & rpi-imager --cli $imgFile $selectedDrive.DeviceID
-} else {
-    # Fallback: Verwende PowerShell native Methode mit dd für Windows
-    $ddPath = Get-Command "dd" -ErrorAction SilentlyContinue
+    Write-Success "Image geschrieben"
     
-    if (-not $ddPath) {
-        Write-Warning2 "Für das Schreiben des Images wird der Raspberry Pi Imager benötigt."
-        Write-Host ""
-        Write-Host "Bitte lade den Raspberry Pi Imager herunter und schreibe das Image manuell:"
-        Write-Host "  1. Download: https://www.raspberrypi.com/software/"
-        Write-Host "  2. Image-Datei: $imgFile"
-        Write-Host "  3. Nach dem Schreiben dieses Skript erneut mit -SkipDownload ausführen"
-        Write-Host ""
-        Write-Host "Oder installiere dd für Windows:"
-        Write-Host "  winget install GNU.dd"
-        Write-Host ""
-        
-        $openImager = Get-YesNo "Raspberry Pi Imager Website öffnen?"
-        if ($openImager) {
-            Start-Process "https://www.raspberrypi.com/software/"
-        }
-        
-        Write-Host ""
-        Write-Host "Nach dem Schreiben des Images: Führe das Skript erneut aus mit:" -ForegroundColor Yellow
-        Write-Host "  .\prepare-sd-card.ps1 -SkipDownload" -ForegroundColor Cyan
-        exit 0
-    }
-    
-    # dd verwenden
+} elseif ($ddPath) {
+    Write-Success "dd gefunden"
+    Write-Step "Schreibe Image auf SD-Karte..."
+    Write-Warning2 "Dies kann 10-20 Minuten dauern. Bitte warten..."
     & dd if=$imgFile of=$selectedDrive.DeviceID bs=4M status=progress
+    Write-Success "Image geschrieben"
+    
+} else {
+    Write-Warning2 "Kein Flash-Tool gefunden!"
+    Write-Host ""
+    Write-Host "Bitte installiere eines der folgenden Tools:" -ForegroundColor Yellow
+    Write-Host "  1. balenaEtcher (empfohlen): winget install Balena.Etcher" -ForegroundColor Cyan
+    Write-Host "  2. Raspberry Pi Imager: https://www.raspberrypi.com/software/" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Nach der Installation dieses Skript erneut ausführen." -ForegroundColor Yellow
+    exit 1
 }
-
-Write-Success "Image geschrieben"
 
 #===============================================================================
 # Schritt 6: Boot-Partition konfigurieren
@@ -438,24 +439,62 @@ Write-ColorOutput "`n━━━━━━━━━━━━━━━━━━━�
 Write-ColorOutput "Schritt 6: Boot-Partition konfigurieren" "White"
 Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
 
-# Warte auf Laufwerkserkennung
-Start-Sleep -Seconds 5
+Write-Host ""
+Write-ColorOutput "Die SD-Karte muss jetzt eingesteckt sein, damit die Boot-Partition" "Yellow"
+Write-ColorOutput "konfiguriert werden kann." "Yellow"
+Write-Host ""
 
-# Finde Boot-Partition
-$partitions = Get-Partition -DiskNumber $diskNumber -ErrorAction SilentlyContinue
-$bootPartition = $partitions | Where-Object { $_.Size -lt 1GB } | Select-Object -First 1
+# Warte auf Boot-Partition
+Write-Step "Suche Boot-Partition..."
 
-if (-not $bootPartition) {
-    # Versuche Laufwerksbuchstaben direkt zu finden
-    $volumes = Get-Volume | Where-Object { $_.FileSystemLabel -eq "bootfs" -or $_.FileSystemLabel -eq "boot" }
-    if ($volumes) {
-        $bootDrive = "$($volumes[0].DriveLetter):"
-    } else {
-        Write-Warning2 "Boot-Partition konnte nicht automatisch gefunden werden."
-        $bootDrive = Get-UserInput "Laufwerksbuchstabe der Boot-Partition (z.B. E:)"
+$bootDrive = $null
+$maxRetries = 30
+$retry = 0
+
+while (-not $bootDrive -and $retry -lt $maxRetries) {
+    # Suche nach bootfs oder boot Partition
+    $volumes = Get-Volume | Where-Object { 
+        $_.FileSystemLabel -eq "bootfs" -or 
+        $_.FileSystemLabel -eq "boot" -or 
+        $_.FileSystemLabel -match "^BOOT" 
     }
-} else {
-    $bootDrive = "$($bootPartition.DriveLetter):"
+    
+    if ($volumes -and $volumes[0].DriveLetter) {
+        $bootDrive = "$($volumes[0].DriveLetter):"
+        break
+    }
+    
+    # Alternativ: Suche Partition auf dem ausgewählten Disk
+    $partitions = Get-Partition -DiskNumber $diskNumber -ErrorAction SilentlyContinue
+    $bootPartition = $partitions | Where-Object { $_.Size -lt 1GB -and $_.DriveLetter } | Select-Object -First 1
+    
+    if ($bootPartition) {
+        $bootDrive = "$($bootPartition.DriveLetter):"
+        break
+    }
+    
+    $retry++
+    if ($retry -lt $maxRetries) {
+        Write-Host "  Warte auf Boot-Partition... ($retry/$maxRetries)" -ForegroundColor Gray
+        Start-Sleep -Seconds 2
+    }
+}
+
+if (-not $bootDrive) {
+    Write-Warning2 "Boot-Partition konnte nicht automatisch gefunden werden."
+    Write-Host ""
+    Write-Host "Bitte stecke die SD-Karte ein (falls nicht schon geschehen)" -ForegroundColor Yellow
+    Write-Host "und gib den Laufwerksbuchstaben der Boot-Partition ein." -ForegroundColor Yellow
+    Write-Host ""
+    $bootDrive = Get-UserInput "Laufwerksbuchstabe der Boot-Partition (z.B. D:)" "D:"
+    if (-not $bootDrive.EndsWith(":")) { $bootDrive = "$bootDrive`:" }
+}
+
+# Prüfe ob Boot-Partition zugänglich ist
+if (-not (Test-Path $bootDrive)) {
+    Write-Error2 "Boot-Partition $bootDrive nicht zugaenglich!"
+    Write-Host "Bitte stelle sicher, dass die SD-Karte eingesteckt ist." -ForegroundColor Yellow
+    exit 1
 }
 
 Write-Success "Boot-Partition: $bootDrive"
