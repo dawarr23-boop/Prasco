@@ -111,7 +111,7 @@ PRASCO enthält mehrere Hilfsskripte für Einrichtung, Wartung und Betrieb:
 
 | Skript                        | Beschreibung                                                                |
 | ----------------------------- | --------------------------------------------------------------------------- |
-| `scripts/prepare-sd-card.ps1` | **SD-Karten Setup** - Lädt Pi OS, schreibt auf SD-Karte, konfiguriert Auto-Setup |
+| `scripts/prepare-sd-card.ps1` | **SD-Karten Setup** - Wähle OS (Pi OS Lite/Desktop/DietPi), lädt herunter, schreibt auf SD-Karte, konfiguriert Auto-Setup. Inklusive Fehlerbehandlung und Retry-Logik |
 
 ### Raspberry Pi Installation
 
@@ -164,12 +164,18 @@ Das einfachste Setup - bereitet eine SD-Karte vor, die beim ersten Start automat
 ```
 
 Das Skript:
-1. Lädt Raspberry Pi OS automatisch herunter
-2. Schreibt das Image auf die SD-Karte
-3. Konfiguriert SSH, WLAN und Benutzer
-4. Richtet automatische PRASCO-Installation beim ersten Start ein
+1. **Betriebssystem-Auswahl**: Raspberry Pi OS (Lite/Desktop) oder DietPi
+2. Lädt das gewählte OS automatisch herunter (mit Fehlerbehandlung)
+3. Schreibt das Image auf die SD-Karte
+4. Konfiguriert SSH, WLAN, Hostname und Benutzer
+5. Richtet automatische PRASCO-Installation beim ersten Start ein
 
 Nach dem ersten Boot: SSH-Verbindung herstellen und interaktives Setup starten.
+
+**📚 Weitere Informationen:**
+- [OS-Vergleich](OS-COMPARISON.md) - Welches Betriebssystem ist das richtige?
+- [Troubleshooting](SD-CARD-TROUBLESHOOTING.md) - Lösungen für häufige Probleme
+- [Detaillierte Anleitung](RASPBERRY-PI-SETUP.md) - Schritt-für-Schritt Setup-Guide
 
 ---
 
