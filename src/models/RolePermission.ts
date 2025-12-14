@@ -30,12 +30,17 @@ RolePermission.init(
       primaryKey: true,
     },
     role: {
-      type: DataTypes.ENUM('super_admin', 'admin', 'editor', 'viewer', 'display'),
+      type: DataTypes.STRING,
       allowNull: false,
+      unique: false,
+      validate: {
+        isIn: [['super_admin', 'admin', 'editor', 'viewer', 'display']],
+      },
     },
     permissionId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      unique: false,
       references: {
         model: 'permissions',
         key: 'id',
