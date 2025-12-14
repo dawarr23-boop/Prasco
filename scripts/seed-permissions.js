@@ -10,8 +10,8 @@ async function main() {
   try {
     console.log('🌱 Starting permission seeding...');
     
-    // Import after dotenv is loaded
-    const { sequelize } = require('../dist/models');
+    // Import database connection
+    const { sequelize } = require('../dist/config/database');
     const { seedPermissions } = require('../dist/database/seeders/permissions');
     
     await sequelize.authenticate();
@@ -20,6 +20,7 @@ async function main() {
     await seedPermissions();
     
     console.log('✅ Permission seeding complete!');
+    await sequelize.close();
     process.exit(0);
   } catch (error) {
     console.error('❌ Error:', error);
