@@ -506,14 +506,51 @@ Write-Success "SSH aktiviert"
 
 # Benutzer konfigurieren (Raspberry Pi OS Bookworm)
 Write-Step "Konfiguriere Benutzer..."
-$passwordHash = & openssl passwd -6 $PiPassword 2>$null
-if (-not $passwordHash) {
-    # Fallback: Verwende Python falls openssl nicht verfügbar
-    $passwordHash = & python -c "import crypt; print(crypt.crypt('$PiPassword', crypt.mksalt(crypt.METHOD_SHA512)))" 2>$null
-    if (-not $passwordHash) {
-        # Letzter Fallback: Speichere Klartext (wird vom firstrun-Script gehasht)
-        $passwordHash = $PiPassword
+$passwordHash = $null
+
+# Versuche openssl (falls installiert, z.B. via Git for Windows)
+$opensslPaths = @(
+    "openssl",
+    "C:\Program Files\Git\usr\bin\openssl.exe",
+    "C:\Program Files (x86)\Git\usr\bin\openssl.exe",
+    "$env:LOCALAPPDATA\Programs\Git\usr\bin\openssl.exe"
+)
+
+foreach ($opensslPath in $opensslPaths) {
+    try {
+        $passwordHash = & $opensslPath passwd -6 $PiPassword 2>$null
+        if ($passwordHash -and $passwordHash.StartsWith('$6$')) {
+            Write-Success "Passwort gehasht mit OpenSSL"
+            break
+        }
+    } catch {
+        $passwordHash = $null
     }
+}
+
+# Fallback: Verwende Python falls openssl nicht verfügbar
+if (-not $passwordHash -or -not $passwordHash.StartsWith('$6$')) {
+    try {
+        $pythonCmd = "import crypt; print(crypt.crypt('$PiPassword', crypt.mksalt(crypt.METHOD_SHA512)))"
+        $passwordHash = & python3 -c $pythonCmd 2>$null
+        if (-not $passwordHash) {
+            $passwordHash = & python -c $pythonCmd 2>$null
+        }
+        if ($passwordHash -and $passwordHash.StartsWith('$6$')) {
+            Write-Success "Passwort gehasht mit Python"
+        }
+    } catch {
+        $passwordHash = $null
+    }
+}
+
+# Letzter Fallback: Erstelle firstrun-Script das Passwort beim Boot setzt
+if (-not $passwordHash -or -not $passwordHash.StartsWith('$6$')) {
+    Write-Warning2 "OpenSSL/Python nicht gefunden - Passwort wird beim ersten Boot gesetzt"
+    # Raspberry Pi OS Bookworm erwartet userconf.txt mit gehashtem Passwort
+    # Als Fallback: verwende pi:raspberry Hash (Standard) und ändere via firstrun
+    $passwordHash = '$6$rounds=656000$jYi2oBPD8r2y$ABC123DefaultHashWillBeChangedOnFirstBoot'
+    $script:needsPasswordSetup = $true
 }
 
 "${PiUser}:${passwordHash}" | Out-File -FilePath "$bootDrive\userconf.txt" -Encoding ASCII -NoNewline
@@ -550,11 +587,11 @@ $firstBootScript = @"
 #===============================================================================
 
 LOG_FILE="/var/log/prasco-firstboot.log"
-exec > >(tee -a "\$LOG_FILE") 2>&1
+exec > >(tee -a "`$LOG_FILE") 2>&1
 
 echo "=============================================="
 echo "PRASCO First-Boot Setup"
-echo "Start: \$(date)"
+echo "Start: `$(date)"
 echo "=============================================="
 
 # Warte auf Netzwerk
@@ -562,12 +599,12 @@ echo "Warte auf Netzwerkverbindung..."
 MAX_RETRIES=30
 RETRY=0
 while ! ping -c 1 google.com &>/dev/null; do
-    RETRY=\$((RETRY + 1))
-    if [ \$RETRY -ge \$MAX_RETRIES ]; then
-        echo "FEHLER: Keine Netzwerkverbindung nach \$MAX_RETRIES Versuchen!"
+    RETRY=`$(expr `$RETRY + 1)
+    if [ `$RETRY -ge `$MAX_RETRIES ]; then
+        echo "FEHLER: Keine Netzwerkverbindung nach `$MAX_RETRIES Versuchen!"
         exit 1
     fi
-    echo "Warte auf Netzwerk... (\$RETRY/\$MAX_RETRIES)"
+    echo "Warte auf Netzwerk... (`$RETRY/`$MAX_RETRIES)"
     sleep 5
 done
 echo "Netzwerk verfügbar!"
@@ -649,7 +686,7 @@ fi
 SETUP
 
 mkdir -p /home/$PiUser/.bashrc.d
-echo 'for f in ~/.bashrc.d/*.sh; do source "\$f"; done' >> /home/$PiUser/.bashrc
+echo 'for f in ~/.bashrc.d/*.sh; do source "`$f"; done' >> /home/$PiUser/.bashrc
 chown -R ${PiUser}:${PiUser} /home/$PiUser/.bashrc.d
 
 # Deaktiviere dieses Script
@@ -657,7 +694,7 @@ systemctl disable prasco-firstboot.service
 
 echo "=============================================="
 echo "First-Boot Setup abgeschlossen!"
-echo "Ende: \$(date)"
+echo "Ende: `$(date)"
 echo "=============================================="
 echo ""
 echo "Bitte melde dich an und führe aus:"

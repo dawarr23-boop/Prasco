@@ -109,29 +109,29 @@ PRASCO enthält mehrere Hilfsskripte für Einrichtung, Wartung und Betrieb:
 
 ### SD-Karten Vorbereitung (Windows)
 
-| Skript                        | Beschreibung                                                                |
-| ----------------------------- | --------------------------------------------------------------------------- |
+| Skript                        | Beschreibung                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------- |
 | `scripts/prepare-sd-card.ps1` | **SD-Karten Setup** - Lädt Pi OS, schreibt auf SD-Karte, konfiguriert Auto-Setup |
 
 ### Raspberry Pi Installation
 
-| Skript                        | Beschreibung                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| Skript                        | Beschreibung                                                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | `scripts/auto-install.sh`     | **One-Liner Installation** - `curl -sSL https://raw.githubusercontent.com/dawarr23-boop/Prasco/main/scripts/auto-install.sh \| bash` |
-| `scripts/setup-production.sh` | **Interaktives Produktions-Setup** - Vollständige Ersteinrichtung mit Datenbank, PM2, Kiosk-Modus |
-| `scripts/firstboot-setup.sh`  | First-Boot Service für automatische Installation |
+| `scripts/setup-production.sh` | **Interaktives Produktions-Setup** - Vollständige Ersteinrichtung mit Datenbank, PM2, Kiosk-Modus                                    |
+| `scripts/firstboot-setup.sh`  | First-Boot Service für automatische Installation                                                                                     |
 
 ### Wartung & Betrieb
 
-| Skript                        | Beschreibung                                                                                      |
-| ----------------------------- | ------------------------------------------------------------------------------------------------- |
-| `scripts/first-run.sh`        | Schnellstart nach dem Klonen                                                                      |
-| `scripts/health-check.sh`     | Systemdiagnose und Status-Übersicht                                                               |
-| `scripts/update.sh`           | PRASCO auf neueste Version aktualisieren                                                          |
-| `scripts/backup.sh`           | Backup von Datenbank und Uploads erstellen                                                        |
-| `scripts/restore.sh`          | Backup wiederherstellen                                                                           |
-| `scripts/start-kiosk.sh`      | Browser im Kiosk-Modus starten                                                                    |
-| `scripts/deploy-to-pi.ps1`    | Windows: Deploy auf Raspberry Pi                                                                  |
+| Skript                     | Beschreibung                               |
+| -------------------------- | ------------------------------------------ |
+| `scripts/first-run.sh`     | Schnellstart nach dem Klonen               |
+| `scripts/health-check.sh`  | Systemdiagnose und Status-Übersicht        |
+| `scripts/update.sh`        | PRASCO auf neueste Version aktualisieren   |
+| `scripts/backup.sh`        | Backup von Datenbank und Uploads erstellen |
+| `scripts/restore.sh`       | Backup wiederherstellen                    |
+| `scripts/start-kiosk.sh`   | Browser im Kiosk-Modus starten             |
+| `scripts/deploy-to-pi.ps1` | Windows: Deploy auf Raspberry Pi           |
 
 ### Verwendung
 
@@ -164,6 +164,7 @@ Das einfachste Setup - bereitet eine SD-Karte vor, die beim ersten Start automat
 ```
 
 Das Skript:
+
 1. Lädt Raspberry Pi OS automatisch herunter
 2. Schreibt das Image auf die SD-Karte
 3. Konfiguriert SSH, WLAN und Benutzer
