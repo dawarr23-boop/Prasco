@@ -1,6 +1,10 @@
-# Digitales Schwarzes Brett
+# PRASCO - Digitales Schwarzes Brett
 
-Ein vollständiges digitales Schwarzes Brett für Raspberry Pi mit Webinterface zur Verwaltung von Inhalten.
+Ein vollständiges digitales Schwarzes Brett (Digital Signage) für Raspberry Pi mit Webinterface zur Verwaltung von Inhalten.
+
+[![GitHub](https://img.shields.io/github/license/dawarr23-boop/Prasco)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
 ## 📋 Übersicht
 
@@ -103,9 +107,24 @@ Nach dem Start des Servers:
 
 PRASCO enthält mehrere Hilfsskripte für Einrichtung, Wartung und Betrieb:
 
+### SD-Karten Vorbereitung (Windows)
+
+| Skript                        | Beschreibung                                                                |
+| ----------------------------- | --------------------------------------------------------------------------- |
+| `scripts/prepare-sd-card.ps1` | **SD-Karten Setup** - Lädt Pi OS, schreibt auf SD-Karte, konfiguriert Auto-Setup |
+
+### Raspberry Pi Installation
+
 | Skript                        | Beschreibung                                                                                      |
 | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `scripts/auto-install.sh`     | **One-Liner Installation** - `curl -sSL https://raw.githubusercontent.com/dawarr23-boop/Prasco/main/scripts/auto-install.sh \| bash` |
 | `scripts/setup-production.sh` | **Interaktives Produktions-Setup** - Vollständige Ersteinrichtung mit Datenbank, PM2, Kiosk-Modus |
+| `scripts/firstboot-setup.sh`  | First-Boot Service für automatische Installation |
+
+### Wartung & Betrieb
+
+| Skript                        | Beschreibung                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- |
 | `scripts/first-run.sh`        | Schnellstart nach dem Klonen                                                                      |
 | `scripts/health-check.sh`     | Systemdiagnose und Status-Übersicht                                                               |
 | `scripts/update.sh`           | PRASCO auf neueste Version aktualisieren                                                          |
@@ -135,11 +154,42 @@ chmod +x scripts/setup-production.sh
 
 ## 🍓 Raspberry Pi Deployment
 
-### Schnellstart (Automatisch) ⭐
+### Option 1: Vollautomatische SD-Karten-Vorbereitung (Windows) ⭐⭐⭐
+
+Das einfachste Setup - bereitet eine SD-Karte vor, die beim ersten Start automatisch alles installiert:
+
+```powershell
+# PowerShell als Administrator ausführen
+.\scripts\prepare-sd-card.ps1
+```
+
+Das Skript:
+1. Lädt Raspberry Pi OS automatisch herunter
+2. Schreibt das Image auf die SD-Karte
+3. Konfiguriert SSH, WLAN und Benutzer
+4. Richtet automatische PRASCO-Installation beim ersten Start ein
+
+Nach dem ersten Boot: SSH-Verbindung herstellen und interaktives Setup starten.
+
+---
+
+### Option 2: One-Liner Installation (auf bestehendem Pi) ⭐⭐
+
+Auf einem frischen Raspberry Pi OS einfach ausführen:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/dawarr23-boop/Prasco/main/scripts/auto-install.sh | bash
+```
+
+Dies installiert automatisch alle Abhängigkeiten und startet das interaktive Setup.
+
+---
+
+### Option 3: Manuelles Setup ⭐
 
 ```bash
 # Repository klonen
-git clone <dein-repository-url>
+git clone https://github.com/dawarr23-boop/Prasco.git
 cd prasco
 
 # Interaktives Setup starten
@@ -153,7 +203,7 @@ Siehe [RASPBERRY-PI-SETUP.md](RASPBERRY-PI-SETUP.md) für die vollständige Anle
 
 ---
 
-### Manuelle Installation
+### Manuelle Installation (Schritt für Schritt)
 
 #### 1. Raspberry Pi vorbereiten
 
