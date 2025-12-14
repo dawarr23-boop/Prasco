@@ -8,6 +8,9 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import swaggerUi from 'swagger-ui-express';
+import https from 'https';
+import http from 'http';
+import fs from 'fs';
 
 // Load environment variables FIRST
 dotenv.config();
@@ -33,6 +36,12 @@ import { swaggerSpec } from './config/swagger';
 
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
+const SSL_ENABLED = process.env.SSL_ENABLED === 'true';
+const SSL_KEY_PATH = process.env.SSL_KEY_PATH || './ssl/server.key';
+const SSL_CERT_PATH = process.env.SSL_CERT_PATH || './ssl/server.crt';
+
+// Determine if we should use HSTS (only with SSL)
+const useHSTS = SSL_ENABLED;
 
 // Security Middleware - Helmet
 app.use(
@@ -71,14 +80,16 @@ app.use(
         frameAncestors: ["'self'"],
         objectSrc: ["'none'"],
         scriptSrcAttr: ["'none'"],
-        upgradeInsecureRequests: [],
+        // Only upgrade insecure requests when SSL is enabled
+        ...(SSL_ENABLED ? { upgradeInsecureRequests: [] } : {}),
       },
     },
-    hsts: {
+    // Only enable HSTS when SSL is enabled
+    hsts: useHSTS ? {
       maxAge: 31536000,
       includeSubDomains: true,
       preload: true,
-    },
+    } : false,
   })
 );
 
@@ -230,11 +241,36 @@ const startServer = async () => {
 
     // Start server - use a promise to ensure the server stays running
     return new Promise<void>((resolve, reject) => {
-      const server = app.listen(PORT, () => {
-        logger.info(`🚀 Server läuft auf http://localhost:${PORT}`);
-        logger.info(`📺 Display: http://localhost:${PORT}`);
-        logger.info(`⚙️  Admin: http://localhost:${PORT}/admin`);
-        logger.info(`📚 API: http://localhost:${PORT}/api`);
+      let server: http.Server | https.Server;
+      const protocol = SSL_ENABLED ? 'https' : 'http';
+
+      if (SSL_ENABLED) {
+        // HTTPS Server
+        try {
+          const sslOptions = {
+            key: fs.readFileSync(path.resolve(SSL_KEY_PATH)),
+            cert: fs.readFileSync(path.resolve(SSL_CERT_PATH)),
+          };
+          server = https.createServer(sslOptions, app);
+          logger.info('🔐 SSL aktiviert');
+        } catch (error) {
+          logger.error('❌ SSL-Zertifikate nicht gefunden. Bitte führen Sie ./scripts/generate-ssl-cert.sh aus');
+          logger.info('⚠️  Starte im HTTP-Modus als Fallback...');
+          server = http.createServer(app);
+        }
+      } else {
+        // HTTP Server
+        server = http.createServer(app);
+      }
+
+      server.listen(PORT, () => {
+        logger.info(`🚀 Server läuft auf ${protocol}://localhost:${PORT}`);
+        logger.info(`📺 Display: ${protocol}://localhost:${PORT}`);
+        logger.info(`⚙️  Admin: ${protocol}://localhost:${PORT}/admin`);
+        logger.info(`📚 API: ${protocol}://localhost:${PORT}/api`);
+        if (!SSL_ENABLED) {
+          logger.info('💡 Tipp: Für HTTPS setze SSL_ENABLED=true in .env');
+        }
         resolve();
       });
 
