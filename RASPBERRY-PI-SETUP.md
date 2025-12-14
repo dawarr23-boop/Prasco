@@ -37,6 +37,74 @@ Vollständige Schritt-für-Schritt-Anleitung zur Einrichtung eines Raspberry Pi 
 
 ## 2. SD-Karte vorbereiten
 
+### 🚀 Option A: Automatisches Setup (Windows - Empfohlen!)
+
+PRASCO enthält ein PowerShell-Skript, das die gesamte SD-Karten-Vorbereitung automatisiert:
+
+**Features:**
+- ✅ Wahl zwischen Raspberry Pi OS (Lite/Desktop) und DietPi
+- ✅ Automatischer Download und Verifikation des OS-Images
+- ✅ Automatisches Schreiben auf SD-Karte
+- ✅ SSH, WLAN, Hostname-Konfiguration
+- ✅ Integriertes First-Boot-Setup für PRASCO
+- ✅ Fehlerbehandlung und Wiederholungsversuche
+
+**Voraussetzungen:**
+- Windows 10/11 mit PowerShell
+- Administrator-Rechte
+- 7-Zip (wird automatisch installiert falls nicht vorhanden)
+
+**Verwendung:**
+
+```powershell
+# PowerShell als Administrator öffnen
+# In PRASCO-Verzeichnis wechseln
+cd Prasco
+
+# Setup-Skript starten
+.\scripts\prepare-sd-card.ps1
+```
+
+Das Skript führt dich interaktiv durch:
+1. **Betriebssystem-Auswahl:**
+   - Raspberry Pi OS Lite (minimal, headless)
+   - Raspberry Pi OS Desktop (mit GUI für Kiosk-Modus)
+   - DietPi (ultra-schlank, optimiert)
+
+2. **Konfiguration:**
+   - Hostname (Standard: prasco)
+   - Benutzername und Passwort
+   - Optional: WLAN-Einstellungen
+
+3. **SD-Karten-Auswahl** (alle angeschlossenen Laufwerke werden angezeigt)
+
+4. **Automatische Installation:**
+   - Download des OS-Images (~400-1000 MB)
+   - Extraktion
+   - Schreiben auf SD-Karte
+   - Boot-Konfiguration
+   - First-Boot-Setup-Skript
+
+**Nach dem Flashen:**
+- SD-Karte in Raspberry Pi einlegen
+- Pi mit Netzwerk und Strom verbinden
+- ~10-15 Minuten warten (automatisches Setup)
+- Per SSH verbinden: `ssh pi@prasco.local`
+- Interaktives Setup starten: `cd ~/Prasco && ./scripts/setup-production.sh`
+
+**Vorteile:**
+- 🎯 Ein einziger Befehl für komplette Vorbereitung
+- 🔒 Sichere Passwörter und Konfiguration
+- 🔄 Automatische Wiederholungsversuche bei Fehlern
+- 📝 Checksum-Verifikation (verhindert korrupte Images)
+- 🎨 Mehrere OS-Optionen zur Auswahl
+
+---
+
+### Option B: Manuelles Setup mit Raspberry Pi Imager
+
+Falls du das manuelle Setup bevorzugst oder kein Windows verwendest:
+
 ### 2.1 Raspberry Pi Imager herunterladen
 
 1. Öffne https://www.raspberrypi.com/software/
