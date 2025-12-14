@@ -125,10 +125,31 @@ function Get-YesNo {
 
 # Konfiguration
 $Config = @{
-    RaspberryPiOS = @{
-        URL = "https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz"
-        FileName = "raspios-bookworm-arm64-lite.img.xz"
-        ImageName = "raspios-bookworm-arm64-lite.img"
+    OperatingSystems = @{
+        "RaspberryPiOS_Lite" = @{
+            Name = "Raspberry Pi OS (64-bit Lite)"
+            Description = "Minimales OS ohne Desktop (empfohlen für Headless)"
+            URL = "https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64-lite.img.xz"
+            FileName = "raspios-bookworm-arm64-lite.img.xz"
+            ImageName = "raspios-bookworm-arm64-lite.img"
+            SHA256 = ""  # Optional: Für Integritätsprüfung
+        }
+        "RaspberryPiOS_Desktop" = @{
+            Name = "Raspberry Pi OS (64-bit mit Desktop)"
+            Description = "Vollständiges OS mit grafischer Oberfläche (für Kiosk-Modus)"
+            URL = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2024-11-19/2024-11-19-raspios-bookworm-arm64.img.xz"
+            FileName = "raspios-bookworm-arm64.img.xz"
+            ImageName = "raspios-bookworm-arm64.img"
+            SHA256 = ""
+        }
+        "DietPi" = @{
+            Name = "DietPi (64-bit)"
+            Description = "Extrem schlankes OS, optimiert für minimalen Ressourcenverbrauch"
+            URL = "https://dietpi.com/downloads/images/DietPi_RPi-ARMv8-Bookworm.img.xz"
+            FileName = "DietPi_RPi-ARMv8-Bookworm.img.xz"
+            ImageName = "DietPi_RPi-ARMv8-Bookworm.img"
+            SHA256 = ""
+        }
     }
     TempDir = "$env:TEMP\prasco-setup"
     Repository = "https://github.com/dawarr23-boop/Prasco.git"
@@ -202,6 +223,34 @@ Write-Success "Windows Disk Management verfügbar"
 Write-ColorOutput "`n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
 Write-ColorOutput "Schritt 2: Konfiguration" "White"
 Write-ColorOutput "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" "Cyan"
+
+# Betriebssystem auswählen
+Write-Host ""
+Write-Host "Verfügbare Betriebssysteme:" -ForegroundColor Cyan
+Write-Host ""
+
+$osKeys = @("RaspberryPiOS_Lite", "RaspberryPiOS_Desktop", "DietPi")
+$i = 1
+foreach ($osKey in $osKeys) {
+    $os = $Config.OperatingSystems[$osKey]
+    Write-Host "  $i) " -ForegroundColor Yellow -NoNewline
+    Write-Host "$($os.Name)" -ForegroundColor White
+    Write-Host "     $($os.Description)" -ForegroundColor Gray
+    $i++
+}
+
+Write-Host ""
+$osSelection = Get-UserInput "Wähle Betriebssystem (Nummer)" "1"
+$selectedOSIndex = [int]$osSelection - 1
+
+if ($selectedOSIndex -lt 0 -or $selectedOSIndex -ge $osKeys.Count) {
+    Write-Error2 "Ungültige Auswahl!"
+    exit 1
+}
+
+$selectedOSKey = $osKeys[$selectedOSIndex]
+$selectedOS = $Config.OperatingSystems[$selectedOSKey]
+Write-Success "Gewählt: $($selectedOS.Name)"
 
 # Hostname
 if (-not $Hostname) {
@@ -320,43 +369,120 @@ if (-not (Test-Path $Config.TempDir)) {
     New-Item -ItemType Directory -Path $Config.TempDir -Force | Out-Null
 }
 
-$xzFile = Join-Path $Config.TempDir $Config.RaspberryPiOS.FileName
-$imgFile = Join-Path $Config.TempDir $Config.RaspberryPiOS.ImageName
+$xzFile = Join-Path $Config.TempDir $selectedOS.FileName
+$imgFile = Join-Path $Config.TempDir $selectedOS.ImageName
 
 if ($SkipDownload -and (Test-Path $imgFile)) {
     Write-Success "Image bereits vorhanden: $imgFile"
 } else {
     if (-not (Test-Path $xzFile)) {
-        Write-Step "Lade Raspberry Pi OS herunter..."
-        Write-Host "  URL: $($Config.RaspberryPiOS.URL)" -ForegroundColor Gray
-        Write-Host "  Dies kann einige Minuten dauern..." -ForegroundColor Gray
+        Write-Step "Lade $($selectedOS.Name) herunter..."
+        Write-Host "  URL: $($selectedOS.URL)" -ForegroundColor Gray
+        Write-Host "  Dies kann einige Minuten dauern (typisch 400-1000 MB)..." -ForegroundColor Gray
         Write-Host ""
         
-        try {
-            $ProgressPreference = 'SilentlyContinue'
-            Invoke-WebRequest -Uri $Config.RaspberryPiOS.URL -OutFile $xzFile -UseBasicParsing
-            $ProgressPreference = 'Continue'
-            Write-Success "Download abgeschlossen"
-        } catch {
-            Write-Error2 "Download fehlgeschlagen: $_"
-            exit 1
+        $maxRetries = 3
+        $retryCount = 0
+        $downloadSuccess = $false
+        
+        while (-not $downloadSuccess -and $retryCount -lt $maxRetries) {
+            try {
+                if ($retryCount -gt 0) {
+                    Write-Warning2 "Wiederhole Download (Versuch $($retryCount + 1) von $maxRetries)..."
+                }
+                
+                $ProgressPreference = 'SilentlyContinue'
+                Invoke-WebRequest -Uri $selectedOS.URL -OutFile $xzFile -UseBasicParsing -TimeoutSec 600
+                $ProgressPreference = 'Continue'
+                
+                # Prüfe ob Datei vollständig heruntergeladen wurde (mindestens 100 MB)
+                $fileSize = (Get-Item $xzFile).Length
+                if ($fileSize -lt 100MB) {
+                    throw "Download unvollständig (nur $([math]::Round($fileSize/1MB, 2)) MB). Möglicherweise beschädigt."
+                }
+                
+                Write-Success "Download abgeschlossen ($([math]::Round($fileSize/1MB, 2)) MB)"
+                $downloadSuccess = $true
+            } catch {
+                $retryCount++
+                Write-Error2 "Download fehlgeschlagen: $_"
+                
+                if ($retryCount -lt $maxRetries) {
+                    Write-Host "  Warte 5 Sekunden vor erneutem Versuch..." -ForegroundColor Gray
+                    Start-Sleep -Seconds 5
+                    
+                    # Lösche teilweise heruntergeladene Datei
+                    if (Test-Path $xzFile) {
+                        Remove-Item $xzFile -Force
+                    }
+                } else {
+                    Write-Error2 "Download nach $maxRetries Versuchen fehlgeschlagen!"
+                    Write-Host ""
+                    Write-Host "Mögliche Lösungen:" -ForegroundColor Yellow
+                    Write-Host "  1. Internetverbindung prüfen"
+                    Write-Host "  2. Später erneut versuchen"
+                    Write-Host "  3. Image manuell herunterladen und in $($Config.TempDir) ablegen"
+                    Write-Host "  4. Skript mit -SkipDownload erneut ausführen"
+                    exit 1
+                }
+            }
         }
     } else {
         Write-Success "XZ-Archiv bereits vorhanden"
+        
+        # Prüfe Dateigröße
+        $fileSize = (Get-Item $xzFile).Length
+        if ($fileSize -lt 100MB) {
+            Write-Warning2 "Archiv scheint unvollständig ($([math]::Round($fileSize/1MB, 2)) MB)"
+            if (Get-YesNo "Erneut herunterladen?" $true) {
+                Remove-Item $xzFile -Force
+                Write-Step "Starte erneuten Download..."
+                # Rekursiver Aufruf - wird im nächsten Durchlauf heruntergeladen
+            }
+        }
     }
     
     # Extrahieren
-    Write-Step "Extrahiere Image..."
-    & $7zipPath x $xzFile -o"$($Config.TempDir)" -y | Out-Null
-    
-    # Finde das extrahierte Image
-    $extractedImg = Get-ChildItem $Config.TempDir -Filter "*.img" | Select-Object -First 1
-    if ($extractedImg) {
-        $imgFile = $extractedImg.FullName
-        Write-Success "Image extrahiert: $($extractedImg.Name)"
+    if (-not (Test-Path $imgFile)) {
+        Write-Step "Extrahiere Image..."
+        Write-Host "  Dies kann 2-5 Minuten dauern..." -ForegroundColor Gray
+        
+        try {
+            $extractResult = & $7zipPath x $xzFile -o"$($Config.TempDir)" -y 2>&1
+            
+            if ($LASTEXITCODE -ne 0) {
+                throw "7-Zip Fehler-Code: $LASTEXITCODE"
+            }
+            
+            # Finde das extrahierte Image
+            Start-Sleep -Seconds 2
+            $extractedImg = Get-ChildItem $Config.TempDir -Filter "*.img" | Select-Object -First 1
+            
+            if ($extractedImg) {
+                $imgFile = $extractedImg.FullName
+                $imgSize = (Get-Item $imgFile).Length
+                Write-Success "Image extrahiert: $($extractedImg.Name) ($([math]::Round($imgSize/1GB, 2)) GB)"
+            } else {
+                throw "Keine .img Datei gefunden nach Extraktion"
+            }
+        } catch {
+            Write-Error2 "Extraktion fehlgeschlagen: $_"
+            Write-Host ""
+            Write-Host "Mögliche Ursachen:" -ForegroundColor Yellow
+            Write-Host "  • XZ-Archiv ist beschädigt"
+            Write-Host "  • Nicht genug Speicherplatz in $($Config.TempDir)"
+            Write-Host "  • 7-Zip Fehler"
+            Write-Host ""
+            Write-Host "Lösung: XZ-Archiv löschen und erneut herunterladen"
+            
+            if (Get-YesNo "XZ-Archiv löschen und erneut herunterladen?") {
+                Remove-Item $xzFile -Force -ErrorAction SilentlyContinue
+                Write-Host "Bitte führe das Skript erneut aus." -ForegroundColor Cyan
+            }
+            exit 1
+        }
     } else {
-        Write-Error2 "Konnte extrahiertes Image nicht finden!"
-        exit 1
+        Write-Success "Image bereits extrahiert"
     }
 }
 
@@ -465,6 +591,45 @@ Write-Step "Aktiviere SSH..."
 New-Item -ItemType File -Path "$bootDrive\ssh" -Force | Out-Null
 Write-Success "SSH aktiviert"
 
+# Erstelle firstrun.sh für Raspberry Pi OS (wird automatisch beim ersten Boot ausgeführt)
+# Dies ist der offizielle Weg für Raspberry Pi OS Bookworm
+Write-Step "Erstelle First-Run Konfiguration..."
+
+$firstrunSetup = @"
+#!/bin/bash
+
+set +e
+
+# Aktiviere systemd Service für PRASCO Setup
+if [ -f /boot/firmware/prasco-firstboot.service ] || [ -f /boot/prasco-firstboot.service ]; then
+    # Bestimme Boot-Pfad
+    if [ -f /boot/firmware/prasco-firstboot.service ]; then
+        BOOT_PATH="/boot/firmware"
+    else
+        BOOT_PATH="/boot"
+    fi
+    
+    # Installiere Service
+    cp "\$BOOT_PATH/prasco-firstboot.service" /etc/systemd/system/ 2>/dev/null || true
+    systemctl daemon-reload
+    systemctl enable prasco-firstboot.service 2>/dev/null || true
+    
+    echo "PRASCO Auto-Setup aktiviert"
+fi
+
+# Setze Hostname
+hostnamectl set-hostname $Hostname 2>/dev/null || hostname $Hostname
+echo "127.0.1.1 $Hostname" >> /etc/hosts
+
+rm -f /boot/firstrun.sh
+sed -i 's| systemd.run.*||g' /boot/cmdline.txt
+exit 0
+"@
+
+$firstrunSetup | Out-File -FilePath "$bootDrive\firstrun.sh" -Encoding ASCII
+
+Write-Success "First-Run Konfiguration erstellt"
+
 # Benutzer konfigurieren (Raspberry Pi OS Bookworm)
 Write-Step "Konfiguriere Benutzer..."
 $passwordHash = & openssl passwd -6 $PiPassword 2>$null
@@ -503,11 +668,15 @@ network={
 # PRASCO First-Boot Script erstellen
 Write-Step "Erstelle PRASCO Auto-Setup..."
 
+$isDietPi = $selectedOSKey -eq "DietPi"
+$isLite = $selectedOSKey -eq "RaspberryPiOS_Lite"
+
 $firstBootScript = @"
 #!/bin/bash
 #===============================================================================
 # PRASCO First-Boot Auto-Setup
 # Dieses Skript wird beim ersten Start automatisch ausgeführt
+# OS: $($selectedOS.Name)
 #===============================================================================
 
 LOG_FILE="/var/log/prasco-firstboot.log"
@@ -515,17 +684,19 @@ exec > >(tee -a "\$LOG_FILE") 2>&1
 
 echo "=============================================="
 echo "PRASCO First-Boot Setup"
+echo "Betriebssystem: $($selectedOS.Name)"
 echo "Start: \$(date)"
 echo "=============================================="
 
 # Warte auf Netzwerk
 echo "Warte auf Netzwerkverbindung..."
-MAX_RETRIES=30
+MAX_RETRIES=60
 RETRY=0
-while ! ping -c 1 google.com &>/dev/null; do
+while ! ping -c 1 -W 2 8.8.8.8 &>/dev/null && ! ping -c 1 -W 2 1.1.1.1 &>/dev/null; do
     RETRY=\$((RETRY + 1))
     if [ \$RETRY -ge \$MAX_RETRIES ]; then
         echo "FEHLER: Keine Netzwerkverbindung nach \$MAX_RETRIES Versuchen!"
+        echo "Bitte Netzwerkverbindung prüfen (Ethernet-Kabel oder WLAN-Konfiguration)"
         exit 1
     fi
     echo "Warte auf Netzwerk... (\$RETRY/\$MAX_RETRIES)"
@@ -535,12 +706,23 @@ echo "Netzwerk verfügbar!"
 
 # Hostname setzen
 echo "Setze Hostname auf: $Hostname"
-hostnamectl set-hostname $Hostname
-echo "127.0.1.1 $Hostname" >> /etc/hosts
+hostnamectl set-hostname $Hostname 2>/dev/null || hostname $Hostname
+grep -q "$Hostname" /etc/hosts || echo "127.0.1.1 $Hostname" >> /etc/hosts
 
 # Netzwerk konfigurieren: DHCP mit statischem Fallback
 echo "Konfiguriere Netzwerk (DHCP mit Fallback 192.168.1.199)..."
-cat >> /etc/dhcpcd.conf << 'NETCFG'
+
+# Prüfe welcher Netzwerk-Manager verwendet wird
+if systemctl is-active --quiet NetworkManager; then
+    echo "Verwende NetworkManager..."
+    # NetworkManager Konfiguration (neuere Raspberry Pi OS Versionen)
+    nmcli con mod 'Wired connection 1' ipv4.method auto 2>/dev/null || true
+    nmcli con mod 'Wired connection 1' ipv4.may-fail no 2>/dev/null || true
+elif [ -f /etc/dhcpcd.conf ]; then
+    echo "Verwende dhcpcd..."
+    # dhcpcd Konfiguration (ältere Versionen und DietPi)
+    if ! grep -q "# PRASCO Netzwerkkonfiguration" /etc/dhcpcd.conf; then
+        cat >> /etc/dhcpcd.conf << 'NETCFG'
 
 # PRASCO Netzwerkkonfiguration
 # Primär: DHCP, Fallback: Statische IP falls kein DHCP-Server antwortet
@@ -559,70 +741,123 @@ fallback static_eth0
 interface wlan0
 fallback static_eth0
 NETCFG
-
-# dhcpcd neu starten falls aktiv
-systemctl restart dhcpcd 2>/dev/null || true
+        systemctl restart dhcpcd 2>/dev/null || true
+    fi
+fi
 echo "Netzwerk konfiguriert!"
 
 # System aktualisieren
 echo "Aktualisiere System..."
 apt-get update
-apt-get upgrade -y
+DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::="--force-confold"
 
 # Node.js 18 installieren
 echo "Installiere Node.js 18..."
-curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-apt-get install -y nodejs
+if ! command -v node &> /dev/null; then
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    apt-get install -y nodejs
+else
+    echo "Node.js bereits installiert: \$(node --version)"
+fi
 
 # PostgreSQL installieren
 echo "Installiere PostgreSQL..."
-apt-get install -y postgresql postgresql-contrib
+if ! command -v psql &> /dev/null; then
+    DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql postgresql-contrib
+    systemctl enable postgresql
+    systemctl start postgresql
+else
+    echo "PostgreSQL bereits installiert"
+fi
 
 # PM2 installieren
 echo "Installiere PM2..."
-npm install -g pm2
+if ! command -v pm2 &> /dev/null; then
+    npm install -g pm2
+else
+    echo "PM2 bereits installiert"
+fi
 
-# Weitere Abhängigkeiten
-echo "Installiere weitere Abhängigkeiten..."
-apt-get install -y git chromium-browser xdotool unclutter
+# Git installieren
+echo "Installiere Git..."
+apt-get install -y git
+
+# Weitere Abhängigkeiten (nur wenn Desktop-Version oder Kiosk-Modus gewünscht)
+if $(if ($isLite) { "false" } else { "true" }); then
+    echo "Installiere Desktop-Abhängigkeiten für Kiosk-Modus..."
+    apt-get install -y chromium-browser xdotool unclutter 2>/dev/null || \
+    apt-get install -y chromium xdotool unclutter 2>/dev/null || \
+    echo "Chromium muss manuell installiert werden für Kiosk-Modus"
+fi
 
 # PRASCO klonen
 echo "Klone PRASCO Repository..."
 cd /home/$PiUser
-git clone $($Config.Repository) Prasco
-chown -R ${PiUser}:${PiUser} Prasco
+if [ ! -d "Prasco" ]; then
+    git clone $($Config.Repository) Prasco
+    chown -R ${PiUser}:${PiUser} Prasco
+    echo "PRASCO erfolgreich geklont"
+else
+    echo "PRASCO Verzeichnis existiert bereits"
+fi
 
 # Setze Marker dass Setup abgeschlossen werden muss
 touch /home/$PiUser/Prasco/.first-boot-complete
 
 # Erstelle Autostart für interaktives Setup
+mkdir -p /home/$PiUser/.bashrc.d
+
 cat > /home/$PiUser/.bashrc.d/prasco-setup.sh << 'SETUP'
-if [ -f /home/$PiUser/Prasco/.first-boot-complete ] && [ ! -f /home/$PiUser/Prasco/.setup-complete ]; then
+#!/bin/bash
+# PRASCO Auto-Setup Erinnerung
+
+if [ -f ~/Prasco/.first-boot-complete ] && [ ! -f ~/Prasco/.setup-complete ]; then
     echo ""
     echo "╔═══════════════════════════════════════════════════════════════╗"
     echo "║         PRASCO - Erste Einrichtung erforderlich              ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
-    echo "Starte interaktives Setup mit:"
-    echo "  cd ~/Prasco && ./scripts/setup-production.sh"
+    echo "🚀 Starte interaktives Setup mit:"
+    echo "   cd ~/Prasco && ./scripts/setup-production.sh"
+    echo ""
+    echo "⚡ Oder Schnellstart für Test:"
+    echo "   cd ~/Prasco && ./scripts/first-run.sh"
     echo ""
 fi
 SETUP
 
-mkdir -p /home/$PiUser/.bashrc.d
-echo 'for f in ~/.bashrc.d/*.sh; do source "\$f"; done' >> /home/$PiUser/.bashrc
-chown -R ${PiUser}:${PiUser} /home/$PiUser/.bashrc.d
+# Füge .bashrc.d Support hinzu falls nicht vorhanden
+if ! grep -q ".bashrc.d" /home/$PiUser/.bashrc 2>/dev/null; then
+    echo '' >> /home/$PiUser/.bashrc
+    echo '# Source all scripts in .bashrc.d' >> /home/$PiUser/.bashrc
+    echo 'if [ -d ~/.bashrc.d ]; then' >> /home/$PiUser/.bashrc
+    echo '    for f in ~/.bashrc.d/*.sh; do' >> /home/$PiUser/.bashrc
+    echo '        [ -f "\$f" ] && source "\$f"' >> /home/$PiUser/.bashrc
+    echo '    done' >> /home/$PiUser/.bashrc
+    echo 'fi' >> /home/$PiUser/.bashrc
+fi
 
-# Deaktiviere dieses Script
-systemctl disable prasco-firstboot.service
+chown -R ${PiUser}:${PiUser} /home/$PiUser/.bashrc.d
+chmod +x /home/$PiUser/.bashrc.d/prasco-setup.sh
+
+# Deaktiviere dieses Script für zukünftige Boots
+systemctl disable prasco-firstboot.service 2>/dev/null || true
+
+# Entferne das Script damit es nicht erneut ausgeführt wird
+rm -f /boot/prasco-firstboot.sh /boot/firmware/prasco-firstboot.sh
 
 echo "=============================================="
 echo "First-Boot Setup abgeschlossen!"
 echo "Ende: \$(date)"
 echo "=============================================="
 echo ""
-echo "Bitte melde dich an und führe aus:"
-echo "  cd ~/Prasco && ./scripts/setup-production.sh"
+echo "Nächste Schritte:"
+echo "  1. Mit SSH verbinden: ssh $PiUser@$Hostname.local"
+echo "  2. Vollständiges Setup: cd ~/Prasco && ./scripts/setup-production.sh"
+echo "  3. Oder Schnellstart: cd ~/Prasco && ./scripts/first-run.sh"
+echo ""
+echo "Das System wird jetzt neu gestartet..."
+sleep 5
 
 # Neustart
 reboot
@@ -631,16 +866,21 @@ reboot
 $firstBootScript | Out-File -FilePath "$bootDrive\prasco-firstboot.sh" -Encoding ASCII
 
 # Systemd Service für First-Boot erstellen
+# Unterstützt sowohl /boot als auch /boot/firmware Pfade (verschiedene Pi OS Versionen)
 $systemdService = @"
 [Unit]
 Description=PRASCO First Boot Setup
-After=network-online.target
+After=network-online.target systemd-networkd-wait-online.service
 Wants=network-online.target
-ConditionPathExists=/boot/prasco-firstboot.sh
+ConditionPathExists=|/boot/prasco-firstboot.sh
+ConditionPathExists=|/boot/firmware/prasco-firstboot.sh
+ConditionPathExists=!/etc/prasco-firstboot-complete
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /boot/prasco-firstboot.sh
+ExecStartPre=/bin/sleep 10
+ExecStart=/bin/bash -c 'if [ -f /boot/prasco-firstboot.sh ]; then /bin/bash /boot/prasco-firstboot.sh; elif [ -f /boot/firmware/prasco-firstboot.sh ]; then /bin/bash /boot/firmware/prasco-firstboot.sh; fi'
+ExecStartPost=/bin/touch /etc/prasco-firstboot-complete
 RemainAfterExit=yes
 StandardOutput=journal+console
 
@@ -650,18 +890,68 @@ WantedBy=multi-user.target
 
 $systemdService | Out-File -FilePath "$bootDrive\prasco-firstboot.service" -Encoding ASCII
 
-# cmdline.txt anpassen für First-Boot (falls möglich)
-$cmdlinePath = "$bootDrive\cmdline.txt"
-if (Test-Path $cmdlinePath) {
-    $cmdline = Get-Content $cmdlinePath -Raw
-    if ($cmdline -notmatch "systemd.run") {
-        # Füge systemd firstboot hinzu
-        $cmdline = $cmdline.Trim() + " systemd.run=/boot/prasco-firstboot.sh systemd.run_success_action=reboot"
-        $cmdline | Out-File -FilePath $cmdlinePath -Encoding ASCII -NoNewline
-    }
-}
+# Erstelle Installations-Helper Script (wird beim ersten Boot die systemd-Service installieren)
+$installerScript = @"
+#!/bin/bash
+# PRASCO Firstboot Service Installer
+# Dieses Script installiert den systemd Service beim ersten Boot
+
+# Bestimme Boot-Partition Pfad
+if [ -f /boot/firmware/prasco-firstboot.service ]; then
+    BOOT_PATH="/boot/firmware"
+elif [ -f /boot/prasco-firstboot.service ]; then
+    BOOT_PATH="/boot"
+else
+    echo "Fehler: Kann prasco-firstboot.service nicht finden"
+    exit 1
+fi
+
+# Kopiere Service-Datei
+cp "\$BOOT_PATH/prasco-firstboot.service" /etc/systemd/system/
+
+# Lade systemd neu
+systemctl daemon-reload
+
+# Aktiviere Service
+systemctl enable prasco-firstboot.service
+
+# Starte Service (wird dann beim nächsten Boot automatisch laufen)
+echo "PRASCO Firstboot Service installiert und aktiviert"
+
+# Lösche dieses Script
+rm -f /etc/rc.local.d/prasco-installer.sh
+"@
+
+$installerScript | Out-File -FilePath "$bootDrive\prasco-installer.sh" -Encoding ASCII
 
 Write-Success "PRASCO Auto-Setup konfiguriert"
+
+# Erstelle Installations-Info Datei
+$infoContent = @"
+PRASCO Auto-Installation
+========================
+
+Diese SD-Karte wurde vorbereitet für:
+- Betriebssystem: $($selectedOS.Name)
+- Hostname: $Hostname
+- Benutzer: $PiUser
+$(if ($WiFiSSID) { "- WLAN: $WiFiSSID" } else { "" })
+
+Beim ersten Start:
+1. Raspberry Pi bootet (~2-3 Minuten)
+2. Automatisches Setup läuft (~10-15 Minuten)
+   - System-Updates
+   - Node.js, PostgreSQL, PM2 Installation
+   - PRASCO Repository klonen
+3. System startet neu
+4. Verbinde per SSH: ssh ${PiUser}@${Hostname}.local
+5. Führe aus: cd ~/Prasco && ./scripts/setup-production.sh
+
+Erstellt: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+"@
+
+$infoContent | Out-File -FilePath "$bootDrive\PRASCO-INSTALLATION.txt" -Encoding UTF8
+Write-Success "Installations-Info erstellt"
 
 # Custom config.txt Anpassungen
 Write-Step "Optimiere Boot-Konfiguration..."
