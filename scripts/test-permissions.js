@@ -47,6 +47,16 @@ async function main() {
       console.log(`  - ${rp.permission?.name || 'N/A'}`);
     });
     
+    // Direct SQL query
+    console.log('\n🔍 Direct SQL Query:');
+    const [results] = await sequelize.query(
+      'SELECT role, COUNT(*) as count FROM role_permissions GROUP BY role'
+    );
+    console.log('Role counts in database:');
+    results.forEach((row) => {
+      console.log(`  - ${row.role}: ${row.count} permissions`);
+    });
+    
     await sequelize.close();
     process.exit(0);
   } catch (error) {
