@@ -230,13 +230,18 @@ const startServer = async () => {
     await connectDatabase();
     logger.info('✅ Datenbankverbindung hergestellt');
 
-    // Seed database if in development
-    if (process.env.NODE_ENV === 'development') {
-      try {
+    // Seed database (always seed if users table is empty)
+    try {
+      const { User } = await import('./models');
+      const userCount = await User.count();
+      if (userCount === 0) {
+        logger.info('🌱 Datenbank ist leer - starte Seeding...');
         await seedDatabase();
-      } catch (seedError) {
-        logger.warn('⚠️  Database-Seeding übersprungen (möglicherweise bereits geseedet)');
+      } else if (process.env.NODE_ENV === 'development') {
+        await seedDatabase();
       }
+    } catch (seedError) {
+      logger.warn('⚠️  Database-Seeding übersprungen:', seedError);
     }
 
     // Start server - use a promise to ensure the server stays running
