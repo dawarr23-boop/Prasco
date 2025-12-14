@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PRASCO Admin Login - Digitales Schwarzes Brett</title>
+    <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
+  </head>
+  <body class="login-page">
+    <div class="login-container">
+      <div class="login-box">
+        <div class="login-header">
+          <img
+            src="https://www.prasco.net/content/files/images/Prasco/logo-small.png"
+            alt="PRASCO"
+            class="logo-image"
+            style="max-width: 200px; margin-bottom: 1rem"
+          />
+          <h1>PRASCO Admin</h1>
+          <p>Digitales Schwarzes Brett</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="username">E-Mail</label>
+            <input
+              type="email"
+              id="username"
+              name="username"
+              required
+              autocomplete="username"
+              placeholder="admin@prasco.net"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Passwort</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="remember" />
+              <span>Angemeldet bleiben</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Anmelden</button>
+
+          <div id="error-message" class="error-message" style="display: none"></div>
+        </form>
+
+        <!-- SSO Login Section -->
+        <div id="sso-section" class="sso-section" style="display: none">
+          <div class="divider">
+            <span>oder</span>
+          </div>
+          <button type="button" id="sso-login-btn" class="btn btn-sso btn-block">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 23 23"
+              width="20"
+              height="20"
+              style="margin-right: 8px; vertical-align: middle"
+            >
+              <path fill="#f3f3f3" d="M0 0h23v23H0z" />
+              <path fill="#f35325" d="M1 1h10v10H1z" />
+              <path fill="#81bc06" d="M12 1h10v10H12z" />
+              <path fill="#05a6f0" d="M1 12h10v10H1z" />
+              <path fill="#ffba08" d="M12 12h10v10H12z" />
+            </svg>
+            Mit Microsoft anmelden
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/admin-login.js"></script>
+  </body>
+</html>

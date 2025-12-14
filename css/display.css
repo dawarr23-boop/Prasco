@@ -1,0 +1,632 @@
+/* Display CSS - Für das öffentliche Schwarze Brett */
+/* PRASCO Corporate Design */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Roboto+Condensed:wght@400;600;700&family=Orbitron:wght@400;500;600;700&display=swap');
+
+/* ============================================
+   Vortragsmodus / Presentation Mode Styles
+   ============================================ */
+
+.presentation-mode {
+  cursor: pointer;
+}
+
+.presentation-controls {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 10000;
+  animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.pres-btn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pres-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.1);
+}
+
+.pres-btn:active {
+  transform: scale(0.95);
+}
+
+.pres-prev,
+.pres-next {
+  background: var(--prasco-red);
+}
+
+.pres-prev:hover,
+.pres-next:hover {
+  background: var(--prasco-dark-red);
+}
+
+.pres-toggle {
+  background: #009640;
+}
+
+.pres-toggle:hover {
+  background: #007830;
+}
+
+.pres-exit {
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+}
+
+.pres-exit:hover {
+  background: #dc3545;
+}
+
+.pres-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem;
+  color: #fff;
+}
+
+.pres-mode-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--prasco-red);
+  text-transform: uppercase;
+}
+
+.pres-counter {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Klickbare Bereiche im Vortragsmodus */
+.presentation-mode .display-main {
+  cursor: pointer;
+}
+
+.presentation-mode .post-container::before,
+.presentation-mode .post-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 15%;
+  height: 100%;
+  z-index: 100;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.presentation-mode .post-container::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.presentation-mode .post-container::after {
+  right: 0;
+  background: linear-gradient(-90deg, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.presentation-mode .post-container:hover::before,
+.presentation-mode .post-container:hover::after {
+  opacity: 1;
+}
+
+/* Verstecke normalen Post-Indicator im Vortragsmodus */
+.presentation-mode .post-indicator {
+  display: none;
+}
+
+/* Video Stumm-Indikator (wenn globale Hintergrundmusik aktiv) */
+.video-muted-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-size: 1.5rem;
+  z-index: 10001;
+  backdrop-filter: blur(4px);
+  animation: fadeInOut 3s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+.video-muted-indicator:hover {
+  opacity: 1 !important;
+}
+
+/* Globale Musik Indikator */
+.global-music-indicator {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0, 150, 64, 0.9);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.global-music-indicator .music-icon {
+  animation: pulse-music 1s ease-in-out infinite;
+}
+
+@keyframes pulse-music {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* PRASCO Primärfarben */
+  --prasco-red: #e30613;
+  --prasco-dark-red: #bc0a30;
+  --prasco-black: #58585a; /* PRASCO Logo Grau */
+  --prasco-white: #ffffff;
+
+  /* PRASCO Sekundärfarben */
+  --prasco-gray-dark: #333333;
+  --prasco-gray: #666666;
+  --prasco-gray-light: #999999;
+  --prasco-gray-bg: #f5f5f5;
+  --prasco-border: #e0e0e0;
+
+  /* Aliases */
+  --primary-color: var(--prasco-red);
+  --secondary-color: var(--prasco-gray);
+  --dark-color: var(--prasco-black);
+  --light-color: var(--prasco-gray-bg);
+  --white: var(--prasco-white);
+  --text-color: var(--prasco-gray-dark);
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+
+  /* Typography */
+  --font-primary: 'Roboto', 'Segoe UI', sans-serif;
+  --font-heading: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--prasco-gray-bg);
+  color: var(--text-color);
+  overflow: hidden;
+  height: 100vh;
+}
+
+#bulletin-board {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+}
+
+/* Header */
+.display-header {
+  background: var(--white);
+  color: var(--prasco-black);
+  padding: 1.5rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-bottom: 4px solid #009640; /* PRASCO Logo Grün */
+  gap: 2rem;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--prasco-red);
+  text-transform: uppercase;
+  font-family: var(--font-heading);
+}
+
+.logo-image {
+  max-height: 70px;
+  width: auto;
+  object-fit: contain;
+  filter: none;
+}
+
+.header-category {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--prasco-red);
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.clock {
+  font-size: 2.5rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  color: #58585a; /* PRASCO Logo Grau */
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(88, 88, 90, 0.2);
+}
+
+/* Main Display Area */
+.display-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  position: relative;
+  background: var(--prasco-gray-bg);
+}
+
+.post-container {
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.post {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3rem;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post h1 {
+  font-size: 3.5rem;
+  margin-bottom: 2rem;
+  color: var(--prasco-black);
+  line-height: 1.2;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  border-left: 6px solid #009640; /* PRASCO Logo Grün */
+  padding-left: 2rem;
+  text-align: left;
+}
+
+.post p {
+  font-size: 1.75rem;
+  line-height: 1.8;
+  color: var(--prasco-gray-dark);
+  max-width: 1000px;
+  font-family: var(--font-primary);
+  font-weight: 400;
+}
+
+.post img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.post video {
+  max-width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.post iframe {
+  max-width: 100%;
+  width: 1200px;
+  height: 675px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.loading {
+  font-size: 2rem;
+  color: var(--secondary-color);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Post Indicator */
+.post-indicator {
+  position: absolute;
+  bottom: 2rem;
+  right: 3rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--white);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 1.2rem;
+}
+
+/* Footer */
+.display-footer {
+  background: var(--prasco-black);
+  color: var(--white);
+  padding: 1rem 3rem;
+  text-align: center;
+  border-top: 3px solid #009640; /* PRASCO Logo Grün */
+}
+
+.footer-info {
+  font-size: 1rem;
+  font-family: var(--font-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.footer-info #post-counter {
+  color: #009640; /* PRASCO Logo Grün */
+  font-weight: 600;
+}
+
+.separator {
+  color: var(--prasco-gray);
+}
+
+/* Content Type Specific Styles */
+.post.type-text {
+  background: var(--white);
+  color: var(--prasco-black);
+}
+
+.post.type-text h1,
+.post.type-text p {
+  color: var(--prasco-black);
+}
+
+.post.type-image {
+  background: var(--white);
+}
+
+.post.type-image h1 {
+  color: var(--prasco-black);
+}
+
+.post.type-video {
+  background: var(--white);
+}
+
+.post.type-video h1 {
+  color: var(--prasco-black);
+}
+
+/* Category Badge */
+.category-badge {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  color: var(--white);
+  background: var(--prasco-red);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .post h1 {
+    font-size: 3rem;
+  }
+
+  .post p {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .display-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .clock {
+    font-size: 1.8rem;
+  }
+
+  .post h1 {
+    font-size: 2rem;
+  }
+
+  .post p {
+    font-size: 1.2rem;
+  }
+
+  .post-indicator {
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   Video Vollbild Styles
+   ============================================ */
+
+/* Container für Vollbild-Video */
+.video-fullscreen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* HTML5 Video - native Auflösung beibehalten */
+.video-fullscreen-container video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* YouTube/Vimeo iframes - volle Größe für 16:9 Aspect Ratio */
+.video-fullscreen-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+}
+
+/* Video-Fehler Fallback (bei Einbettungsbeschränkungen) */
+.video-error-fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 2rem 3rem;
+  border-radius: 8px;
+}
+
+.video-error-fallback a {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #ff0000;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.video-error-fallback a:hover {
+  background: #cc0000;
+}
+
+/* Verstecke Header/Footer während Video */
+.header.hidden-for-video,
+.footer.hidden-for-video,
+.display-header.hidden-for-video,
+.display-footer.hidden-for-video {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Post-Container für Video-Typ anpassen */
+.post.type-video {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}

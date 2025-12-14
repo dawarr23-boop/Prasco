@@ -1,0 +1,324 @@
+### Health Check
+GET http://localhost:3000/api/health
+
+###
+
+### Register New User
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@prasco.net",
+  "password": "test123",
+  "firstName": "Test",
+  "lastName": "User",
+  "organizationId": 1
+}
+
+###
+
+### Login Admin
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@prasco.net",
+  "password": "admin123"
+}
+
+###
+
+### Login Editor
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "editor@prasco.net",
+  "password": "editor123"
+}
+
+###
+
+### Login Test User
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@prasco.net",
+  "password": "test123"
+}
+
+###
+
+### Login Viewer (Read-Only)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "viewer@prasco.net",
+  "password": "viewer123"
+}
+
+###
+
+### Get Current User Profile
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Refresh Token
+POST http://localhost:3000/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "YOUR_REFRESH_TOKEN_HERE"
+}
+
+###
+
+### Logout
+POST http://localhost:3000/api/auth/logout
+
+###
+
+### Get All Posts - ✅ Task 4 Complete
+# Supports: pagination (?page=1&limit=10), filtering (?category=1&isActive=true&search=text), sorting (?sort=priority&order=DESC)
+GET http://localhost:3000/api/posts
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get All Posts with Pagination & Filter
+GET http://localhost:3000/api/posts?page=1&limit=5&category=1&isActive=true
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get All Posts with Search
+GET http://localhost:3000/api/posts?search=willkommen&sort=priority&order=DESC
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get Single Post - ✅ Task 4 Complete
+GET http://localhost:3000/api/posts/1
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Create Post - ✅ Task 4 Complete (Admin/Editor only)
+POST http://localhost:3000/api/posts
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Test Post via API",
+  "content": "Dies ist ein Test-Post erstellt über die REST API",
+  "contentType": "text",
+  "categoryId": 1,
+  "duration": 15,
+  "priority": 3,
+  "isActive": true
+}
+
+###
+
+### Update Post - ✅ Task 4 Complete (Admin/Editor only)
+PUT http://localhost:3000/api/posts/1
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Aktualisierter Post-Titel",
+  "content": "Aktualisierter Inhalt mit mehr Details",
+  "priority": 8
+}
+
+###
+
+### Delete Post - ✅ Task 4 Complete (Admin/Editor only)
+DELETE http://localhost:3000/api/posts/1
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get All Categories - ✅ Task 4 Complete
+GET http://localhost:3000/api/categories
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get Active Categories Only
+GET http://localhost:3000/api/categories?isActive=true
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get Single Category - ✅ Task 4 Complete
+GET http://localhost:3000/api/categories/1
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Create Category - ✅ Task 4 Complete (Admin only)
+POST http://localhost:3000/api/categories
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Neue Kategorie",
+  "color": "#ff6b6b",
+  "icon": "🎉"
+}
+
+###
+
+### Update Category - ✅ Task 4 Complete (Admin only)
+PUT http://localhost:3000/api/categories/1
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Aktualisierte Kategorie",
+  "color": "#00ff00"
+}
+
+###
+
+### Delete Category - ✅ Task 4 Complete (Admin only)
+DELETE http://localhost:3000/api/categories/4
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+###
+
+### Get Active Posts for Display - ✅ Task 4 Complete (Public, no auth)
+# Returns active posts sorted by priority DESC, then createdAt DESC
+# Supports organization filtering: ?organization=prasco
+GET http://localhost:3000/api/public/posts
+
+###
+
+### Get Active Posts by Organization Slug
+GET http://localhost:3000/api/public/posts?organization=prasco
+
+###
+
+### Get Active Posts by Category
+GET http://localhost:3000/api/public/posts?category=1
+
+###
+
+### Get Single Post for Display - ✅ Task 4 Complete (Public, increments view counter)
+GET http://localhost:3000/api/public/posts/1
+
+###
+
+### Get Active Categories for Display - ✅ Task 4 Complete (Public, no auth)
+GET http://localhost:3000/api/public/categories
+
+###
+
+### Upload Media (TODO - Task 6)
+POST http://localhost:3000/api/media/upload
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------WebKitFormBoundary--
+
+###
+
+#############################
+# Task 5: Permission Testing
+#############################
+
+### Test Permission: Editor creates post (✅ should work - has posts.create)
+POST http://localhost:3000/api/posts
+Authorization: Bearer EDITOR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Post vom Editor",
+  "content": "Editor hat posts.create Permission",
+  "contentType": "text"
+}
+
+###
+
+### Test Permission: Admin creates post (❌ should fail 403 - NO posts.create)
+POST http://localhost:3000/api/posts
+Authorization: Bearer ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Post vom Admin",
+  "content": "Admin hat KEINE posts.create Permission",
+  "contentType": "text"
+}
+
+###
+
+### Test Permission: Viewer reads posts (✅ should work - has posts.read)
+GET http://localhost:3000/api/posts
+Authorization: Bearer VIEWER_TOKEN_HERE
+
+###
+
+### Test Permission: Viewer creates post (❌ should fail 403 - NO posts.create)
+POST http://localhost:3000/api/posts
+Authorization: Bearer VIEWER_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Post vom Viewer",
+  "content": "Viewer hat KEINE posts.create Permission",
+  "contentType": "text"
+}
+
+###
+
+### Test Permission: Editor creates category (✅ should work - has categories.create)
+POST http://localhost:3000/api/categories
+Authorization: Bearer EDITOR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Editor Kategorie",
+  "color": "#33cc33"
+}
+
+###
+
+### Test Permission: Admin updates post (✅ should work - has posts.update)
+PUT http://localhost:3000/api/posts/1
+Authorization: Bearer ADMIN_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "priority": 9
+}
+
+###
+
+### Test Permission: Admin deletes post (✅ should work - has posts.delete)
+DELETE http://localhost:3000/api/posts/4
+Authorization: Bearer ADMIN_TOKEN_HERE
+
+###
+
+### Test Permission: Editor deletes post (✅ should work - has posts.delete)
+DELETE http://localhost:3000/api/posts/5
+Authorization: Bearer EDITOR_TOKEN_HERE
+
+###
+
+### Test Permission: Viewer deletes post (❌ should fail 403 - NO posts.delete)
+DELETE http://localhost:3000/api/posts/1
+Authorization: Bearer VIEWER_TOKEN_HERE
+
+###

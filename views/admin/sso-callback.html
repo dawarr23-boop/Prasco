@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSO Login - PRASCO</title>
+    <link rel="stylesheet" href="/css/admin.css" />
+    <style>
+      .sso-callback-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #009640 0%, #007830 100%);
+      }
+
+      .sso-callback-card {
+        background: white;
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 400px;
+      }
+
+      .sso-callback-card h2 {
+        color: #009640;
+        margin-bottom: 1rem;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid #e0e0e0;
+        border-top: 4px solid #009640;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 1.5rem auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error-message {
+        color: #dc3545;
+        background: #fee;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        display: none;
+      }
+
+      .success-icon {
+        font-size: 48px;
+        color: #28a745;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sso-callback-container">
+      <div class="sso-callback-card">
+        <img
+          src="https://www.prasco.net/assets/media/logo.png"
+          alt="PRASCO Logo"
+          style="height: 50px; margin-bottom: 1rem"
+        />
+        <h2 id="title">Anmeldung läuft...</h2>
+        <div class="spinner" id="spinner"></div>
+        <div class="success-icon" id="success">✓</div>
+        <p id="message">Bitte warten Sie, während wir Sie anmelden.</p>
+        <div class="error-message" id="error"></div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        const refreshToken = urlParams.get('refreshToken');
+        const error = urlParams.get('error');
+
+        const titleEl = document.getElementById('title');
+        const spinnerEl = document.getElementById('spinner');
+        const successEl = document.getElementById('success');
+        const messageEl = document.getElementById('message');
+        const errorEl = document.getElementById('error');
+
+        if (error) {
+          // Fehler anzeigen
+          titleEl.textContent = 'Anmeldung fehlgeschlagen';
+          spinnerEl.style.display = 'none';
+
+          const errorMessages = {
+            sso_denied: 'Der Zugriff wurde verweigert.',
+            sso_invalid_response: 'Ungültige Antwort vom Authentifizierungsserver.',
+            sso_state_expired: 'Die Sitzung ist abgelaufen. Bitte versuchen Sie es erneut.',
+            sso_token_failed: 'Token-Abruf fehlgeschlagen.',
+            sso_no_email: 'Keine E-Mail-Adresse gefunden.',
+            sso_domain_not_allowed: 'Ihre E-Mail-Domain ist nicht zugelassen.',
+            sso_user_not_found: 'Kein Benutzerkonto gefunden.',
+            sso_user_inactive: 'Ihr Benutzerkonto ist deaktiviert.',
+            sso_no_organization: 'Keine Organisation für die Anmeldung verfügbar.',
+            sso_callback_failed: 'Ein unerwarteter Fehler ist aufgetreten.',
+          };
+
+          errorEl.textContent = errorMessages[error] || `Fehler: ${error}`;
+          errorEl.style.display = 'block';
+          messageEl.innerHTML =
+            '<a href="/admin" style="color: #009640;">Zurück zur Anmeldeseite</a>';
+          return;
+        }
+
+        if (!token || !refreshToken) {
+          titleEl.textContent = 'Fehler';
+          spinnerEl.style.display = 'none';
+          errorEl.textContent = 'Keine Anmeldedaten erhalten.';
+          errorEl.style.display = 'block';
+          messageEl.innerHTML =
+            '<a href="/admin" style="color: #009640;">Zurück zur Anmeldeseite</a>';
+          return;
+        }
+
+        // Token speichern
+        localStorage.setItem('accessToken', token);
+        localStorage.setItem('refreshToken', refreshToken);
+
+        // Benutzerdaten aus Token extrahieren
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          localStorage.setItem(
+            'user',
+            JSON.stringify({
+              id: payload.id,
+              email: payload.email,
+              role: payload.role,
+              organizationId: payload.organizationId,
+              ssoProvider: payload.ssoProvider || 'azure_ad',
+            })
+          );
+        } catch (e) {
+          console.error('Token parsing error:', e);
+        }
+
+        // Erfolg anzeigen
+        titleEl.textContent = 'Anmeldung erfolgreich!';
+        spinnerEl.style.display = 'none';
+        successEl.style.display = 'block';
+        messageEl.textContent = 'Sie werden weitergeleitet...';
+
+        // Weiterleitung zum Dashboard
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard.html';
+        }, 1000);
+      })();
+    </script>
+  </body>
+</html>
