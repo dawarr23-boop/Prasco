@@ -60,36 +60,53 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     // Import dynamically to avoid circular dependency
     const { Permission, RolePermission, UserPermission } = await import('./index');
 
-    // 1. Check for direct user permission (grant or revoke)
-    const userPermission = await UserPermission.findOne({
-      include: [
-        {
-          model: Permission,
-          as: 'permission',
-          where: { name: permissionName },
-        },
-      ],
-      where: { userId: this.id },
-    });
-
-    // If user has explicit permission setting, use it (true = granted, false = revoked)
-    if (userPermission) {
-      return userPermission.granted;
+    // Build list of permissions to check (including .manage wildcard)
+    const permissionsToCheck = [permissionName];
+    
+    // If permission is like "posts.read", also check for "posts.manage"
+    const parts = permissionName.split('.');
+    if (parts.length === 2 && parts[1] !== 'manage') {
+      permissionsToCheck.push(`${parts[0]}.manage`);
     }
 
-    // 2. Check role-based permissions
-    const rolePermission = await RolePermission.findOne({
-      include: [
-        {
-          model: Permission,
-          as: 'permission',
-          where: { name: permissionName },
-        },
-      ],
-      where: { role: this.role },
-    });
+    // 1. Check for direct user permission (grant or revoke)
+    for (const perm of permissionsToCheck) {
+      const userPermission = await UserPermission.findOne({
+        include: [
+          {
+            model: Permission,
+            as: 'permission',
+            where: { name: perm },
+          },
+        ],
+        where: { userId: this.id },
+      });
 
-    return !!rolePermission;
+      // If user has explicit permission setting, use it
+      if (userPermission) {
+        return userPermission.granted;
+      }
+    }
+
+    // 2. Check role-based permissions (including manage wildcard)
+    for (const perm of permissionsToCheck) {
+      const rolePermission = await RolePermission.findOne({
+        include: [
+          {
+            model: Permission,
+            as: 'permission',
+            where: { name: perm },
+          },
+        ],
+        where: { role: this.role },
+      });
+
+      if (rolePermission) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   // Check if user has any of the given permissions
