@@ -44,8 +44,8 @@ Das Skript versucht automatisch 3x erneut zu downloaden:
 #### 2. Größere Timeout-Werte
 Wenn Downloads immer abbrechen, ändere im Skript:
 ```powershell
-# Zeile ~370 im Skript:
--TimeoutSec 600  # Von 600 auf 1200 erhöhen
+# Zeile ~395 im Skript:
+-TimeoutSec 600  # Aktueller Wert - kann auf 1200 erhöht werden
 ```
 
 #### 3. Manueller Download

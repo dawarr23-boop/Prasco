@@ -437,7 +437,7 @@ if ($SkipDownload -and (Test-Path $imgFile)) {
             if (Get-YesNo "Erneut herunterladen?" $true) {
                 Remove-Item $xzFile -Force
                 Write-Step "Starte erneuten Download..."
-                # Rekursiver Aufruf - wird im nächsten Durchlauf heruntergeladen
+                # Datei wird beim nächsten Durchlauf neu heruntergeladen
             }
         }
     }
@@ -783,12 +783,23 @@ echo "Installiere Git..."
 apt-get install -y git
 
 # Weitere Abhängigkeiten (nur wenn Desktop-Version oder Kiosk-Modus gewünscht)
-if $(if ($isLite) { "false" } else { "true" }); then
-    echo "Installiere Desktop-Abhängigkeiten für Kiosk-Modus..."
-    apt-get install -y chromium-browser xdotool unclutter 2>/dev/null || \
-    apt-get install -y chromium xdotool unclutter 2>/dev/null || \
-    echo "Chromium muss manuell installiert werden für Kiosk-Modus"
+"@ + $(if ($isLite) { @"
+
+echo "Lite-Version: Chromium wird nicht automatisch installiert"
+echo "Für Kiosk-Modus später manuell installieren mit:"
+echo "  sudo apt install chromium-browser xdotool unclutter"
+"@ } else { @"
+
+echo "Installiere Desktop-Abhängigkeiten für Kiosk-Modus..."
+if apt-get install -y chromium-browser xdotool unclutter; then
+    echo "Chromium und Kiosk-Tools erfolgreich installiert"
+elif apt-get install -y chromium xdotool unclutter; then
+    echo "Chromium (alternative) und Kiosk-Tools erfolgreich installiert"
+else
+    echo "WARNUNG: Chromium-Installation fehlgeschlagen"
+    echo "Für Kiosk-Modus muss Chromium manuell installiert werden"
 fi
+"@ }) + @"
 
 # PRASCO klonen
 echo "Klone PRASCO Repository..."
