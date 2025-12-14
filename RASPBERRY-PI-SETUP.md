@@ -295,11 +295,11 @@ PRASCO enthält ein interaktives Setup-Skript, das alle folgenden Schritte autom
 # Nach Home-Verzeichnis wechseln
 cd ~
 
-# Repository klonen (URL anpassen!)
-git clone https://github.com/DEIN_USER/prasco.git
+# Repository klonen
+git clone https://github.com/dawarr23-boop/Prasco.git
 
 # In Projektverzeichnis wechseln
-cd prasco
+cd Prasco
 
 # Interaktives Setup starten
 chmod +x scripts/setup-production.sh
@@ -383,11 +383,11 @@ GRANT ALL PRIVILEGES ON DATABASE bulletin_board TO prasco;
 # Nach Home-Verzeichnis wechseln
 cd ~
 
-# Repository klonen (URL anpassen!)
-git clone https://github.com/DEIN_USER/prasco.git
+# Repository klonen
+git clone https://github.com/dawarr23-boop/Prasco.git
 
 # In Projektverzeichnis wechseln
-cd prasco
+cd Prasco
 ```
 
 ### 5.4 Umgebungsvariablen konfigurieren
@@ -494,7 +494,7 @@ nano ~/.config/autostart/prasco-kiosk.desktop
 [Desktop Entry]
 Type=Application
 Name=PRASCO Kiosk
-Exec=/home/pi/prasco/scripts/start-kiosk.sh
+Exec=/home/pi/Prasco/scripts/start-kiosk.sh
 X-GNOME-Autostart-enabled=true
 ```
 
@@ -502,10 +502,10 @@ X-GNOME-Autostart-enabled=true
 
 ```bash
 # Skript anzeigen
-cat ~/prasco/scripts/start-kiosk.sh
+cat ~/Prasco/scripts/start-kiosk.sh
 
 # Falls nicht vorhanden, erstellen:
-nano ~/prasco/scripts/start-kiosk.sh
+nano ~/Prasco/scripts/start-kiosk.sh
 ```
 
 **Inhalt:**
@@ -540,7 +540,7 @@ chromium-browser \
 
 ```bash
 # Ausführbar machen
-chmod +x ~/prasco/scripts/start-kiosk.sh
+chmod +x ~/Prasco/scripts/start-kiosk.sh
 ```
 
 ### 6.3 Bildschirm-Einstellungen
@@ -603,7 +603,7 @@ journalctl -u pm2-pi -f
 ssh pi@prasco.local
 
 # In Projektverzeichnis wechseln
-cd ~/prasco
+cd ~/Prasco
 
 # Updates holen
 git pull
@@ -638,7 +638,7 @@ sudo reboot
 pg_dump -U prasco bulletin_board > ~/backup_$(date +%Y%m%d).sql
 
 # Uploads sichern
-tar -czf ~/uploads_backup_$(date +%Y%m%d).tar.gz ~/prasco/uploads/
+tar -czf ~/uploads_backup_$(date +%Y%m%d).tar.gz ~/Prasco/uploads/
 ```
 
 ### 7.5 Fernzugriff auf Admin-Panel
@@ -667,7 +667,7 @@ Aus deinem lokalen Netzwerk:
 
 - [ ] SD-Karte mit Raspberry Pi Imager geflasht
 - [ ] SSH aktiviert, Passwort gesetzt
-- [ ] PRASCO geklont: `git clone https://github.com/DEIN_USER/prasco.git`
+- [ ] PRASCO geklont: `git clone https://github.com/dawarr23-boop/Prasco.git`
 - [ ] Setup-Skript gestartet: `./scripts/setup-production.sh`
 - [ ] Interaktive Fragen beantwortet
 - [ ] System getestet

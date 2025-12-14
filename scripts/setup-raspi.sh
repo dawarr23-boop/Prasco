@@ -70,7 +70,7 @@ apt install -y chromium-browser unclutter
 
 # App-Verzeichnis erstellen
 echo "📁 App-Verzeichnis erstellen..."
-APP_DIR="/home/pi/prasco"
+APP_DIR="/home/pi/Prasco"
 mkdir -p $APP_DIR
 chown pi:pi $APP_DIR
 
@@ -82,7 +82,7 @@ cat > /home/pi/.config/autostart/prasco-kiosk.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
 Name=PRASCO Kiosk
-Exec=/home/pi/prasco/start-kiosk.sh
+Exec=/home/pi/Prasco/start-kiosk.sh
 X-GNOME-Autostart-enabled=true
 EOF
 

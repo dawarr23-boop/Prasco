@@ -226,8 +226,8 @@ sudo apt-get install postgresql postgresql-contrib -y
 
 ```bash
 # Via Git
-git clone <dein-repository-url>
-cd prasco
+git clone https://github.com/dawarr23-boop/Prasco.git
+cd Prasco
 
 # Dependencies installieren
 npm install

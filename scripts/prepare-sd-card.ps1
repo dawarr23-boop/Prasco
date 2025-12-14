@@ -563,22 +563,22 @@ apt-get install -y git chromium-browser xdotool unclutter
 # PRASCO klonen
 echo "Klone PRASCO Repository..."
 cd /home/$PiUser
-git clone $($Config.Repository) prasco
-chown -R ${PiUser}:${PiUser} prasco
+git clone $($Config.Repository) Prasco
+chown -R ${PiUser}:${PiUser} Prasco
 
 # Setze Marker dass Setup abgeschlossen werden muss
-touch /home/$PiUser/prasco/.first-boot-complete
+touch /home/$PiUser/Prasco/.first-boot-complete
 
 # Erstelle Autostart für interaktives Setup
 cat > /home/$PiUser/.bashrc.d/prasco-setup.sh << 'SETUP'
-if [ -f /home/$PiUser/prasco/.first-boot-complete ] && [ ! -f /home/$PiUser/prasco/.setup-complete ]; then
+if [ -f /home/$PiUser/Prasco/.first-boot-complete ] && [ ! -f /home/$PiUser/Prasco/.setup-complete ]; then
     echo ""
     echo "╔═══════════════════════════════════════════════════════════════╗"
     echo "║         PRASCO - Erste Einrichtung erforderlich              ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
     echo "Starte interaktives Setup mit:"
-    echo "  cd ~/prasco && ./scripts/setup-production.sh"
+    echo "  cd ~/Prasco && ./scripts/setup-production.sh"
     echo ""
 fi
 SETUP
@@ -596,7 +596,7 @@ echo "Ende: \$(date)"
 echo "=============================================="
 echo ""
 echo "Bitte melde dich an und führe aus:"
-echo "  cd ~/prasco && ./scripts/setup-production.sh"
+echo "  cd ~/Prasco && ./scripts/setup-production.sh"
 
 # Neustart
 reboot
@@ -677,7 +677,7 @@ Write-Host "  5. Per SSH verbinden:" -ForegroundColor Yellow
 Write-Host "     ssh ${PiUser}@${Hostname}.local" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  6. Interaktives Setup starten:" -ForegroundColor Yellow
-Write-Host "     cd ~/prasco && ./scripts/setup-production.sh" -ForegroundColor Cyan
+Write-Host "     cd ~/Prasco && ./scripts/setup-production.sh" -ForegroundColor Cyan
 Write-Host ""
 
 Write-ColorOutput "Zugangsdaten:" "Yellow"

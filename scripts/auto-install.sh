@@ -15,7 +15,7 @@ set -e
 
 # Konfiguration
 REPO_URL="https://github.com/dawarr23-boop/Prasco.git"
-INSTALL_DIR="$HOME/prasco"
+INSTALL_DIR="$HOME/Prasco"
 LOG_FILE="/tmp/prasco-install-$(date +%Y%m%d_%H%M%S).log"
 
 # Farben
@@ -234,7 +234,7 @@ show_completion() {
     echo ""
     echo "  Starte die interaktive Einrichtung:"
     echo ""
-    echo -e "    ${YELLOW}cd ~/prasco && ./scripts/setup-production.sh${NC}"
+    echo -e "    ${YELLOW}cd ~/Prasco && ./scripts/setup-production.sh${NC}"
     echo ""
     echo -e "${CYAN}System-Informationen:${NC}"
     echo "  Hostname:   $HOSTNAME"
@@ -253,7 +253,7 @@ start_interactive_setup() {
     else
         echo ""
         print_info "Du kannst das Setup später starten mit:"
-        echo -e "    ${CYAN}cd ~/prasco && ./scripts/setup-production.sh${NC}"
+        echo -e "    ${CYAN}cd ~/Prasco && ./scripts/setup-production.sh${NC}"
         echo ""
     fi
 }

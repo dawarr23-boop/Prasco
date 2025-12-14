@@ -9,7 +9,7 @@ param(
     [string]$PiUser = "pi",
     
     [Parameter(Mandatory=$false)]
-    [string]$RemotePath = "/home/pi/prasco"
+    [string]$RemotePath = "/home/pi/Prasco"
 )
 
 Write-Host "🚀 PRASCO Deployment zu Raspberry Pi" -ForegroundColor Cyan

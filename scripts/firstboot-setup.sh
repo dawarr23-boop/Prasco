@@ -126,7 +126,7 @@ echo "✓ Tools installiert"
 echo "[7/7] Klone PRASCO Repository..."
 
 USER_HOME="/home/$PRASCO_USER"
-PRASCO_DIR="$USER_HOME/prasco"
+PRASCO_DIR="$USER_HOME/Prasco"
 
 if [[ -d "$PRASCO_DIR" ]]; then
     rm -rf "$PRASCO_DIR"
@@ -160,7 +160,7 @@ cat > "$USER_HOME/.prasco-setup-hint" << 'HINT'
 ║                                                                           ║
 ║   Starte die interaktive Einrichtung mit:                                 ║
 ║                                                                           ║
-║       cd ~/prasco && ./scripts/setup-production.sh                        ║
+║       cd ~/Prasco && ./scripts/setup-production.sh                        ║
 ║                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
@@ -206,7 +206,7 @@ echo "=============================================="
 echo ""
 echo "Nächste Schritte:"
 echo "  1. Verbinde dich per SSH: ssh $PRASCO_USER@$PRASCO_HOSTNAME.local"
-echo "  2. Starte das Setup: cd ~/prasco && ./scripts/setup-production.sh"
+echo "  2. Starte das Setup: cd ~/Prasco && ./scripts/setup-production.sh"
 echo ""
 
 # Optional: Neustart

@@ -79,8 +79,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ```bash
 # Auf dem Raspberry Pi:
-git clone <repository-url> ~/prasco
-cd ~/prasco
+git clone https://github.com/dawarr23-boop/Prasco.git ~/Prasco
+cd ~/Prasco
 sudo bash scripts/setup-raspi.sh
 ```
 
@@ -95,7 +95,7 @@ Das Skript installiert automatisch:
 #### 3. App konfigurieren
 
 ```bash
-cd ~/prasco
+cd ~/Prasco
 cp .env.production .env
 nano .env  # Passwörter anpassen!
 ```
@@ -286,7 +286,7 @@ pm2 monit
 ### Update durchführen
 
 ```bash
-cd ~/prasco
+cd ~/Prasco
 git pull
 npm ci --only=production
 npm run build
