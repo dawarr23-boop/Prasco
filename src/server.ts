@@ -94,9 +94,10 @@ app.use(
 );
 
 // Rate Limiting - Global API Limiter
+// Configurable via environment variables, defaults are suitable for single-admin usage
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // Higher limit for development
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes default
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000', 10), // 1000 requests per window
   message: 'Zu viele Anfragen von dieser IP, bitte versuchen Sie es später erneut.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -107,10 +108,10 @@ const apiLimiter = rateLimit({
   },
 });
 
-// Strict Rate Limiter for Authentication
+// Rate Limiter for Authentication - more lenient for development/small deployments
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 50 : 5, // Higher limit for development
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '30', 10), // 30 login attempts per 15 min
   message: 'Zu viele Login-Versuche. Bitte versuchen Sie es in 15 Minuten erneut.',
   skipSuccessfulRequests: true,
   handler: (req, _res, next) => {
@@ -123,7 +124,7 @@ const authLimiter = rateLimit({
 // Upload Rate Limiter
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: process.env.NODE_ENV === 'development' ? 100 : 10, // Higher limit for development
+  max: parseInt(process.env.UPLOAD_RATE_LIMIT_MAX || '100', 10), // 100 uploads per hour
   message: 'Zu viele Upload-Versuche. Bitte versuchen Sie es in einer Stunde erneut.',
   handler: (req, _res, next) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
