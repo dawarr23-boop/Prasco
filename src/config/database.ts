@@ -62,9 +62,10 @@ export const connectDatabase = async (): Promise<void> => {
         const dbType = dialect === 'sqlite' ? 'SQLite' : 'PostgreSQL';
         logger.info(`✅ ${dbType} Verbindung erfolgreich`);
 
-        // Sync models (für SQLite immer, für PostgreSQL nur in development)
+        // Sync models - OHNE alter, um Crashes zu vermeiden
+        // Schema muss manuell via Seeding erstellt werden
         if (NODE_ENV === 'development' || dialect === 'sqlite') {
-            await sequelize.sync({ alter: true });
+            await sequelize.sync();
             logger.info('✅ Datenbank-Schema synchronisiert');
         }
     } catch (error) {

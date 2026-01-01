@@ -60,6 +60,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     // Import dynamically to avoid circular dependency
     const { Permission, RolePermission, UserPermission } = await import('./index');
 
+    console.log(`[hasPermission] Checking permission "${permissionName}" for user ${this.email} (${this.role})`);
+
     // Build list of permissions to check (including .manage wildcard)
     const permissionsToCheck = [permissionName];
     
@@ -68,6 +70,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     if (parts.length === 2 && parts[1] !== 'manage') {
       permissionsToCheck.push(`${parts[0]}.manage`);
     }
+
+    console.log(`[hasPermission] Permissions to check: ${permissionsToCheck.join(', ')}`);
 
     // 1. Check for direct user permission (grant or revoke)
     for (const perm of permissionsToCheck) {
@@ -84,6 +88,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
       // If user has explicit permission setting, use it
       if (userPermission) {
+        console.log(`[hasPermission] Found user-specific permission: ${perm} = ${userPermission.granted}`);
         return userPermission.granted;
       }
     }
@@ -102,10 +107,12 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
       });
 
       if (rolePermission) {
+        console.log(`[hasPermission] Found role-based permission: ${perm} for role ${this.role}`);
         return true;
       }
     }
 
+    console.log(`[hasPermission] NO permission found for "${permissionName}"`);
     return false;
   }
 

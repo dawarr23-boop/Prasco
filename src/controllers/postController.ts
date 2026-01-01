@@ -428,3 +428,34 @@ export const reorderPosts = async (
     next(error);
   }
 };
+
+/**
+ * Delete all posts
+ * DELETE /api/posts
+ */
+export const deleteAllPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const where: any = {};
+    
+    // Organization filter
+    if (req.user?.organizationId) {
+      where.organizationId = req.user.organizationId;
+    }
+
+    const deletedCount = await Post.destroy({ where });
+
+    res.json({
+      success: true,
+      message: `${deletedCount} Beiträge gelöscht`,
+      deletedCount,
+    });
+
+    logger.info(`SECURITY: ${deletedCount} Posts gelöscht von ${req.user?.email}`);
+  } catch (error) {
+    next(error);
+  }
+};

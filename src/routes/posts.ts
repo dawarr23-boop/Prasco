@@ -407,4 +407,39 @@ router.delete(
   postController.deletePost
 );
 
+/**
+ * @openapi
+ * /api/posts:
+ *   delete:
+ *     tags:
+ *       - Posts
+ *     summary: Alle Beiträge löschen
+ *     description: Löscht alle Beiträge. Nur für Admins. Erfordert 'posts.manage' Permission.
+ *     responses:
+ *       200:
+ *         description: Erfolgreich gelöscht
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 deletedCount:
+ *                   type: number
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *     security:
+ *       - bearerAuth: []
+ */
+router.delete(
+  '/',
+  requirePermission('posts.manage'),
+  postController.deleteAllPosts
+);
+
 export default router;

@@ -1,5 +1,5 @@
 import { logger } from '../../utils/logger';
-import { User, Organization, Category, Post } from '../../models';
+import { User, Organization, Category } from '../../models';
 import { seedPermissions } from './permissions';
 
 export const seedDatabase = async (): Promise<void> => {
@@ -44,7 +44,7 @@ export const seedDatabase = async (): Promise<void> => {
     );
 
     // 3. Create Admin User
-    const [admin] = await User.findOrCreate({
+    await User.findOrCreate({
       where: { email: 'admin@prasco.net' },
       defaults: {
         email: 'admin@prasco.net',
@@ -59,7 +59,7 @@ export const seedDatabase = async (): Promise<void> => {
     logger.info('✅ Admin-User erstellt');
 
     // 4. Create Test Editor
-    const [editor] = await User.findOrCreate({
+    await User.findOrCreate({
       where: { email: 'editor@prasco.net' },
       defaults: {
         email: 'editor@prasco.net',
@@ -93,7 +93,18 @@ export const seedDatabase = async (): Promise<void> => {
     }
     logger.info('✅ Kategorien erstellt');
 
-    // 5. Create Sample Posts - NUR wenn noch keine Posts existieren
+    // 5. Create Sample Posts - DEAKTIVIERT
+    // Demo-Posts werden nicht mehr automatisch erstellt
+    
+    logger.info('🎉 Database-Seeding erfolgreich abgeschlossen!');
+  } catch (error) {
+    logger.error('❌ Fehler beim Database-Seeding:', error);
+    throw error;
+  }
+};
+
+// Alter Demo-Posts-Code - auskommentiert
+/*
     const existingPostCount = await Post.count();
 
     if (existingPostCount > 0) {
@@ -711,13 +722,7 @@ export const seedDatabase = async (): Promise<void> => {
 
       logger.info('✅ Sample-Posts & Feature-Präsentations-Slides erstellt');
     }
-
-    logger.info('🎉 Database-Seeding erfolgreich abgeschlossen!');
-  } catch (error) {
-    logger.error('❌ Fehler beim Database-Seeding:', error);
-    throw error;
-  }
-};
+*/
 
 // Removed automatic execution block - seedDatabase is only called from server.ts startup
 // If you need to run seeding manually, import and call seedDatabase() explicitly

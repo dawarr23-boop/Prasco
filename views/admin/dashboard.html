@@ -106,7 +106,10 @@
           <section id="posts-section" class="section">
             <div class="section-header">
               <h2>Beiträge verwalten</h2>
-              <button class="btn btn-primary" id="showPostFormBtn">+ Neuer Beitrag</button>
+              <div>
+                <button class="btn btn-primary" id="showPostFormBtn">+ Neuer Beitrag</button>
+                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">🗑️ Alle löschen</button>
+              </div>
             </div>
 
             <div id="post-form" class="form-container" style="display: none">
@@ -959,6 +962,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js"></script>
+    <script src="/js/admin.js?v=1.1"></script>
   </body>
 </html>

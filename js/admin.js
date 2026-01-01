@@ -1134,7 +1134,7 @@ async function loadPosts() {
   postsList.innerHTML = '<p style="text-align:center; color: #6c757d;">Lade Beiträge...</p>';
 
   try {
-    const response = await apiRequest('/posts');
+    const response = await apiRequest('/posts?limit=100');
     postsCache = response?.data || [];
 
     if (postsCache.length === 0) {
@@ -1554,18 +1554,34 @@ function initGlobalMusicSettings() {
     });
   }
 
-  // Speichern
+  // Speichern mit automatischem Upload, falls Datei ausgewählt
   if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
+      // Prüfen, ob eine neue Datei ausgewählt wurde und noch nicht hochgeladen ist
+      if (musicFileInput && musicFileInput.files.length > 0 && !uploadedMusicUrl) {
+        try {
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Hochladen...';
+          const result = await uploadFile(musicFileInput.files[0]);
+          uploadedMusicUrl = result.url;
+          showNotification('Musik-Datei hochgeladen!', 'success');
+        } catch (error) {
+          showNotification('Upload fehlgeschlagen: ' + error.message, 'error');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Speichern';
+          return;
+        }
+      }
       const settings = {
         enabled: enabledCheckbox?.checked || false,
         url: uploadedMusicUrl || urlInput?.value || '',
         volume: parseInt(volumeSlider?.value) || 30,
         muteVideos: muteVideosCheckbox?.checked !== false,
       };
-
       localStorage.setItem('globalMusicSettings', JSON.stringify(settings));
       showNotification('Globale Musik-Einstellungen gespeichert!', 'success');
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Speichern';
     });
   }
 
@@ -3226,5 +3242,30 @@ async function loadAppInfo() {
     console.log('App-Info konnte nicht geladen werden:', error);
   }
 }
+
+// Delete All Posts Handler
+document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async () => {
+  if (!confirm('⚠️ ACHTUNG: Möchten Sie wirklich ALLE Beiträge unwiderruflich löschen?')) {
+    return;
+  }
+  
+  if (!confirm('🚨 Letzte Warnung: Diese Aktion kann nicht rückgängig gemacht werden!')) {
+    return;
+  }
+
+  try {
+    const response = await apiRequest('/posts', {
+      method: 'DELETE'
+    });
+
+    if (response.success) {
+      showNotification(`✅ ${response.deletedCount} Beiträge wurden gelöscht`, 'success');
+      await loadPosts();
+    }
+  } catch (error) {
+    console.error('Fehler beim Löschen aller Posts:', error);
+    showNotification('❌ Fehler beim Löschen der Beiträge', 'error');
+  }
+});
 
 console.log('Admin Dashboard geladen (API-Modus)');

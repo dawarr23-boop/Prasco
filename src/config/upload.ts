@@ -41,6 +41,16 @@ export const ALLOWED_MIME_TYPES = {
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     'application/vnd.oasis.opendocument.presentation',
   ],
+  AUDIO: [
+    'audio/mpeg',
+    'audio/mp3',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/ogg',
+    'audio/x-m4a',
+    'audio/aac',
+    'audio/flac',
+  ],
 };
 
 // Get all allowed MIME types
@@ -49,6 +59,7 @@ export const ALL_ALLOWED_MIME_TYPES = [
   ...ALLOWED_MIME_TYPES.VIDEO,
   ...ALLOWED_MIME_TYPES.DOCUMENT,
   ...ALLOWED_MIME_TYPES.PRESENTATION,
+  ...ALLOWED_MIME_TYPES.AUDIO,
 ];
 
 // Generate unique filename
@@ -89,6 +100,14 @@ const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFil
     '.mp4',
     '.webm',
     '.ogg',
+    '.mp3',
+    '.wav',
+    '.aac',
+    '.flac',
+    '.m4a',
+    '.wma',
+    '.aiff',
+    '.opus',
     '.mov',
     '.pdf',
     '.doc',

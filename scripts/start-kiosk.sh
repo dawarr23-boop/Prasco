@@ -8,24 +8,24 @@ sleep 10
 # Display-Einstellungen
 export DISPLAY=:0
 
-# Bildschirmschoner deaktivieren
-xset s off
-xset -dpms
-xset s noblank
+# Bildschirmschoner deaktivieren (optional, ignoriere Fehler)
+xset s off 2>/dev/null || true
+xset -dpms 2>/dev/null || true
+xset s noblank 2>/dev/null || true
 
-# Mauszeiger verstecken (nach 0.5 Sekunden Inaktivität)
-unclutter -idle 0.5 -root &
+# Mauszeiger verstecken (optional, nur wenn installiert)
+command -v unclutter >/dev/null 2>&1 && unclutter -idle 0.5 -root &
 
-# Warte auf Server
+# Warte auf Server (HTTPS mit self-signed certificate)
 echo "Warte auf PRASCO Server..."
-while ! curl -s http://localhost:3000/api/health > /dev/null 2>&1; do
+while ! curl -sk https://localhost:3000/api/health > /dev/null 2>&1; do
   echo "Server nicht erreichbar, warte..."
   sleep 2
 done
 echo "Server erreichbar!"
 
 # Chromium im Kiosk-Modus starten mit Autoplay-Unterstützung
-chromium-browser \
+chromium \
   --kiosk \
   --noerrdialogs \
   --disable-infobars \
@@ -37,4 +37,5 @@ chromium-browser \
   --start-fullscreen \
   --disable-pinch \
   --overscroll-history-navigation=0 \
-  http://localhost:3000/public/display.html
+  --ignore-certificate-errors \
+  https://localhost:3000/public/display.html
