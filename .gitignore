@@ -8,8 +8,10 @@ yarn.lock
 # Environment
 .env
 .env.local
-# .env.development - für lokale Entwicklung (kann committed werden)
-# .env.production - enthält Beispielwerte, kann committed werden
+.env.development
+.env.production
+.env.test
+# Only .env.example and .env.*.example files should be committed
 
 # Database
 *.sqlite
