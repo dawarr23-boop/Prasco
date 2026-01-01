@@ -3100,6 +3100,44 @@ window.addEventListener('load', async () => {
   // Hintergrundmusik-Steuerung initialisieren
   initBackgroundMusicControls();
 
+  // Display-Einstellungen speichern
+  const saveDisplaySettingsBtn = document.getElementById('saveDisplaySettings');
+  if (saveDisplaySettingsBtn) {
+    saveDisplaySettingsBtn.addEventListener('click', () => {
+      const refreshInterval = document.getElementById('refresh-interval');
+      const defaultDuration = document.getElementById('default-duration');
+      
+      if (refreshInterval && defaultDuration) {
+        const settings = {
+          refreshInterval: parseInt(refreshInterval.value) || 5,
+          defaultDuration: parseInt(defaultDuration.value) || 10
+        };
+        
+        localStorage.setItem('displaySettings', JSON.stringify(settings));
+        showNotification('Display-Einstellungen gespeichert!', 'success');
+      }
+    });
+  }
+
+  // Display-Einstellungen laden
+  const savedDisplaySettings = localStorage.getItem('displaySettings');
+  if (savedDisplaySettings) {
+    try {
+      const settings = JSON.parse(savedDisplaySettings);
+      const refreshInterval = document.getElementById('refresh-interval');
+      const defaultDuration = document.getElementById('default-duration');
+      
+      if (refreshInterval && settings.refreshInterval) {
+        refreshInterval.value = settings.refreshInterval;
+      }
+      if (defaultDuration && settings.defaultDuration) {
+        defaultDuration.value = settings.defaultDuration;
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Display-Einstellungen:', error);
+    }
+  }
+
   // Passwort ändern Modal
   const changePasswordBtn = document.getElementById('changePasswordBtn');
   const closePasswordModal = document.getElementById('closePasswordModal');

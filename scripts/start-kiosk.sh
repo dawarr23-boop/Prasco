@@ -18,11 +18,21 @@ command -v unclutter >/dev/null 2>&1 && unclutter -idle 0.5 -root &
 
 # Warte auf Server (HTTPS mit self-signed certificate)
 echo "Warte auf PRASCO Server..."
-while ! curl -sk https://localhost:3000/api/health > /dev/null 2>&1; do
+# Prüfe sowohl HTTP als auch HTTPS
+while ! (curl -s http://localhost:3000/api/health > /dev/null 2>&1 || curl -sk https://localhost:3000/api/health > /dev/null 2>&1); do
   echo "Server nicht erreichbar, warte..."
   sleep 2
 done
 echo "Server erreichbar!"
+
+# Bestimme Protokoll (HTTPS bevorzugt wenn verfügbar)
+if curl -sk https://localhost:3000/api/health > /dev/null 2>&1; then
+  PROTOCOL="https"
+  echo "Verwende HTTPS"
+else
+  PROTOCOL="http"
+  echo "Verwende HTTP"
+fi
 
 # Chromium im Kiosk-Modus starten mit Autoplay-Unterstützung
 chromium \
@@ -38,4 +48,10 @@ chromium \
   --disable-pinch \
   --overscroll-history-navigation=0 \
   --ignore-certificate-errors \
+<<<<<<< HEAD
   https://localhost:3000/public/display.html
+=======
+  --disable-web-security \
+  --allow-insecure-localhost \
+  ${PROTOCOL}://localhost:3000
+>>>>>>> 55849d7 (feat: Complete script review and updates for TypeScript migration)

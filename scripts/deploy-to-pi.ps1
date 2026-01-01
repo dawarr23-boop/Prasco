@@ -32,8 +32,7 @@ $deployFiles = @(
     "scripts",
     "package.json",
     "package-lock.json",
-    ".env.production",
-    "index.html"
+    ".env.production"
 )
 
 Write-Host "`n📤 Dateien übertragen..." -ForegroundColor Yellow

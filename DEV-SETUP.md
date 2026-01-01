@@ -10,12 +10,25 @@ node --version  # v18+ empfohlen
 npm --version   # v9+
 ```
 
-### 2. PostgreSQL
+### 2. Datenbank
 
-**Option A: Docker (Empfohlen)**
+**Option A: SQLite (Empfohlen für lokale Entwicklung) ⭐**
+
+Keine Installation nötig! SQLite wird automatisch mit der Anwendung gestartet.
 
 ```powershell
-# PostgreSQL für Development starten
+# .env Datei erstellen
+copy .env.example .env
+
+# Stelle sicher, dass DB_DIALECT auf sqlite gesetzt ist
+# DB_DIALECT=sqlite
+# DB_STORAGE=./database.sqlite
+```
+
+**Option B: PostgreSQL (für Produktion oder erweiterte Entwicklung)**
+
+```powershell
+# PostgreSQL mit Docker starten
 docker run --name prasco-postgres `
   -e POSTGRES_PASSWORD=postgres `
   -e POSTGRES_DB=bulletin_board `
@@ -27,9 +40,17 @@ docker exec -it prasco-postgres psql -U postgres -c "CREATE DATABASE bulletin_bo
 
 # Status prüfen
 docker ps
+
+# In .env konfigurieren:
+# DB_DIALECT=postgres
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_NAME=bulletin_board
+# DB_USER=postgres
+# DB_PASSWORD=postgres
 ```
 
-**Option B: Lokale Installation**
+**Option C: Lokale PostgreSQL Installation**
 
 ```powershell
 # Mit Chocolatey
@@ -66,22 +87,25 @@ npm install
 ### 2. Environment konfigurieren
 
 ```powershell
-# Development-Umgebung
-cp .env.development .env
+# .env Datei erstellen (SQLite wird standardmäßig verwendet)
+copy .env.example .env
 
-# Anpassen wenn nötig
+# Optional: Anpassen für PostgreSQL
 notepad .env
 ```
 
-### 3. Datenbank initialisieren
+### 3. Development-Server starten
 
 ```powershell
-# TypeScript kompilieren
-npm run build
-
-# Development-Server starten (initialisiert DB automatisch)
+# Server mit Auto-Reload starten (erstellt SQLite-DB automatisch)
 npm run dev
 ```
+
+Die Datenbank wird beim ersten Start automatisch erstellt und mit Beispieldaten gefüllt.
+
+**Standard-Login:**
+- Email: `admin@prasco.net`
+- Passwort: `admin123`
 
 ## Entwicklungsworkflow
 

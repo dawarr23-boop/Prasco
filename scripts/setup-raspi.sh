@@ -121,7 +121,7 @@ chromium-browser \
   --autoplay-policy=no-user-gesture-required \
   --check-for-update-interval=31536000 \
   --start-fullscreen \
-  http://localhost:3000/public/display.html
+  http://localhost:3000
 EOF
 
 chmod +x $APP_DIR/start-kiosk.sh

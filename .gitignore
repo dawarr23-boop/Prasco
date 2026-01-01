@@ -45,3 +45,10 @@ build/
 # Tests
 coverage/
 .nyc_output/
+
+# Legacy/Temp files to be deleted
+löschen/
+stdout.txt
+stderr.txt
+test-*.jpg
+test-*.png

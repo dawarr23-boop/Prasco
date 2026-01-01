@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Script to test user permissions
- * Run: node scripts/test-permissions.js
+ * Run: npm run build && node scripts/test-permissions.js
  */
 
 require('dotenv').config();
@@ -10,30 +10,32 @@ async function main() {
   try {
     console.log('🔍 Testing user permissions...\n');
     
-    const { sequelize } = require('../dist/config/database');
-    const { User, Permission, RolePermission } = require('../dist/models');
+    const { sequelize } = require('../dist/config/database.js');
+    const models = require('../dist/models/index.js');
+    const { User, Permission, RolePermission } = models;
     
     await sequelize.authenticate();
     console.log('✅ Database connected\n');
     
-    // Get admin user
-    const admin = await User.findOne({ where: { email: 'admin@prasco.net' } });
+    // Get admin user (check environment variable or use default)
+    const adminEmail = process.env.SUPER_ADMIN_EMAIL || process.env.ADMIN_EMAIL || 'admin@prasco.net';
+    const admin = await User.findOne({ where: { email: adminEmail } });
     if (!admin) {
-      console.log('❌ Admin user not found');
+      console.log(`❌ Admin user not found: ${adminEmail}`);
+      console.log('   Run seeder first: npm run db:seed');
       process.exit(1);
     }
     
     console.log(`User: ${admin.email} (${admin.role})\n`);
     
-    // Test posts.read permission
-    console.log('Testing permission: posts.read');
-    const hasPostsRead = await admin.hasPermission('posts.read');
-    console.log(`  Result: ${hasPostsRead ? '✅ GRANTED' : '❌ DENIED'}\n`);
+    // Test permissions
+    const testPermissions = ['posts.read', 'posts.manage', 'users.read', 'categories.manage'];
     
-    // Test posts.manage permission
-    console.log('Testing permission: posts.manage');
-    const hasPostsManage = await admin.hasPermission('posts.manage');
-    console.log(`  Result: ${hasPostsManage ? '✅ GRANTED' : '❌ DENIED'}\n`);
+    for (const perm of testPermissions) {
+      console.log(`Testing permission: ${perm}`);
+      const hasPermission = await admin.hasPermission(perm);
+      console.log(`  Result: ${hasPermission ? '✅ GRANTED' : '❌ DENIED'}\n`);
+    }
     
     // Check role_permissions for admin
     const rolePerms = await RolePermission.findAll({

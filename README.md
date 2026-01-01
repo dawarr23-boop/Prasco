@@ -11,11 +11,15 @@ Ein vollständiges digitales Schwarzes Brett (Digital Signage) für Raspberry Pi
 Dieses Projekt stellt ein digitales Schwarzes Brett bereit, das auf einem Fernseher über einen Raspberry Pi angezeigt wird. Es verfügt über:
 
 - **Public Display**: Vollbild-Anzeige mit automatischer Rotation von Beiträgen
-- **Admin-Panel**: Webbasierte Verwaltungsoberfläche für Inhalte
-- **Flexible Inhalte**: Text, Bilder, Videos, HTML
+- **Responsive Layout**: Inhalte passen sich automatisch ohne Scrollen an die Bildschirmgröße an
+- **Admin-Panel**: Webbasierte Verwaltungsoberfläche mit persistenten Einstellungen
+- **Flexible Inhalte**: Text, Bilder, Videos, HTML, PowerPoint-Präsentationen
 - **Zeitplanung**: Start- und End-Datum für Beiträge
-- **Kategorien**: Organisierung und Filterung von Inhalten
+- **Kategorien**: Organisierung und Filterung von Inhalten mit Farbcodierung
 - **Auto-Refresh**: Automatische Aktualisierung der Anzeige
+- **Hintergrundmusik**: Globale Musik-Unterstützung mit automatischer Video-Stummschaltung
+- **Vortragsmodus**: Manuelle Navigation für Präsentationen
+- **Multi-DB Support**: SQLite für Entwicklung, PostgreSQL für Produktion
 
 ## 📁 Projektstruktur
 
@@ -46,7 +50,7 @@ digital-bulletin-board/
 
 ### Voraussetzungen
 
-- **Node.js** (v16 oder höher)
+- **Node.js** (v18 oder höher)
 - **NPM** oder **Yarn**
 - Für Raspberry Pi: Raspberry Pi 3B+ oder 4
 - Fernseher mit HDMI-Anschluss
@@ -57,18 +61,21 @@ digital-bulletin-board/
 # Dependencies installieren
 npm install
 
-# Umgebungsvariablen einrichten
+# Umgebungsvariablen einrichten (SQLite wird automatisch verwendet)
 copy .env.example .env
 
-# Server starten
+# Server starten (erstellt SQLite-Datenbank automatisch)
 npm start
 ```
 
 ### Entwicklungsmodus
 
 ```powershell
+# Development-Server mit SQLite und Auto-Reload
 npm run dev
 ```
+
+> **Hinweis:** Für lokale Entwicklung wird automatisch SQLite verwendet. Für Produktion auf Raspberry Pi wird PostgreSQL empfohlen (siehe Deployment-Abschnitt).
 
 ## 💻 Verwendung
 
