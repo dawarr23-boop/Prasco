@@ -17,11 +17,13 @@ Write-Host "=====================================" -ForegroundColor Cyan
 
 # Build ausführen
 Write-Host "`n📦 TypeScript kompilieren..." -ForegroundColor Yellow
-npm run build
+$buildOutput = npm run build 2>&1
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Build fehlgeschlagen!" -ForegroundColor Red
+    Write-Host $buildOutput
     exit 1
 }
+Write-Host "✓ Build erfolgreich" -ForegroundColor Green
 
 # Dateien für Deployment vorbereiten
 $deployFiles = @(
@@ -37,24 +39,39 @@ $deployFiles = @(
 
 Write-Host "`n📤 Dateien übertragen..." -ForegroundColor Yellow
 
+# Erstelle Remote-Verzeichnis falls nicht vorhanden
+ssh "${PiUser}@${PiHost}" "mkdir -p ${RemotePath}"
+
 foreach ($file in $deployFiles) {
     if (Test-Path $file) {
         Write-Host "  Kopiere $file..."
         scp -r $file "${PiUser}@${PiHost}:${RemotePath}/"
+    } else {
+        Write-Host "  ⚠️  $file nicht gefunden, überspringe..." -ForegroundColor Yellow
     }
 }
 
 Write-Host "`n⚙️ Remote-Setup ausführen..." -ForegroundColor Yellow
 
-$remoteCommands = @"
-cd $RemotePath
-cp .env.production .env 2>/dev/null || true
-npm ci --only=production
-pm2 restart prasco 2>/dev/null || pm2 start dist/server.js --name prasco
+# Verwende bash -c mit einzelnen Befehlen um \r Probleme zu vermeiden
+$remoteScript = @"
+#!/bin/bash
+set -e
+cd '$RemotePath'
+if [ -f .env.production ]; then
+  cp .env.production .env
+fi
+npm ci --omit=dev --quiet
+if pm2 list | grep -q 'prasco.*online'; then
+  pm2 restart prasco
+else
+  pm2 start dist/server.js --name prasco
+fi
 pm2 save
 "@
 
-ssh "${PiUser}@${PiHost}" $remoteCommands
+# Schreibe Script temporär auf dem Pi und führe es aus
+$remoteScript | ssh "${PiUser}@${PiHost}" "cat > /tmp/prasco-deploy.sh && chmod +x /tmp/prasco-deploy.sh && bash /tmp/prasco-deploy.sh && rm /tmp/prasco-deploy.sh"
 
 Write-Host "`n✅ Deployment abgeschlossen!" -ForegroundColor Green
 Write-Host "   Display: http://${PiHost}:3000" -ForegroundColor Cyan

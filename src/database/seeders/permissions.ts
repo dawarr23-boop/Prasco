@@ -206,6 +206,20 @@ const permissions: PermissionSeed[] = [
     description: 'Manage roles and permissions',
   },
 
+  // Settings
+  {
+    name: PERMISSIONS.SETTINGS_READ,
+    resource: 'settings',
+    action: 'read',
+    description: 'Read application settings',
+  },
+  {
+    name: PERMISSIONS.SETTINGS_WRITE,
+    resource: 'settings',
+    action: 'write',
+    description: 'Modify application settings',
+  },
+
   // System
   {
     name: PERMISSIONS.SYSTEM_SETTINGS,
@@ -241,6 +255,8 @@ const rolePermissions: { [key: string]: string[] } = {
     PERMISSIONS.MEDIA_DELETE,
     PERMISSIONS.MEDIA_MANAGE,
     PERMISSIONS.DISPLAYS_MANAGE,
+    PERMISSIONS.SETTINGS_READ,
+    PERMISSIONS.SETTINGS_WRITE,
   ],
   editor: [
     // Editor can manage content

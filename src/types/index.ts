@@ -65,6 +65,10 @@ export const PERMISSIONS = {
   PERMISSIONS_MANAGE: 'permissions.manage',
   ROLES_MANAGE: 'roles.manage',
 
+  // Settings
+  SETTINGS_READ: 'settings.read',
+  SETTINGS_WRITE: 'settings.write',
+
   // System (Super Admin only)
   SYSTEM_SETTINGS: 'system.settings',
   SYSTEM_LOGS: 'system.logs',

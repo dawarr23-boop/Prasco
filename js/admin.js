@@ -3103,27 +3103,72 @@ window.addEventListener('load', async () => {
   // Display-Einstellungen speichern
   const saveDisplaySettingsBtn = document.getElementById('saveDisplaySettings');
   if (saveDisplaySettingsBtn) {
-    saveDisplaySettingsBtn.addEventListener('click', () => {
+    saveDisplaySettingsBtn.addEventListener('click', async () => {
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
       
       if (refreshInterval && defaultDuration) {
         const settings = {
-          refreshInterval: parseInt(refreshInterval.value) || 5,
-          defaultDuration: parseInt(defaultDuration.value) || 10
+          'display.refreshInterval': parseInt(refreshInterval.value) || 5,
+          'display.defaultDuration': parseInt(defaultDuration.value) || 10
         };
         
-        localStorage.setItem('displaySettings', JSON.stringify(settings));
-        showNotification('Display-Einstellungen gespeichert!', 'success');
+        try {
+          const response = await fetch('/api/settings/bulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({ settings })
+          });
+
+          if (!response.ok) {
+            throw new Error('Fehler beim Speichern der Einstellungen');
+          }
+
+          // Fallback zu localStorage für Kompatibilität
+          localStorage.setItem('displaySettings', JSON.stringify({
+            refreshInterval: settings['display.refreshInterval'],
+            defaultDuration: settings['display.defaultDuration']
+          }));
+
+          showNotification('Display-Einstellungen gespeichert!', 'success');
+        } catch (error) {
+          console.error('Fehler beim Speichern:', error);
+          showNotification('Fehler beim Speichern der Einstellungen', 'error');
+        }
       }
     });
   }
 
   // Display-Einstellungen laden
-  const savedDisplaySettings = localStorage.getItem('displaySettings');
-  if (savedDisplaySettings) {
+  const loadDisplaySettings = async () => {
     try {
-      const settings = JSON.parse(savedDisplaySettings);
+      // Versuche von Backend zu laden
+      const response = await fetch('/api/settings?category=display', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+
+      let settings = {};
+
+      if (response.ok) {
+        const data = await response.json();
+        settings = {
+          refreshInterval: data['display.refreshInterval'],
+          defaultDuration: data['display.defaultDuration']
+        };
+      } else {
+        // Fallback zu localStorage
+        const savedDisplaySettings = localStorage.getItem('displaySettings');
+        if (savedDisplaySettings) {
+          settings = JSON.parse(savedDisplaySettings);
+        }
+      }
+
+      // Werte in UI setzen
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
       
@@ -3135,8 +3180,29 @@ window.addEventListener('load', async () => {
       }
     } catch (error) {
       console.error('Fehler beim Laden der Display-Einstellungen:', error);
+      
+      // Fallback zu localStorage bei Fehler
+      try {
+        const savedDisplaySettings = localStorage.getItem('displaySettings');
+        if (savedDisplaySettings) {
+          const settings = JSON.parse(savedDisplaySettings);
+          const refreshInterval = document.getElementById('refresh-interval');
+          const defaultDuration = document.getElementById('default-duration');
+          
+          if (refreshInterval && settings.refreshInterval) {
+            refreshInterval.value = settings.refreshInterval;
+          }
+          if (defaultDuration && settings.defaultDuration) {
+            defaultDuration.value = settings.defaultDuration;
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Fehler beim Fallback-Laden:', fallbackError);
+      }
     }
-  }
+  };
+
+  loadDisplaySettings();
 
   // Passwort ändern Modal
   const changePasswordBtn = document.getElementById('changePasswordBtn');

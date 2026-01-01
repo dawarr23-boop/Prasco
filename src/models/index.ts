@@ -6,6 +6,7 @@ import Post from './Post';
 import Permission from './Permission';
 import RolePermission from './RolePermission';
 import UserPermission from './UserPermission';
+import Setting from './Setting';
 
 // Define associations
 
@@ -133,7 +134,7 @@ Permission.belongsToMany(User, {
   as: 'users',
 });
 
-export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission };
+export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting };
 
 export default {
   User,
@@ -144,4 +145,5 @@ export default {
   Permission,
   RolePermission,
   UserPermission,
+  Setting,
 };
