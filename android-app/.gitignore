@@ -1,0 +1,42 @@
+# Gradle
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+*.ipr
+*.iws
+.DS_Store
+
+# Android Studio
+captures/
+.externalNativeBuild
+.cxx
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+release/
+
+# Keystore files
+*.jks
+*.keystore
+
+# Google Services
+google-services.json
+
+# Log Files
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NDK
+obj/
