@@ -340,7 +340,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
     let skipped = 0;
 
     for (const example of examples) {
-      const [post, wasCreated] = await Post.findOrCreate({
+      const [, wasCreated] = await Post.findOrCreate({
         where: { title: example.title },
         defaults: {
           ...example,
