@@ -5,6 +5,12 @@ let posts = [];
 let currentIndex = 0;
 let autoRotateTimer = null;
 
+// Display-Einstellungen (werden vom Backend geladen)
+let displaySettings = {
+  refreshInterval: 5, // Standard: 5 Minuten
+  defaultDuration: 10, // Standard: 10 Sekunden
+};
+
 // Vortragsmodus State (manuelle Navigation)
 let presentationModeState = {
   isActive: false,
@@ -34,6 +40,50 @@ let globalMusicSettings = {
   volume: 30,
   muteVideos: true,
 };
+
+// ============================================
+// Display-Einstellungen laden
+// ============================================
+
+// Lade Display-Einstellungen vom Backend
+async function loadDisplaySettings() {
+  try {
+    const response = await fetch('/api/settings?category=display');
+    if (response.ok) {
+      const settings = await response.json();
+      
+      // Aktualisiere Einstellungen
+      if (settings.displayRefreshInterval) {
+        displaySettings.refreshInterval = parseInt(settings.displayRefreshInterval.value) || 5;
+      }
+      if (settings.displayDefaultDuration) {
+        displaySettings.defaultDuration = parseInt(settings.displayDefaultDuration.value) || 10;
+      }
+      
+      console.log('Display-Einstellungen geladen:', displaySettings);
+      
+      // Aktualisiere Fußzeile
+      updateRefreshInfo();
+      
+      return true;
+    } else {
+      console.log('Verwende Standard-Einstellungen (Backend nicht verfügbar)');
+      return false;
+    }
+  } catch (error) {
+    console.log('Fehler beim Laden der Display-Einstellungen:', error);
+    console.log('Verwende Standard-Einstellungen');
+    return false;
+  }
+}
+
+// Aktualisiere Refresh-Info in der Fußzeile
+function updateRefreshInfo() {
+  const refreshElement = document.getElementById('auto-refresh-info');
+  if (refreshElement) {
+    refreshElement.textContent = `Auto-Refresh: ${displaySettings.refreshInterval} Min`;
+  }
+}
 
 // ============================================
 // Hintergrundmusik Funktionen
@@ -761,11 +811,14 @@ function updateDate() {
   }
 }
 
-// Automatisches Refresh (alle 5 Minuten)
+// Automatisches Refresh (dynamisch basierend auf Einstellungen)
 function startAutoRefresh() {
+  const refreshMs = displaySettings.refreshInterval * 60 * 1000;
+  console.log(`Auto-Refresh gestartet: alle ${displaySettings.refreshInterval} Minuten`);
+  
   setInterval(
     async () => {
-      // Auto-Refresh: Posts werden neu geladen
+      console.log('Auto-Refresh: Posts werden neu geladen...');
       const oldLength = posts.length;
       await fetchPosts();
 
@@ -774,8 +827,8 @@ function startAutoRefresh() {
         displayCurrentPost();
       }
     },
-    5 * 60 * 1000
-  ); // 5 Minuten
+    refreshMs
+  );
 }
 
 // PowerPoint Präsentation rendern
@@ -973,8 +1026,18 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Start
-init();
-startAutoRefresh();
-
-console.log('Display-Modus gestartet 🚀');
+// Initialisierung
+(async function() {
+  console.log('Display-Modus wird initialisiert...');
+  
+  // 1. Lade Einstellungen vom Backend
+  await loadDisplaySettings();
+  
+  // 2. Initialisiere Display
+  init();
+  
+  // 3. Starte Auto-Refresh mit konfigurierten Intervall
+  startAutoRefresh();
+  
+  console.log('Display-Modus gestartet 🚀');
+})();

@@ -15,14 +15,16 @@ const router = Router();
  * GET /api/settings
  * Hole alle Einstellungen (optional gefiltert nach Kategorie)
  * Query: ?category=display
+ * Public: Lesezugriff für Display-Einstellungen
  */
-router.get('/', authenticate, getSettings);
+router.get('/', getSettings);
 
 /**
  * GET /api/settings/:key
  * Hole eine einzelne Einstellung
+ * Public: Lesezugriff für Display-Einstellungen
  */
-router.get('/:key', authenticate, getSetting);
+router.get('/:key', getSetting);
 
 /**
  * POST /api/settings/bulk

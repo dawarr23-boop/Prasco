@@ -198,6 +198,16 @@ export const createPost = async (
     const musicVolume =
       backgroundMusicVolume !== undefined ? Math.min(100, Math.max(0, backgroundMusicVolume)) : 50;
 
+    // Automatisches Enddatum: 7 Tage nach Startdatum (oder jetzt) wenn nicht angegeben
+    let calculatedEndDate = endDate;
+    if (!endDate) {
+      const baseDate = startDate ? new Date(startDate) : new Date();
+      const autoEndDate = new Date(baseDate);
+      autoEndDate.setDate(autoEndDate.getDate() + 7); // +7 Tage
+      calculatedEndDate = autoEndDate;
+      logger.info(`Automatisches Enddatum gesetzt: ${autoEndDate.toISOString()}`);
+    }
+
     const post = await Post.create({
       title,
       content,
@@ -207,7 +217,7 @@ export const createPost = async (
       organizationId: req.user?.organizationId,
       createdBy: req.user!.id,
       startDate: startDate || null,
-      endDate: endDate || null,
+      endDate: calculatedEndDate || null,
       duration: duration || 10,
       priority: priority || 0,
       isActive: isActive !== undefined ? isActive : true,

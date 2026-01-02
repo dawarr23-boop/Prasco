@@ -132,21 +132,33 @@ Dieses Verzeichnis enthält Hilfs-Skripte für Installation, Wartung und Deploym
 
 ### 🗄️ Datenbank
 
+#### TypeScript Seeder (Best Practice) ✅
+**Status:** Aktuell & Empfohlen
+**Zweck:** Vollständiges Database Seeding mit TypeScript
+**Verwendung:**
+```bash
+# Haupt-Seed (User, Organisationen, Kategorien, Demo-Posts)
+npm run db:seed
+
+# HTML-Beispielposts (9 verschiedene Designs + 2 Text-Posts)
+npm run db:seed-examples
+```
+**Vorteile:**
+- Konsistent mit TypeScript-Projekt
+- Type-Safety und IDE-Unterstützung
+- Funktioniert lokal UND auf Raspberry Pi (nach Build)
+- Teil des offiziellen Seeder-Systems
+
 #### `seed-permissions.js` ✅
-**Status:** Aktuell (gerade gefixt)
+**Status:** Aktuell (Legacy JavaScript)
 **Zweck:** Berechtigungen in Datenbank seeden
 **Verwendung:** `npm run build && node scripts/seed-permissions.js`
-**Änderungen:**
-- ✅ Verwendet `dist/` (kompilierter TypeScript)
-- ✅ Bessere Fehlerbehandlung
+**Hinweis:** Wird in Zukunft durch TypeScript-Seeder ersetzt
 
 #### `test-permissions.js` ✅
-**Status:** Aktuell (gerade gefixt)
+**Status:** Aktuell (Legacy JavaScript)
 **Zweck:** Berechtigungen testen
 **Verwendung:** `npm run build && node scripts/test-permissions.js`
-**Änderungen:**
-- ✅ Verwendet `dist/` (kompilierter TypeScript)
-- ✅ Verwendet .env Variablen für Admin-Email
 
 ### 🖥️ Raspberry Pi Spezifisch
 

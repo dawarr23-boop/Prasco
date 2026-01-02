@@ -48,10 +48,8 @@ chromium \
   --disable-pinch \
   --overscroll-history-navigation=0 \
   --ignore-certificate-errors \
-<<<<<<< HEAD
-  https://localhost:3000/public/display.html
-=======
   --disable-web-security \
   --allow-insecure-localhost \
-  ${PROTOCOL}://localhost:3000
->>>>>>> 55849d7 (feat: Complete script review and updates for TypeScript migration)
+  --force-device-scale-factor=1 \
+  ${PROTOCOL}://localhost:3000/public/display.html
+

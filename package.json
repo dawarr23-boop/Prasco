@@ -20,6 +20,7 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "db:seed": "ts-node src/database/seeders/index.ts",
+    "db:seed-examples": "ts-node src/database/seeders/htmlExamples.ts",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f"

@@ -53,26 +53,25 @@ foreach ($file in $deployFiles) {
 
 Write-Host "`n⚙️ Remote-Setup ausführen..." -ForegroundColor Yellow
 
-# Verwende bash -c mit einzelnen Befehlen um \r Probleme zu vermeiden
-$remoteScript = @"
-#!/bin/bash
-set -e
-cd '$RemotePath'
-if [ -f .env.production ]; then
-  cp .env.production .env
-fi
-npm ci --omit=dev --quiet
-if pm2 list | grep -q 'prasco.*online'; then
-  pm2 restart prasco
-else
-  pm2 start dist/server.js --name prasco
-fi
-pm2 save
-"@
+# Führe Remote-Befehle direkt aus
+ssh "${PiUser}@${PiHost}" 'cd /home/pi/Prasco && if [ -f .env.production ]; then cp .env.production .env; fi'
+ssh "${PiUser}@${PiHost}" 'cd /home/pi/Prasco && npm ci --omit=dev --quiet'
 
-# Schreibe Script temporär auf dem Pi und führe es aus
-$remoteScript | ssh "${PiUser}@${PiHost}" "cat > /tmp/prasco-deploy.sh && chmod +x /tmp/prasco-deploy.sh && bash /tmp/prasco-deploy.sh && rm /tmp/prasco-deploy.sh"
+# PM2 prüfen und neu starten
+Write-Host "  PM2: Prüfe Status..."
+$pm2Check = ssh "${PiUser}@${PiHost}" 'pm2 list | grep -q "prasco.*online" && echo "running" || echo "stopped"'
+if ($pm2Check -match 'stopped') {
+    Write-Host "  PM2: Starte neuen Prozess..."
+    ssh "${PiUser}@${PiHost}" 'cd /home/pi/Prasco && pm2 start dist/server.js --name prasco'
+} else {
+    Write-Host "  PM2: Restarte bestehenden Prozess..."
+    ssh "${PiUser}@${PiHost}" 'cd /home/pi/Prasco && pm2 restart prasco'
+}
+ssh "${PiUser}@${PiHost}" 'pm2 save'
 
 Write-Host "`n✅ Deployment abgeschlossen!" -ForegroundColor Green
-Write-Host "   Display: http://${PiHost}:3000" -ForegroundColor Cyan
-Write-Host "   Admin:   http://${PiHost}:3000/admin" -ForegroundColor Cyan
+$displayUrl = "http://${PiHost}:3000"
+$adminUrl = "http://${PiHost}:3000/admin"
+Write-Host "   Display: $displayUrl" -ForegroundColor Cyan
+Write-Host "   Admin:   $adminUrl" -ForegroundColor Cyan
+
