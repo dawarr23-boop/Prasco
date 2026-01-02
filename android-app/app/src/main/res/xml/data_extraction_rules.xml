@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataExtraction>
+    <dataTypes>
+        <dataType>
+            <dataType>
+                <dataTypeName>application/vnd.android.database</dataTypeName>
+                <dataExtractionRules>
+                    <extractDataRule extractToCloud="false" extractToLocal="false" />
+                </dataExtractionRules>
+            </dataType>
+        </dataType>
+    </dataTypes>
+</dataExtraction>
