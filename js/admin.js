@@ -1303,6 +1303,9 @@ async function showPostForm() {
   document.getElementById('end-date').value = ''; // Leer = unbegrenzt
 
   await loadCategoryDropdown();
+  
+  // Document import button visibility
+  updateDocumentImportVisibility();
 }
 
 async function loadCategoryDropdown() {
@@ -3346,6 +3349,107 @@ async function loadAppInfo() {
     console.log('App-Info konnte nicht geladen werden:', error);
   }
 }
+
+// ============================================
+// Document Import Funktionalität
+// ============================================
+
+/**
+ * Import Word oder PDF Dokument und parse zu Post-Inhalt
+ */
+async function importDocument() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf';
+  
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validierung
+    const validExtensions = ['.docx', '.pdf'];
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!validExtensions.includes(fileExt)) {
+      showNotification('Nur Word (.docx) und PDF Dokumente sind erlaubt', 'error');
+      return;
+    }
+    
+    if (file.size > 10 * 1024 * 1024) {
+      showNotification('Datei zu groß (max. 10MB)', 'error');
+      return;
+    }
+    
+    // Upload und Parse
+    try {
+      showNotification('Dokument wird importiert...', 'info');
+      const uploadBtn = document.getElementById('import-document-btn');
+      if (uploadBtn) uploadBtn.disabled = true;
+      
+      const formData = new FormData();
+      formData.append('document', file);
+      
+      const response = await fetch('/api/documents/parse', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Import fehlgeschlagen');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success && result.data) {
+        // Fülle Formular mit geparsten Daten
+        document.getElementById('post-title').value = result.data.title || '';
+        document.getElementById('post-content').value = result.data.content || '';
+        document.getElementById('post-type').value = result.data.contentType || 'html';
+        
+        // Trigger content type change event
+        const typeSelect = document.getElementById('post-type');
+        if (typeSelect) {
+          typeSelect.dispatchEvent(new Event('change'));
+        }
+        
+        showNotification(
+          `Dokument erfolgreich importiert (${result.data.metadata.wordCount || 0} Wörter)`, 
+          'success'
+        );
+      }
+      
+    } catch (error) {
+      console.error('Document import error:', error);
+      showNotification('Fehler beim Importieren: ' + error.message, 'error');
+    } finally {
+      const uploadBtn = document.getElementById('import-document-btn');
+      if (uploadBtn) uploadBtn.disabled = false;
+    }
+  };
+  
+  input.click();
+}
+
+/**
+ * Update visibility of document import button based on content type
+ */
+function updateDocumentImportVisibility() {
+  const importBtn = document.getElementById('import-document-btn');
+  const contentType = document.getElementById('post-type')?.value;
+  
+  if (importBtn) {
+    // Show import button for text and html types
+    importBtn.style.display = ['text', 'html'].includes(contentType) ? 'inline-block' : 'none';
+  }
+}
+
+// Event Listeners für Document Import
+document.getElementById('import-document-btn')?.addEventListener('click', importDocument);
+document.getElementById('post-type')?.addEventListener('change', updateDocumentImportVisibility);
 
 // Delete All Posts Handler
 document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async () => {

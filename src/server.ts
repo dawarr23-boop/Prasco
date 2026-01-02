@@ -31,6 +31,7 @@ import publicRoutes from './routes/public';
 import mediaRoutes from './routes/media';
 import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
+import documentRoutes from './routes/documents';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -202,6 +203,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/documents', uploadLimiter, documentRoutes); // Document upload/parsing
 app.use('/api/public', publicRoutes); // No rate limit for public display
 app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);
