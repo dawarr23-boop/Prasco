@@ -22,8 +22,8 @@ android {
             useSupportLibrary = true
         }
 
-        // API Base URL
-        buildConfigField("String", "API_BASE_URL", "\"https://10.0.162.110:3000/api/\"")
+        // API Base URL - Using HTTP for development
+        buildConfigField("String", "API_BASE_URL", "\"http://10.0.162.110:3000/api/\"")
     }
 
     buildTypes {
@@ -98,6 +98,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.48")
     ksp("com.google.dagger:hilt-android-compiler:2.48")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-work:1.1.0")
+    ksp("androidx.hilt:hilt-compiler:1.1.0")
 
     // Retrofit - Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

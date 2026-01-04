@@ -31,8 +31,8 @@ class PrascoApplication : Application(), Configuration.Provider {
         Timber.i("PRASCO Mobile App Started")
     }
     
-    override fun getWorkManagerConfiguration() =
-        Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .setMinimumLoggingLevel(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.ERROR)
             .build()

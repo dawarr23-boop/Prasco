@@ -7,11 +7,14 @@ import { logger } from '../utils/logger';
 import { Op } from 'sequelize';
 import path from 'path';
 
-// PowerPoint MIME types
+// PowerPoint, PDF und Word MIME types (werden in einzelne Slides/Seiten konvertiert)
 const PRESENTATION_MIME_TYPES = [
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.oasis.opendocument.presentation',
+  'application/pdf', // PDFs werden wie Präsentationen behandelt (Seite für Seite)
+  'application/msword', // Word .doc
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // Word .docx
 ];
 
 export const uploadMedia = async (
@@ -51,9 +54,44 @@ export const uploadMedia = async (
 
       logger.info(`PowerPoint uploaded: ${result.presentationId}`);
 
+      // *** NEU: Erstelle automatisch einen Post pro Folie ***
+      const { Post } = await import('../models');
+      const createdPosts = [];
+      const baseFileName = path.basename(file.originalname, path.extname(file.originalname));
+
+      for (const slide of result.slides) {
+        // Erstelle einen separaten Media-Eintrag für jede Folie
+        const slideMedia = await Media.create({
+          filename: `slide_${slide.slideNumber}.png`,
+          originalName: `${baseFileName}_Folie_${slide.slideNumber}.png`,
+          mimeType: 'image/png',
+          size: 0, // Wird später aktualisiert wenn nötig
+          url: slide.imageUrl,
+          uploadedBy: userId,
+          organizationId: organizationId || undefined,
+        });
+
+        const slidePost = await Post.create({
+          title: `${baseFileName} - Folie ${slide.slideNumber}`,
+          content: '',
+          contentType: 'image',
+          mediaId: slideMedia.id,
+          organizationId: organizationId || undefined,
+          createdBy: userId,
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 Tage
+          duration: 10, // 10 Sekunden pro Folie
+          priority: 1000 + slide.slideNumber, // Hohe Priority für Slides, damit sie vor normalen Posts erscheinen
+          isActive: true,
+        });
+        createdPosts.push(slidePost.id);
+      }
+
+      logger.info(`${createdPosts.length} Posts automatisch aus PowerPoint erstellt: ${result.presentationId}`);
+
       res.status(201).json({
         success: true,
-        message: 'PowerPoint erfolgreich hochgeladen',
+        message: `PowerPoint erfolgreich hochgeladen und ${result.totalSlides} Posts erstellt`,
         data: {
           id: media.id, // Media ID für Post-Verknüpfung
           type: 'presentation',
@@ -62,6 +100,7 @@ export const uploadMedia = async (
           originalName: file.originalname,
           slides: result.slides,
           totalSlides: result.totalSlides,
+          postsCreated: createdPosts,
         },
       });
       return;

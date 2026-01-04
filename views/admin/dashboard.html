@@ -123,11 +123,13 @@
                   <div class="form-group">
                     <label for="post-type">Typ *</label>
                     <select id="post-type" name="content_type" required>
-                      <option value="text">Text</option>
-                      <option value="image">Bild</option>
-                      <option value="video">Video</option>
-                      <option value="html">HTML</option>
-                      <option value="presentation">▣ PowerPoint Präsentation</option>
+                      <option value="text">📝 Text</option>
+                      <option value="image">🖼️ Bild</option>
+                      <option value="video">🎥 Video</option>
+                      <option value="html">🌐 HTML</option>
+                      <option value="presentation">📊 PowerPoint Präsentation</option>
+                      <option value="pdf">📄 PDF Dokument</option>
+                      <option value="word">📃 Word Dokument</option>
                     </select>
                   </div>
                 </div>
@@ -171,11 +173,11 @@
                     type="file"
                     id="media-file"
                     name="media_file"
-                    accept="image/*,video/*,.pptx,.ppt,.odp"
+                    accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.pptx,.ppt,.odp"
                   />
                   <small style="color: #666; display: block; margin-top: 0.5rem"
-                    >Unterstützt: Bilder (JPG, PNG, GIF), Videos (MP4, WebM) und
-                    <strong>PowerPoint (.pptx, .ppt)</strong></small
+                    >Unterstützt: Bilder (JPG, PNG, GIF, WebP, SVG), Videos (MP4, WebM, MOV), Audio (MP3, WAV, OGG),
+                    <strong>PDFs, Word (.doc, .docx)</strong> und <strong>PowerPoint (.pptx, .ppt, .odp)</strong></small
                   >
                   <div id="upload-progress" style="display: none; margin-top: 0.5rem">
                     <div
@@ -211,6 +213,16 @@
                     <label for="priority">Priorität</label>
                     <input type="number" id="priority" name="priority" value="0" min="0" max="10" />
                   </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                  <label style="display: flex; align-items: center; cursor: pointer; font-size: 1rem;">
+                    <input type="checkbox" id="show-title" name="show_title" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;" />
+                    <span>Titel auf dem Display anzeigen</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 0.25rem; margin-left: 24px;">
+                    Wenn aktiviert, wird der Titel des Beitrags im Display über dem Inhalt angezeigt
+                  </small>
                 </div>
 
                 <div class="form-row">

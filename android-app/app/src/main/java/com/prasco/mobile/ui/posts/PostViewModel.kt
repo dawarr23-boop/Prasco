@@ -34,6 +34,12 @@ class PostViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     private val _filterActive = MutableStateFlow<Boolean?>(null)
 
+    private val _syncState = MutableStateFlow<Resource<Unit>?>(null)
+    val syncState: StateFlow<Resource<Unit>?> = _syncState.asStateFlow()
+
+    private val _deleteState = MutableStateFlow<Resource<Unit>?>(null)
+    val deleteState: StateFlow<Resource<Unit>?> = _deleteState.asStateFlow()
+
     init {
         loadPosts()
         loadCategories()
@@ -95,6 +101,24 @@ class PostViewModel @Inject constructor(
         }
     }
 
+    fun syncData() {
+        viewModelScope.launch {
+            _syncState.value = Resource.Loading()
+            
+            when (val result = postRepository.syncPosts()) {
+                is Resource.Success -> {
+                    _syncState.value = Resource.Success(Unit)
+                    Timber.i("Data synced successfully")
+                }
+                is Resource.Error -> {
+                    _syncState.value = Resource.Error(result.message ?: "Sync failed")
+                    Timber.e("Failed to sync data: ${result.message}")
+                }
+                is Resource.Loading -> {}
+            }
+        }
+    }
+
     fun syncCategories() {
         viewModelScope.launch {
             when (val result = categoryRepository.syncCategories()) {
@@ -119,35 +143,19 @@ class PostViewModel @Inject constructor(
 
     fun deletePost(postId: Int) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _deleteState.value = Resource.Loading()
             
             when (val result = postRepository.deletePost(postId)) {
                 is Resource.Success -> {
+                    _deleteState.value = Resource.Success(Unit)
                     Timber.i("Post deleted successfully")
                 }
                 is Resource.Error -> {
-                    _errorMessage.value = result.message
+                    _deleteState.value = Resource.Error(result.message ?: "Delete failed")
                     Timber.e("Failed to delete post: ${result.message}")
                 }
                 is Resource.Loading -> {}
             }
-            
-            _isLoading.value = false
-        }
-    }
-
-    fun clearError() {
-        _errorMessage.value = null
-    }
-}
-            }
-        }
-    }
-
-    fun deletePost(postId: Int) {
-        viewModelScope.launch {
-            _deleteState.value = Resource.Loading()
-            _deleteState.value = postRepository.deletePost(postId)
         }
     }
 
@@ -155,12 +163,7 @@ class PostViewModel @Inject constructor(
         _deleteState.value = null
     }
 
-    fun getFilteredPosts(activeOnly: Boolean, categoryId: Int?): StateFlow<List<Post>> {
-        return when {
-            categoryId != null -> postRepository.getPostsByStatus(activeOnly)
-                .map { posts -> posts.filter { it.category?.id == categoryId } }
-            activeOnly -> postRepository.getPostsByStatus(true)
-            else -> postRepository.getAllPosts()
-        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    fun clearError() {
+        _errorMessage.value = null
     }
 }

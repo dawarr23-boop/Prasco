@@ -119,6 +119,9 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
       // Bestimme Typ automatisch
       let type: 'string' | 'number' | 'boolean' | 'json' = 'string';
       let stringValue: string;
+      
+      // Extrahiere Kategorie aus dem Key (z.B. "display.refreshInterval" -> "display")
+      const category = key.includes('.') ? key.split('.')[0] : undefined;
 
       if (typeof value === 'number') {
         type = 'number';
@@ -137,6 +140,7 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
         key,
         value: stringValue,
         type,
+        category,
       });
 
       results.push({

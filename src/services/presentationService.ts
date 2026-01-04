@@ -7,6 +7,9 @@ import { logger } from '../utils/logger';
 
 const execAsync = promisify(exec);
 
+// PDF-to-Image conversion with pdf-poppler
+const pdfPoppler = require('pdf-poppler');
+
 // PowerPoint Slide Interface
 export interface PresentationSlide {
   slideNumber: number;
@@ -63,6 +66,38 @@ async function checkLibreOffice(): Promise<string | null> {
 }
 
 /**
+ * Prüft ob ImageMagick installiert ist und gibt den Befehl zurück
+ */
+async function checkImageMagick(): Promise<string | null> {
+  const possiblePaths = [
+    // Windows - ImageMagick 7+
+    'C:\\Program Files\\ImageMagick-7.1.2-Q16-HDRI\\magick.exe',
+    'C:\\Program Files\\ImageMagick\\magick.exe',
+    'C:\\Program Files (x86)\\ImageMagick\\magick.exe',
+    // Linux/Mac
+    '/usr/bin/magick',
+    '/usr/local/bin/magick',
+    '/usr/bin/convert',
+    '/usr/local/bin/convert',
+  ];
+
+  // Versuche zuerst den Befehl direkt
+  try {
+    await execAsync('magick --version');
+    return 'magick';
+  } catch {
+    // Suche nach installiertem Pfad
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        return `"${p}"`;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Konvertiert PowerPoint zu PNG-Bildern mit LibreOffice
  */
 async function convertWithLibreOffice(
@@ -81,35 +116,91 @@ async function convertWithLibreOffice(
   }
 
   try {
-    // Erst zu PDF konvertieren
-    const pdfCmd = `${soffice} --headless --convert-to pdf --outdir "${outputDir}" "${inputPath}"`;
-    logger.info(`Konvertiere zu PDF: ${pdfCmd}`);
-    await execAsync(pdfCmd, { timeout: 120000 });
+    let pdfPath: string;
+    const inputExt = path.extname(inputPath).toLowerCase();
 
-    // Finde die PDF-Datei
-    const files = fs.readdirSync(outputDir);
-    const pdfFile = files.find((f) => f.endsWith('.pdf'));
+    // Prüfe ob die Eingabe bereits ein PDF ist
+    if (inputExt === '.pdf') {
+      logger.info('Eingabe ist bereits ein PDF, überspringe Konvertierung');
+      pdfPath = inputPath;
+    } else {
+      // Erst zu PDF konvertieren (für PowerPoint, ODP, etc.)
+      const pdfCmd = `${soffice} --headless --convert-to pdf --outdir "${outputDir}" "${inputPath}"`;
+      logger.info(`Konvertiere zu PDF: ${pdfCmd}`);
+      await execAsync(pdfCmd, { timeout: 120000 });
 
-    if (!pdfFile) {
-      throw new Error('PDF-Konvertierung fehlgeschlagen');
+      // Finde die PDF-Datei
+      const files = fs.readdirSync(outputDir);
+      const pdfFile = files.find((f) => f.endsWith('.pdf'));
+
+      if (!pdfFile) {
+        throw new Error('PDF-Konvertierung fehlgeschlagen');
+      }
+
+      pdfPath = path.join(outputDir, pdfFile);
     }
 
-    const pdfPath = path.join(outputDir, pdfFile);
-
     // PDF zu PNG konvertieren (mehrere Seiten)
-    // LibreOffice kann PDF direkt zu PNG konvertieren
-    const pngCmd = `${soffice} --headless --convert-to png --outdir "${outputDir}" "${pdfPath}"`;
-    logger.info(`Konvertiere zu PNG: ${pngCmd}`);
-
+    // Versuche verschiedene Methoden für mehrseitige PDF-Konvertierung
+    
+    let conversionSuccess = false;
+    
+    // Methode 1: pdf-poppler (Node.js-Paket, funktioniert auf allen Plattformen)
     try {
-      await execAsync(pngCmd, { timeout: 120000 });
-    } catch {
-      // Falls PDF->PNG nicht funktioniert, verwende alternative Methode
-      logger.info('Versuche alternative PNG-Konvertierung...');
+      logger.info('Versuche pdf-poppler für mehrseitige PDF-Konvertierung...');
+      const opts = {
+        format: 'png',
+        out_dir: outputDir,
+        out_prefix: 'slide',
+        page: null, // Alle Seiten
+      };
+      await pdfPoppler.convert(pdfPath, opts);
+      conversionSuccess = true;
+      logger.info('PDF erfolgreich mit pdf-poppler konvertiert');
+    } catch (popplerError) {
+      logger.warn('pdf-poppler fehlgeschlagen:', popplerError);
+      
+      // Methode 2: pdftoppm (am besten für Linux/Raspberry Pi)
+      try {
+        const outputPrefix = path.join(outputDir, 'slide');
+        const pdftoppmCmd = `pdftoppm -png "${pdfPath}" "${outputPrefix}"`;
+        logger.info('Versuche pdftoppm...');
+        await execAsync(pdftoppmCmd, { timeout: 120000 });
+        conversionSuccess = true;
+        logger.info('PDF erfolgreich mit pdftoppm konvertiert');
+      } catch (pdftoppmError) {
+        logger.info('pdftoppm nicht verfügbar, versuche ImageMagick...');
+        
+        // Methode 3: ImageMagick convert (benötigt Ghostscript)
+        const magickCmd = await checkImageMagick();
+        if (magickCmd) {
+          try {
+            const outputPattern = path.join(outputDir, 'slide-%03d.png');
+            const magickConvertCmd = `${magickCmd} -density 150 "${pdfPath}" "${outputPattern}"`;
+            logger.info('Versuche ImageMagick...');
+            await execAsync(magickConvertCmd, { timeout: 120000 });
+            conversionSuccess = true;
+            logger.info('PDF erfolgreich mit ImageMagick konvertiert');
+          } catch (magickError) {
+            logger.warn('ImageMagick-Konvertierung fehlgeschlagen (Ghostscript fehlt?)');
+          }
+        }
+        
+        // Methode 4: LibreOffice (konvertiert nur erste Seite)
+        if (!conversionSuccess) {
+          logger.warn('Verwende LibreOffice PNG-Konvertierung (nur erste Seite)');
+          const pngCmd = `${soffice} --headless --convert-to png --outdir "${outputDir}" "${pdfPath}"`;
+          try {
+            await execAsync(pngCmd, { timeout: 120000 });
+          } catch (loError) {
+            logger.error('LibreOffice PNG-Konvertierung fehlgeschlagen:', loError);
+          }
+        }
+      }
     }
 
     // Zähle die generierten PNG-Dateien
-    const pngFiles = fs.readdirSync(outputDir).filter((f) => f.endsWith('.png'));
+    let pngFiles = fs.readdirSync(outputDir).filter((f) => f.endsWith('.png'));
 
     if (pngFiles.length === 0) {
       // Wenn keine PNGs erzeugt wurden, behalte die PDF
@@ -127,14 +218,14 @@ async function convertWithLibreOffice(
     for (const pngFile of pngFiles) {
       const oldPath = path.join(outputDir, pngFile);
       const newPath = path.join(outputDir, `slide_${slideNumber.toString().padStart(3, '0')}.png`);
-      if (oldPath !== newPath) {
+      if (oldPath !== newPath && !pngFile.startsWith('slide_')) {
         fs.renameSync(oldPath, newPath);
       }
       slideNumber++;
     }
 
-    // Lösche die temporäre PDF
-    if (fs.existsSync(pdfPath)) {
+    // Lösche die temporäre PDF (nur wenn sie konvertiert wurde, nicht wenn es die Originaldatei ist)
+    if (inputExt !== '.pdf' && fs.existsSync(pdfPath) && pdfPath !== inputPath) {
       fs.unlinkSync(pdfPath);
     }
 

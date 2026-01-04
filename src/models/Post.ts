@@ -5,7 +5,7 @@ interface PostAttributes {
   id: number;
   title: string;
   content: string;
-  contentType: 'text' | 'image' | 'video' | 'html';
+  contentType: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
   mediaId?: number;
   categoryId?: number;
   organizationId?: number;
@@ -18,6 +18,7 @@ interface PostAttributes {
   viewCount: number;
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
+  showTitle?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -44,7 +45,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public id!: number;
   public title!: string;
   public content!: string;
-  public contentType!: 'text' | 'image' | 'video' | 'html';
+  public contentType!: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
   public mediaId?: number;
   public categoryId?: number;
   public organizationId?: number;
@@ -57,6 +58,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public viewCount!: number;
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
+  public showTitle?: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -90,7 +92,7 @@ Post.init(
       allowNull: false,
     },
     contentType: {
-      type: DataTypes.ENUM('text', 'image', 'video', 'html'),
+      type: DataTypes.ENUM('text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'),
       allowNull: false,
       defaultValue: 'text',
     },
@@ -166,6 +168,12 @@ Post.init(
       allowNull: true,
       defaultValue: 50,
       comment: 'Background music volume (0-100)',
+    },
+    showTitle: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+      comment: 'Whether to show the title on the display',
     },
   },
   {

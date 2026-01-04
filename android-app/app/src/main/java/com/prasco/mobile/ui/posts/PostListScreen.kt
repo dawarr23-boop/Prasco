@@ -37,7 +37,7 @@ fun PostListScreen(
     var showDeleteDialog by remember { mutableStateOf<Post?>(null) }
     
     LaunchedEffect(deleteState) {
-        if (deleteState is Resource.Success) {
+        if (deleteState is Resource.Success<*>) {
             viewModel.clearDeleteState()
             viewModel.syncData()
         }
@@ -99,7 +99,7 @@ fun PostListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (syncState is Resource.Loading && posts.isEmpty()) {
+            if (syncState is Resource.Loading<*> && posts.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -147,13 +147,13 @@ fun PostListScreen(
                 }
             }
             
-            if (syncState is Resource.Error) {
+            if (syncState is Resource.Error<*>) {
                 Snackbar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(16.dp)
                 ) {
-                    Text((syncState as Resource.Error).message ?: "Fehler beim Laden")
+                    Text((syncState as Resource.Error<*>).message ?: "Fehler beim Laden")
                 }
             }
         }

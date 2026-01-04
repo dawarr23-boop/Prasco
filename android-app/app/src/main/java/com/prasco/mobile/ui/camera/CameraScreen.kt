@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import timber.log.Timber
 import java.io.File
@@ -44,26 +45,27 @@ fun CameraScreen(
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
     
     LaunchedEffect(Unit) {
-        if (!cameraPermissionState.hasPermission) {
+        if (cameraPermissionState.status !is PermissionStatus.Granted) {
             cameraPermissionState.launchPermissionRequest()
         }
     }
     
-    when {
-        cameraPermissionState.hasPermission -> {
+    when (val status = cameraPermissionState.status) {
+        is PermissionStatus.Granted -> {
             CameraContent(
                 onImageCaptured = onImageCaptured,
                 onClose = onClose
             )
         }
-        cameraPermissionState.shouldShowRationale -> {
-            PermissionRationaleScreen(
-                onRequestPermission = { cameraPermissionState.launchPermissionRequest() },
-                onClose = onClose
-            )
-        }
-        else -> {
-            PermissionDeniedScreen(onClose = onClose)
+        is PermissionStatus.Denied -> {
+            if (status.shouldShowRationale) {
+                PermissionRationaleScreen(
+                    onRequestPermission = { cameraPermissionState.launchPermissionRequest() },
+                    onClose = onClose
+                )
+            } else {
+                PermissionDeniedScreen(onClose = onClose)
+            }
         }
     }
 }

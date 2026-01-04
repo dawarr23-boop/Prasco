@@ -52,8 +52,8 @@ export const getActivePosts = async (
     const posts = await Post.findAll({
       where,
       order: [
-        ['priority', 'DESC'], // Higher priority first
-        ['createdAt', 'DESC'], // Newer posts first
+        ['priority', 'DESC'], // Slides (1000+) zuerst, dann normale Posts nach Priority
+        ['createdAt', 'DESC'], // Neuere Posts zuerst bei gleicher Priority
       ],
       include: [
         {
@@ -72,6 +72,7 @@ export const getActivePosts = async (
         'title',
         'content',
         'contentType',
+        'mediaId',
         'duration',
         'priority',
         'startDate',
@@ -129,6 +130,7 @@ export const getPostById = async (
         'title',
         'content',
         'contentType',
+        'mediaId',
         'duration',
         'priority',
         'startDate',

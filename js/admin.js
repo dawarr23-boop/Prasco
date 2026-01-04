@@ -1157,12 +1157,24 @@ async function loadPosts() {
             : t('posts.unlimited');
           const zeitraum = `${startDate} - ${endDate}`;
 
+          // Icon für Content-Type
+          const typeIcons = {
+            text: '📝',
+            image: '🖼️',
+            video: '🎥',
+            html: '🌐',
+            presentation: '📊',
+            pdf: '📄',
+            word: '📃'
+          };
+          const typeIcon = typeIcons[post.contentType] || '📄';
+
           return `
         <div class="list-item draggable-post" draggable="true" data-post-id="${post.id}" data-index="${index}">
             <div class="drag-handle" title="Ziehen zum Sortieren">⋮⋮</div>
             <div class="list-item-content clickable" data-action="edit" data-post-id="${post.id}" title="Klicken zum Bearbeiten">
                 <h3>${escapeHtml(post.title)}</h3>
-                <p>Typ: ${post.contentType} | Dauer: ${post.duration || 10}s | Priorität: ${post.priority || 0} | Status: ${post.isActive !== false ? t('common.active') : t('common.inactive')}</p>
+                <p>Typ: ${typeIcon} ${post.contentType} | Dauer: ${post.duration || 10}s | Priorität: ${post.priority || 0} | Status: ${post.isActive !== false ? t('common.active') : t('common.inactive')}</p>
                 <p style="font-size: 12px; color: #666;">▸ Zeitraum: ${zeitraum}</p>
                 ${post.category ? `<span style="background: ${post.category.color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${post.category.icon || ''} ${post.category.name}</span>` : ''}
             </div>
@@ -1296,11 +1308,16 @@ async function showPostForm() {
   currentPostId = null;
   document.getElementById('postForm').reset();
 
-  // Standard-Startdatum auf jetzt setzen (Enddatum bleibt leer = unbegrenzt)
+  // Standard-Startdatum auf jetzt setzen, Enddatum auf +7 Tage
   const now = new Date();
   const localDateTime = now.toISOString().slice(0, 16);
   document.getElementById('start-date').value = localDateTime;
-  document.getElementById('end-date').value = ''; // Leer = unbegrenzt
+  
+  // Enddatum auf +7 Tage setzen
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + 7);
+  const endDateTime = endDate.toISOString().slice(0, 16);
+  document.getElementById('end-date').value = endDateTime;
 
   await loadCategoryDropdown();
   
@@ -1407,6 +1424,12 @@ async function editPost(id) {
   }
 
   document.querySelector('input[name="is_active"]').checked = post.isActive !== false;
+
+  // Titel-Anzeige Checkbox setzen
+  const showTitleCheckbox = document.getElementById('show-title');
+  if (showTitleCheckbox) {
+    showTitleCheckbox.checked = post.showTitle === true;
+  }
 
   const categorySelect = document.getElementById('post-category');
   if (categorySelect && post.category) {
@@ -1786,6 +1809,7 @@ async function handlePostFormSubmit(e) {
     isActive: formData.get('is_active') === 'on',
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
+    showTitle: formData.get('show_title') === 'on',
   };
 
   if (mediaId) {
@@ -3117,26 +3141,20 @@ window.addEventListener('load', async () => {
         };
         
         try {
-          const response = await fetch('/api/settings/bulk', {
+          const data = await apiRequest('/settings/bulk', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            },
             body: JSON.stringify({ settings })
           });
 
-          if (!response.ok) {
-            throw new Error('Fehler beim Speichern der Einstellungen');
+          if (data) {
+            // Fallback zu localStorage für Kompatibilität
+            localStorage.setItem('displaySettings', JSON.stringify({
+              refreshInterval: settings['display.refreshInterval'],
+              defaultDuration: settings['display.defaultDuration']
+            }));
+
+            showNotification('Display-Einstellungen gespeichert!', 'success');
           }
-
-          // Fallback zu localStorage für Kompatibilität
-          localStorage.setItem('displaySettings', JSON.stringify({
-            refreshInterval: settings['display.refreshInterval'],
-            defaultDuration: settings['display.defaultDuration']
-          }));
-
-          showNotification('Display-Einstellungen gespeichert!', 'success');
         } catch (error) {
           console.error('Fehler beim Speichern:', error);
           showNotification('Fehler beim Speichern der Einstellungen', 'error');
@@ -3149,16 +3167,11 @@ window.addEventListener('load', async () => {
   const loadDisplaySettings = async () => {
     try {
       // Versuche von Backend zu laden
-      const response = await fetch('/api/settings?category=display', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-        }
-      });
+      const data = await apiRequest('/settings?category=display');
 
       let settings = {};
 
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         settings = {
           refreshInterval: data['display.refreshInterval'],
           defaultDuration: data['display.defaultDuration']
@@ -3389,20 +3402,14 @@ async function importDocument() {
       const formData = new FormData();
       formData.append('document', file);
       
-      const response = await fetch('/api/documents/parse', {
+      const result = await apiRequest('/documents/parse', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
         body: formData
       });
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Import fehlgeschlagen');
+      if (!result || !result.success) {
+        throw new Error(result?.message || 'Import fehlgeschlagen');
       }
-      
-      const result = await response.json();
       
       if (result.success && result.data) {
         // Fülle Formular mit geparsten Daten

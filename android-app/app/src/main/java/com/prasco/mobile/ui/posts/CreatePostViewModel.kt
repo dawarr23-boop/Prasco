@@ -63,6 +63,9 @@ class CreatePostViewModel @Inject constructor(
     private val _postCreated = MutableStateFlow(false)
     val postCreated: StateFlow<Boolean> = _postCreated.asStateFlow()
 
+    private val _createState = MutableStateFlow<Resource<Unit>?>(null)
+    val createState: StateFlow<Resource<Unit>?> = _createState.asStateFlow()
+
     init {
         loadCategories()
         setDefaultEndDate()
@@ -213,7 +216,7 @@ class CreatePostViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _createState.value = Resource.Loading()
-            _createState.value = postRepository.updatePost(
+            val result = postRepository.updatePost(
                 id = id,
                 title = title,
                 content = content,
@@ -226,6 +229,11 @@ class CreatePostViewModel @Inject constructor(
                 endDate = endDate,
                 isActive = isActive
             )
+            _createState.value = when (result) {
+                is Resource.Success -> Resource.Success(Unit)
+                is Resource.Error -> Resource.Error(result.message ?: "Update failed")
+                is Resource.Loading -> Resource.Loading()
+            }
         }
     }
 

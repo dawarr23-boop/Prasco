@@ -170,42 +170,21 @@ fun CreatePostScreen(
             Button(
                 onClick = {
                     if (title.isNotBlank() && content.isNotBlank()) {
-                        if (postId == null) {
-                            viewModel.createPost(
-                                title = title,
-                                content = content,
-                                type = type,
-                                mediaUrl = null,
-                                duration = duration.toIntOrNull() ?: 10,
-                                priority = priority.toIntOrNull() ?: 0,
-                                categoryId = selectedCategoryId,
-                                startDate = null,
-                                endDate = null,
-                                isActive = isActive
-                            )
-                        } else {
-                            viewModel.updatePost(
-                                id = postId,
-                                title = title,
-                                content = content,
-                                type = type,
-                                mediaUrl = null,
-                                duration = duration.toIntOrNull() ?: 10,
-                                priority = priority.toIntOrNull() ?: 0,
-                                categoryId = selectedCategoryId,
-                                startDate = null,
-                                endDate = null,
-                                isActive = isActive
-                            )
-                        }
+                        viewModel.updateTitle(title)
+                        viewModel.updateContent(content)
+                        viewModel.updateDuration(duration.toIntOrNull() ?: 10)
+                        viewModel.updatePriority(priority.toIntOrNull() ?: 0)
+                        viewModel.updateSelectedCategory(categories.find { it.id == selectedCategoryId })
+                        viewModel.updateIsActive(isActive)
+                        viewModel.createPost()
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                enabled = createState !is Resource.Loading
+                enabled = createState !is Resource.Loading<*>
             ) {
-                if (createState is Resource.Loading) {
+                if (createState is Resource.Loading<*>) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.onPrimary
@@ -215,10 +194,10 @@ fun CreatePostScreen(
                 }
             }
             
-            if (createState is Resource.Error) {
+            if (createState is Resource.Error<*>) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = (createState as Resource.Error).message ?: "Fehler beim Speichern",
+                    text = (createState as Resource.Error<*>).message ?: "Unbekannter Fehler",
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )

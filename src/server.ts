@@ -99,7 +99,7 @@ app.use(
 // Configurable via environment variables, defaults are suitable for single-admin usage
 const apiLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes default
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000', 10), // 1000 requests per window
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '10000', 10), // 10000 requests per window (erhöht für Development)
   message: 'Zu viele Anfragen von dieser IP, bitte versuchen Sie es später erneut.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -257,12 +257,24 @@ const startServer = async () => {
       if (SSL_ENABLED) {
         // HTTPS Server
         try {
-          const sslOptions = {
-            key: fs.readFileSync(path.resolve(SSL_KEY_PATH)),
-            cert: fs.readFileSync(path.resolve(SSL_CERT_PATH)),
-          };
+          // Try loading PFX first (Windows-friendly), then fall back to key+cert
+          let sslOptions;
+          const pfxPath = path.resolve('./ssl/server.pfx');
+          
+          if (fs.existsSync(pfxPath)) {
+            sslOptions = {
+              pfx: fs.readFileSync(pfxPath),
+              passphrase: 'prasco123'
+            };
+            logger.info('🔐 SSL aktiviert (PFX-Format)');
+          } else {
+            sslOptions = {
+              key: fs.readFileSync(path.resolve(SSL_KEY_PATH)),
+              cert: fs.readFileSync(path.resolve(SSL_CERT_PATH)),
+            };
+            logger.info('🔐 SSL aktiviert');
+          }
           server = https.createServer(sslOptions, app);
-          logger.info('🔐 SSL aktiviert');
         } catch (error) {
           logger.error('❌ SSL-Zertifikate nicht gefunden. Bitte führen Sie ./scripts/generate-ssl-cert.sh aus');
           logger.info('⚠️  Starte im HTTP-Modus als Fallback...');

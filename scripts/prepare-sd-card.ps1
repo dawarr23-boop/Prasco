@@ -615,25 +615,17 @@ hostnamectl set-hostname $Hostname
 echo "127.0.1.1 $Hostname" >> /etc/hosts
 
 # Netzwerk konfigurieren: DHCP mit statischem Fallback
-echo "Konfiguriere Netzwerk (DHCP mit Fallback 192.168.1.199)..."
+echo "Konfiguriere Netzwerk (DHCP mit Fallback 192.168.2.132)..."
 cat >> /etc/dhcpcd.conf << 'NETCFG'
 
 # PRASCO Netzwerkkonfiguration
-# Primär: DHCP, Fallback: Statische IP falls kein DHCP-Server antwortet
+# WLAN mit statischer IP
 
-# Fallback-Profil definieren
-profile static_eth0
-static ip_address=192.168.1.199/24
-static routers=192.168.1.1
-static domain_name_servers=192.168.1.1 8.8.8.8 8.8.4.4
-
-# Ethernet: DHCP mit Fallback nach 30 Sekunden
-interface eth0
-fallback static_eth0
-
-# WLAN: DHCP mit Fallback nach 30 Sekunden
+# WLAN: Statische IP-Adresse
 interface wlan0
-fallback static_eth0
+static ip_address=192.168.2.132/24
+static routers=192.168.2.1
+static domain_name_servers=192.168.2.1 8.8.8.8 8.8.4.4
 NETCFG
 
 # dhcpcd neu starten falls aktiv

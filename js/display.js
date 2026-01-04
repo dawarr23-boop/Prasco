@@ -25,6 +25,14 @@ let presentationState = {
   slideTimer: null,
 };
 
+// Text-Pagination State (für lange Texte)
+let textPaginationState = {
+  isActive: false,
+  pages: [],
+  currentPage: 0,
+  postId: null,
+};
+
 // Hintergrundmusik-State
 let backgroundMusicState = {
   audio: null,
@@ -52,12 +60,12 @@ async function loadDisplaySettings() {
     if (response.ok) {
       const settings = await response.json();
       
-      // Aktualisiere Einstellungen
-      if (settings.displayRefreshInterval) {
-        displaySettings.refreshInterval = parseInt(settings.displayRefreshInterval.value) || 5;
+      // Aktualisiere Einstellungen - API gibt Keys als Objekt-Properties zurück
+      if (settings['display.refreshInterval'] !== undefined) {
+        displaySettings.refreshInterval = parseInt(settings['display.refreshInterval']) || 5;
       }
-      if (settings.displayDefaultDuration) {
-        displaySettings.defaultDuration = parseInt(settings.displayDefaultDuration.value) || 10;
+      if (settings['display.defaultDuration'] !== undefined) {
+        displaySettings.defaultDuration = parseInt(settings['display.defaultDuration']) || 10;
       }
       
       console.log('Display-Einstellungen geladen:', displaySettings);
@@ -546,6 +554,51 @@ async function fetchPosts() {
   }
 }
 
+// ============================================
+// Text-Pagination Funktionen
+// ============================================
+
+// Teilt langen Text in mehrere Seiten auf
+function splitTextIntoPages(text, maxCharsPerPage) {
+  const pages = [];
+  const paragraphs = text.split('\n\n');
+  let currentPage = '';
+  
+  for (const paragraph of paragraphs) {
+    // Wenn aktueller Absatz + neuer Absatz zu lang ist
+    if ((currentPage + paragraph).length > maxCharsPerPage && currentPage.length > 0) {
+      pages.push(currentPage.trim());
+      currentPage = paragraph + '\n\n';
+    } else {
+      currentPage += paragraph + '\n\n';
+    }
+  }
+  
+  // Letzte Seite hinzufügen
+  if (currentPage.trim().length > 0) {
+    pages.push(currentPage.trim());
+  }
+  
+  return pages;
+}
+
+// Rendert eine Text-Seite mit Seitenzähler
+function renderTextPage(pageText, pageIndex, totalPages, showTitle = false, title = '') {
+  return `
+    <div style="display: flex; flex-direction: column; height: 100%; padding: 40px;">
+      ${showTitle && pageIndex === 0 ? `<h1 style="margin-bottom: 20px;">${escapeHtml(title)}</h1>` : ''}
+      <div style="flex: 1; overflow: hidden;">
+        <p style="font-size: 1.5rem; line-height: 1.8; white-space: pre-wrap;">${escapeHtml(pageText)}</p>
+      </div>
+      ${totalPages > 1 ? `
+        <div style="text-align: center; padding: 20px; font-size: 1.2rem; color: #666;">
+          Seite ${pageIndex + 1} von ${totalPages}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
 // Aktuellen Post anzeigen
 function displayCurrentPost() {
   if (posts.length === 0) {
@@ -560,6 +613,11 @@ function displayCurrentPost() {
   }
   presentationState.isActive = false;
   presentationState.currentSlide = 0;
+
+  // Stoppe Text-Pagination
+  textPaginationState.isActive = false;
+  textPaginationState.pages = [];
+  textPaginationState.currentPage = 0;
 
   const post = posts[currentIndex];
   const container = document.getElementById('current-post');
@@ -578,15 +636,30 @@ function displayCurrentPost() {
 
   switch (post.content_type) {
     case 'text':
-      html = `
-                <h1>${escapeHtml(post.title)}</h1>
-                <p>${escapeHtml(post.content || '')}</p>
-            `;
+      // Prüfe ob Text zu lang ist und pagination nötig ist
+      const textContent = post.content || '';
+      const maxCharsPerPage = 1500; // Ungefähr für Full-HD Display
+      
+      if (textContent.length > maxCharsPerPage) {
+        // Teile Text in Seiten auf
+        textPaginationState.pages = splitTextIntoPages(textContent, maxCharsPerPage);
+        textPaginationState.isActive = true;
+        textPaginationState.postId = post.id;
+        textPaginationState.currentPage = 0;
+        
+        html = renderTextPage(textPaginationState.pages[0], 0, textPaginationState.pages.length, post.show_title, post.title);
+      } else {
+        html = `
+          ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+          <p>${escapeHtml(textContent)}</p>
+        `;
+      }
       break;
 
     case 'image':
+      // Titel wird nur angezeigt wenn showTitle aktiviert ist
       html = `
-                <h1>${escapeHtml(post.title)}</h1>
+                ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
                 ${post.media_url ? `<img src="${escapeHtml(post.media_url)}" alt="${escapeHtml(post.title)}">` : ''}
                 ${post.content ? `<p>${escapeHtml(post.content)}</p>` : ''}
             `;
@@ -682,8 +755,8 @@ function displayCurrentPost() {
       break;
 
     case 'html':
-      html = `
-                <h1>${escapeHtml(post.title)}</h1>
+      html = `${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                
                 <div>${post.content || ''}</div>
             `;
       break;
@@ -694,8 +767,8 @@ function displayCurrentPost() {
       break;
 
     default:
-      html = `
-                <h1>${escapeHtml(post.title)}</h1>
+      html = `${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                
                 <p>${escapeHtml(post.content || '')}</p>
             `;
   }
@@ -723,12 +796,53 @@ function displayCurrentPost() {
   if (!presentationModeState.isActive || !presentationModeState.isPaused) {
     const duration = (post.display_duration || 10) * 1000;
     autoRotateTimer = setTimeout(() => {
-      nextPost();
+      // Prüfe ob Text-Pagination aktiv ist und noch Seiten übrig sind
+      if (textPaginationState.isActive && textPaginationState.currentPage < textPaginationState.pages.length - 1) {
+        showNextTextPage();
+      } else {
+        nextPost();
+      }
     }, duration);
   }
 
   // Update Vortragsmodus-Counter
   updatePresentationCounter();
+}
+
+// Zeige nächste Text-Seite
+function showNextTextPage() {
+  if (!textPaginationState.isActive) return;
+  
+  textPaginationState.currentPage++;
+  const container = document.getElementById('current-post');
+  const currentPost = posts[currentIndex];
+  const html = renderTextPage(
+    textPaginationState.pages[textPaginationState.currentPage],
+    textPaginationState.currentPage,
+    textPaginationState.pages.length,
+    currentPost.show_title,
+    currentPost.title
+  );
+  
+  container.innerHTML = html;
+  
+  // Animation
+  container.style.animation = 'none';
+  setTimeout(() => {
+    container.style.animation = 'fadeIn 0.8s ease';
+  }, 10);
+  
+  // Nächste Seite oder Post nach Duration
+  clearTimeout(autoRotateTimer);
+  const duration = (currentPost.display_duration || 10) * 1000;
+  
+  autoRotateTimer = setTimeout(() => {
+    if (textPaginationState.currentPage < textPaginationState.pages.length - 1) {
+      showNextTextPage();
+    } else {
+      nextPost();
+    }
+  }, duration);
 }
 
 // Nächster Post
@@ -875,7 +989,6 @@ function renderPresentation(post) {
   return `
     <div style="text-align: center; padding: 60px;">
       <div style="font-size: 100px; margin-bottom: 30px;">📊</div>
-      <h1>${escapeHtml(post.title)}</h1>
       <p style="font-size: 24px; color: #666;">PowerPoint Präsentation</p>
       ${post.content ? `<p style="margin-top: 30px;">${escapeHtml(post.content)}</p>` : ''}
     </div>
@@ -889,8 +1002,7 @@ function renderSlideshow(post, slides, currentSlideIndex) {
 
   return `
     <div class="presentation-slideshow" style="height: 100%; display: flex; flex-direction: column; background: #1a1a2e;">
-      <div class="slide-header" style="padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3);">
-        <h2 style="margin: 0; color: #fff; font-size: 24px;">${escapeHtml(post.title)}</h2>
+      <div class="slide-header" style="padding: 15px 30px; display: flex; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.3);">
         <div style="color: #fff; font-size: 18px; opacity: 0.8;">
           Folie ${currentSlideIndex + 1} / ${totalSlides}
         </div>

@@ -18,9 +18,7 @@ class SyncScheduler @Inject constructor(
         private const val SYNC_INTERVAL_HOURS = 6L
     }
 
-    fun schedulePeriodic
-
-Sync() {
+    fun schedulePeriodicSync() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .setRequiresBatteryNotLow(true)
@@ -33,7 +31,7 @@ Sync() {
             .setConstraints(constraints)
             .setBackoffCriteria(
                 BackoffPolicy.EXPONENTIAL,
-                PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
+                10000L,
                 TimeUnit.MILLISECONDS
             )
             .build()

@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import { DocumentService } from '../services/documentService';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
-import path from 'path';
 
 /**
  * Upload and parse document (Word/PDF) for post creation
@@ -62,7 +61,7 @@ export const parseDocument = async (
  * GET /api/documents/formats
  */
 export const getSupportedFormats = async (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

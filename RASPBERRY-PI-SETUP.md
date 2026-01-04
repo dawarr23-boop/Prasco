@@ -230,11 +230,11 @@ sudo nmcli con up "Wired connection 1"
 # /etc/dhcpcd.conf bearbeiten
 sudo nano /etc/dhcpcd.conf
 
-# Am Ende einfügen:
-interface eth0
-static ip_address=192.168.1.100/24
-static routers=192.168.1.1
-static domain_name_servers=192.168.1.1 8.8.8.8
+# Am Ende einfügen (für WLAN):
+interface wlan0
+static ip_address=192.168.2.132/24
+static routers=192.168.2.1
+static domain_name_servers=192.168.2.1 8.8.8.8
 
 # Speichern: Strg+O, Enter, Strg+X
 # Neustart
