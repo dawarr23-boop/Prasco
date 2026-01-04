@@ -3206,6 +3206,13 @@ window.addEventListener('load', async () => {
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
       
+      console.log('Form elements found:', {
+        refreshInterval,
+        defaultDuration,
+        refreshValue: settings.refreshInterval,
+        durationValue: settings.defaultDuration
+      });
+
       if (refreshInterval && settings.refreshInterval) {
         refreshInterval.value = settings.refreshInterval;
       }
