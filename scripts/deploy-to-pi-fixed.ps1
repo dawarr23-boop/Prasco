@@ -69,10 +69,7 @@ if ($pm2Check -match 'stopped') {
 }
 ssh "${PiUser}@${PiHost}" 'pm2 save'
 
-Write-Host "`n✅ Deployment abgeschlossen!" -ForegroundColor Green
-$displayUrl = "http://${PiHost}:3000"
-$adminUrl = "http://${PiHost}:3000/admin"
-Write-Host "   Display: $displayUrl" -ForegroundColor Cyan
-Write-Host "   Admin:   $adminUrl" -ForegroundColor Cyan
-
+Write-Host "`nDeployment abgeschlossen!" -ForegroundColor Green
+Write-Host "Display: http://${PiHost}:3000" -ForegroundColor Cyan
+Write-Host "Admin: http://${PiHost}:3000/admin" -ForegroundColor Cyan
 

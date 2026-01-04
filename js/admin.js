@@ -1738,15 +1738,29 @@ async function handlePostFormSubmit(e) {
   const fileInput = document.getElementById('media-file');
   let mediaId = null;
   let isPresentationUpload = false;
+  let postsAlreadyCreated = false;
 
   // Datei-Upload falls vorhanden
   if (fileInput && fileInput.files.length > 0) {
     const file = fileInput.files[0];
-    isPresentationUpload = file.name.toLowerCase().match(/\.(pptx?|odp)$/);
+    isPresentationUpload = file.name.toLowerCase().match(/\.(pptx?|odp|pdf|docx?)$/);
 
     try {
       const uploadResult = await uploadFile(file);
       mediaId = uploadResult.id;
+      
+      // Prüfe ob Posts bereits automatisch erstellt wurden (bei Präsentationen)
+      if (uploadResult.postsCreated && uploadResult.postsCreated.length > 0) {
+        postsAlreadyCreated = true;
+        showNotification(
+          `Präsentation erfolgreich hochgeladen! ${uploadResult.postsCreated.length} Slides wurden erstellt.`,
+          'success'
+        );
+        hidePostForm();
+        await loadPosts();
+        await updateDashboardStats();
+        return; // Beende hier, da Posts bereits erstellt wurden
+      }
     } catch (error) {
       showNotification('Datei-Upload fehlgeschlagen: ' + error.message, 'error');
       return;
@@ -1852,7 +1866,7 @@ async function uploadFile(file) {
   const progressBar = document.getElementById('upload-progress-bar');
   const statusText = document.getElementById('upload-status');
 
-  const isPowerPoint = file.name.toLowerCase().match(/\.(pptx?|odp)$/);
+  const isPowerPoint = file.name.toLowerCase().match(/\.(pptx?|odp|pdf|docx?)$/);
 
   if (progressDiv) {
     progressDiv.style.display = 'block';
@@ -3168,6 +3182,8 @@ window.addEventListener('load', async () => {
     try {
       // Versuche von Backend zu laden
       const data = await apiRequest('/settings?category=display');
+      
+      console.log('Loaded settings from backend:', data);
 
       let settings = {};
 
@@ -3176,6 +3192,8 @@ window.addEventListener('load', async () => {
           refreshInterval: data['display.refreshInterval'],
           defaultDuration: data['display.defaultDuration']
         };
+        
+        console.log('Parsed settings:', settings);
       } else {
         // Fallback zu localStorage
         const savedDisplaySettings = localStorage.getItem('displaySettings');

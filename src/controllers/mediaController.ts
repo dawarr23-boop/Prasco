@@ -13,8 +13,8 @@ const PRESENTATION_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.oasis.opendocument.presentation',
   'application/pdf', // PDFs werden wie Präsentationen behandelt (Seite für Seite)
-  'application/msword', // Word .doc
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // Word .docx
+  'application/msword', // .doc
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
 ];
 
 export const uploadMedia = async (

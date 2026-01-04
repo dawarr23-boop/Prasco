@@ -7,9 +7,6 @@ import { logger } from '../utils/logger';
 
 const execAsync = promisify(exec);
 
-// PDF-to-Image conversion with pdf-poppler
-const pdfPoppler = require('pdf-poppler');
-
 // PowerPoint Slide Interface
 export interface PresentationSlide {
   slideNumber: number;
@@ -125,9 +122,25 @@ async function convertWithLibreOffice(
       pdfPath = inputPath;
     } else {
       // Erst zu PDF konvertieren (für PowerPoint, ODP, etc.)
-      const pdfCmd = `${soffice} --headless --convert-to pdf --outdir "${outputDir}" "${inputPath}"`;
+      // Nutze temporäres User-Profil um Konflikte zu vermeiden
+      const tempProfile = path.join(outputDir, '.libreoffice-temp');
+      const pdfCmd = `${soffice} --headless --invisible --nologo --nofirststartwizard -env:UserInstallation=file://${tempProfile} --convert-to pdf --outdir "${outputDir}" "${inputPath}"`;
       logger.info(`Konvertiere zu PDF: ${pdfCmd}`);
-      await execAsync(pdfCmd, { timeout: 120000 });
+      
+      try {
+        await execAsync(pdfCmd, { timeout: 120000 });
+      } catch (error) {
+        // Cleanup temp profile bei Fehler
+        if (fs.existsSync(tempProfile)) {
+          fs.rmSync(tempProfile, { recursive: true, force: true });
+        }
+        throw error;
+      }
+      
+      // Cleanup temp profile nach erfolgreicher Konvertierung
+      if (fs.existsSync(tempProfile)) {
+        fs.rmSync(tempProfile, { recursive: true, force: true });
+      }
 
       // Finde die PDF-Datei
       const files = fs.readdirSync(outputDir);
@@ -145,56 +158,40 @@ async function convertWithLibreOffice(
     
     let conversionSuccess = false;
     
-    // Methode 1: pdf-poppler (Node.js-Paket, funktioniert auf allen Plattformen)
+    // Methode 1: pdftoppm (am besten für Linux/Raspberry Pi)
     try {
-      logger.info('Versuche pdf-poppler für mehrseitige PDF-Konvertierung...');
-      const opts = {
-        format: 'png',
-        out_dir: outputDir,
-        out_prefix: 'slide',
-        page: null, // Alle Seiten
-      };
-      await pdfPoppler.convert(pdfPath, opts);
+      const outputPrefix = path.join(outputDir, 'slide');
+      const pdftoppmCmd = `pdftoppm -png "${pdfPath}" "${outputPrefix}"`;
+      logger.info('Versuche pdftoppm...');
+      await execAsync(pdftoppmCmd, { timeout: 120000 });
       conversionSuccess = true;
-      logger.info('PDF erfolgreich mit pdf-poppler konvertiert');
-    } catch (popplerError) {
-      logger.warn('pdf-poppler fehlgeschlagen:', popplerError);
+      logger.info('PDF erfolgreich mit pdftoppm konvertiert');
+    } catch (pdftoppmError) {
+      logger.info('pdftoppm nicht verfügbar, versuche ImageMagick...');
       
-      // Methode 2: pdftoppm (am besten für Linux/Raspberry Pi)
-      try {
-        const outputPrefix = path.join(outputDir, 'slide');
-        const pdftoppmCmd = `pdftoppm -png "${pdfPath}" "${outputPrefix}"`;
-        logger.info('Versuche pdftoppm...');
-        await execAsync(pdftoppmCmd, { timeout: 120000 });
-        conversionSuccess = true;
-        logger.info('PDF erfolgreich mit pdftoppm konvertiert');
-      } catch (pdftoppmError) {
-        logger.info('pdftoppm nicht verfügbar, versuche ImageMagick...');
-        
-        // Methode 3: ImageMagick convert (benötigt Ghostscript)
-        const magickCmd = await checkImageMagick();
-        if (magickCmd) {
-          try {
-            const outputPattern = path.join(outputDir, 'slide-%03d.png');
-            const magickConvertCmd = `${magickCmd} -density 150 "${pdfPath}" "${outputPattern}"`;
-            logger.info('Versuche ImageMagick...');
-            await execAsync(magickConvertCmd, { timeout: 120000 });
-            conversionSuccess = true;
-            logger.info('PDF erfolgreich mit ImageMagick konvertiert');
-          } catch (magickError) {
-            logger.warn('ImageMagick-Konvertierung fehlgeschlagen (Ghostscript fehlt?)');
-          }
+      // Methode 2: ImageMagick convert (benötigt Ghostscript)
+      const magickCmd = await checkImageMagick();
+      if (magickCmd) {
+        try {
+          const outputPattern = path.join(outputDir, 'slide-%03d.png');
+          const magickConvertCmd = `${magickCmd} -density 150 "${pdfPath}" "${outputPattern}"`;
+          logger.info('Versuche ImageMagick...');
+          await execAsync(magickConvertCmd, { timeout: 120000 });
+          conversionSuccess = true;
+          logger.info('PDF erfolgreich mit ImageMagick konvertiert');
+        } catch (magickError) {
+          logger.warn('ImageMagick-Konvertierung fehlgeschlagen (Ghostscript fehlt?)');
         }
-        
-        // Methode 4: LibreOffice (konvertiert nur erste Seite)
-        if (!conversionSuccess) {
-          logger.warn('Verwende LibreOffice PNG-Konvertierung (nur erste Seite)');
-          const pngCmd = `${soffice} --headless --convert-to png --outdir "${outputDir}" "${pdfPath}"`;
-          try {
-            await execAsync(pngCmd, { timeout: 120000 });
-          } catch (loError) {
-            logger.error('LibreOffice PNG-Konvertierung fehlgeschlagen:', loError);
-          }
+      }
+      
+      // Methode 3: LibreOffice (konvertiert nur erste Seite)
+      if (!conversionSuccess) {
+        logger.warn('Verwende LibreOffice PNG-Konvertierung (nur erste Seite)');
+        const pngCmd = `${soffice} --headless --convert-to png --outdir "${outputDir}" "${pdfPath}"`;
+        try {
+          await execAsync(pngCmd, { timeout: 120000 });
+        } catch (loError) {
+          logger.error('LibreOffice PNG-Konvertierung fehlgeschlagen:', loError);
         }
       }
     }

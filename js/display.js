@@ -39,6 +39,7 @@ let backgroundMusicState = {
   currentPostId: null,
   fadeInterval: null,
   isGlobalMusic: false,
+  userInteracted: false, // Track ob Benutzer interagiert hat (für Autoplay-Policy)
 };
 
 // Globale Musik-Einstellungen
@@ -59,6 +60,8 @@ async function loadDisplaySettings() {
     const response = await fetch('/api/settings?category=display');
     if (response.ok) {
       const settings = await response.json();
+      
+      console.log('Raw settings from API:', settings);
       
       // Aktualisiere Einstellungen - API gibt Keys als Objekt-Properties zurück
       if (settings['display.refreshInterval'] !== undefined) {
@@ -160,14 +163,22 @@ function playBackgroundMusic(post) {
     return;
   }
 
-  // Gleiche Musik läuft bereits
-  if (audio.src === musicUrl && !audio.paused) {
+  // Gleiche Musik läuft bereits - vergleiche URLs korrekt (relativ vs. absolut)
+  const currentMusicUrl = audio.src ? new URL(audio.src).pathname : '';
+  const newMusicPath = musicUrl.startsWith('http') ? new URL(musicUrl).pathname : musicUrl;
+  
+  if (currentMusicUrl && currentMusicUrl === newMusicPath && !audio.paused) {
+    // Musik läuft bereits, nur Lautstärke anpassen falls nötig
+    if (Math.abs(audio.volume - volume) > 0.01) {
+      audio.volume = volume;
+    }
     backgroundMusicState.isGlobalMusic = isGlobal;
+    backgroundMusicState.currentPostId = post.id;
     return;
   }
 
   // Stoppe aktuelle Musik mit Fade-Out, dann starte neue
-  if (!audio.paused && audio.src !== musicUrl) {
+  if (!audio.paused && currentMusicUrl !== newMusicPath) {
     fadeOutMusic(() => {
       startNewMusic(musicUrl, volume);
       backgroundMusicState.isGlobalMusic = isGlobal;
@@ -190,10 +201,17 @@ function startNewMusic(url, targetVolume) {
   audio
     .play()
     .then(() => {
+      backgroundMusicState.userInteracted = true;
       fadeInMusic(targetVolume);
     })
     .catch((err) => {
-      console.log('Hintergrundmusik konnte nicht gestartet werden:', err.message);
+      // Autoplay blockiert - warte auf Benutzerinteraktion
+      if (err.name === 'NotAllowedError') {
+        console.log('Hintergrundmusik wartet auf Benutzerinteraktion...');
+        // Versuche es später bei der ersten Interaktion erneut
+      } else {
+        console.log('Hintergrundmusik konnte nicht gestartet werden:', err.message);
+      }
     });
 }
 
@@ -457,6 +475,9 @@ async function init() {
   await fetchPosts();
   startClock();
   updateDate();
+  
+  // Aktualisiere Refresh-Info nachdem DOM geladen ist
+  updateRefreshInfo();
 
   if (posts.length > 0) {
     displayCurrentPost();
@@ -1136,7 +1157,30 @@ document.addEventListener('click', (e) => {
     // Mitte geklickt - Toggle Pause (optional)
     toggleAutoRotation();
   }
+  
+  // Versuche Musik zu starten falls sie durch Autoplay blockiert wurde
+  resumeBackgroundMusicIfNeeded();
 });
+
+// Tastatur-Interaktion für Musik-Start
+document.addEventListener('keydown', () => {
+  resumeBackgroundMusicIfNeeded();
+}, { once: true });
+
+// Versuche blockierte Musik zu starten
+function resumeBackgroundMusicIfNeeded() {
+  const audio = backgroundMusicState.audio;
+  if (audio && audio.src && audio.paused && !backgroundMusicState.userInteracted) {
+    audio.play()
+      .then(() => {
+        backgroundMusicState.userInteracted = true;
+        console.log('Hintergrundmusik erfolgreich gestartet nach Benutzerinteraktion');
+      })
+      .catch(() => {
+        // Ignoriere Fehler
+      });
+  }
+}
 
 // Initialisierung
 (async function() {
