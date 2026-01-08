@@ -1391,6 +1391,16 @@ async function showPostForm() {
   if (window.transitionPicker) {
     window.transitionPicker.show(null, null);
   }
+
+  // Animation-Timeline für neuen Post initialisieren
+  if (!window.animationTimeline) {
+    window.animationTimeline = new AnimationTimeline('animation-timeline-container');
+    await window.animationTimeline.init();
+  } else {
+    window.animationTimeline.animations = [];
+    window.animationTimeline.render();
+    window.animationTimeline.attachEventListeners();
+  }
 }
 
 async function loadCategoryDropdown() {
@@ -1547,6 +1557,18 @@ async function editPost(id) {
       console.log('Keine Transition für Post gefunden oder Fehler:', error.message);
       window.transitionPicker.show(post.id, null);
     }
+  }
+
+  // Animation-Timeline laden und anzeigen
+  if (!window.animationTimeline) {
+    window.animationTimeline = new AnimationTimeline('animation-timeline-container');
+    await window.animationTimeline.init();
+  }
+  
+  try {
+    await window.animationTimeline.loadAnimationsForPost(post.id);
+  } catch (error) {
+    console.log('Keine Animationen für Post gefunden:', error.message);
   }
 }
 
@@ -1952,6 +1974,17 @@ async function handlePostFormSubmit(e) {
           console.error('Fehler beim Speichern der Transition:', transitionError);
           // Kein User-Fehler anzeigen, da Post erfolgreich gespeichert wurde
         }
+      }
+    }
+
+    // Element-Animationen separat speichern (PowerPoint-Effekt)
+    if (savedPostId && window.animationTimeline) {
+      try {
+        await window.animationTimeline.saveAnimationsForPost(savedPostId);
+        console.log('Animationen erfolgreich gespeichert');
+      } catch (animationError) {
+        console.error('Fehler beim Speichern der Animationen:', animationError);
+        // Kein User-Fehler anzeigen, da Post erfolgreich gespeichert wurde
       }
     }
 
@@ -4085,6 +4118,725 @@ class TransitionPicker {
     }
     return false;
   }
+}
+
+// ============================================
+// ANIMATION TIMELINE EDITOR (Element Animations)
+// ============================================
+
+/**
+ * AnimationTimeline Class
+ * Visual editor for creating element animations within posts
+ */
+class AnimationTimeline {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.animations = [];
+    this.effects = [];
+    this.currentPostId = null;
+    this.draggedItem = null;
+  }
+
+  async init() {
+    await this.loadAvailableEffects();
+    this.render();
+    this.attachEventListeners();
+  }
+
+  /**
+   * Load available animation effects from API
+   */
+  async loadAvailableEffects() {
+    try {
+      const response = await apiRequest('/animations/effects');
+      if (response.success && response.effects) {
+        this.effects = this.organizeEffects(response.effects);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Animationseffekte:', error);
+      showNotification('Fehler beim Laden der Animationseffekte', 'error');
+    }
+  }
+
+  /**
+   * Organize effects by category
+   */
+  organizeEffects(effects) {
+    const organized = {
+      entrance: [],
+      exit: [],
+      emphasis: []
+    };
+
+    effects.forEach(effect => {
+      if (effect.startsWith('entrance-')) {
+        organized.entrance.push(effect);
+      } else if (effect.startsWith('exit-')) {
+        organized.exit.push(effect);
+      } else if (effect.startsWith('emphasis-')) {
+        organized.emphasis.push(effect);
+      }
+    });
+
+    return organized;
+  }
+
+  /**
+   * Render the animation timeline editor
+   */
+  render() {
+    if (!this.container) return;
+
+    const html = `
+      <div class="animation-timeline-editor">
+        <div class="animation-timeline-header">
+          <h3>🎭 Element-Animationen</h3>
+          <p class="animation-timeline-subtitle">Erstellen Sie Animationen für einzelne Elemente im Beitrag</p>
+          <button type="button" class="btn btn-sm btn-primary" id="add-animation-btn">
+            ➕ Animation hinzufügen
+          </button>
+        </div>
+
+        <div class="animation-list" id="animation-list">
+          ${this.animations.length === 0 ? `
+            <div class="animation-empty-state">
+              <p>🎬 Noch keine Animationen vorhanden</p>
+              <p class="text-muted">Fügen Sie Animationen hinzu um Elemente zum Leben zu erwecken</p>
+            </div>
+          ` : this.renderAnimationList()}
+        </div>
+      </div>
+
+      <!-- Animation Editor Modal (initially hidden) -->
+      <div id="animation-editor-modal" class="animation-modal" style="display: none;">
+        <div class="animation-modal-content">
+          <div class="animation-modal-header">
+            <h3 id="animation-modal-title">Animation hinzufügen</h3>
+            <button type="button" class="close-btn" id="close-animation-modal">✕</button>
+          </div>
+
+          <div class="animation-modal-body">
+            <!-- Element Selector -->
+            <div class="form-group">
+              <label>🎯 Element-Selektor</label>
+              <input 
+                type="text" 
+                id="animation-element-selector" 
+                class="form-control" 
+                placeholder=".my-class, #my-id, h1, .container > p"
+              />
+              <small class="form-text">CSS-Selektor für das zu animierende Element</small>
+            </div>
+
+            <!-- Effect Category Tabs -->
+            <div class="animation-tabs">
+              <button type="button" class="animation-tab active" data-category="entrance">
+                📥 Entrance (${this.effects.entrance?.length || 0})
+              </button>
+              <button type="button" class="animation-tab" data-category="exit">
+                📤 Exit (${this.effects.exit?.length || 0})
+              </button>
+              <button type="button" class="animation-tab" data-category="emphasis">
+                ⭐ Emphasis (${this.effects.emphasis?.length || 0})
+              </button>
+            </div>
+
+            <!-- Effect Gallery -->
+            <div class="animation-effect-gallery" id="animation-effect-gallery">
+              ${this.renderEffectGallery('entrance')}
+            </div>
+
+            <!-- Animation Settings -->
+            <div class="animation-settings">
+              <h4>⚙️ Einstellungen</h4>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Dauer (ms)</label>
+                  <input 
+                    type="range" 
+                    id="animation-duration" 
+                    class="form-range" 
+                    min="200" 
+                    max="3000" 
+                    step="100" 
+                    value="1000"
+                  />
+                  <span class="range-value" id="duration-value">1000ms</span>
+                </div>
+
+                <div class="form-group col-md-6">
+                  <label>Verzögerung (ms)</label>
+                  <input 
+                    type="range" 
+                    id="animation-delay" 
+                    class="form-range" 
+                    min="0" 
+                    max="5000" 
+                    step="100" 
+                    value="0"
+                  />
+                  <span class="range-value" id="delay-value">0ms</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Easing</label>
+                <select id="animation-easing" class="form-control">
+                  <option value="linear">Linear</option>
+                  <option value="ease" selected>Ease</option>
+                  <option value="ease-in">Ease In</option>
+                  <option value="ease-out">Ease Out</option>
+                  <option value="ease-in-out">Ease In Out</option>
+                  <option value="cubic-bezier(0.68, -0.55, 0.265, 1.55)">Bounce</option>
+                  <option value="cubic-bezier(0.175, 0.885, 0.32, 1.275)">Elastic</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Trigger</label>
+                <select id="animation-trigger" class="form-control">
+                  <option value="auto" selected>Automatisch (sofort)</option>
+                  <option value="sequence">Sequenz (nach vorheriger Animation)</option>
+                  <option value="click">Bei Klick</option>
+                  <option value="hover">Bei Hover</option>
+                  <option value="scroll">Beim Scrollen ins Sichtfeld</option>
+                  <option value="visibility">Bei Sichtbarkeit</option>
+                </select>
+                <small class="form-text">Wann soll die Animation ausgelöst werden?</small>
+              </div>
+
+              <div class="form-group">
+                <label>Reihenfolge</label>
+                <input 
+                  type="number" 
+                  id="animation-order" 
+                  class="form-control" 
+                  value="0" 
+                  min="0" 
+                  step="1"
+                />
+                <small class="form-text">Für Sequenz-Trigger: Abspielreihenfolge (0 = zuerst)</small>
+              </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="animation-preview-section">
+              <button type="button" class="btn btn-secondary" id="preview-animation-btn">
+                ▶️ Vorschau
+              </button>
+              <div class="animation-preview-box" id="animation-preview-box">
+                <div class="preview-element" id="preview-element">Vorschau-Element</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="animation-modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancel-animation-btn">Abbrechen</button>
+            <button type="button" class="btn btn-primary" id="save-animation-btn">💾 Speichern</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.container.innerHTML = html;
+  }
+
+  /**
+   * Render effect gallery for a category
+   */
+  renderEffectGallery(category) {
+    const effects = this.effects[category] || [];
+    
+    return `
+      <div class="effect-gallery-grid">
+        ${effects.map(effect => `
+          <div class="effect-card" data-effect="${effect}">
+            <div class="effect-card-preview">
+              <div class="effect-preview-element anim-${this.getAnimationClass(effect)}"></div>
+            </div>
+            <div class="effect-card-name">${this.formatEffectName(effect)}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  /**
+   * Render animation list
+   */
+  renderAnimationList() {
+    return this.animations
+      .sort((a, b) => (a.order || 0) - (b.order || 0))
+      .map(anim => this.renderAnimationItem(anim))
+      .join('');
+  }
+
+  /**
+   * Render single animation item
+   */
+  renderAnimationItem(anim) {
+    const triggerIcons = {
+      auto: '⚡',
+      sequence: '🔢',
+      click: '👆',
+      hover: '🖱️',
+      scroll: '📜',
+      visibility: '👁️'
+    };
+
+    return `
+      <div class="animation-item" data-animation-id="${anim.id || 'new-' + Date.now()}" draggable="true">
+        <div class="animation-item-drag">⋮⋮</div>
+        <div class="animation-item-content">
+          <div class="animation-item-selector">${anim.elementSelector}</div>
+          <div class="animation-item-details">
+            <span class="animation-badge">${this.formatEffectName(anim.animationType)}</span>
+            <span class="animation-trigger">${triggerIcons[anim.trigger]} ${anim.trigger}</span>
+            <span class="animation-timing">${anim.duration}ms ${anim.delay > 0 ? `+${anim.delay}ms` : ''}</span>
+          </div>
+        </div>
+        <div class="animation-item-actions">
+          <button type="button" class="btn-icon" data-action="edit" data-id="${anim.id}">✏️</button>
+          <button type="button" class="btn-icon" data-action="delete" data-id="${anim.id}">🗑️</button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Attach event listeners
+   */
+  attachEventListeners() {
+    // Add animation button
+    const addBtn = document.getElementById('add-animation-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => this.openAnimationEditor());
+    }
+
+    // Modal close
+    const closeBtn = document.getElementById('close-animation-modal');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => this.closeAnimationEditor());
+    }
+
+    // Cancel button
+    const cancelBtn = document.getElementById('cancel-animation-btn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => this.closeAnimationEditor());
+    }
+
+    // Save button
+    const saveBtn = document.getElementById('save-animation-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => this.saveAnimation());
+    }
+
+    // Preview button
+    const previewBtn = document.getElementById('preview-animation-btn');
+    if (previewBtn) {
+      previewBtn.addEventListener('click', () => this.previewAnimation());
+    }
+
+    // Category tabs
+    document.querySelectorAll('.animation-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.animation-tab').forEach(t => t.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        const category = e.currentTarget.dataset.category;
+        document.getElementById('animation-effect-gallery').innerHTML = this.renderEffectGallery(category);
+        this.attachEffectCardListeners();
+      });
+    });
+
+    // Range inputs
+    const durationRange = document.getElementById('animation-duration');
+    const delayRange = document.getElementById('animation-delay');
+    
+    if (durationRange) {
+      durationRange.addEventListener('input', (e) => {
+        document.getElementById('duration-value').textContent = e.target.value + 'ms';
+      });
+    }
+
+    if (delayRange) {
+      delayRange.addEventListener('input', (e) => {
+        document.getElementById('delay-value').textContent = e.target.value + 'ms';
+      });
+    }
+
+    // Attach effect card listeners
+    this.attachEffectCardListeners();
+
+    // Attach animation list listeners
+    this.attachAnimationListListeners();
+  }
+
+  /**
+   * Attach listeners to effect cards
+   */
+  attachEffectCardListeners() {
+    document.querySelectorAll('.effect-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        // Remove previous selection
+        document.querySelectorAll('.effect-card').forEach(c => c.classList.remove('selected'));
+        // Select this card
+        e.currentTarget.classList.add('selected');
+        // Store selected effect
+        this.selectedEffect = e.currentTarget.dataset.effect;
+      });
+    });
+  }
+
+  /**
+   * Attach listeners to animation list items
+   */
+  attachAnimationListListeners() {
+    const listContainer = document.getElementById('animation-list');
+    if (!listContainer) return;
+
+    // Edit/Delete buttons
+    listContainer.addEventListener('click', (e) => {
+      const action = e.target.dataset.action;
+      const animId = e.target.dataset.id;
+
+      if (action === 'edit') {
+        this.editAnimation(animId);
+      } else if (action === 'delete') {
+        this.deleteAnimation(animId);
+      }
+    });
+
+    // Drag & Drop
+    listContainer.addEventListener('dragstart', (e) => {
+      if (e.target.classList.contains('animation-item')) {
+        e.target.classList.add('dragging');
+        this.draggedItem = e.target;
+      }
+    });
+
+    listContainer.addEventListener('dragend', (e) => {
+      if (e.target.classList.contains('animation-item')) {
+        e.target.classList.remove('dragging');
+        this.draggedItem = null;
+      }
+    });
+
+    listContainer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const afterElement = this.getDragAfterElement(listContainer, e.clientY);
+      const dragging = document.querySelector('.dragging');
+      if (dragging && afterElement == null) {
+        listContainer.appendChild(dragging);
+      } else if (dragging) {
+        listContainer.insertBefore(dragging, afterElement);
+      }
+    });
+
+    listContainer.addEventListener('drop', (e) => {
+      e.preventDefault();
+      this.updateAnimationOrder();
+    });
+  }
+
+  /**
+   * Get element after drag position
+   */
+  getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.animation-item:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  /**
+   * Update animation order after drag & drop
+   */
+  updateAnimationOrder() {
+    const items = document.querySelectorAll('.animation-item');
+    items.forEach((item, index) => {
+      const animId = item.dataset.animationId;
+      const animation = this.animations.find(a => a.id == animId || `new-${a.tempId}` == animId);
+      if (animation) {
+        animation.order = index;
+      }
+    });
+
+    // Render updated list
+    document.getElementById('animation-list').innerHTML = this.renderAnimationList();
+    this.attachAnimationListListeners();
+  }
+
+  /**
+   * Open animation editor modal
+   */
+  openAnimationEditor(animation = null) {
+    const modal = document.getElementById('animation-editor-modal');
+    if (!modal) return;
+
+    this.currentEditingAnimation = animation;
+
+    // Set modal title
+    document.getElementById('animation-modal-title').textContent = 
+      animation ? 'Animation bearbeiten' : 'Animation hinzufügen';
+
+    // Pre-fill form if editing
+    if (animation) {
+      document.getElementById('animation-element-selector').value = animation.elementSelector || '';
+      document.getElementById('animation-duration').value = animation.duration || 1000;
+      document.getElementById('duration-value').textContent = (animation.duration || 1000) + 'ms';
+      document.getElementById('animation-delay').value = animation.delay || 0;
+      document.getElementById('delay-value').textContent = (animation.delay || 0) + 'ms';
+      document.getElementById('animation-easing').value = animation.easing || 'ease-out';
+      document.getElementById('animation-trigger').value = animation.trigger || 'auto';
+      document.getElementById('animation-order').value = animation.order || 0;
+      
+      // Select effect card
+      this.selectedEffect = animation.animationType;
+      setTimeout(() => {
+        const effectCard = document.querySelector(`[data-effect="${animation.animationType}"]`);
+        if (effectCard) effectCard.classList.add('selected');
+      }, 100);
+    } else {
+      // Reset form
+      document.getElementById('animation-element-selector').value = '';
+      document.getElementById('animation-duration').value = 1000;
+      document.getElementById('duration-value').textContent = '1000ms';
+      document.getElementById('animation-delay').value = 0;
+      document.getElementById('delay-value').textContent = '0ms';
+      document.getElementById('animation-easing').value = 'ease-out';
+      document.getElementById('animation-trigger').value = 'auto';
+      document.getElementById('animation-order').value = this.animations.length;
+      this.selectedEffect = null;
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  /**
+   * Close animation editor modal
+   */
+  closeAnimationEditor() {
+    const modal = document.getElementById('animation-editor-modal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    this.currentEditingAnimation = null;
+    this.selectedEffect = null;
+  }
+
+  /**
+   * Save animation
+   */
+  saveAnimation() {
+    const elementSelector = document.getElementById('animation-element-selector').value.trim();
+    
+    if (!elementSelector) {
+      showNotification('Bitte geben Sie einen Element-Selektor an', 'warning');
+      return;
+    }
+
+    if (!this.selectedEffect) {
+      showNotification('Bitte wählen Sie einen Animationseffekt', 'warning');
+      return;
+    }
+
+    const animationData = {
+      elementSelector,
+      animationType: this.selectedEffect,
+      duration: parseInt(document.getElementById('animation-duration').value),
+      delay: parseInt(document.getElementById('animation-delay').value),
+      easing: document.getElementById('animation-easing').value,
+      trigger: document.getElementById('animation-trigger').value,
+      order: parseInt(document.getElementById('animation-order').value)
+    };
+
+    if (this.currentEditingAnimation) {
+      // Update existing
+      Object.assign(this.currentEditingAnimation, animationData);
+    } else {
+      // Add new
+      animationData.tempId = Date.now();
+      this.animations.push(animationData);
+    }
+
+    // Re-render list
+    document.getElementById('animation-list').innerHTML = this.renderAnimationList();
+    this.attachAnimationListListeners();
+
+    this.closeAnimationEditor();
+    showNotification('✅ Animation hinzugefügt', 'success');
+  }
+
+  /**
+   * Edit animation
+   */
+  editAnimation(animId) {
+    const animation = this.animations.find(a => a.id == animId || a.tempId == animId);
+    if (animation) {
+      this.openAnimationEditor(animation);
+    }
+  }
+
+  /**
+   * Delete animation
+   */
+  async deleteAnimation(animId) {
+    if (!confirm('Diese Animation wirklich löschen?')) return;
+
+    const index = this.animations.findIndex(a => a.id == animId || a.tempId == animId);
+    if (index !== -1) {
+      this.animations.splice(index, 1);
+      document.getElementById('animation-list').innerHTML = this.renderAnimationList();
+      this.attachAnimationListListeners();
+      showNotification('🗑️ Animation gelöscht', 'success');
+    }
+  }
+
+  /**
+   * Preview animation
+   */
+  previewAnimation() {
+    if (!this.selectedEffect) {
+      showNotification('Bitte wählen Sie zuerst einen Effekt', 'warning');
+      return;
+    }
+
+    const previewElement = document.getElementById('preview-element');
+    if (!previewElement) return;
+
+    const duration = parseInt(document.getElementById('animation-duration').value);
+    const delay = parseInt(document.getElementById('animation-delay').value);
+    const easing = document.getElementById('animation-easing').value;
+
+    // Remove old animation class
+    previewElement.className = 'preview-element';
+
+    // Set CSS variables
+    previewElement.style.setProperty('--animation-duration', `${duration}ms`);
+    previewElement.style.setProperty('--animation-delay', `${delay}ms`);
+    previewElement.style.setProperty('--animation-easing', easing);
+
+    // Trigger reflow
+    void previewElement.offsetWidth;
+
+    // Add animation class
+    const animClass = this.getAnimationClass(this.selectedEffect);
+    previewElement.classList.add(`anim-${animClass}`);
+
+    // Reset after animation
+    setTimeout(() => {
+      previewElement.className = 'preview-element';
+    }, duration + delay + 100);
+  }
+
+  /**
+   * Load animations for a post
+   */
+  async loadAnimationsForPost(postId) {
+    this.currentPostId = postId;
+
+    try {
+      const response = await apiRequest(`/animations/post/${postId}`);
+      if (response.success && response.animations) {
+        this.animations = response.animations;
+        document.getElementById('animation-list').innerHTML = this.renderAnimationList();
+        this.attachAnimationListListeners();
+      } else {
+        this.animations = [];
+        document.getElementById('animation-list').innerHTML = `
+          <div class="animation-empty-state">
+            <p>🎬 Noch keine Animationen vorhanden</p>
+            <p class="text-muted">Fügen Sie Animationen hinzu um Elemente zum Leben zu erwecken</p>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.log('No animations for post (404 is OK)');
+      this.animations = [];
+    }
+  }
+
+  /**
+   * Save all animations for current post
+   */
+  async saveAnimationsForPost(postId) {
+    if (this.animations.length === 0) {
+      return true; // Nothing to save
+    }
+
+    try {
+      const response = await apiRequest(`/animations/bulk`, {
+        method: 'POST',
+        body: JSON.stringify({
+          postId,
+          animations: this.animations.map(anim => ({
+            elementSelector: anim.elementSelector,
+            animationType: anim.animationType,
+            duration: anim.duration,
+            delay: anim.delay,
+            easing: anim.easing,
+            trigger: anim.trigger,
+            order: anim.order
+          }))
+        })
+      });
+
+      if (response.success) {
+        showNotification('✅ Animationen gespeichert', 'success');
+        return true;
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern der Animationen:', error);
+      showNotification('❌ Fehler beim Speichern', 'error');
+    }
+
+    return false;
+  }
+
+  /**
+   * Get animation class name from effect type
+   */
+  getAnimationClass(effectType) {
+    // Remove 'entrance-', 'exit-', 'emphasis-' prefix and return rest
+    return effectType.replace(/^(entrance|exit|emphasis)-/, '');
+  }
+
+  /**
+   * Format effect name for display
+   */
+  formatEffectName(effectType) {
+    return effectType
+      .replace(/^(entrance|exit|emphasis)-/, '')
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+}
+
+// Global instance for use in post editor
+let animationTimeline = null;
+
+/**
+ * Initialize Animation Timeline in Post Modal
+ */
+function initAnimationTimelineInModal() {
+  const container = document.getElementById('animation-timeline-container');
+  if (!container) {
+    console.warn('Animation Timeline Container nicht gefunden');
+    return;
+  }
+
+  animationTimeline = new AnimationTimeline('animation-timeline-container');
+  animationTimeline.init();
 }
 
 // Global instance for use in post editor

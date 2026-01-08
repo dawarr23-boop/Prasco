@@ -1930,3 +1930,374 @@ body {
   }
 }
 
+/* ============================================
+   ANIMATION TIMELINE EDITOR
+   ============================================ */
+
+.animation-timeline-editor {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.animation-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.animation-timeline-header h3 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.animation-timeline-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 5px 0 0 0;
+}
+
+/* Animation List */
+.animation-list {
+  min-height: 100px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.animation-empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+.animation-empty-state p:first-child {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.animation-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: move;
+  transition: all 0.2s ease;
+}
+
+.animation-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.animation-item.dragging {
+  opacity: 0.5;
+}
+
+.animation-item-drag {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-right: 10px;
+  cursor: grab;
+}
+
+.animation-item-content {
+  flex: 1;
+}
+
+.animation-item-selector {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.animation-item-details {
+  display: flex;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.animation-badge {
+  background: var(--primary-color);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.animation-trigger {
+  background: var(--bg-dark);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.animation-timing {
+  font-family: 'Courier New', monospace;
+}
+
+.animation-item-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+}
+
+/* Animation Modal */
+.animation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.animation-modal-content {
+  background: var(--card-bg);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.animation-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.animation-modal-header h3 {
+  margin: 0;
+  color: var(--text-color);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: var(--danger-color);
+}
+
+.animation-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.animation-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px;
+  border-top: 2px solid var(--border-color);
+}
+
+/* Animation Tabs */
+.animation-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.animation-tab {
+  flex: 1;
+  padding: 12px;
+  background: var(--bg-light);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.animation-tab:hover {
+  border-color: var(--primary-color);
+}
+
+.animation-tab.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Effect Gallery */
+.animation-effect-gallery {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.effect-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.effect-card {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.effect-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.effect-card.selected {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.effect-card-preview {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.effect-preview-element {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+.effect-card-name {
+  font-size: 0.75rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+/* Animation Settings */
+.animation-settings {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.animation-settings h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: var(--text-color);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.range-value {
+  display: inline-block;
+  margin-left: 10px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* Animation Preview */
+.animation-preview-section {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.animation-preview-box {
+  margin-top: 15px;
+  height: 150px;
+  background: white;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.preview-element {
+  padding: 20px 40px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .animation-modal-content {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .effect-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .animation-tabs {
+    flex-direction: column;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .animation-item-details {
+    flex-wrap: wrap;
+  }
+}
