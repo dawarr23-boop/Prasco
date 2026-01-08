@@ -34,6 +34,7 @@ import settingsRoutes from './routes/settings';
 import documentRoutes from './routes/documents';
 import transitionsRoutes from './routes/transitions';
 import animationsRoutes from './routes/animations';
+import motionPathsRoutes from './routes/motionPaths';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -211,6 +212,7 @@ app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);
 app.use('/api/transitions', transitionsRoutes); // Slide Transitions
 app.use('/api/animations', animationsRoutes); // Element Animations
+app.use('/api/motion-paths', motionPathsRoutes); // Motion Paths
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
