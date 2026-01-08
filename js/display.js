@@ -461,6 +461,9 @@ class AnimationEngine {
       return this.applySimpleAnimation(element, animation);
     }
 
+    // Check if this animation has a motion path
+    const motionPath = await motionPathEngine.loadMotionPath(animation.id);
+
     return new Promise((resolve) => {
       const duration = animation.duration || 1000;
       const delay = animation.delay || 0;
@@ -477,6 +480,11 @@ class AnimationEngine {
       // Make element visible but potentially transparent (for entrance effects)
       if (animation.animationType.startsWith('entrance-')) {
         element.style.visibility = 'visible';
+      }
+
+      // Apply motion path if available
+      if (motionPath) {
+        motionPathEngine.applyMotionPath(element, animation, motionPath);
       }
 
       // Apply animation class
@@ -789,6 +797,253 @@ const animationEngine = new AnimationEngine();
 
 // ============================================
 // ENDE ANIMATION ENGINE
+// ============================================
+
+// ============================================
+// MOTION PATH ENGINE
+// ============================================
+
+class MotionPathEngine {
+  constructor() {
+    this.motionPaths = new Map(); // animationId -> motionPath data
+    this.activeAnimations = new Set(); // Currently running motion animations
+    this.performanceProfile = effectRenderer.performanceProfile;
+  }
+
+  /**
+   * Load motion path for an animation
+   */
+  async loadMotionPath(animationId) {
+    try {
+      const response = await fetch(`/api/motion-paths/animation/${animationId}`);
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = await response.json();
+      if (data.success && data.motionPath) {
+        this.motionPaths.set(animationId, data.motionPath);
+        return data.motionPath;
+      }
+    } catch (error) {
+      console.error('Error loading motion path:', error);
+    }
+    return null;
+  }
+
+  /**
+   * Apply motion path to an element
+   */
+  async applyMotionPath(element, animation, motionPath) {
+    if (!element || !motionPath) return;
+
+    // Skip on low performance
+    if (this.performanceProfile === 'low') {
+      return;
+    }
+
+    // Skip if reduced motion is preferred
+    if (this.shouldReduceMotion()) {
+      return;
+    }
+
+    // Parse pathData
+    const pathData = this.parsePathData(motionPath.pathData);
+    if (!pathData || !pathData.svgPath) {
+      console.warn('Invalid path data');
+      return;
+    }
+
+    // Set CSS custom properties
+    const duration = animation.duration || 1000;
+    const delay = animation.delay || 0;
+    const easing = animation.easing || 'ease-out';
+
+    element.style.setProperty('--motion-path', `path("${pathData.svgPath}")`);
+    element.style.setProperty('--animation-duration', `${duration}ms`);
+    element.style.setProperty('--animation-delay', `${delay}ms`);
+    element.style.setProperty('--animation-easing', easing);
+
+    // Set offset-rotate based on autoOrient
+    if (motionPath.autoOrient) {
+      const rotateValue = motionPath.orientAngle === 0 
+        ? 'auto' 
+        : `auto ${motionPath.orientAngle}deg`;
+      element.style.setProperty('--motion-rotate', rotateValue);
+    } else {
+      element.style.setProperty('--motion-rotate', `${motionPath.orientAngle}deg`);
+    }
+
+    // Set anchor point
+    const anchorClass = this.getAnchorClass(motionPath.anchorPoint);
+    element.classList.add(anchorClass);
+
+    // Apply base motion path class
+    element.classList.add('motion-path-animation');
+    element.classList.add('motion-forward'); // Default animation
+
+    this.activeAnimations.add(element);
+
+    // Wait for animation to complete
+    return new Promise((resolve) => {
+      const onAnimationEnd = () => {
+        element.removeEventListener('animationend', onAnimationEnd);
+        this.activeAnimations.delete(element);
+        resolve();
+      };
+
+      element.addEventListener('animationend', onAnimationEnd);
+
+      // Fallback timeout
+      setTimeout(() => {
+        if (this.activeAnimations.has(element)) {
+          onAnimationEnd();
+        }
+      }, duration + delay + 100);
+    });
+  }
+
+  /**
+   * Parse pathData JSON string
+   */
+  parsePathData(pathDataString) {
+    try {
+      return JSON.parse(pathDataString);
+    } catch (error) {
+      console.error('Failed to parse pathData:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get CSS anchor class from anchorPoint
+   */
+  getAnchorClass(anchorPoint) {
+    const classMap = {
+      'center': 'motion-anchor-center',
+      'top-left': 'motion-anchor-top-left',
+      'top-right': 'motion-anchor-top-right',
+      'bottom-left': 'motion-anchor-bottom-left',
+      'bottom-right': 'motion-anchor-bottom-right',
+      'top': 'motion-anchor-top',
+      'bottom': 'motion-anchor-bottom',
+      'left': 'motion-anchor-left',
+      'right': 'motion-anchor-right',
+    };
+    return classMap[anchorPoint] || 'motion-anchor-center';
+  }
+
+  /**
+   * Create SVG path visualization (for debugging/preview)
+   */
+  createPathVisualization(pathData, container) {
+    const { svgPath, viewBox } = pathData;
+    
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = '1';
+    svg.style.opacity = '0.3';
+
+    if (viewBox) {
+      svg.setAttribute('viewBox', `0 0 ${viewBox.width} ${viewBox.height}`);
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    }
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', svgPath);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#3498db');
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-dasharray', '5,5');
+
+    svg.appendChild(path);
+    container.appendChild(svg);
+
+    return svg;
+  }
+
+  /**
+   * Check if browser supports CSS Motion Path
+   */
+  supportsMotionPath() {
+    const testElement = document.createElement('div');
+    return 'offsetPath' in testElement.style || 
+           'offset-path' in testElement.style ||
+           CSS.supports('offset-path', 'path("M 0 0")');
+  }
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  shouldReduceMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Stop all active motion animations
+   */
+  stop() {
+    this.activeAnimations.forEach(element => {
+      element.classList.remove('motion-path-animation');
+      element.classList.remove('motion-forward');
+      element.classList.remove('motion-backward');
+      element.classList.remove('motion-loop');
+      
+      // Remove anchor classes
+      element.classList.remove('motion-anchor-center');
+      element.classList.remove('motion-anchor-top-left');
+      element.classList.remove('motion-anchor-top-right');
+      element.classList.remove('motion-anchor-bottom-left');
+      element.classList.remove('motion-anchor-bottom-right');
+      element.classList.remove('motion-anchor-top');
+      element.classList.remove('motion-anchor-bottom');
+      element.classList.remove('motion-anchor-left');
+      element.classList.remove('motion-anchor-right');
+
+      // Clear CSS properties
+      element.style.removeProperty('--motion-path');
+      element.style.removeProperty('--motion-distance');
+      element.style.removeProperty('--motion-rotate');
+      element.style.removeProperty('--motion-anchor');
+    });
+    this.activeAnimations.clear();
+  }
+
+  /**
+   * Cleanup
+   */
+  clearCache() {
+    this.motionPaths.clear();
+    this.stop();
+  }
+
+  /**
+   * Get predefined path templates (for testing/development)
+   */
+  async loadPathTemplates() {
+    try {
+      const response = await fetch('/api/motion-paths/templates?width=300&height=300');
+      if (response.ok) {
+        const data = await response.json();
+        return data.templates || [];
+      }
+    } catch (error) {
+      console.error('Error loading path templates:', error);
+    }
+    return [];
+  }
+}
+
+// Globale Instanz
+const motionPathEngine = new MotionPathEngine();
+
+// ============================================
+// ENDE MOTION PATH ENGINE
 // ============================================
 
 let posts = [];
@@ -1711,6 +1966,7 @@ function showNextTextPage() {
 function nextPost() {
   // Stoppe aktive Animationen und cleanup
   animationEngine.stop();
+  motionPathEngine.stop(); // Stop motion path animations
   
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
   currentIndex = (currentIndex + 1) % posts.length;
@@ -1723,6 +1979,7 @@ function nextPost() {
 function previousPost() {
   // Stoppe aktive Animationen und cleanup
   animationEngine.stop();
+  motionPathEngine.stop(); // Stop motion path animations
   
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
   currentIndex = (currentIndex - 1 + posts.length) % posts.length;
