@@ -1054,6 +1054,56 @@ function logout() {
 }
 
 // ============================================
+// Posts Sortierung
+// ============================================
+function applySortToPosts(sortMode) {
+  switch(sortMode) {
+    case 'title':
+      postsCache.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      break;
+    case 'created':
+      postsCache.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      break;
+    case 'updated':
+      postsCache.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+      break;
+    case 'status':
+      postsCache.sort((a, b) => {
+        const aActive = a.isActive !== false ? 1 : 0;
+        const bActive = b.isActive !== false ? 1 : 0;
+        return bActive - aActive;
+      });
+      break;
+    case 'category':
+      postsCache.sort((a, b) => {
+        const aCat = a.category?.name || 'zzz';
+        const bCat = b.category?.name || 'zzz';
+        return aCat.localeCompare(bCat);
+      });
+      break;
+    case 'priority':
+    default:
+      postsCache.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+      break;
+  }
+}
+
+function initPostSorting() {
+  const sortSelect = document.getElementById('post-sort');
+  if (sortSelect) {
+    // Gespeicherte Sortierung wiederherstellen
+    const savedSort = localStorage.getItem('postSortMode') || 'priority';
+    sortSelect.value = savedSort;
+    
+    sortSelect.addEventListener('change', async (e) => {
+      const sortMode = e.target.value;
+      localStorage.setItem('postSortMode', sortMode);
+      await loadPosts();
+    });
+  }
+}
+
+// ============================================
 // Navigation
 // ============================================
 function navigateTo(section) {
@@ -1080,11 +1130,17 @@ function navigateTo(section) {
     document.getElementById('page-title').textContent = titles[section] || section;
 
     // Daten laden bei Navigation
-    if (section === 'posts') loadPosts();
+    if (section === 'posts') {
+      loadPosts();
+      initPostSorting();
+    }
     if (section === 'categories') loadCategories();
     if (section === 'users') loadUsers();
     if (section === 'dashboard') updateDashboardStats();
-    if (section === 'settings' && !ssoConfigLoaded) loadSSOConfiguration();
+    if (section === 'settings') {
+      if (!ssoConfigLoaded) loadSSOConfiguration();
+      loadDisplaySettings();
+    }
   }
 }
 
@@ -1136,6 +1192,10 @@ async function loadPosts() {
   try {
     const response = await apiRequest('/posts?limit=100');
     postsCache = response?.data || [];
+    
+    // Sortierung anwenden
+    const sortMode = localStorage.getItem('postSortMode') || 'priority';
+    applySortToPosts(sortMode);
 
     if (postsCache.length === 0) {
       postsList.innerHTML =
@@ -1296,6 +1356,9 @@ async function saveNewOrder() {
       }
     });
     postsCache = newPostsCache;
+    
+    // Posts neu laden um die aktualisierten Prioritäten anzuzeigen
+    await loadPosts();
   } catch (error) {
     showNotification('Fehler beim Speichern der Reihenfolge: ' + error.message, 'error');
     // Bei Fehler: Posts neu laden um konsistenten State zu haben
@@ -1746,7 +1809,9 @@ async function handlePostFormSubmit(e) {
     isPresentationUpload = file.name.toLowerCase().match(/\.(pptx?|odp|pdf|docx?)$/);
 
     try {
-      const uploadResult = await uploadFile(file);
+      // categoryId für Upload mitgeben (für Slides)
+      const categoryId = formData.get('category_id');
+      const uploadResult = await uploadFile(file, categoryId);
       mediaId = uploadResult.id;
       
       // Prüfe ob Posts bereits automatisch erstellt wurden (bei Präsentationen)
@@ -1858,9 +1923,14 @@ async function handlePostFormSubmit(e) {
 // ============================================
 // File Upload
 // ============================================
-async function uploadFile(file) {
+async function uploadFile(file, categoryId = null) {
   const formData = new FormData();
   formData.append('file', file);
+  
+  // CategoryId für Slides mitgeben
+  if (categoryId) {
+    formData.append('categoryId', categoryId);
+  }
 
   const progressDiv = document.getElementById('upload-progress');
   const progressBar = document.getElementById('upload-progress-bar');
@@ -2857,6 +2927,92 @@ async function loadSSOConfiguration() {
   }
 }
 
+// Guard für Display-Einstellungen laden
+let displaySettingsLoading = false;
+
+/**
+ * Lädt die Display-Einstellungen vom Server
+ */
+async function loadDisplaySettings() {
+  console.log('loadDisplaySettings() aufgerufen');
+  
+  // Verhindere mehrfache gleichzeitige Aufrufe
+  if (displaySettingsLoading) {
+    console.log('Display-Einstellungen werden bereits geladen, überspringe...');
+    return;
+  }
+  
+  displaySettingsLoading = true;
+  
+  try {
+    // Versuche von Backend zu laden
+    const data = await apiRequest('/settings?category=display');
+    
+    console.log('Loaded settings from backend:', data);
+
+    let settings = {};
+
+    if (data) {
+      settings = {
+        refreshInterval: data['display.refreshInterval'],
+        defaultDuration: data['display.defaultDuration']
+      };
+      
+      console.log('Parsed settings:', settings);
+    } else {
+      // Fallback zu localStorage
+      const savedDisplaySettings = localStorage.getItem('displaySettings');
+      if (savedDisplaySettings) {
+        const localSettings = JSON.parse(savedDisplaySettings);
+        settings = {
+          refreshInterval: localSettings.refreshInterval,
+          defaultDuration: localSettings.defaultDuration
+        };
+      }
+    }
+
+    const refreshInterval = document.getElementById('refresh-interval');
+    const defaultDuration = document.getElementById('default-duration');
+    
+    console.log('Form elements found:', {
+      refreshInterval,
+      defaultDuration,
+      refreshValue: settings.refreshInterval,
+      durationValue: settings.defaultDuration
+    });
+
+    if (refreshInterval && settings.refreshInterval) {
+      refreshInterval.value = settings.refreshInterval;
+    }
+    if (defaultDuration && settings.defaultDuration) {
+      defaultDuration.value = settings.defaultDuration;
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der Display-Einstellungen:', error);
+    
+    // Fallback zu localStorage bei Fehler
+    try {
+      const savedDisplaySettings = localStorage.getItem('displaySettings');
+      if (savedDisplaySettings) {
+        const settings = JSON.parse(savedDisplaySettings);
+        const refreshInterval = document.getElementById('refresh-interval');
+        const defaultDuration = document.getElementById('default-duration');
+        
+        if (refreshInterval && settings.refreshInterval) {
+          refreshInterval.value = settings.refreshInterval;
+        }
+        if (defaultDuration && settings.defaultDuration) {
+          defaultDuration.value = settings.defaultDuration;
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Fehler beim Fallback-Laden:', fallbackError);
+    }
+  } finally {
+    displaySettingsLoading = false;
+  }
+}
+
 /**
  * Aktualisiert das SSO Status-Banner
  */
@@ -3104,6 +3260,7 @@ window.addEventListener('load', async () => {
   const showUserFormBtn = document.getElementById('showUserFormBtn');
   const hideUserFormBtn = document.getElementById('hideUserFormBtn');
   const openDisplayBtn = document.getElementById('openDisplayBtn');
+  const triggerFileUploadBtn = document.getElementById('trigger-file-upload');
 
   if (quickNewPostBtn) {
     quickNewPostBtn.addEventListener('click', () => navigateTo('posts'));
@@ -3122,6 +3279,11 @@ window.addEventListener('load', async () => {
   }
   if (showUserFormBtn) {
     showUserFormBtn.addEventListener('click', showUserForm);
+  }
+  if (triggerFileUploadBtn) {
+    triggerFileUploadBtn.addEventListener('click', () => {
+      document.getElementById('media-file')?.click();
+    });
   }
   if (hideUserFormBtn) {
     hideUserFormBtn.addEventListener('click', hideUserForm);
@@ -3176,74 +3338,6 @@ window.addEventListener('load', async () => {
       }
     });
   }
-
-  // Display-Einstellungen laden
-  const loadDisplaySettings = async () => {
-    try {
-      // Versuche von Backend zu laden
-      const data = await apiRequest('/settings?category=display');
-      
-      console.log('Loaded settings from backend:', data);
-
-      let settings = {};
-
-      if (data) {
-        settings = {
-          refreshInterval: data['display.refreshInterval'],
-          defaultDuration: data['display.defaultDuration']
-        };
-        
-        console.log('Parsed settings:', settings);
-      } else {
-        // Fallback zu localStorage
-        const savedDisplaySettings = localStorage.getItem('displaySettings');
-        if (savedDisplaySettings) {
-          settings = JSON.parse(savedDisplaySettings);
-        }
-      }
-
-      // Werte in UI setzen
-      const refreshInterval = document.getElementById('refresh-interval');
-      const defaultDuration = document.getElementById('default-duration');
-      
-      console.log('Form elements found:', {
-        refreshInterval,
-        defaultDuration,
-        refreshValue: settings.refreshInterval,
-        durationValue: settings.defaultDuration
-      });
-
-      if (refreshInterval && settings.refreshInterval) {
-        refreshInterval.value = settings.refreshInterval;
-      }
-      if (defaultDuration && settings.defaultDuration) {
-        defaultDuration.value = settings.defaultDuration;
-      }
-    } catch (error) {
-      console.error('Fehler beim Laden der Display-Einstellungen:', error);
-      
-      // Fallback zu localStorage bei Fehler
-      try {
-        const savedDisplaySettings = localStorage.getItem('displaySettings');
-        if (savedDisplaySettings) {
-          const settings = JSON.parse(savedDisplaySettings);
-          const refreshInterval = document.getElementById('refresh-interval');
-          const defaultDuration = document.getElementById('default-duration');
-          
-          if (refreshInterval && settings.refreshInterval) {
-            refreshInterval.value = settings.refreshInterval;
-          }
-          if (defaultDuration && settings.defaultDuration) {
-            defaultDuration.value = settings.defaultDuration;
-          }
-        }
-      } catch (fallbackError) {
-        console.error('Fehler beim Fallback-Laden:', fallbackError);
-      }
-    }
-  };
-
-  loadDisplaySettings();
 
   // Passwort ändern Modal
   const changePasswordBtn = document.getElementById('changePasswordBtn');
@@ -3470,12 +3564,32 @@ async function importDocument() {
  * Update visibility of document import button based on content type
  */
 function updateDocumentImportVisibility() {
-  const importBtn = document.getElementById('import-document-btn');
+  const uploadSection = document.getElementById('upload-section');
+  const wordPdfImport = document.getElementById('word-pdf-import');
+  const mediaUrlSection = document.getElementById('media-url-section');
+  const fileUploadSection = document.getElementById('file-upload-section');
   const contentType = document.getElementById('post-type')?.value;
   
-  if (importBtn) {
-    // Show import button for text and html types
-    importBtn.style.display = ['text', 'html'].includes(contentType) ? 'inline-block' : 'none';
+  if (!uploadSection) return;
+  
+  // Alle Subsections verstecken
+  if (wordPdfImport) wordPdfImport.style.display = 'none';
+  if (mediaUrlSection) mediaUrlSection.style.display = 'none';
+  if (fileUploadSection) fileUploadSection.style.display = 'none';
+  
+  // Je nach Typ richtige Sektion anzeigen
+  if (['text', 'html'].includes(contentType)) {
+    // Text/HTML: Nur Word/PDF Import
+    uploadSection.style.display = 'block';
+    if (wordPdfImport) wordPdfImport.style.display = 'block';
+  } else if (['image', 'video', 'presentation', 'pdf', 'word'].includes(contentType)) {
+    // Andere Typen: URL + File Upload
+    uploadSection.style.display = 'block';
+    if (mediaUrlSection) mediaUrlSection.style.display = 'block';
+    if (fileUploadSection) fileUploadSection.style.display = 'block';
+  } else {
+    // Kein Upload bei HTML
+    uploadSection.style.display = 'none';
   }
 }
 

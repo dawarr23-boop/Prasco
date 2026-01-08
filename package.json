@@ -1,6 +1,6 @@
 {
   "name": "digital-bulletin-board",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Enterprise Digital Signage Platform - PRASCO",
   "main": "dist/server.js",
   "scripts": {

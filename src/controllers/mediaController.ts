@@ -30,6 +30,7 @@ export const uploadMedia = async (
     const file = req.file;
     const userId = req.user!.id;
     const organizationId = req.user!.organizationId;
+    const categoryId = req.body.categoryId ? parseInt(req.body.categoryId) : null;
 
     // Check if it's a PowerPoint file
     if (PRESENTATION_MIME_TYPES.includes(file.mimetype)) {
@@ -76,13 +77,15 @@ export const uploadMedia = async (
           content: '',
           contentType: 'image',
           mediaId: slideMedia.id,
+          categoryId: categoryId || undefined,
           organizationId: organizationId || undefined,
           createdBy: userId,
           startDate: new Date(),
           endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 Tage
           duration: 10, // 10 Sekunden pro Folie
-          priority: 1000 + slide.slideNumber, // Hohe Priority für Slides, damit sie vor normalen Posts erscheinen
+          priority: 20000 - slide.slideNumber, // Folie 1 = höchste Priorität (19999), dann absteigend
           isActive: true,
+          showTitle: false,
         });
         createdPosts.push(slidePost.id);
       }

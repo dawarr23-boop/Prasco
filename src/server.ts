@@ -81,7 +81,7 @@ app.use(
         formAction: ["'self'"],
         frameAncestors: ["'self'"],
         objectSrc: ["'none'"],
-        scriptSrcAttr: ["'none'"],
+        scriptSrcAttr: ["'unsafe-inline'"], // Erlaubt inline event handler für dynamische Controls
         // Only upgrade insecure requests when SSL is enabled
         ...(SSL_ENABLED ? { upgradeInsecureRequests: [] } : {}),
       },

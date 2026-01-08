@@ -121,6 +121,9 @@ chromium-browser \
   --autoplay-policy=no-user-gesture-required \
   --check-for-update-interval=31536000 \
   --start-fullscreen \
+  --ignore-certificate-errors \
+  --disable-web-security \
+  --allow-insecure-localhost \
   http://localhost:3000
 EOF
 

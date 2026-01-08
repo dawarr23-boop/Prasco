@@ -406,25 +406,56 @@ function checkPresentationMode() {
 function createPresentationControls() {
   const controlsHtml = `
     <div class="presentation-controls" id="presentation-controls">
-      <button class="pres-btn pres-prev" onclick="previousPost()" title="Vorheriger Beitrag (←)">
+      <button class="pres-btn pres-prev" id="pres-prev" title="Vorheriger Beitrag (←)">
         ◀
       </button>
       <div class="pres-info">
         <span class="pres-mode-label">VORTRAGSMODUS</span>
         <span class="pres-counter" id="pres-counter">1 / 1</span>
       </div>
-      <button class="pres-btn pres-next" onclick="nextPost()" title="Nächster Beitrag (→)">
+      <button class="pres-btn pres-next" id="pres-next" title="Nächster Beitrag (→)">
         ▶
       </button>
-      <button class="pres-btn pres-toggle" id="pres-toggle" onclick="toggleAutoRotation()" title="Auto-Rotation umschalten">
+      <button class="pres-btn pres-toggle" id="pres-toggle" title="Auto-Rotation umschalten">
         ▷
       </button>
-      <button class="pres-btn pres-exit" onclick="exitPresentationMode()" title="Vortragsmodus beenden">
+      <button class="pres-btn pres-exit" id="pres-exit" title="Vortragsmodus beenden">
         ✕
       </button>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', controlsHtml);
+  
+  // Event-Listener für Buttons (nach DOM-Insert)
+  setTimeout(() => {
+    const prevBtn = document.getElementById('pres-prev');
+    const nextBtn = document.getElementById('pres-next');
+    const toggleBtn = document.getElementById('pres-toggle');
+    const exitBtn = document.getElementById('pres-exit');
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => previousPost());
+    if (nextBtn) nextBtn.addEventListener('click', () => nextPost());
+    if (toggleBtn) toggleBtn.addEventListener('click', () => toggleAutoRotation());
+    if (exitBtn) exitBtn.addEventListener('click', () => exitPresentationMode());
+  }, 0);
+  
+  // Auto-Hide nach 3 Sekunden Inaktivität
+  let hideTimeout;
+  const controls = document.getElementById('presentation-controls');
+  
+  function showControls() {
+    controls.classList.add('visible');
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      controls.classList.remove('visible');
+    }, 3000);
+  }
+  
+  // Zeige Controls bei Mausbewegung
+  document.addEventListener('mousemove', showControls);
+  
+  // Initial anzeigen
+  showControls();
 }
 
 // Toggle Auto-Rotation im Vortragsmodus
@@ -704,7 +735,7 @@ function displayCurrentPost() {
         if (youtubeMatch) {
           const videoId = youtubeMatch[1];
           // YouTube iframe - mute abhängig von globaler Musik
-          videoHtml = `<div class="video-fullscreen-container" ${!shouldMuteVideo ? `onclick="this.querySelector('iframe').src = this.querySelector('iframe').src.replace('mute=1', 'mute=0');"` : ''}>
+          videoHtml = `<div class="video-fullscreen-container" data-video-id="${videoId}" data-unmute="${!shouldMuteVideo}">
             <iframe 
               id="youtube-player"
               src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&loop=1&playlist=${videoId}&controls=1&rel=0&playsinline=1&enablejsapi=1&modestbranding=1&iv_load_policy=3&fs=1" 

@@ -1,7 +1,15 @@
 // Admin Login JavaScript
 
+// Verhindere mehrfache Event-Listener
+let loginInProgress = false;
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  // Verhindere mehrfache gleichzeitige Login-Versuche
+  if (loginInProgress) {
+    return;
+  }
 
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -13,6 +21,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   errorMessage.style.display = 'none';
   submitButton.disabled = true;
   submitButton.textContent = 'Anmelden...';
+  loginInProgress = true;
 
   try {
     // API-Authentifizierung mit REST Backend
@@ -58,6 +67,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Button wieder aktivieren
     submitButton.disabled = false;
     submitButton.textContent = 'Anmelden';
+  } finally {
+    // Stelle sicher, dass das Flag immer zurückgesetzt wird
+    loginInProgress = false;
   }
 });
 

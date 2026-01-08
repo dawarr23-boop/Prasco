@@ -667,20 +667,24 @@ unclutter -idle 0.1 -root &
 # Chromium im Kiosk-Modus starten
 # --autoplay-policy für Video mit Ton
 # --disable-features=TranslateUI deaktiviert Übersetzungs-Popup
-chromium-browser \\
-    --kiosk \\
-    --noerrdialogs \\
-    --disable-infobars \\
-    --disable-session-crashed-bubble \\
-    --disable-restore-session-state \\
-    --autoplay-policy=no-user-gesture-required \\
-    --check-for-update-interval=31536000 \\
-    --disable-component-update \\
-    --disable-features=TranslateUI \\
-    --no-first-run \\
-    --start-fullscreen \\
-    --disable-pinch \\
-    --overscroll-history-navigation=0 \\
+# --ignore-certificate-errors erlaubt selbstsignierte SSL-Zertifikate
+chromium-browser \
+    --kiosk \
+    --noerrdialogs \
+    --disable-infobars \
+    --disable-session-crashed-bubble \
+    --disable-restore-session-state \
+    --autoplay-policy=no-user-gesture-required \
+    --check-for-update-interval=31536000 \
+    --disable-component-update \
+    --disable-features=TranslateUI \
+    --no-first-run \
+    --start-fullscreen \
+    --disable-pinch \
+    --overscroll-history-navigation=0 \
+    --ignore-certificate-errors \
+    --disable-web-security \
+    --allow-insecure-localhost \
     http://localhost:$SERVER_PORT/public/display.html
 
 EOF
