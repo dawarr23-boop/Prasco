@@ -1386,6 +1386,11 @@ async function showPostForm() {
   
   // Document import button visibility
   updateDocumentImportVisibility();
+
+  // Transition-Picker für neuen Post zurücksetzen
+  if (window.transitionPicker) {
+    window.transitionPicker.show(null, null);
+  }
 }
 
 async function loadCategoryDropdown() {
@@ -1429,6 +1434,11 @@ function hidePostForm() {
   if (musicPreview) {
     musicPreview.pause();
     musicPreview.src = '';
+  }
+
+  // Transition-Picker verbergen
+  if (window.transitionPicker) {
+    window.transitionPicker.hide();
   }
 }
 
@@ -1525,6 +1535,19 @@ async function editPost(id) {
 
   // Hintergrundmusik-Sektion je nach Content-Type ein/ausblenden
   updateBackgroundMusicVisibility(post.contentType);
+
+  // Transition-Picker laden und anzeigen mit aktuellen Daten
+  if (window.transitionPicker) {
+    try {
+      const transitionResponse = await apiRequest(`/api/transitions/${post.id}`);
+      const currentTransition = transitionResponse?.data || null;
+      window.transitionPicker.show(post.id, currentTransition);
+    } catch (error) {
+      // Kein Fehler anzeigen wenn keine Transition existiert
+      console.log('Keine Transition für Post gefunden oder Fehler:', error.message);
+      window.transitionPicker.show(post.id, null);
+    }
+  }
 }
 
 // Helper: Datum für datetime-local Input formatieren
@@ -1896,6 +1919,8 @@ async function handlePostFormSubmit(e) {
   }
 
   try {
+    let savedPostId = currentPostId;
+    
     if (currentPostId) {
       // Update
       await apiRequest(`/posts/${currentPostId}`, {
@@ -1905,11 +1930,29 @@ async function handlePostFormSubmit(e) {
       showNotification('Beitrag erfolgreich aktualisiert!', 'success');
     } else {
       // Create
-      await apiRequest('/posts', {
+      const response = await apiRequest('/posts', {
         method: 'POST',
         body: JSON.stringify(postData),
       });
+      savedPostId = response.data?.id;
       showNotification('Beitrag erfolgreich erstellt!', 'success');
+    }
+
+    // Transition separat speichern (PowerPoint-Effekt)
+    if (savedPostId && window.transitionPicker) {
+      const transitionData = window.transitionPicker.getSelectedTransition();
+      if (transitionData) {
+        try {
+          await apiRequest(`/api/transitions/${savedPostId}`, {
+            method: 'PUT',
+            body: JSON.stringify(transitionData),
+          });
+          console.log('Transition erfolgreich gespeichert');
+        } catch (transitionError) {
+          console.error('Fehler beim Speichern der Transition:', transitionError);
+          // Kein User-Fehler anzeigen, da Post erfolgreich gespeichert wurde
+        }
+      }
     }
 
     hidePostForm();
@@ -3440,6 +3483,12 @@ window.addEventListener('load', async () => {
   await loadPosts();
   await loadCategories();
 
+  // Transition-Picker initialisieren (PowerPoint-Effekte)
+  if (typeof TransitionPicker !== 'undefined') {
+    window.transitionPicker = new TransitionPicker('transition-picker-container');
+    await window.transitionPicker.init();
+  }
+
   // SSO-Einstellungen initialisieren (nur für Super-Admin)
   await initSSOSettings();
 
@@ -3623,3 +3672,457 @@ document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async ()
 });
 
 console.log('Admin Dashboard geladen (API-Modus)');
+
+// ============================================
+// PRASCO 2.0 - TRANSITION PICKER
+// ============================================
+
+/**
+ * TransitionPicker Class
+ * Ermöglicht Auswahl und Konfiguration von Slide-Transitions
+ */
+class TransitionPicker {
+  constructor(containerId, onSelect) {
+    this.container = document.getElementById(containerId);
+    this.onSelect = onSelect;
+    this.transitions = [];
+    this.selectedTransition = null;
+    this.currentConfig = {
+      transitionType: 'fade',
+      direction: null,
+      duration: 800,
+      easing: 'ease-in-out',
+      delay: 0
+    };
+  }
+
+  async init() {
+    await this.loadTransitions();
+    this.render();
+    this.attachEventListeners();
+  }
+
+  async loadTransitions() {
+    try {
+      const response = await apiRequest('/transitions');
+      if (response.success && response.transitions) {
+        this.transitions = Object.entries(response.transitions).map(([key, value]) => ({
+          type: key,
+          ...value
+        }));
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Transitions:', error);
+      showNotification('Fehler beim Laden der Übergänge', 'error');
+    }
+  }
+
+  render() {
+    if (!this.container) return;
+
+    const html = `
+      <div class="transition-picker">
+        <div class="transition-picker-header">
+          <h3>🎬 Übergangseffekt wählen</h3>
+          <p class="transition-picker-subtitle">Wählen Sie einen Effekt für den Wechsel zu diesem Beitrag</p>
+        </div>
+
+        <div class="transition-gallery">
+          ${this.transitions.map(t => this.renderTransitionCard(t)).join('')}
+        </div>
+
+        <div class="transition-config" id="transition-config" style="display: none;">
+          <h4>Einstellungen</h4>
+          
+          <div class="form-group" id="direction-group" style="display: none;">
+            <label>Richtung</label>
+            <select id="transition-direction" class="form-control">
+              <option value="">-- Bitte wählen --</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Dauer (ms)</label>
+            <input type="range" id="transition-duration" class="form-range" min="200" max="2000" step="100" value="800">
+            <span class="range-value" id="duration-value">800ms</span>
+          </div>
+
+          <div class="form-group">
+            <label>Easing</label>
+            <select id="transition-easing" class="form-control">
+              <option value="linear">Linear</option>
+              <option value="ease">Ease</option>
+              <option value="ease-in">Ease In</option>
+              <option value="ease-out">Ease Out</option>
+              <option value="ease-in-out" selected>Ease In-Out</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Verzögerung (ms)</label>
+            <input type="number" id="transition-delay" class="form-control" value="0" min="0" max="5000" step="100">
+          </div>
+
+          <div class="transition-actions">
+            <button type="button" class="btn btn-secondary" id="preview-transition-btn">
+              👁️ Vorschau
+            </button>
+            <button type="button" class="btn btn-danger" id="remove-transition-btn">
+              🗑️ Entfernen
+            </button>
+            <button type="button" class="btn btn-primary" id="apply-transition-btn">
+              ✅ Anwenden
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    this.container.innerHTML = html;
+  }
+
+  renderTransitionCard(transition) {
+    const isSelected = this.selectedTransition?.type === transition.type;
+    const performanceIcon = {
+      excellent: '🟢',
+      good: '🟡',
+      medium: '🟠'
+    }[transition.performance] || '⚪';
+
+    return `
+      <div class="transition-card ${isSelected ? 'selected' : ''}" data-type="${transition.type}">
+        <div class="transition-preview">
+          <div class="transition-preview-box">
+            <div class="preview-slide prev">A</div>
+            <div class="preview-slide next">B</div>
+          </div>
+        </div>
+        <div class="transition-info">
+          <h4>${transition.displayName || transition.name}</h4>
+          <p class="transition-desc">${transition.description}</p>
+          <div class="transition-meta">
+            <span class="badge badge-${transition.complexity || 'low'}">${transition.complexity || 'low'}</span>
+            <span class="performance-indicator" title="Performance">${performanceIcon}</span>
+            ${transition.requires3D ? '<span class="badge badge-3d">3D</span>' : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  attachEventListeners() {
+    // Transition-Karten klickbar machen
+    this.container.querySelectorAll('.transition-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const type = card.dataset.type;
+        this.selectTransition(type);
+      });
+    });
+
+    // Duration Slider
+    const durationSlider = document.getElementById('transition-duration');
+    const durationValue = document.getElementById('duration-value');
+    if (durationSlider && durationValue) {
+      durationSlider.addEventListener('input', (e) => {
+        durationValue.textContent = `${e.target.value}ms`;
+        this.currentConfig.duration = parseInt(e.target.value);
+      });
+    }
+
+    // Direction Select
+    const directionSelect = document.getElementById('transition-direction');
+    if (directionSelect) {
+      directionSelect.addEventListener('change', (e) => {
+        this.currentConfig.direction = e.target.value || null;
+      });
+    }
+
+    // Easing Select
+    const easingSelect = document.getElementById('transition-easing');
+    if (easingSelect) {
+      easingSelect.addEventListener('change', (e) => {
+        this.currentConfig.easing = e.target.value;
+      });
+    }
+
+    // Delay Input
+    const delayInput = document.getElementById('transition-delay');
+    if (delayInput) {
+      delayInput.addEventListener('change', (e) => {
+        this.currentConfig.delay = parseInt(e.target.value) || 0;
+      });
+    }
+
+    // Action Buttons
+    document.getElementById('preview-transition-btn')?.addEventListener('click', () => {
+      this.previewTransition();
+    });
+
+    document.getElementById('remove-transition-btn')?.addEventListener('click', () => {
+      this.removeTransition();
+    });
+
+    document.getElementById('apply-transition-btn')?.addEventListener('click', () => {
+      this.applyTransition();
+    });
+  }
+
+  selectTransition(type) {
+    this.selectedTransition = this.transitions.find(t => t.type === type);
+    
+    if (!this.selectedTransition) return;
+
+    // Update UI
+    this.container.querySelectorAll('.transition-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.type === type);
+    });
+
+    // Update Config
+    this.currentConfig.transitionType = type;
+    this.currentConfig.duration = this.selectedTransition.defaultDuration || 800;
+    this.currentConfig.easing = this.selectedTransition.defaultEasing || 'ease-in-out';
+
+    // Show Config Panel
+    const configPanel = document.getElementById('transition-config');
+    if (configPanel) configPanel.style.display = 'block';
+
+    // Update Direction Dropdown
+    this.updateDirectionOptions();
+
+    // Update Form Values
+    document.getElementById('transition-duration').value = this.currentConfig.duration;
+    document.getElementById('duration-value').textContent = `${this.currentConfig.duration}ms`;
+    document.getElementById('transition-easing').value = this.currentConfig.easing;
+  }
+
+  updateDirectionOptions() {
+    const directionGroup = document.getElementById('direction-group');
+    const directionSelect = document.getElementById('transition-direction');
+
+    if (!this.selectedTransition.hasDirection) {
+      directionGroup.style.display = 'none';
+      this.currentConfig.direction = null;
+      return;
+    }
+
+    directionGroup.style.display = 'block';
+    
+    const directions = this.selectedTransition.directions || [];
+    directionSelect.innerHTML = `
+      <option value="">-- Bitte wählen --</option>
+      ${directions.map(dir => `<option value="${dir}">${this.getDirectionLabel(dir)}</option>`).join('')}
+    `;
+
+    // Set first direction as default
+    if (directions.length > 0) {
+      directionSelect.value = directions[0];
+      this.currentConfig.direction = directions[0];
+    }
+  }
+
+  getDirectionLabel(direction) {
+    const labels = {
+      left: 'Links',
+      right: 'Rechts',
+      up: 'Oben',
+      down: 'Unten',
+      in: 'Hinein',
+      out: 'Heraus',
+      horizontal: 'Horizontal',
+      vertical: 'Vertikal'
+    };
+    return labels[direction] || direction;
+  }
+
+  async previewTransition() {
+    if (!this.selectedTransition) return;
+
+    // Erstelle Preview-Modal
+    const modal = document.createElement('div');
+    modal.className = 'transition-preview-modal';
+    modal.innerHTML = `
+      <div class="transition-preview-content">
+        <div class="preview-controls">
+          <h3>Vorschau: ${this.selectedTransition.displayName}</h3>
+          <button type="button" class="btn btn-secondary" id="close-preview-btn">Schließen</button>
+        </div>
+        <div class="preview-stage">
+          <div class="preview-slide-full active" id="preview-slide-1">
+            <h2>Beitrag A</h2>
+            <p>Dies ist der aktuelle Beitrag</p>
+          </div>
+          <div class="preview-slide-full" id="preview-slide-2">
+            <h2>Beitrag B</h2>
+            <p>Dies ist der nächste Beitrag</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-large" id="replay-preview-btn">
+          🔄 Noch einmal abspielen
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Close Button
+    document.getElementById('close-preview-btn').addEventListener('click', () => {
+      modal.remove();
+    });
+
+    // Replay Button
+    const replayBtn = document.getElementById('replay-preview-btn');
+    replayBtn.addEventListener('click', () => {
+      this.runPreviewAnimation();
+    });
+
+    // Run initial animation
+    setTimeout(() => this.runPreviewAnimation(), 500);
+  }
+
+  runPreviewAnimation() {
+    const slide1 = document.getElementById('preview-slide-1');
+    const slide2 = document.getElementById('preview-slide-2');
+
+    if (!slide1 || !slide2) return;
+
+    // Reset
+    slide1.className = 'preview-slide-full active';
+    slide2.className = 'preview-slide-full';
+    slide1.style.display = 'flex';
+    slide2.style.display = 'none';
+
+    // Import EffectRenderer from display.js context
+    const renderer = new EffectRenderer();
+
+    setTimeout(() => {
+      renderer.performTransition(slide1, slide2, this.currentConfig);
+    }, 100);
+  }
+
+  applyTransition() {
+    if (!this.selectedTransition) {
+      showNotification('Bitte wählen Sie einen Übergang aus', 'warning');
+      return;
+    }
+
+    if (this.selectedTransition.hasDirection && !this.currentConfig.direction) {
+      showNotification('Bitte wählen Sie eine Richtung', 'warning');
+      return;
+    }
+
+    if (this.onSelect) {
+      this.onSelect(this.currentConfig);
+    }
+
+    showNotification(`✅ Übergang "${this.selectedTransition.displayName}" angewendet`, 'success');
+  }
+
+  removeTransition() {
+    this.selectedTransition = null;
+    this.currentConfig = {
+      transitionType: 'fade',
+      direction: null,
+      duration: 800,
+      easing: 'ease-in-out',
+      delay: 0
+    };
+
+    // Hide config panel
+    const configPanel = document.getElementById('transition-config');
+    if (configPanel) configPanel.style.display = 'none';
+
+    // Deselect all cards
+    this.container.querySelectorAll('.transition-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+
+    if (this.onSelect) {
+      this.onSelect(null);
+    }
+
+    showNotification('Übergang entfernt', 'info');
+  }
+
+  // Load existing transition for a post
+  async loadTransitionForPost(postId) {
+    try {
+      const response = await apiRequest(`/posts/${postId}/transition`);
+      if (response.success && response.transition) {
+        this.currentConfig = {
+          transitionType: response.transition.transitionType,
+          direction: response.transition.direction,
+          duration: response.transition.duration,
+          easing: response.transition.easing,
+          delay: response.transition.delay || 0
+        };
+        this.selectTransition(this.currentConfig.transitionType);
+        return this.currentConfig;
+      }
+    } catch (error) {
+      // Kein Transition vorhanden (404 ist OK)
+      console.log('No transition configured for post');
+    }
+    return null;
+  }
+
+  // Save transition for a post
+  async saveTransitionForPost(postId) {
+    if (!this.selectedTransition) return;
+
+    try {
+      const response = await apiRequest(`/posts/${postId}/transition`, {
+        method: 'POST',
+        body: JSON.stringify(this.currentConfig)
+      });
+
+      if (response.success) {
+        showNotification('✅ Übergang gespeichert', 'success');
+        return true;
+      }
+    } catch (error) {
+      console.error('Fehler beim Speichern des Übergangs:', error);
+      showNotification('❌ Fehler beim Speichern', 'error');
+    }
+    return false;
+  }
+}
+
+// Global instance for use in post editor
+let transitionPicker = null;
+
+/**
+ * Initialize Transition Picker in Post Modal
+ */
+function initTransitionPickerInModal() {
+  const container = document.getElementById('transition-picker-container');
+  if (!container) {
+    console.warn('Transition Picker Container nicht gefunden');
+    return;
+  }
+
+  transitionPicker = new TransitionPicker('transition-picker-container', (config) => {
+    // Store config for later save
+    window.currentPostTransition = config;
+  });
+
+  transitionPicker.init();
+}
+
+// Hook into existing showPostModal function
+const originalShowPostModal = window.showPostModal;
+if (originalShowPostModal) {
+  window.showPostModal = function(...args) {
+    originalShowPostModal.apply(this, args);
+    
+    // Initialize transition picker after modal is shown
+    setTimeout(() => {
+      initTransitionPickerInModal();
+      
+      // Load existing transition if editing
+      if (args[0]) { // postId exists
+        transitionPicker?.loadTransitionForPost(args[0]);
+      }
+    }, 100);
+  };
+}
+

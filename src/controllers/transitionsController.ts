@@ -7,7 +7,7 @@ import effectPresets from '../../config/effect-presets.json';
  * GET /api/transitions
  * Liefert alle verfügbaren Transition-Presets
  */
-export const getAvailableTransitions = async (req: Request, res: Response) => {
+export const getAvailableTransitions = async (_req: Request, res: Response) => {
   try {
     res.json({
       success: true,
@@ -34,10 +34,11 @@ export const getPostTransition = async (req: Request, res: Response) => {
     // Prüfe ob Post existiert
     const post = await Post.findByPk(postId);
     if (!post) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Post nicht gefunden',
       });
+      return;
     }
 
     // Finde Transition
@@ -46,10 +47,11 @@ export const getPostTransition = async (req: Request, res: Response) => {
     });
 
     if (!transition) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Keine Transition für diesen Post konfiguriert',
       });
+      return;
     }
 
     res.json({
@@ -77,28 +79,31 @@ export const setPostTransition = async (req: Request, res: Response) => {
 
     // Validierung
     if (!transitionType) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'transitionType ist erforderlich',
       });
+      return;
     }
 
     // Prüfe ob Post existiert
     const post = await Post.findByPk(postId);
     if (!post) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Post nicht gefunden',
       });
+      return;
     }
 
     // Prüfe ob Transition-Typ valid ist
     const validTypes = Object.keys(effectPresets.transitions);
     if (!validTypes.includes(transitionType)) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: `Ungültiger Transition-Typ. Erlaubt: ${validTypes.join(', ')}`,
       });
+      return;
     }
 
     // Finde oder erstelle Transition
@@ -141,10 +146,11 @@ export const deletePostTransition = async (req: Request, res: Response) => {
     });
 
     if (deleted === 0) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Keine Transition zum Löschen gefunden',
       });
+      return;
     }
 
     res.json({
@@ -165,7 +171,7 @@ export const deletePostTransition = async (req: Request, res: Response) => {
  * GET /api/posts/with-transitions
  * Liefert alle Posts mit ihren Transitions
  */
-export const getPostsWithTransitions = async (req: Request, res: Response) => {
+export const getPostsWithTransitions = async (_req: Request, res: Response) => {
   try {
     const posts = await Post.findAll({
       include: [

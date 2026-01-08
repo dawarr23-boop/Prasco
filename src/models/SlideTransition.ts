@@ -44,14 +44,6 @@ class SlideTransition
   public isValid(): boolean {
     const validTypes = ['fade', 'slide', 'zoom', 'wipe', 'push', 'cube', 'flip', 'morph'];
     const validDirections = ['left', 'right', 'up', 'down', 'in', 'out'];
-    const validEasings = [
-      'linear',
-      'ease',
-      'ease-in',
-      'ease-out',
-      'ease-in-out',
-      'cubic-bezier',
-    ];
 
     if (!validTypes.includes(this.transitionType)) {
       return false;
