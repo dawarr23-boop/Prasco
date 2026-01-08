@@ -7,6 +7,8 @@ import Permission from './Permission';
 import RolePermission from './RolePermission';
 import UserPermission from './UserPermission';
 import Setting from './Setting';
+import SlideTransition from './SlideTransition';
+import ElementAnimation from './ElementAnimation';
 
 // Define associations
 
@@ -134,7 +136,30 @@ Permission.belongsToMany(User, {
   as: 'users',
 });
 
-export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting };
+// Post -> SlideTransition (1:1) - Already defined in SlideTransition.ts
+// Post -> ElementAnimations (1:N)
+Post.hasMany(ElementAnimation, {
+  foreignKey: 'postId',
+  as: 'elementAnimations',
+});
+ElementAnimation.belongsTo(Post, {
+  foreignKey: 'postId',
+  as: 'post',
+});
+
+export { 
+  User, 
+  Organization, 
+  Category, 
+  Media, 
+  Post, 
+  Permission, 
+  RolePermission, 
+  UserPermission, 
+  Setting,
+  SlideTransition,
+  ElementAnimation,
+};
 
 export default {
   User,
@@ -146,4 +171,6 @@ export default {
   RolePermission,
   UserPermission,
   Setting,
+  SlideTransition,
+  ElementAnimation,
 };
