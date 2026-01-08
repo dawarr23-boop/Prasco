@@ -1888,10 +1888,9 @@ function displayCurrentPost() {
   }, 10);
 
   // ============================================
-  // ELEMENT ANIMATIONS ABSPIELEN (DEAKTIVIERT)
+  // ELEMENT ANIMATIONS ABSPIELEN
   // ============================================
   // Lade und spiele Element-Animationen ab (wenn vorhanden)
-  /*
   (async () => {
     try {
       const animations = await animationEngine.loadAnimations(post.id);
@@ -1905,7 +1904,6 @@ function displayCurrentPost() {
       console.error('Fehler beim Laden der Element-Animationen:', error);
     }
   })();
-  */
 
   // Nächster Post nach Duration (nicht im Vortragsmodus wenn pausiert)
   clearTimeout(autoRotateTimer);
