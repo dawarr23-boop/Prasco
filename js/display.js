@@ -1696,6 +1696,230 @@ function renderTextPage(pageText, pageIndex, totalPages, showTitle = false, titl
   `;
 }
 
+// ============================================
+// SLIDE TRANSITION INTEGRATION
+// ============================================
+
+/**
+ * Display post with slide transition
+ */
+async function displayPostWithTransition(fromIndex, toIndex) {
+  if (posts.length === 0) {
+    showNoContent();
+    return;
+  }
+
+  const container = document.getElementById('current-post');
+  const fromPost = fromIndex >= 0 && fromIndex < posts.length ? posts[fromIndex] : null;
+  const toPost = posts[toIndex];
+  
+  // Load transition config for the new post
+  let transitionConfig = null;
+  try {
+    const response = await fetch(`/api/transitions/post/${toPost.id}`);
+    if (response.ok) {
+      transitionConfig = await response.json();
+    }
+  } catch (error) {
+    console.log('No transition configured, using default fade');
+  }
+  
+  // Default transition if none configured
+  if (!transitionConfig) {
+    transitionConfig = {
+      transitionType: 'fade',
+      duration: 600,
+      easing: 'ease-in-out',
+      direction: 'left'
+    };
+  }
+  
+  // Create temporary containers for transition
+  const oldContainer = document.createElement('div');
+  oldContainer.className = 'post transition-old';
+  oldContainer.innerHTML = container.innerHTML;
+  oldContainer.style.position = 'absolute';
+  oldContainer.style.top = '0';
+  oldContainer.style.left = '0';
+  oldContainer.style.width = '100%';
+  oldContainer.style.height = '100%';
+  
+  const newContainer = document.createElement('div');
+  newContainer.className = 'post transition-new';
+  newContainer.style.position = 'absolute';
+  newContainer.style.top = '0';
+  newContainer.style.left = '0';
+  newContainer.style.width = '100%';
+  newContainer.style.height = '100%';
+  newContainer.style.display = 'none';
+  
+  // Render new post content into newContainer
+  renderPostContent(toPost, newContainer);
+  
+  // Add containers to parent
+  container.style.position = 'relative';
+  container.innerHTML = '';
+  container.appendChild(oldContainer);
+  container.appendChild(newContainer);
+  
+  // Perform transition
+  try {
+    await effectRenderer.performTransition(oldContainer, newContainer, transitionConfig);
+  } catch (error) {
+    console.error('Transition error:', error);
+  }
+  
+  // Cleanup: Move newContainer content back to main container
+  container.style.position = '';
+  container.innerHTML = newContainer.innerHTML;
+  container.className = newContainer.className.replace('transition-new', '');
+  
+  // Update header category
+  updateHeaderCategory(toPost.category_id);
+  
+  // Post-transition tasks
+  playBackgroundMusic(toPost);
+  updateGlobalMusicIndicator();
+  
+  // Load and play element animations
+  (async () => {
+    try {
+      const animations = await animationEngine.loadAnimations(toPost.id);
+      if (animations && animations.length > 0) {
+        setTimeout(() => {
+          animationEngine.playAnimations(toPost.id, container);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Element-Animationen:', error);
+    }
+  })();
+  
+  // Setup auto-rotate timer
+  clearTimeout(autoRotateTimer);
+  if (!presentationModeState.isActive || !presentationModeState.isPaused) {
+    const duration = (toPost.display_duration || 10) * 1000;
+    autoRotateTimer = setTimeout(() => {
+      if (textPaginationState.isActive && textPaginationState.currentPage < textPaginationState.pages.length - 1) {
+        showNextTextPage();
+      } else {
+        nextPost();
+      }
+    }, duration);
+  }
+}
+
+/**
+ * Render post content into a container
+ */
+function renderPostContent(post, container) {
+  container.classList.add(`type-${post.content_type}`);
+  
+  let html = '';
+  
+  switch (post.content_type) {
+    case 'text':
+      const textContent = post.content || '';
+      const maxCharsPerPage = 1500;
+      
+      if (textContent.length > maxCharsPerPage) {
+        textPaginationState.pages = splitTextIntoPages(textContent, maxCharsPerPage);
+        textPaginationState.isActive = true;
+        textPaginationState.postId = post.id;
+        textPaginationState.currentPage = 0;
+        html = renderTextPage(textPaginationState.pages[0], 0, textPaginationState.pages.length, post.show_title, post.title);
+      } else {
+        html = `
+          ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+          <p>${escapeHtml(textContent)}</p>
+        `;
+      }
+      break;
+
+    case 'image':
+      html = `
+        ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+        ${post.media_url ? `<img src="${escapeHtml(post.media_url)}" alt="${escapeHtml(post.title)}">` : ''}
+        ${post.content ? `<p>${escapeHtml(post.content)}</p>` : ''}
+      `;
+      break;
+
+    case 'video':
+      let videoHtml = '';
+      loadGlobalMusicSettings();
+      const shouldMuteVideo = globalMusicSettings.enabled && globalMusicSettings.muteVideos && globalMusicSettings.url;
+      const muteParam = shouldMuteVideo ? '1' : '0';
+
+      if (post.media_url) {
+        const youtubeMatch = post.media_url.match(
+          /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/
+        );
+
+        if (youtubeMatch) {
+          const videoId = youtubeMatch[1];
+          videoHtml = `<div class="video-fullscreen-container" data-video-id="${videoId}" data-unmute="${!shouldMuteVideo}">
+            <iframe 
+              id="youtube-player"
+              src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&loop=1&playlist=${videoId}&controls=1&rel=0&playsinline=1&enablejsapi=1&modestbranding=1&iv_load_policy=3&fs=1" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; autoplay" 
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen>
+            </iframe>
+            ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
+          </div>`;
+        } else if (post.media_url.includes('vimeo.com')) {
+          const vimeoMatch = post.media_url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+          if (vimeoMatch) {
+            const videoId = vimeoMatch[1];
+            videoHtml = `<div class="video-fullscreen-container">
+              <iframe 
+                src="https://player.vimeo.com/video/${videoId}?autoplay=1&loop=1&muted=${muteParam}&controls=1" 
+                frameborder="0" 
+                allow="autoplay; fullscreen; picture-in-picture" 
+                allowfullscreen>
+              </iframe>
+              ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
+            </div>`;
+          }
+        } else {
+          videoHtml = `<div class="video-fullscreen-container">
+            <video 
+              id="fullscreen-video"
+              src="${escapeHtml(post.media_url)}" 
+              autoplay 
+              loop 
+              playsinline
+              ${shouldMuteVideo ? 'muted' : ''}>
+            </video>
+            ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
+          </div>`;
+        }
+      }
+      html = videoHtml;
+      break;
+
+    case 'html':
+      html = `
+        ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+        <div>${post.content || ''}</div>
+      `;
+      break;
+
+    case 'presentation':
+      html = renderPresentation(post);
+      break;
+
+    default:
+      html = `
+        ${post.show_title ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+        <p>${escapeHtml(post.content || '')}</p>
+      `;
+  }
+  
+  container.innerHTML = html;
+}
+
 // Aktuellen Post anzeigen
 function displayCurrentPost() {
   if (posts.length === 0) {
@@ -1961,27 +2185,35 @@ function showNextTextPage() {
 }
 
 // Nächster Post
-function nextPost() {
+async function nextPost() {
   // Stoppe aktive Animationen und cleanup
   animationEngine.stop();
   motionPathEngine.stop(); // Stop motion path animations
   
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
+  
+  const oldIndex = currentIndex;
   currentIndex = (currentIndex + 1) % posts.length;
-  displayCurrentPost();
+  
+  await displayPostWithTransition(oldIndex, currentIndex);
+  
   updatePostCounter();
   updatePresentationCounter();
 }
 
 // Vorheriger Post
-function previousPost() {
+async function previousPost() {
   // Stoppe aktive Animationen und cleanup
   animationEngine.stop();
   motionPathEngine.stop(); // Stop motion path animations
   
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
+  
+  const oldIndex = currentIndex;
   currentIndex = (currentIndex - 1 + posts.length) % posts.length;
-  displayCurrentPost();
+  
+  await displayPostWithTransition(oldIndex, currentIndex);
+  
   updatePostCounter();
   updatePresentationCounter();
 }
