@@ -2301,3 +2301,262 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* ============================================ */
+/* PATH EDITOR (Motion Paths)                  */
+/* ============================================ */
+
+.path-editor-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  padding: 20px;
+  overflow-y: auto;
+  backdrop-filter: blur(4px);
+}
+
+.path-editor-modal.show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.path-editor-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-out;
+}
+
+.path-editor-body {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  max-height: calc(90vh - 140px);
+  overflow: hidden;
+}
+
+/* Toolbar */
+.path-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 15px;
+  background: var(--prasco-gray-bg);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-section label {
+  font-weight: 500;
+  margin: 0;
+  white-space: nowrap;
+}
+
+#path-type-select {
+  padding: 6px 12px;
+  border: 1px solid var(--prasco-border);
+  border-radius: 6px;
+  background: white;
+  min-width: 150px;
+}
+
+/* Canvas Container */
+.path-canvas-container {
+  grid-column: 1;
+  grid-row: 2;
+  position: relative;
+  background: white;
+  border: 2px solid var(--prasco-border);
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.path-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+.grid-bg {
+  pointer-events: none;
+}
+
+.motion-path-stroke {
+  pointer-events: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.control-point {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.control-point:hover {
+  r: 8;
+  stroke-width: 3;
+}
+
+.control-point:active {
+  cursor: grabbing;
+}
+
+.preview-element {
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.canvas-info {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Settings Panel */
+.path-settings-panel {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 20px;
+  background: var(--prasco-gray-bg);
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+.path-settings-panel h3 {
+  margin: 0 0 20px 0;
+  color: var(--prasco-red);
+  font-size: 18px;
+}
+
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--prasco-gray-dark);
+}
+
+.setting-group input,
+.setting-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--prasco-border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.setting-group input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.setting-group input[type="number"]::-webkit-outer-spin-button,
+.setting-group input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Template Selector Overlay */
+.template-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.template-selector-dialog {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.template-selector-dialog h3 {
+  margin: 0 0 15px 0;
+  color: var(--prasco-red);
+}
+
+.template-selector-dialog select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--prasco-border);
+  border-radius: 6px;
+}
+
+/* Responsive Path Editor */
+@media (max-width: 1024px) {
+  .path-editor-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .path-settings-panel {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .path-canvas-container {
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .path-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-section {
+    justify-content: space-between;
+  }
+
+  .path-editor-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .path-canvas-container {
+    min-height: 300px;
+  }
+}

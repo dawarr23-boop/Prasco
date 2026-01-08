@@ -4397,8 +4397,9 @@ class AnimationTimeline {
           </div>
         </div>
         <div class="animation-item-actions">
-          <button type="button" class="btn-icon" data-action="edit" data-id="${anim.id}">✏️</button>
-          <button type="button" class="btn-icon" data-action="delete" data-id="${anim.id}">🗑️</button>
+          <button type="button" class="btn-icon" data-action="motion-path" data-id="${anim.id}" title="Edit Motion Path">🛤️</button>
+          <button type="button" class="btn-icon" data-action="edit" data-id="${anim.id}" title="Edit Animation">✏️</button>
+          <button type="button" class="btn-icon" data-action="delete" data-id="${anim.id}" title="Delete">🗑️</button>
         </div>
       </div>
     `;
@@ -4504,6 +4505,8 @@ class AnimationTimeline {
         this.editAnimation(animId);
       } else if (action === 'delete') {
         this.deleteAnimation(animId);
+      } else if (action === 'motion-path') {
+        this.openPathEditor(animId);
       }
     });
 
@@ -4702,6 +4705,23 @@ class AnimationTimeline {
   }
 
   /**
+   * Open motion path editor for animation
+   */
+  openPathEditor(animId) {
+    // Check if animation has been saved (has real ID)
+    const animation = this.animations.find(a => a.id == animId);
+    
+    if (!animation || !animation.id || animation.id.toString().startsWith('new-')) {
+      showNotification('⚠️ Bitte speichern Sie die Animation zuerst', 'warning');
+      return;
+    }
+
+    // Create and open PathEditor
+    pathEditor = new PathEditor(animId);
+    pathEditor.open();
+  }
+
+  /**
    * Preview animation
    */
   previewAnimation() {
@@ -4824,6 +4844,649 @@ class AnimationTimeline {
 
 // Global instance for use in post editor
 let animationTimeline = null;
+
+// ============================================
+// MOTION PATH EDITOR (SVG Path Creation)
+// ============================================
+
+/**
+ * PathEditor Class
+ * Visual SVG path editor for creating motion paths for element animations
+ */
+class PathEditor {
+  constructor(animationId) {
+    this.animationId = animationId;
+    this.modal = null;
+    this.canvas = null;
+    this.svg = null;
+    this.path = null;
+    this.controlPoints = [];
+    this.selectedPoint = null;
+    this.isDragging = false;
+    this.pathType = 'custom';
+    this.pathData = null;
+    this.previewElement = null;
+    this.previewAnimation = null;
+  }
+
+  /**
+   * Open path editor modal
+   */
+  async open() {
+    await this.createModal();
+    await this.loadExistingPath();
+    this.setupEventListeners();
+    this.modal.classList.add('show');
+  }
+
+  /**
+   * Create modal HTML
+   */
+  async createModal() {
+    const modalHtml = `
+      <div class="modal path-editor-modal">
+        <div class="modal-content path-editor-content">
+          <div class="modal-header">
+            <h2>🛤️ Motion Path Editor</h2>
+            <button class="close-btn" onclick="pathEditor.close()">×</button>
+          </div>
+          
+          <div class="path-editor-body">
+            <!-- Toolbar -->
+            <div class="path-toolbar">
+              <div class="toolbar-section">
+                <label>Path Type:</label>
+                <select id="path-type-select" onchange="pathEditor.changePathType(this.value)">
+                  <option value="custom">Custom Path</option>
+                  <option value="line">Straight Line</option>
+                  <option value="curve">Smooth Curve</option>
+                  <option value="arc">Arc</option>
+                  <option value="circle">Circle</option>
+                </select>
+              </div>
+              
+              <div class="toolbar-section">
+                <button class="btn btn-secondary" onclick="pathEditor.loadTemplate()">
+                  📋 Load Template
+                </button>
+                <button class="btn btn-secondary" onclick="pathEditor.clearPath()">
+                  🗑️ Clear Path
+                </button>
+              </div>
+              
+              <div class="toolbar-section">
+                <label>
+                  <input type="checkbox" id="auto-orient-check" onchange="pathEditor.toggleAutoOrient(this.checked)">
+                  Auto Orient
+                </label>
+                <label>
+                  <input type="checkbox" id="show-grid-check" checked onchange="pathEditor.toggleGrid(this.checked)">
+                  Show Grid
+                </label>
+              </div>
+            </div>
+            
+            <!-- Canvas Container -->
+            <div class="path-canvas-container">
+              <svg id="path-canvas" class="path-canvas" viewBox="0 0 800 600">
+                <defs>
+                  <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                  </pattern>
+                </defs>
+                <rect class="grid-bg" width="100%" height="100%" fill="url(#grid)"/>
+                <path id="motion-path" class="motion-path-stroke" fill="none" stroke="#2196F3" stroke-width="2"/>
+                <g id="control-points-group"></g>
+                <circle id="preview-element" class="preview-element" r="15" fill="#FF5722" opacity="0"/>
+              </svg>
+              
+              <div class="canvas-info">
+                <span id="canvas-info-text">Click to add control points</span>
+              </div>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div class="path-settings-panel">
+              <h3>Path Settings</h3>
+              
+              <div class="setting-group">
+                <label>Anchor Point:</label>
+                <select id="anchor-point-select" onchange="pathEditor.updateAnchorPoint(this.value)">
+                  <option value="center">Center</option>
+                  <option value="top-left">Top Left</option>
+                  <option value="top-center">Top Center</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="center-left">Center Left</option>
+                  <option value="center-right">Center Right</option>
+                  <option value="bottom-left">Bottom Left</option>
+                  <option value="bottom-center">Bottom Center</option>
+                  <option value="bottom-right">Bottom Right</option>
+                </select>
+              </div>
+              
+              <div class="setting-group">
+                <label>Orient Angle (°):</label>
+                <input type="number" id="orient-angle-input" min="0" max="360" value="0" 
+                       onchange="pathEditor.updateOrientAngle(this.value)">
+              </div>
+              
+              <div class="setting-group">
+                <button class="btn btn-primary btn-block" onclick="pathEditor.playPreview()">
+                  ▶️ Preview Animation
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="pathEditor.close()">Cancel</button>
+            <button class="btn btn-primary" onclick="pathEditor.save()">Save Path</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    this.modal = document.querySelector('.path-editor-modal');
+    this.canvas = document.getElementById('path-canvas');
+    this.svg = this.canvas;
+    this.path = document.getElementById('motion-path');
+    this.previewElement = document.getElementById('preview-element');
+  }
+
+  /**
+   * Load existing motion path if available
+   */
+  async loadExistingPath() {
+    try {
+      const response = await fetch(`/api/motion-paths/animation/${this.animationId}`);
+      if (response.ok) {
+        const motionPath = await response.json();
+        this.pathData = motionPath;
+        this.pathType = motionPath.pathType;
+        
+        // Set UI values
+        document.getElementById('path-type-select').value = motionPath.pathType;
+        document.getElementById('auto-orient-check').checked = motionPath.autoOrient;
+        document.getElementById('orient-angle-input').value = motionPath.orientAngle || 0;
+        document.getElementById('anchor-point-select').value = motionPath.anchorPoint;
+        
+        // Parse and render path
+        if (motionPath.pathData) {
+          const pathDataObj = JSON.parse(motionPath.pathData);
+          this.renderPathFromData(pathDataObj);
+        }
+      }
+    } catch (error) {
+      console.log('No existing path found, starting fresh');
+    }
+  }
+
+  /**
+   * Setup event listeners for canvas interaction
+   */
+  setupEventListeners() {
+    this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+    this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+    this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+    this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (this.modal.classList.contains('show')) {
+        if (e.key === 'Delete' && this.selectedPoint) {
+          this.deleteControlPoint(this.selectedPoint);
+        } else if (e.key === 'Escape') {
+          this.close();
+        }
+      }
+    });
+  }
+
+  /**
+   * Handle canvas click - add or select control point
+   */
+  handleCanvasClick(e) {
+    if (this.isDragging) return;
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 800;
+    const y = ((e.clientY - rect.top) / rect.height) * 600;
+    
+    // Check if clicking on existing point
+    const clickedPoint = this.findPointAtPosition(x, y);
+    if (clickedPoint) {
+      this.selectControlPoint(clickedPoint);
+      return;
+    }
+    
+    // Add new control point for custom paths
+    if (this.pathType === 'custom') {
+      this.addControlPoint(x, y);
+      this.updatePath();
+    }
+  }
+
+  /**
+   * Handle mouse move - drag control points
+   */
+  handleMouseMove(e) {
+    if (!this.selectedPoint || !this.isDragging) return;
+    
+    const rect = this.canvas.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 800;
+    const y = ((e.clientY - rect.top) / rect.height) * 600;
+    
+    this.selectedPoint.x = Math.max(0, Math.min(800, x));
+    this.selectedPoint.y = Math.max(0, Math.min(600, y));
+    
+    this.renderControlPoints();
+    this.updatePath();
+  }
+
+  /**
+   * Handle mouse up - stop dragging
+   */
+  handleMouseUp() {
+    this.isDragging = false;
+  }
+
+  /**
+   * Add control point
+   */
+  addControlPoint(x, y) {
+    const point = {
+      id: Date.now(),
+      x: x,
+      y: y,
+      type: this.controlPoints.length === 0 ? 'M' : 'L'
+    };
+    this.controlPoints.push(point);
+    this.renderControlPoints();
+    this.updateCanvasInfo();
+  }
+
+  /**
+   * Find point at position (for clicking)
+   */
+  findPointAtPosition(x, y, threshold = 15) {
+    return this.controlPoints.find(p => 
+      Math.abs(p.x - x) < threshold && Math.abs(p.y - y) < threshold
+    );
+  }
+
+  /**
+   * Select control point
+   */
+  selectControlPoint(point) {
+    this.selectedPoint = point;
+    this.isDragging = true;
+    this.renderControlPoints();
+  }
+
+  /**
+   * Delete control point
+   */
+  deleteControlPoint(point) {
+    const index = this.controlPoints.indexOf(point);
+    if (index > -1) {
+      this.controlPoints.splice(index, 1);
+      this.selectedPoint = null;
+      this.renderControlPoints();
+      this.updatePath();
+      this.updateCanvasInfo();
+    }
+  }
+
+  /**
+   * Render control points on canvas
+   */
+  renderControlPoints() {
+    const group = document.getElementById('control-points-group');
+    group.innerHTML = '';
+    
+    this.controlPoints.forEach((point, index) => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', point.x);
+      circle.setAttribute('cy', point.y);
+      circle.setAttribute('r', this.selectedPoint === point ? 8 : 6);
+      circle.setAttribute('fill', this.selectedPoint === point ? '#FF5722' : '#2196F3');
+      circle.setAttribute('stroke', '#fff');
+      circle.setAttribute('stroke-width', '2');
+      circle.setAttribute('class', 'control-point');
+      circle.style.cursor = 'grab';
+      
+      circle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        this.selectControlPoint(point);
+      });
+      
+      group.appendChild(circle);
+      
+      // Add label
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', point.x + 12);
+      text.setAttribute('y', point.y - 8);
+      text.setAttribute('fill', '#666');
+      text.setAttribute('font-size', '12');
+      text.textContent = index + 1;
+      group.appendChild(text);
+    });
+  }
+
+  /**
+   * Update SVG path based on control points
+   */
+  updatePath() {
+    if (this.controlPoints.length === 0) {
+      this.path.setAttribute('d', '');
+      return;
+    }
+    
+    let pathD = '';
+    
+    if (this.pathType === 'custom') {
+      // Create smooth curve through points using cubic Bézier
+      if (this.controlPoints.length === 1) {
+        pathD = `M ${this.controlPoints[0].x} ${this.controlPoints[0].y}`;
+      } else if (this.controlPoints.length === 2) {
+        pathD = `M ${this.controlPoints[0].x} ${this.controlPoints[0].y} L ${this.controlPoints[1].x} ${this.controlPoints[1].y}`;
+      } else {
+        // Use Catmull-Rom to Bezier conversion for smooth curves
+        pathD = this.createSmoothPath(this.controlPoints);
+      }
+    } else {
+      // Use predefined path types
+      pathD = this.generatePredefinedPath();
+    }
+    
+    this.path.setAttribute('d', pathD);
+  }
+
+  /**
+   * Create smooth path through points
+   */
+  createSmoothPath(points) {
+    if (points.length < 2) return '';
+    
+    let d = `M ${points[0].x} ${points[0].y}`;
+    
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+      
+      // Calculate control points for cubic Bézier
+      const cp1x = p1.x + (p2.x - p0.x) / 6;
+      const cp1y = p1.y + (p2.y - p0.y) / 6;
+      const cp2x = p2.x - (p3.x - p1.x) / 6;
+      const cp2y = p2.y - (p3.y - p1.y) / 6;
+      
+      d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+    }
+    
+    return d;
+  }
+
+  /**
+   * Generate predefined path based on type
+   */
+  generatePredefinedPath() {
+    const width = 800;
+    const height = 600;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    switch (this.pathType) {
+      case 'line':
+        return `M 100 ${centerY} L ${width - 100} ${centerY}`;
+        
+      case 'curve':
+        return `M 100 ${height - 100} Q ${centerX} 100, ${width - 100} ${height - 100}`;
+        
+      case 'arc':
+        return `M 100 ${centerY} A 300 300 0 0 1 ${width - 100} ${centerY}`;
+        
+      case 'circle':
+        const radius = Math.min(width, height) / 3;
+        return `M ${centerX} ${centerY - radius} A ${radius} ${radius} 0 1 1 ${centerX} ${centerY + radius} A ${radius} ${radius} 0 1 1 ${centerX} ${centerY - radius}`;
+        
+      default:
+        return '';
+    }
+  }
+
+  /**
+   * Change path type
+   */
+  changePathType(type) {
+    this.pathType = type;
+    
+    if (type !== 'custom') {
+      // Clear custom control points for predefined paths
+      this.controlPoints = [];
+      this.renderControlPoints();
+    }
+    
+    this.updatePath();
+    this.updateCanvasInfo();
+  }
+
+  /**
+   * Load template
+   */
+  async loadTemplate() {
+    try {
+      const response = await fetch('/api/motion-paths/templates');
+      const templates = await response.json();
+      
+      // Show template selector
+      const templateNames = Object.keys(templates);
+      const selected = await this.showTemplateSelector(templateNames);
+      
+      if (selected) {
+        const template = templates[selected];
+        this.pathType = template.pathType;
+        document.getElementById('path-type-select').value = template.pathType;
+        
+        if (template.pathData) {
+          const pathDataObj = JSON.parse(template.pathData);
+          this.renderPathFromData(pathDataObj);
+        }
+        
+        this.updatePath();
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      alert('Failed to load templates');
+    }
+  }
+
+  /**
+   * Show template selector dialog
+   */
+  showTemplateSelector(templates) {
+    return new Promise((resolve) => {
+      const options = templates.map(t => `<option value="${t}">${t}</option>`).join('');
+      const html = `
+        <div class="template-selector-overlay">
+          <div class="template-selector-dialog">
+            <h3>Select Template</h3>
+            <select id="template-select" size="10" style="width: 100%; margin: 10px 0;">
+              ${options}
+            </select>
+            <div style="text-align: right; margin-top: 10px;">
+              <button class="btn btn-secondary" onclick="this.closest('.template-selector-overlay').remove(); pathEditor.templateResolve(null);">Cancel</button>
+              <button class="btn btn-primary" onclick="pathEditor.templateResolve(document.getElementById('template-select').value); this.closest('.template-selector-overlay').remove();">Select</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', html);
+      this.templateResolve = resolve;
+    });
+  }
+
+  /**
+   * Clear path
+   */
+  clearPath() {
+    if (confirm('Clear all control points?')) {
+      this.controlPoints = [];
+      this.selectedPoint = null;
+      this.renderControlPoints();
+      this.updatePath();
+      this.updateCanvasInfo();
+    }
+  }
+
+  /**
+   * Toggle auto orient
+   */
+  toggleAutoOrient(checked) {
+    // Update UI state
+    document.getElementById('orient-angle-input').disabled = checked;
+  }
+
+  /**
+   * Toggle grid
+   */
+  toggleGrid(checked) {
+    const grid = this.canvas.querySelector('.grid-bg');
+    grid.style.display = checked ? 'block' : 'none';
+  }
+
+  /**
+   * Update anchor point
+   */
+  updateAnchorPoint(value) {
+    // Store for save
+  }
+
+  /**
+   * Update orient angle
+   */
+  updateOrientAngle(value) {
+    // Store for save
+  }
+
+  /**
+   * Update canvas info text
+   */
+  updateCanvasInfo() {
+    const infoText = document.getElementById('canvas-info-text');
+    if (this.pathType === 'custom') {
+      infoText.textContent = `${this.controlPoints.length} control points - Click to add, drag to move, Delete to remove`;
+    } else {
+      infoText.textContent = `Using ${this.pathType} template - Switch to Custom to edit points`;
+    }
+  }
+
+  /**
+   * Render path from loaded data
+   */
+  renderPathFromData(pathDataObj) {
+    if (pathDataObj.controlPoints && pathDataObj.controlPoints.length > 0) {
+      this.controlPoints = pathDataObj.controlPoints;
+      this.renderControlPoints();
+    }
+    
+    if (pathDataObj.svgPath) {
+      this.path.setAttribute('d', pathDataObj.svgPath);
+    }
+  }
+
+  /**
+   * Play preview animation
+   */
+  playPreview() {
+    const pathD = this.path.getAttribute('d');
+    if (!pathD) {
+      alert('Create a path first!');
+      return;
+    }
+    
+    // Animate preview element along path
+    this.previewElement.setAttribute('opacity', '1');
+    
+    // Create animation
+    const animation = this.previewElement.animate([
+      { offsetDistance: '0%' },
+      { offsetDistance: '100%' }
+    ], {
+      duration: 3000,
+      easing: 'ease-in-out',
+      iterations: 1
+    });
+    
+    // Apply motion path
+    this.previewElement.style.offsetPath = `path('${pathD}')`;
+    this.previewElement.style.offsetRotate = document.getElementById('auto-orient-check').checked ? 'auto' : '0deg';
+    
+    animation.onfinish = () => {
+      this.previewElement.setAttribute('opacity', '0');
+      this.previewElement.style.offsetPath = 'none';
+    };
+  }
+
+  /**
+   * Save motion path
+   */
+  async save() {
+    const pathD = this.path.getAttribute('d');
+    if (!pathD) {
+      alert('Please create a path first');
+      return;
+    }
+    
+    const pathData = {
+      svgPath: pathD,
+      controlPoints: this.controlPoints,
+      viewBox: '0 0 800 600'
+    };
+    
+    const motionPath = {
+      elementAnimationId: this.animationId,
+      pathType: this.pathType,
+      pathData: JSON.stringify(pathData),
+      autoOrient: document.getElementById('auto-orient-check').checked,
+      orientAngle: parseInt(document.getElementById('orient-angle-input').value) || 0,
+      anchorPoint: document.getElementById('anchor-point-select').value
+    };
+    
+    try {
+      const response = await fetch('/api/motion-paths/upsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(motionPath)
+      });
+      
+      if (response.ok) {
+        showNotification('✅ Motion Path saved', 'success');
+        this.close();
+      } else {
+        throw new Error('Save failed');
+      }
+    } catch (error) {
+      console.error('Error saving motion path:', error);
+      showNotification('❌ Failed to save path', 'error');
+    }
+  }
+
+  /**
+   * Close modal
+   */
+  close() {
+    if (this.modal) {
+      this.modal.remove();
+    }
+  }
+}
+
+// Global path editor instance
+let pathEditor = null;
 
 /**
  * Initialize Animation Timeline in Post Modal
