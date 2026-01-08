@@ -1,0 +1,478 @@
+/**
+ * Motion Paths CSS
+ * 
+ * CSS Motion Path Module für Bewegungsanimationen entlang von SVG-Pfaden
+ * - offset-path: Definiert den Bewegungspfad
+ * - offset-distance: Position auf dem Pfad (0% bis 100%)
+ * - offset-rotate: Ausrichtung entlang des Pfades (auto oder Winkel)
+ * - offset-anchor: Ankerpunkt des Elements
+ * 
+ * Browser-Support: Chrome 46+, Edge 79+, Firefox 72+, Safari 16+
+ * Fallback: Für ältere Browser werden Animationen übersprungen
+ */
+
+/* ============================================
+   BASE MOTION PATH CLASSES
+   ============================================ */
+
+/**
+ * Base class für alle Motion Path Animationen
+ * Aktiviert CSS Motion Path und setzt Default-Werte
+ */
+.motion-path-animation {
+  /* Aktiviere Motion Path */
+  offset-path: var(--motion-path, none);
+  offset-distance: var(--motion-distance, 0%);
+  offset-rotate: var(--motion-rotate, auto);
+  offset-anchor: var(--motion-anchor, center);
+  
+  /* Animation-Eigenschaften */
+  animation-duration: var(--animation-duration, 1000ms);
+  animation-delay: var(--animation-delay, 0ms);
+  animation-timing-function: var(--animation-easing, ease-out);
+  animation-fill-mode: both;
+  
+  /* Hardware-Beschleunigung */
+  will-change: offset-distance;
+  transform: translateZ(0);
+}
+
+/**
+ * Motion Path mit automatischer Ausrichtung
+ * Element rotiert automatisch entlang des Pfades
+ */
+.motion-path-auto-orient {
+  offset-rotate: auto;
+}
+
+/**
+ * Motion Path ohne Auto-Orient
+ * Element behält seine Ausrichtung bei
+ */
+.motion-path-fixed-orient {
+  offset-rotate: 0deg;
+}
+
+/* ============================================
+   ANCHOR POINTS
+   ============================================ */
+
+.motion-anchor-center {
+  offset-anchor: center;
+}
+
+.motion-anchor-top-left {
+  offset-anchor: left top;
+}
+
+.motion-anchor-top-right {
+  offset-anchor: right top;
+}
+
+.motion-anchor-bottom-left {
+  offset-anchor: left bottom;
+}
+
+.motion-anchor-bottom-right {
+  offset-anchor: right bottom;
+}
+
+.motion-anchor-top {
+  offset-anchor: center top;
+}
+
+.motion-anchor-bottom {
+  offset-anchor: center bottom;
+}
+
+.motion-anchor-left {
+  offset-anchor: left center;
+}
+
+.motion-anchor-right {
+  offset-anchor: right center;
+}
+
+/* ============================================
+   MOTION PATH ANIMATION KEYFRAMES
+   ============================================ */
+
+/**
+ * Standard Motion Path Animation
+ * Bewegt Element von Start (0%) bis Ende (100%) des Pfades
+ */
+@keyframes motion-path-forward {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+/**
+ * Rückwärts Motion Path Animation
+ * Bewegt Element von Ende (100%) bis Start (0%) des Pfades
+ */
+@keyframes motion-path-backward {
+  from {
+    offset-distance: 100%;
+  }
+  to {
+    offset-distance: 0%;
+  }
+}
+
+/**
+ * Loop Motion Path Animation
+ * Kontinuierliche Bewegung entlang des Pfades
+ */
+@keyframes motion-path-loop {
+  0% {
+    offset-distance: 0%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+/**
+ * Bounce Motion Path Animation
+ * Hin- und Rückbewegung entlang des Pfades
+ */
+@keyframes motion-path-bounce {
+  0%, 100% {
+    offset-distance: 0%;
+  }
+  50% {
+    offset-distance: 100%;
+  }
+}
+
+/**
+ * Elastic Motion Path Animation
+ * Bewegung mit elastischem Effekt am Ende
+ */
+@keyframes motion-path-elastic {
+  0% {
+    offset-distance: 0%;
+  }
+  70% {
+    offset-distance: 105%;
+  }
+  85% {
+    offset-distance: 95%;
+  }
+  100% {
+    offset-distance: 100%;
+  }
+}
+
+/* ============================================
+   PREDEFINED ANIMATIONS
+   ============================================ */
+
+/**
+ * Forward Animation (Standard)
+ */
+.motion-forward {
+  animation-name: motion-path-forward;
+}
+
+/**
+ * Backward Animation
+ */
+.motion-backward {
+  animation-name: motion-path-backward;
+}
+
+/**
+ * Loop Animation (infinite)
+ */
+.motion-loop {
+  animation-name: motion-path-loop;
+  animation-iteration-count: infinite;
+}
+
+/**
+ * Bounce Animation (hin und zurück)
+ */
+.motion-bounce {
+  animation-name: motion-path-bounce;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/**
+ * Elastic Animation
+ */
+.motion-elastic {
+  animation-name: motion-path-elastic;
+}
+
+/* ============================================
+   COMBINED WITH ELEMENT ANIMATIONS
+   ============================================ */
+
+/**
+ * Motion Path + Fade In
+ * Element erscheint während es sich bewegt
+ */
+@keyframes motion-fade-in {
+  from {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  to {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+}
+
+.motion-fade-in {
+  animation-name: motion-fade-in;
+}
+
+/**
+ * Motion Path + Fade Out
+ * Element verschwindet während es sich bewegt
+ */
+@keyframes motion-fade-out {
+  from {
+    offset-distance: 0%;
+    opacity: 1;
+  }
+  to {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+.motion-fade-out {
+  animation-name: motion-fade-out;
+}
+
+/**
+ * Motion Path + Scale
+ * Element vergrößert sich während der Bewegung
+ */
+@keyframes motion-scale {
+  from {
+    offset-distance: 0%;
+    scale: 0.5;
+  }
+  to {
+    offset-distance: 100%;
+    scale: 1;
+  }
+}
+
+.motion-scale {
+  animation-name: motion-scale;
+}
+
+/**
+ * Motion Path + Rotate
+ * Element rotiert zusätzlich zur Pfadbewegung
+ */
+@keyframes motion-rotate {
+  from {
+    offset-distance: 0%;
+    rotate: 0deg;
+  }
+  to {
+    offset-distance: 100%;
+    rotate: 360deg;
+  }
+}
+
+.motion-rotate {
+  animation-name: motion-rotate;
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/**
+ * Reduced Motion Support
+ * Deaktiviert Motion Paths wenn User reduced-motion bevorzugt
+ */
+@media (prefers-reduced-motion: reduce) {
+  .motion-path-animation {
+    offset-path: none;
+    animation: none;
+  }
+  
+  .motion-forward,
+  .motion-backward,
+  .motion-loop,
+  .motion-bounce,
+  .motion-elastic,
+  .motion-fade-in,
+  .motion-fade-out,
+  .motion-scale,
+  .motion-rotate {
+    animation: none;
+  }
+}
+
+/**
+ * Low Performance Mode
+ * Vereinfachte Animationen für schwächere Geräte
+ */
+.low-performance .motion-path-animation {
+  animation-duration: calc(var(--animation-duration, 1000ms) * 0.7);
+  will-change: auto;
+}
+
+.low-performance .motion-loop,
+.low-performance .motion-bounce {
+  animation-iteration-count: 1;
+}
+
+/* ============================================
+   DEBUG VISUALIZATION
+   ============================================ */
+
+/**
+ * Debug Mode: Zeigt den Pfad visuell an
+ * Nützlich für Entwicklung und Testing
+ */
+.motion-path-debug::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ============================================
+   BROWSER COMPATIBILITY
+   ============================================ */
+
+/**
+ * Fallback für Browser ohne CSS Motion Path Support
+ * Verwendet transform-basierte Animation
+ */
+@supports not (offset-path: path('M 0 0')) {
+  .motion-path-animation {
+    /* Fallback zu einfacher Transform-Animation */
+    animation: none;
+  }
+  
+  /* Warnung für Entwickler */
+  .motion-path-animation::after {
+    content: '⚠️ Motion Paths not supported';
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 4px 8px;
+    background: rgba(255, 193, 7, 0.9);
+    color: black;
+    font-size: 10px;
+    z-index: 10000;
+    pointer-events: none;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/**
+ * Pause Motion Path Animation
+ */
+.motion-paused {
+  animation-play-state: paused;
+}
+
+/**
+ * Resume Motion Path Animation
+ */
+.motion-playing {
+  animation-play-state: running;
+}
+
+/**
+ * Reverse Motion Path Direction
+ */
+.motion-reverse {
+  animation-direction: reverse;
+}
+
+/**
+ * Motion Path mit sichtbarem Pfad (für Preview)
+ */
+.motion-path-visible {
+  position: relative;
+}
+
+.motion-path-visible::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.3;
+}
+
+/* ============================================
+   EASING PRESETS
+   ============================================ */
+
+.motion-easing-linear {
+  animation-timing-function: linear;
+}
+
+.motion-easing-ease {
+  animation-timing-function: ease;
+}
+
+.motion-easing-ease-in {
+  animation-timing-function: ease-in;
+}
+
+.motion-easing-ease-out {
+  animation-timing-function: ease-out;
+}
+
+.motion-easing-ease-in-out {
+  animation-timing-function: ease-in-out;
+}
+
+.motion-easing-bounce {
+  animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.motion-easing-elastic {
+  animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+/**
+ * Mobile Optimizations
+ * Kürzere Animationsdauer auf kleinen Bildschirmen
+ */
+@media (max-width: 768px) {
+  .motion-path-animation {
+    animation-duration: calc(var(--animation-duration, 1000ms) * 0.8);
+  }
+}
+
+/**
+ * Tablet Optimizations
+ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .motion-path-animation {
+    animation-duration: calc(var(--animation-duration, 1000ms) * 0.9);
+  }
+}
