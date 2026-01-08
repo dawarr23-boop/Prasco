@@ -33,6 +33,7 @@ import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
 import documentRoutes from './routes/documents';
 import transitionsRoutes from './routes/transitions';
+import animationsRoutes from './routes/animations';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -208,7 +209,8 @@ app.use('/api/documents', uploadLimiter, documentRoutes); // Document upload/par
 app.use('/api/public', publicRoutes); // No rate limit for public display
 app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);
-app.use('/api', transitionsRoutes); // Transition & Animation Routes
+app.use('/api/transitions', transitionsRoutes); // Slide Transitions
+app.use('/api/animations', animationsRoutes); // Element Animations
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
