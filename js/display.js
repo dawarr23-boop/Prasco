@@ -2516,6 +2516,80 @@ function resumeBackgroundMusicIfNeeded() {
   }
 }
 
+// ============================================
+// NAVIGATION CONTROLS
+// ============================================
+
+/**
+ * Initialize navigation controls
+ */
+function initNavigationControls() {
+  const prevBtn = document.getElementById('nav-prev');
+  const nextBtn = document.getElementById('nav-next');
+  const pauseBtn = document.getElementById('nav-pause');
+  const navControls = document.getElementById('navigation-controls');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      previousPost();
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nextPost();
+    });
+  }
+
+  if (pauseBtn) {
+    pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAutoRotation();
+      pauseBtn.classList.toggle('paused');
+    });
+  }
+
+  // Touch support
+  if (navControls && 'ontouchstart' in window) {
+    navControls.addEventListener('touchstart', () => {
+      navControls.classList.add('touched');
+      setTimeout(() => {
+        navControls.classList.remove('touched');
+      }, 3000);
+    });
+  }
+
+  // Swipe gesture support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  document.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  });
+
+  function handleSwipe() {
+    const swipeThreshold = 50;
+    const diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swipe left - next post
+        nextPost();
+      } else {
+        // Swipe right - previous post
+        previousPost();
+      }
+    }
+  }
+}
+
 // Initialisierung
 (async function() {
   console.log('Display-Modus wird initialisiert...');
@@ -2526,7 +2600,10 @@ function resumeBackgroundMusicIfNeeded() {
   // 2. Initialisiere Display
   init();
   
-  // 3. Starte Auto-Refresh mit konfigurierten Intervall
+  // 3. Initialisiere Navigation Controls
+  initNavigationControls();
+  
+  // 4. Starte Auto-Refresh mit konfigurierten Intervall
   startAutoRefresh();
   
   console.log('Display-Modus gestartet 🚀');
