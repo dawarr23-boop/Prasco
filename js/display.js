@@ -1,5 +1,358 @@
 // Display JavaScript - Für das öffentliche Schwarze Brett
-// Simuliert API-Aufrufe mit Beispieldaten
+// PRASCO 2.0 - Mit PowerPoint-Effekten
+
+// ============================================
+// EFFECT RENDERER CLASS - Prasco 2.0
+// ============================================
+
+class EffectRenderer {
+  constructor() {
+    this.activeAnimations = [];
+    this.transitionInProgress = false;
+    this.performanceProfile = this.detectPerformanceProfile();
+    this.supportsReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // Erkenne Performance-Profil (Raspberry Pi Detection)
+  detectPerformanceProfile() {
+    const isRaspberryPi = /Raspberry/.test(navigator.userAgent);
+    const isSlowDevice = navigator.hardwareConcurrency <= 4;
+    const hasLowMemory = navigator.deviceMemory && navigator.deviceMemory < 4;
+
+    if (isRaspberryPi || (isSlowDevice && hasLowMemory)) {
+      document.body.classList.add('performance-low');
+      return 'low';
+    } else if (isSlowDevice) {
+      document.body.classList.add('performance-medium');
+      return 'medium';
+    }
+    return 'high';
+  }
+
+  // Hauptmethode: Führe Transition zwischen zwei Slides aus
+  async performTransition(fromElement, toElement, transitionConfig) {
+    if (this.transitionInProgress) {
+      console.warn('Transition bereits aktiv, überspringe...');
+      return;
+    }
+
+    this.transitionInProgress = true;
+
+    try {
+      // Fallback bei Reduced Motion
+      if (this.supportsReducedMotion) {
+        await this.instantSwitch(fromElement, toElement);
+        return;
+      }
+
+      // Optimiere Config für Performance
+      const optimizedConfig = this.optimizeConfig(transitionConfig);
+
+      // Führe entsprechende Transition aus
+      switch (optimizedConfig.transitionType) {
+        case 'fade':
+          await this.fadeTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'slide':
+          await this.slideTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'zoom':
+          await this.zoomTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'wipe':
+          await this.wipeTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'push':
+          await this.pushTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'cube':
+          await this.cubeTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'flip':
+          await this.flipTransition(fromElement, toElement, optimizedConfig);
+          break;
+        case 'morph':
+          await this.morphTransition(fromElement, toElement, optimizedConfig);
+          break;
+        default:
+          await this.fadeTransition(fromElement, toElement, optimizedConfig);
+      }
+    } catch (error) {
+      console.error('Fehler bei Transition:', error);
+      await this.instantSwitch(fromElement, toElement);
+    } finally {
+      this.transitionInProgress = false;
+    }
+  }
+
+  // Optimiere Transition-Config basierend auf Performance
+  optimizeConfig(config) {
+    const optimized = { ...config };
+
+    if (this.performanceProfile === 'low') {
+      optimized.duration = Math.min(optimized.duration || 800, 500);
+      // Fallback für komplexe Effekte
+      if (['cube', 'flip', 'morph'].includes(optimized.transitionType)) {
+        optimized.transitionType = 'fade';
+      }
+    } else if (this.performanceProfile === 'medium') {
+      optimized.duration = Math.min(optimized.duration || 800, 1000);
+    }
+
+    return optimized;
+  }
+
+  // Instant Switch (ohne Animation)
+  async instantSwitch(fromElement, toElement) {
+    return new Promise((resolve) => {
+      if (fromElement) fromElement.style.display = 'none';
+      if (toElement) toElement.style.display = 'block';
+      resolve();
+    });
+  }
+
+  // 1. FADE TRANSITION
+  async fadeTransition(fromElement, toElement, config) {
+    return new Promise((resolve) => {
+      const duration = config.duration || 800;
+      const easing = config.easing || 'ease-in-out';
+
+      // Setze CSS-Variablen
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      // Starte Transition
+      toElement.classList.add('transition-fade-enter');
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add('transition-fade-enter-active');
+        toElement.classList.remove('transition-fade-enter');
+        fromElement.classList.add('transition-fade-exit-active');
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove('transition-fade-exit-active');
+        toElement.classList.remove('transition-fade-enter-active');
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 2. SLIDE TRANSITION
+  async slideTransition(fromElement, toElement, config) {
+    return new Promise((resolve) => {
+      const duration = config.duration || 600;
+      const easing = config.easing || 'ease-in-out';
+      const direction = config.direction || 'left';
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add(`transition-slide-${direction}-enter`);
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add(`transition-slide-${direction}-enter-active`);
+        toElement.classList.remove(`transition-slide-${direction}-enter`);
+        fromElement.classList.add(`transition-slide-${direction}-exit-active`);
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove(`transition-slide-${direction}-exit-active`);
+        toElement.classList.remove(`transition-slide-${direction}-enter-active`);
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 3. ZOOM TRANSITION
+  async zoomTransition(fromElement, toElement, config) {
+    return new Promise((resolve) => {
+      const duration = config.duration || 800;
+      const easing = config.easing || 'ease-out';
+      const direction = config.direction || 'in';
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add(`transition-zoom-${direction}-enter`);
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add(`transition-zoom-${direction}-enter-active`);
+        toElement.classList.remove(`transition-zoom-${direction}-enter`);
+        fromElement.classList.add(`transition-zoom-${direction}-exit-active`);
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove(`transition-zoom-${direction}-exit-active`);
+        toElement.classList.remove(`transition-zoom-${direction}-enter-active`);
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 4. WIPE TRANSITION
+  async wipeTransition(fromElement, toElement, config) {
+    return new Promise((resolve) => {
+      const duration = config.duration || 700;
+      const easing = config.easing || 'ease-in-out';
+      const direction = config.direction || 'left';
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add(`transition-wipe-${direction}-enter`);
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add(`transition-wipe-${direction}-enter-active`);
+        toElement.classList.remove(`transition-wipe-${direction}-enter`);
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        toElement.classList.remove(`transition-wipe-${direction}-enter-active`);
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 5. PUSH TRANSITION
+  async pushTransition(fromElement, toElement, config) {
+    // Push ist ähnlich wie Slide, wird über slide implementiert
+    return this.slideTransition(fromElement, toElement, config);
+  }
+
+  // 6. CUBE TRANSITION (3D)
+  async cubeTransition(fromElement, toElement, config) {
+    // Fallback zu Slide auf Low-Performance
+    if (this.performanceProfile === 'low') {
+      return this.slideTransition(fromElement, toElement, config);
+    }
+
+    return new Promise((resolve) => {
+      const duration = config.duration || 1000;
+      const easing = config.easing || 'ease-in-out';
+      const direction = config.direction || 'left';
+
+      // Add 3D container
+      const container = fromElement.parentElement;
+      container.classList.add('transition-cube-container');
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add('transition-cube');
+      fromElement.classList.add('transition-cube');
+      toElement.classList.add(`transition-cube-${direction}-enter`);
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add(`transition-cube-${direction}-enter-active`);
+        toElement.classList.remove(`transition-cube-${direction}-enter`);
+        fromElement.classList.add(`transition-cube-${direction}-exit-active`);
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove('transition-cube', `transition-cube-${direction}-exit-active`);
+        toElement.classList.remove('transition-cube', `transition-cube-${direction}-enter-active`);
+        container.classList.remove('transition-cube-container');
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 7. FLIP TRANSITION (3D)
+  async flipTransition(fromElement, toElement, config) {
+    // Fallback zu Fade auf Low-Performance
+    if (this.performanceProfile === 'low') {
+      return this.fadeTransition(fromElement, toElement, config);
+    }
+
+    return new Promise((resolve) => {
+      const duration = config.duration || 900;
+      const easing = config.easing || 'ease-in-out';
+      const direction = config.direction || 'left';
+
+      const container = fromElement.parentElement;
+      container.classList.add('transition-flip-container');
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add('transition-flip');
+      fromElement.classList.add('transition-flip');
+      toElement.classList.add(`transition-flip-${direction}-enter`);
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add(`transition-flip-${direction}-enter-active`);
+        toElement.classList.remove(`transition-flip-${direction}-enter`);
+        fromElement.classList.add(`transition-flip-${direction}-exit-active`);
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove('transition-flip', `transition-flip-${direction}-exit-active`);
+        toElement.classList.remove('transition-flip', `transition-flip-${direction}-enter-active`);
+        container.classList.remove('transition-flip-container');
+        resolve();
+      }, duration);
+    });
+  }
+
+  // 8. MORPH TRANSITION
+  async morphTransition(fromElement, toElement, config) {
+    return new Promise((resolve) => {
+      const duration = config.duration || 1000;
+      const easing = config.easing || 'cubic-bezier(0.4, 0, 0.2, 1)';
+
+      toElement.style.setProperty('--duration', `${duration}ms`);
+      toElement.style.setProperty('--easing', easing);
+      fromElement.style.setProperty('--duration', `${duration}ms`);
+      fromElement.style.setProperty('--easing', easing);
+
+      toElement.classList.add('transition-morph-enter');
+      toElement.style.display = 'block';
+
+      requestAnimationFrame(() => {
+        toElement.classList.add('transition-morph-enter-active');
+        toElement.classList.remove('transition-morph-enter');
+        fromElement.classList.add('transition-morph-exit-active');
+      });
+
+      setTimeout(() => {
+        fromElement.style.display = 'none';
+        fromElement.classList.remove('transition-morph-exit-active');
+        toElement.classList.remove('transition-morph-enter-active');
+        resolve();
+      }, duration);
+    });
+  }
+}
+
+// Globale Instanz
+const effectRenderer = new EffectRenderer();
+
+// ============================================
+// ENDE EFFECT RENDERER
+// ============================================
 
 let posts = [];
 let currentIndex = 0;

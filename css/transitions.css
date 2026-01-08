@@ -1,0 +1,808 @@
+/* ============================================
+   PRASCO 2.0 - POWERPOINT-EFFEKTE
+   Transition & Animation CSS
+   ============================================ */
+
+/* ============================================
+   SLIDE TRANSITIONS
+   ============================================ */
+
+/* Container für Transitions */
+.slide-transition-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.slide-transition-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* Hardware-Beschleunigung */
+}
+
+/* ===================
+   1. FADE TRANSITION
+   =================== */
+
+.transition-fade-enter {
+  opacity: 0;
+}
+
+.transition-fade-enter-active {
+  opacity: 1;
+  transition: opacity var(--duration, 800ms) var(--easing, ease-in-out);
+}
+
+.transition-fade-exit {
+  opacity: 1;
+}
+
+.transition-fade-exit-active {
+  opacity: 0;
+  transition: opacity var(--duration, 800ms) var(--easing, ease-in-out);
+}
+
+/* ===================
+   2. SLIDE TRANSITION
+   =================== */
+
+/* Slide Left */
+.transition-slide-left-enter {
+  transform: translateX(100%);
+}
+
+.transition-slide-left-enter-active {
+  transform: translateX(0);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+.transition-slide-left-exit {
+  transform: translateX(0);
+}
+
+.transition-slide-left-exit-active {
+  transform: translateX(-100%);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+/* Slide Right */
+.transition-slide-right-enter {
+  transform: translateX(-100%);
+}
+
+.transition-slide-right-enter-active {
+  transform: translateX(0);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+.transition-slide-right-exit {
+  transform: translateX(0);
+}
+
+.transition-slide-right-exit-active {
+  transform: translateX(100%);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+/* Slide Up */
+.transition-slide-up-enter {
+  transform: translateY(100%);
+}
+
+.transition-slide-up-enter-active {
+  transform: translateY(0);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+.transition-slide-up-exit {
+  transform: translateY(0);
+}
+
+.transition-slide-up-exit-active {
+  transform: translateY(-100%);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+/* Slide Down */
+.transition-slide-down-enter {
+  transform: translateY(-100%);
+}
+
+.transition-slide-down-enter-active {
+  transform: translateY(0);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+.transition-slide-down-exit {
+  transform: translateY(0);
+}
+
+.transition-slide-down-exit-active {
+  transform: translateY(100%);
+  transition: transform var(--duration, 600ms) var(--easing, ease-in-out);
+}
+
+/* ===================
+   3. ZOOM TRANSITION
+   =================== */
+
+/* Zoom In */
+.transition-zoom-in-enter {
+  transform: scale(0);
+  opacity: 0;
+}
+
+.transition-zoom-in-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: all var(--duration, 800ms) var(--easing, ease-out);
+}
+
+.transition-zoom-in-exit {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.transition-zoom-in-exit-active {
+  transform: scale(2);
+  opacity: 0;
+  transition: all var(--duration, 800ms) var(--easing, ease-in);
+}
+
+/* Zoom Out */
+.transition-zoom-out-enter {
+  transform: scale(2);
+  opacity: 0;
+}
+
+.transition-zoom-out-enter-active {
+  transform: scale(1);
+  opacity: 1;
+  transition: all var(--duration, 800ms) var(--easing, ease-out);
+}
+
+.transition-zoom-out-exit {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.transition-zoom-out-exit-active {
+  transform: scale(0);
+  opacity: 0;
+  transition: all var(--duration, 800ms) var(--easing, ease-in);
+}
+
+/* ===================
+   4. WIPE TRANSITION
+   =================== */
+
+/* Wipe verwendet clip-path für bessere Performance */
+.transition-wipe-left-enter {
+  clip-path: inset(0 100% 0 0);
+}
+
+.transition-wipe-left-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--duration, 700ms) var(--easing, ease-in-out);
+}
+
+.transition-wipe-right-enter {
+  clip-path: inset(0 0 0 100%);
+}
+
+.transition-wipe-right-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--duration, 700ms) var(--easing, ease-in-out);
+}
+
+.transition-wipe-up-enter {
+  clip-path: inset(100% 0 0 0);
+}
+
+.transition-wipe-up-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--duration, 700ms) var(--easing, ease-in-out);
+}
+
+.transition-wipe-down-enter {
+  clip-path: inset(0 0 100% 0);
+}
+
+.transition-wipe-down-enter-active {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path var(--duration, 700ms) var(--easing, ease-in-out);
+}
+
+/* ===================
+   5. PUSH TRANSITION
+   =================== */
+
+/* Push ist wie Slide, aber beide Slides bewegen sich */
+.transition-push-container {
+  display: flex;
+  width: 200%;
+  transition: transform var(--duration, 700ms) var(--easing, ease-in-out);
+}
+
+.transition-push-left {
+  transform: translateX(0);
+}
+
+.transition-push-left.active {
+  transform: translateX(-50%);
+}
+
+.transition-push-right {
+  transform: translateX(-50%);
+}
+
+.transition-push-right.active {
+  transform: translateX(0);
+}
+
+/* ===================
+   6. CUBE TRANSITION (3D)
+   =================== */
+
+.transition-cube-container {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+.transition-cube {
+  transform-style: preserve-3d;
+}
+
+/* Cube Left */
+.transition-cube-left-enter {
+  transform: rotateY(90deg) translateZ(-50vw);
+  opacity: 0;
+}
+
+.transition-cube-left-enter-active {
+  transform: rotateY(0deg) translateZ(0);
+  opacity: 1;
+  transition: all var(--duration, 1000ms) var(--easing, ease-in-out);
+}
+
+.transition-cube-left-exit {
+  transform: rotateY(0deg) translateZ(0);
+  opacity: 1;
+}
+
+.transition-cube-left-exit-active {
+  transform: rotateY(-90deg) translateZ(-50vw);
+  opacity: 0;
+  transition: all var(--duration, 1000ms) var(--easing, ease-in-out);
+}
+
+/* Cube Right */
+.transition-cube-right-enter {
+  transform: rotateY(-90deg) translateZ(-50vw);
+  opacity: 0;
+}
+
+.transition-cube-right-enter-active {
+  transform: rotateY(0deg) translateZ(0);
+  opacity: 1;
+  transition: all var(--duration, 1000ms) var(--easing, ease-in-out);
+}
+
+.transition-cube-right-exit {
+  transform: rotateY(0deg) translateZ(0);
+  opacity: 1;
+}
+
+.transition-cube-right-exit-active {
+  transform: rotateY(90deg) translateZ(-50vw);
+  opacity: 0;
+  transition: all var(--duration, 1000ms) var(--easing, ease-in-out);
+}
+
+/* ===================
+   7. FLIP TRANSITION (3D)
+   =================== */
+
+.transition-flip-container {
+  perspective: 1000px;
+}
+
+.transition-flip {
+  transform-style: preserve-3d;
+}
+
+/* Flip Horizontal */
+.transition-flip-left-enter {
+  transform: rotateY(-180deg);
+  opacity: 0;
+}
+
+.transition-flip-left-enter-active {
+  transform: rotateY(0deg);
+  opacity: 1;
+  transition: all var(--duration, 900ms) var(--easing, ease-in-out);
+}
+
+.transition-flip-left-exit-active {
+  transform: rotateY(180deg);
+  opacity: 0;
+  transition: all var(--duration, 900ms) var(--easing, ease-in-out);
+}
+
+/* Flip Vertical */
+.transition-flip-up-enter {
+  transform: rotateX(180deg);
+  opacity: 0;
+}
+
+.transition-flip-up-enter-active {
+  transform: rotateX(0deg);
+  opacity: 1;
+  transition: all var(--duration, 900ms) var(--easing, ease-in-out);
+}
+
+.transition-flip-up-exit-active {
+  transform: rotateX(-180deg);
+  opacity: 0;
+  transition: all var(--duration, 900ms) var(--easing, ease-in-out);
+}
+
+/* ===================
+   8. MORPH TRANSITION
+   =================== */
+
+.transition-morph-enter {
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(0.95);
+}
+
+.transition-morph-enter-active {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+  transition: all var(--duration, 1000ms) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-morph-exit {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.transition-morph-exit-active {
+  opacity: 0;
+  filter: blur(10px);
+  transform: scale(1.05);
+  transition: all var(--duration, 1000ms) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   ELEMENT ANIMATIONS - ENTRANCE
+   ============================================ */
+
+/* Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.anim-fadeIn {
+  animation: fadeIn var(--duration, 500ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Fly In - Left */
+@keyframes flyInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.anim-flyInLeft {
+  animation: flyInLeft var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Fly In - Right */
+@keyframes flyInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.anim-flyInRight {
+  animation: flyInRight var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Fly In - Up */
+@keyframes flyInUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-flyInUp {
+  animation: flyInUp var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Fly In - Down */
+@keyframes flyInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-flyInDown {
+  animation: flyInDown var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Zoom In */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.anim-zoomIn {
+  animation: zoomIn var(--duration, 500ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Bounce In */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.anim-bounceIn {
+  animation: bounceIn var(--duration, 700ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Rotate In */
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-200deg) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.anim-rotateIn {
+  animation: rotateIn var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+}
+
+/* Split Horizontal */
+@keyframes splitHorizontal {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.anim-splitHorizontal {
+  animation: splitHorizontal var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+  transform-origin: center;
+}
+
+/* Split Vertical */
+@keyframes splitVertical {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+.anim-splitVertical {
+  animation: splitVertical var(--duration, 600ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+  opacity: 0;
+  transform-origin: center;
+}
+
+/* ============================================
+   ELEMENT ANIMATIONS - EXIT
+   ============================================ */
+
+/* Fade Out */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.anim-fadeOut {
+  animation: fadeOut var(--duration, 500ms) var(--easing, ease-in) var(--delay, 0ms) forwards;
+}
+
+/* Fly Out - Left */
+@keyframes flyOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+}
+
+.anim-flyOutLeft {
+  animation: flyOutLeft var(--duration, 600ms) var(--easing, ease-in) var(--delay, 0ms) forwards;
+}
+
+/* Fly Out - Right */
+@keyframes flyOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+.anim-flyOutRight {
+  animation: flyOutRight var(--duration, 600ms) var(--easing, ease-in) var(--delay, 0ms) forwards;
+}
+
+/* Zoom Out */
+@keyframes zoomOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+.anim-zoomOut {
+  animation: zoomOut var(--duration, 500ms) var(--easing, ease-in) var(--delay, 0ms) forwards;
+}
+
+/* Collapse */
+@keyframes collapse {
+  from {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+.anim-collapse {
+  animation: collapse var(--duration, 400ms) var(--easing, ease-in) var(--delay, 0ms) forwards;
+  transform-origin: top;
+}
+
+/* ============================================
+   ELEMENT ANIMATIONS - EMPHASIS
+   ============================================ */
+
+/* Pulse */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.anim-pulse {
+  animation: pulse var(--duration, 600ms) var(--easing, ease-in-out) var(--delay, 0ms);
+}
+
+/* Shake */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(10px);
+  }
+}
+
+.anim-shake {
+  animation: shake var(--duration, 500ms) var(--easing, ease-in-out) var(--delay, 0ms);
+}
+
+/* Spin */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.anim-spin {
+  animation: spin var(--duration, 800ms) var(--easing, ease-in-out) var(--delay, 0ms);
+}
+
+/* Grow */
+@keyframes grow {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.2);
+  }
+}
+
+.anim-grow {
+  animation: grow var(--duration, 400ms) var(--easing, ease-out) var(--delay, 0ms) forwards;
+}
+
+/* Highlight */
+@keyframes highlight {
+  0%,
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 rgba(196, 30, 58, 0);
+  }
+  50% {
+    background-color: rgba(196, 30, 58, 0.2);
+    box-shadow: 0 0 20px rgba(196, 30, 58, 0.6);
+  }
+}
+
+.anim-highlight {
+  animation: highlight var(--duration, 600ms) var(--easing, ease-in-out) var(--delay, 0ms);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Keine Animation */
+.no-animation,
+.no-animation * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Hardware-Beschleunigung */
+.hw-accelerate {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Fallback: Nur Fade für alle Transitions */
+  [class*='transition-']:not(.transition-fade) {
+    animation: fadeIn 0.01ms !important;
+  }
+
+  /* Deaktiviere 3D-Effekte */
+  .transition-cube-container,
+  .transition-flip-container {
+    perspective: none !important;
+  }
+
+  .transition-cube,
+  .transition-flip {
+    transform-style: flat !important;
+  }
+}
+
+/* ============================================
+   PERFORMANCE-OPTIMIERUNGEN
+   ============================================ */
+
+/* Low-Performance-Modus (automatisch für Raspberry Pi) */
+.performance-low [class*='transition-cube'],
+.performance-low [class*='transition-flip'],
+.performance-low [class*='transition-morph'] {
+  /* Fallback zu einfachen Transitions */
+  animation: fadeIn 500ms ease-out !important;
+}
+
+.performance-low [class*='anim-'] {
+  /* Reduziere Animation-Dauer */
+  animation-duration: 300ms !important;
+}
+
+/* Deaktiviere Blur-Effekte auf Low-Performance */
+.performance-low .transition-morph-enter,
+.performance-low .transition-morph-exit {
+  filter: none !important;
+}

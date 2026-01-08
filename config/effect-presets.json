@@ -1,0 +1,309 @@
+{
+  "transitions": {
+    "fade": {
+      "name": "Fade",
+      "displayName": "Ein-/Ausblenden",
+      "description": "Sanftes Ein- und Ausblenden zwischen Slides",
+      "defaultDuration": 800,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["linear", "ease", "ease-in", "ease-out", "ease-in-out"],
+      "cssClass": "transition-fade",
+      "previewGif": "/assets/previews/fade.gif",
+      "hasDirection": false,
+      "complexity": "low",
+      "performance": "excellent"
+    },
+    "slide": {
+      "name": "Slide",
+      "displayName": "Schieben",
+      "description": "Slide von der Seite reinschieben",
+      "defaultDuration": 600,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["ease", "ease-in-out", "cubic-bezier(0.4, 0, 0.2, 1)"],
+      "directions": ["left", "right", "up", "down"],
+      "cssClass": "transition-slide-{direction}",
+      "previewGif": "/assets/previews/slide.gif",
+      "hasDirection": true,
+      "complexity": "low",
+      "performance": "excellent"
+    },
+    "zoom": {
+      "name": "Zoom",
+      "displayName": "Zoom",
+      "description": "Hinein- oder Herauszoomen",
+      "defaultDuration": 800,
+      "defaultEasing": "ease-out",
+      "supportedEasing": ["ease", "ease-out", "ease-in-out"],
+      "directions": ["in", "out"],
+      "cssClass": "transition-zoom-{direction}",
+      "previewGif": "/assets/previews/zoom.gif",
+      "hasDirection": true,
+      "complexity": "low",
+      "performance": "excellent"
+    },
+    "wipe": {
+      "name": "Wipe",
+      "displayName": "Wischen",
+      "description": "Wie ein Vorhang zur Seite wischen",
+      "defaultDuration": 700,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["linear", "ease", "ease-in-out"],
+      "directions": ["left", "right", "up", "down"],
+      "cssClass": "transition-wipe-{direction}",
+      "previewGif": "/assets/previews/wipe.gif",
+      "hasDirection": true,
+      "complexity": "medium",
+      "performance": "good"
+    },
+    "push": {
+      "name": "Push",
+      "displayName": "Schieben (Push)",
+      "description": "Neues Slide schiebt das alte weg",
+      "defaultDuration": 700,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["ease", "ease-in-out"],
+      "directions": ["left", "right", "up", "down"],
+      "cssClass": "transition-push-{direction}",
+      "previewGif": "/assets/previews/push.gif",
+      "hasDirection": true,
+      "complexity": "medium",
+      "performance": "good"
+    },
+    "cube": {
+      "name": "Cube",
+      "displayName": "Würfel (3D)",
+      "description": "3D-Würfel-Rotation zwischen Slides",
+      "defaultDuration": 1000,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["ease-in-out"],
+      "directions": ["left", "right", "up", "down"],
+      "cssClass": "transition-cube-{direction}",
+      "previewGif": "/assets/previews/cube.gif",
+      "hasDirection": true,
+      "complexity": "high",
+      "performance": "medium",
+      "requires3D": true,
+      "fallbackTo": "slide"
+    },
+    "flip": {
+      "name": "Flip",
+      "displayName": "Umdrehen (3D)",
+      "description": "3D-Flip-Effekt wie eine Karte",
+      "defaultDuration": 900,
+      "defaultEasing": "ease-in-out",
+      "supportedEasing": ["ease-in-out"],
+      "directions": ["left", "right", "up", "down"],
+      "cssClass": "transition-flip-{direction}",
+      "previewGif": "/assets/previews/flip.gif",
+      "hasDirection": true,
+      "complexity": "high",
+      "performance": "medium",
+      "requires3D": true,
+      "fallbackTo": "fade"
+    },
+    "morph": {
+      "name": "Morph",
+      "displayName": "Morphen",
+      "description": "Sanfter Übergang zwischen ähnlichen Elementen",
+      "defaultDuration": 1000,
+      "defaultEasing": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "supportedEasing": ["ease-out", "ease-in-out", "cubic-bezier(0.4, 0, 0.2, 1)"],
+      "cssClass": "transition-morph",
+      "previewGif": "/assets/previews/morph.gif",
+      "hasDirection": false,
+      "complexity": "high",
+      "performance": "good",
+      "experimental": true
+    }
+  },
+  "animations": {
+    "entrance": {
+      "fadeIn": {
+        "name": "fadeIn",
+        "displayName": "Einblenden",
+        "description": "Element sanft einblenden",
+        "defaultDuration": 500,
+        "defaultEasing": "ease-out",
+        "cssClass": "anim-fadeIn",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "flyIn": {
+        "name": "flyIn",
+        "displayName": "Hereinfliegen",
+        "description": "Element von der Seite hereinfliegen",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-out",
+        "directions": ["left", "right", "up", "down"],
+        "cssClass": "anim-flyIn{Direction}",
+        "hasDirection": true,
+        "complexity": "low"
+      },
+      "zoomIn": {
+        "name": "zoomIn",
+        "displayName": "Hineinzoomen",
+        "description": "Element hineinzoomen",
+        "defaultDuration": 500,
+        "defaultEasing": "ease-out",
+        "cssClass": "anim-zoomIn",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "bounceIn": {
+        "name": "bounceIn",
+        "displayName": "Hineinspringen",
+        "description": "Element mit Bounce-Effekt erscheinen",
+        "defaultDuration": 700,
+        "defaultEasing": "ease-out",
+        "cssClass": "anim-bounceIn",
+        "hasDirection": false,
+        "complexity": "medium"
+      },
+      "rotateIn": {
+        "name": "rotateIn",
+        "displayName": "Hineinrotieren",
+        "description": "Element rotierend erscheinen",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-out",
+        "cssClass": "anim-rotateIn",
+        "hasDirection": false,
+        "complexity": "medium"
+      },
+      "split": {
+        "name": "split",
+        "displayName": "Teilen",
+        "description": "Von Mitte oder Seiten öffnen",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-out",
+        "directions": ["horizontal", "vertical"],
+        "cssClass": "anim-split{Direction}",
+        "hasDirection": true,
+        "complexity": "medium"
+      }
+    },
+    "exit": {
+      "fadeOut": {
+        "name": "fadeOut",
+        "displayName": "Ausblenden",
+        "description": "Element sanft ausblenden",
+        "defaultDuration": 500,
+        "defaultEasing": "ease-in",
+        "cssClass": "anim-fadeOut",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "flyOut": {
+        "name": "flyOut",
+        "displayName": "Herausfliegen",
+        "description": "Element zur Seite herausfliegen",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-in",
+        "directions": ["left", "right", "up", "down"],
+        "cssClass": "anim-flyOut{Direction}",
+        "hasDirection": true,
+        "complexity": "low"
+      },
+      "zoomOut": {
+        "name": "zoomOut",
+        "displayName": "Herauszoomen",
+        "description": "Element herauszoomen",
+        "defaultDuration": 500,
+        "defaultEasing": "ease-in",
+        "cssClass": "anim-zoomOut",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "collapse": {
+        "name": "collapse",
+        "displayName": "Zusammenklappen",
+        "description": "Element zusammenklappen",
+        "defaultDuration": 400,
+        "defaultEasing": "ease-in",
+        "cssClass": "anim-collapse",
+        "hasDirection": false,
+        "complexity": "medium"
+      }
+    },
+    "emphasis": {
+      "pulse": {
+        "name": "pulse",
+        "displayName": "Pulsieren",
+        "description": "Element pulsieren lassen",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-in-out",
+        "cssClass": "anim-pulse",
+        "hasDirection": false,
+        "complexity": "low",
+        "canLoop": true
+      },
+      "shake": {
+        "name": "shake",
+        "displayName": "Schütteln",
+        "description": "Element schütteln",
+        "defaultDuration": 500,
+        "defaultEasing": "ease-in-out",
+        "cssClass": "anim-shake",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "spin": {
+        "name": "spin",
+        "displayName": "Drehen",
+        "description": "Element einmal drehen",
+        "defaultDuration": 800,
+        "defaultEasing": "ease-in-out",
+        "cssClass": "anim-spin",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "grow": {
+        "name": "grow",
+        "displayName": "Wachsen",
+        "description": "Element größer werden lassen",
+        "defaultDuration": 400,
+        "defaultEasing": "ease-out",
+        "cssClass": "anim-grow",
+        "hasDirection": false,
+        "complexity": "low"
+      },
+      "highlight": {
+        "name": "highlight",
+        "displayName": "Hervorheben",
+        "description": "Element kurz hervorheben",
+        "defaultDuration": 600,
+        "defaultEasing": "ease-in-out",
+        "cssClass": "anim-highlight",
+        "hasDirection": false,
+        "complexity": "low"
+      }
+    }
+  },
+  "easingPresets": {
+    "linear": "linear",
+    "ease": "ease",
+    "ease-in": "ease-in",
+    "ease-out": "ease-out",
+    "ease-in-out": "ease-in-out",
+    "smooth": "cubic-bezier(0.4, 0, 0.2, 1)",
+    "bounce": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+    "elastic": "cubic-bezier(0.68, -0.6, 0.32, 1.6)"
+  },
+  "performanceProfiles": {
+    "high": {
+      "maxDuration": 2000,
+      "allow3D": true,
+      "allowComplex": true
+    },
+    "medium": {
+      "maxDuration": 1000,
+      "allow3D": true,
+      "allowComplex": false
+    },
+    "low": {
+      "maxDuration": 500,
+      "allow3D": false,
+      "allowComplex": false,
+      "fallbackTransitions": ["fade", "slide"]
+    }
+  }
+}
