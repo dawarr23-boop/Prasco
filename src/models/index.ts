@@ -9,6 +9,7 @@ import UserPermission from './UserPermission';
 import Setting from './Setting';
 import SlideTransition from './SlideTransition';
 import ElementAnimation from './ElementAnimation';
+import MotionPath from './MotionPath';
 
 // Define associations
 
@@ -147,6 +148,16 @@ ElementAnimation.belongsTo(Post, {
   as: 'post',
 });
 
+// ElementAnimation -> MotionPath (1:1)
+ElementAnimation.hasOne(MotionPath, {
+  foreignKey: 'elementAnimationId',
+  as: 'motionPath',
+});
+MotionPath.belongsTo(ElementAnimation, {
+  foreignKey: 'elementAnimationId',
+  as: 'elementAnimation',
+});
+
 export { 
   User, 
   Organization, 
@@ -159,6 +170,7 @@ export {
   Setting,
   SlideTransition,
   ElementAnimation,
+  MotionPath,
 };
 
 export default {
@@ -173,4 +185,5 @@ export default {
   Setting,
   SlideTransition,
   ElementAnimation,
+  MotionPath,
 };
