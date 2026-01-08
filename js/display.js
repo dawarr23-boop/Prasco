@@ -354,6 +354,443 @@ const effectRenderer = new EffectRenderer();
 // ENDE EFFECT RENDERER
 // ============================================
 
+// ============================================
+// ANIMATION ENGINE (Element Animations)
+// ============================================
+
+class AnimationEngine {
+  constructor() {
+    this.animations = new Map(); // postId -> animations array
+    this.activeAnimations = new Set(); // Currently running animations
+    this.timeline = [];
+    this.timelineIndex = 0;
+    this.isPlaying = false;
+    this.performanceProfile = effectRenderer.performanceProfile;
+    this.observers = new Map(); // For scroll/visibility triggers
+  }
+
+  /**
+   * Load animations for a specific post from the API
+   */
+  async loadAnimations(postId) {
+    try {
+      const response = await fetch(`/api/animations/post/${postId}`);
+      if (!response.ok) {
+        console.warn(`No animations found for post ${postId}`);
+        return [];
+      }
+
+      const animations = await response.json();
+      this.animations.set(postId, animations);
+      
+      console.log(`Loaded ${animations.length} animations for post ${postId}`);
+      return animations;
+    } catch (error) {
+      console.error('Error loading animations:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Play all animations for the current post
+   */
+  async playAnimations(postId, container) {
+    const animations = this.animations.get(postId);
+    if (!animations || animations.length === 0) {
+      return;
+    }
+
+    // Reset state
+    this.timeline = this.buildTimeline(animations);
+    this.timelineIndex = 0;
+    this.isPlaying = true;
+
+    console.log(`Playing ${animations.length} animations for post ${postId}`);
+
+    // Setup triggers
+    this.setupTriggers(animations, container);
+
+    // Start auto-triggered animations
+    await this.playAutoAnimations();
+  }
+
+  /**
+   * Build timeline from animations sorted by order
+   */
+  buildTimeline(animations) {
+    return animations
+      .filter(anim => anim.trigger === 'auto' || anim.trigger === 'sequence')
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
+  }
+
+  /**
+   * Play all auto-triggered animations
+   */
+  async playAutoAnimations() {
+    for (const animation of this.timeline) {
+      if (!this.isPlaying) break;
+
+      await this.playAnimation(animation);
+
+      // Wait for delay before next animation (if sequence trigger)
+      if (animation.trigger === 'sequence' && animation.delay) {
+        await this.wait(animation.delay);
+      }
+    }
+  }
+
+  /**
+   * Play a single animation
+   */
+  async playAnimation(animation) {
+    const element = this.findElement(animation.elementSelector);
+    if (!element) {
+      console.warn(`Element not found: ${animation.elementSelector}`);
+      return;
+    }
+
+    // Skip if reduced motion is preferred
+    if (this.shouldReduceMotion()) {
+      element.style.opacity = '1';
+      element.style.visibility = 'visible';
+      return;
+    }
+
+    // Skip heavy effects on low performance
+    if (this.performanceProfile === 'low' && this.isHeavyEffect(animation.animationType)) {
+      return this.applySimpleAnimation(element, animation);
+    }
+
+    return new Promise((resolve) => {
+      const duration = animation.duration || 1000;
+      const delay = animation.delay || 0;
+      const easing = animation.easing || 'ease-out';
+
+      // Get CSS class for the animation
+      const animationClass = this.getAnimationClass(animation);
+      
+      // Set CSS variables
+      element.style.setProperty('--animation-duration', `${duration}ms`);
+      element.style.setProperty('--animation-delay', `${delay}ms`);
+      element.style.setProperty('--animation-easing', easing);
+
+      // Make element visible but potentially transparent (for entrance effects)
+      if (animation.animationType.startsWith('entrance-')) {
+        element.style.visibility = 'visible';
+      }
+
+      // Apply animation class
+      element.classList.add(animationClass);
+      this.activeAnimations.add(element);
+
+      // Handle animation end
+      const onAnimationEnd = () => {
+        element.removeEventListener('animationend', onAnimationEnd);
+        element.classList.remove(animationClass);
+        this.activeAnimations.delete(element);
+
+        // For exit animations, hide the element
+        if (animation.animationType.startsWith('exit-')) {
+          element.style.display = 'none';
+        }
+
+        resolve();
+      };
+
+      element.addEventListener('animationend', onAnimationEnd);
+
+      // Fallback timeout in case animationend doesn't fire
+      setTimeout(() => {
+        if (this.activeAnimations.has(element)) {
+          onAnimationEnd();
+        }
+      }, duration + delay + 100);
+    });
+  }
+
+  /**
+   * Apply simple animation for low-performance devices
+   */
+  applySimpleAnimation(element, animation) {
+    return new Promise((resolve) => {
+      const duration = Math.min(animation.duration || 1000, 500); // Max 500ms
+      
+      element.style.transition = `opacity ${duration}ms ease-out`;
+      
+      if (animation.animationType.startsWith('entrance-')) {
+        element.style.opacity = '0';
+        element.style.visibility = 'visible';
+        requestAnimationFrame(() => {
+          element.style.opacity = '1';
+        });
+      } else if (animation.animationType.startsWith('exit-')) {
+        element.style.opacity = '0';
+      }
+
+      setTimeout(() => {
+        element.style.transition = '';
+        if (animation.animationType.startsWith('exit-')) {
+          element.style.display = 'none';
+        }
+        resolve();
+      }, duration);
+    });
+  }
+
+  /**
+   * Get CSS animation class name from animation type
+   */
+  getAnimationClass(animation) {
+    const type = animation.animationType;
+    
+    // Map animation types to CSS class names
+    const classMap = {
+      // Entrance
+      'entrance-fade-in': 'anim-fade-in',
+      'entrance-fade-in-down': 'anim-fade-in-down',
+      'entrance-fade-in-up': 'anim-fade-in-up',
+      'entrance-fade-in-left': 'anim-fade-in-left',
+      'entrance-fade-in-right': 'anim-fade-in-right',
+      'entrance-fly-in-down': 'anim-fly-in-down',
+      'entrance-fly-in-up': 'anim-fly-in-up',
+      'entrance-fly-in-left': 'anim-fly-in-left',
+      'entrance-fly-in-right': 'anim-fly-in-right',
+      'entrance-zoom-in': 'anim-zoom-in',
+      'entrance-zoom-in-down': 'anim-zoom-in-down',
+      'entrance-zoom-in-up': 'anim-zoom-in-up',
+      'entrance-bounce-in': 'anim-bounce-in',
+      'entrance-slide-in-left': 'anim-slide-in-left',
+      'entrance-slide-in-right': 'anim-slide-in-right',
+      'entrance-slide-in-up': 'anim-slide-in-up',
+      'entrance-slide-in-down': 'anim-slide-in-down',
+      'entrance-rotate-in': 'anim-rotate-in',
+      'entrance-flip-in-x': 'anim-flip-in-x',
+      'entrance-flip-in-y': 'anim-flip-in-y',
+      'entrance-light-speed-in': 'anim-light-speed-in',
+      'entrance-roll-in': 'anim-roll-in',
+      'entrance-scale-in': 'anim-scale-in',
+      
+      // Exit
+      'exit-fade-out': 'anim-fade-out',
+      'exit-fade-out-down': 'anim-fade-out-down',
+      'exit-fade-out-up': 'anim-fade-out-up',
+      'exit-fade-out-left': 'anim-fade-out-left',
+      'exit-fade-out-right': 'anim-fade-out-right',
+      'exit-fly-out-down': 'anim-fly-out-down',
+      'exit-fly-out-up': 'anim-fly-out-up',
+      'exit-fly-out-left': 'anim-fly-out-left',
+      'exit-fly-out-right': 'anim-fly-out-right',
+      'exit-zoom-out': 'anim-zoom-out',
+      'exit-bounce-out': 'anim-bounce-out',
+      'exit-slide-out-left': 'anim-slide-out-left',
+      'exit-slide-out-right': 'anim-slide-out-right',
+      'exit-slide-out-up': 'anim-slide-out-up',
+      'exit-slide-out-down': 'anim-slide-out-down',
+      'exit-rotate-out': 'anim-rotate-out',
+      'exit-flip-out-x': 'anim-flip-out-x',
+      'exit-flip-out-y': 'anim-flip-out-y',
+      'exit-roll-out': 'anim-roll-out',
+      'exit-scale-out': 'anim-scale-out',
+      
+      // Emphasis
+      'emphasis-pulse': 'anim-pulse',
+      'emphasis-bounce': 'anim-bounce',
+      'emphasis-shake': 'anim-shake',
+      'emphasis-swing': 'anim-swing',
+      'emphasis-wobble': 'anim-wobble',
+      'emphasis-jello': 'anim-jello',
+      'emphasis-heartbeat': 'anim-heartbeat',
+      'emphasis-flash': 'anim-flash',
+      'emphasis-rubber-band': 'anim-rubber-band',
+      'emphasis-tada': 'anim-tada',
+      'emphasis-grow': 'anim-grow',
+      'emphasis-shrink': 'anim-shrink',
+      'emphasis-spin': 'anim-spin',
+    };
+
+    return classMap[type] || 'anim-fade-in';
+  }
+
+  /**
+   * Setup event-based triggers (click, hover, scroll)
+   */
+  setupTriggers(animations, container) {
+    // Cleanup previous observers
+    this.cleanupObservers();
+
+    animations.forEach(animation => {
+      const element = this.findElement(animation.elementSelector, container);
+      if (!element) return;
+
+      switch (animation.trigger) {
+        case 'click':
+          element.style.cursor = 'pointer';
+          element.addEventListener('click', () => this.playAnimation(animation));
+          break;
+
+        case 'hover':
+          element.addEventListener('mouseenter', () => this.playAnimation(animation));
+          break;
+
+        case 'scroll':
+          this.setupScrollTrigger(element, animation);
+          break;
+
+        case 'visibility':
+          this.setupVisibilityTrigger(element, animation);
+          break;
+      }
+    });
+  }
+
+  /**
+   * Setup scroll-based trigger using Intersection Observer
+   */
+  setupScrollTrigger(element, animation) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.playAnimation(animation);
+            observer.unobserve(element); // Play only once
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(element);
+    this.observers.set(element, observer);
+  }
+
+  /**
+   * Setup visibility trigger
+   */
+  setupVisibilityTrigger(element, animation) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.playAnimation(animation);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(element);
+    this.observers.set(element, observer);
+  }
+
+  /**
+   * Find element by selector within container
+   */
+  findElement(selector, container = document) {
+    try {
+      return container.querySelector(selector);
+    } catch (error) {
+      console.error(`Invalid selector: ${selector}`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Check if effect is computationally heavy
+   */
+  isHeavyEffect(type) {
+    const heavyEffects = [
+      'entrance-flip-in-x',
+      'entrance-flip-in-y',
+      'exit-flip-out-x',
+      'exit-flip-out-y',
+      'entrance-rotate-in',
+      'exit-rotate-out',
+      'entrance-roll-in',
+      'exit-roll-out',
+    ];
+    return heavyEffects.includes(type);
+  }
+
+  /**
+   * Check if user prefers reduced motion
+   */
+  shouldReduceMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Wait helper
+   */
+  wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Stop all animations
+   */
+  stop() {
+    this.isPlaying = false;
+    this.activeAnimations.forEach(element => {
+      element.getAnimations().forEach(anim => anim.cancel());
+    });
+    this.activeAnimations.clear();
+  }
+
+  /**
+   * Cleanup observers
+   */
+  cleanupObservers() {
+    this.observers.forEach(observer => observer.disconnect());
+    this.observers.clear();
+  }
+
+  /**
+   * Reset animations for a post
+   */
+  resetAnimations(postId, container) {
+    const animations = this.animations.get(postId);
+    if (!animations) return;
+
+    animations.forEach(animation => {
+      const element = this.findElement(animation.elementSelector, container);
+      if (!element) return;
+
+      // Remove animation classes
+      element.className = element.className
+        .split(' ')
+        .filter(cls => !cls.startsWith('anim-'))
+        .join(' ');
+
+      // Reset inline styles
+      element.style.removeProperty('--animation-duration');
+      element.style.removeProperty('--animation-delay');
+      element.style.removeProperty('--animation-easing');
+
+      // Reset visibility for entrance animations
+      if (animation.animationType.startsWith('entrance-')) {
+        element.style.opacity = '0';
+        element.style.visibility = 'hidden';
+      }
+    });
+  }
+
+  /**
+   * Clear animations cache
+   */
+  clearCache() {
+    this.animations.clear();
+    this.cleanupObservers();
+    this.stop();
+  }
+}
+
+// Globale Instanz
+const animationEngine = new AnimationEngine();
+
+// ============================================
+// ENDE ANIMATION ENGINE
+// ============================================
+
 let posts = [];
 let currentIndex = 0;
 let autoRotateTimer = null;
@@ -1195,6 +1632,24 @@ function displayCurrentPost() {
     container.style.animation = 'fadeIn 0.8s ease';
   }, 10);
 
+  // ============================================
+  // ELEMENT ANIMATIONS ABSPIELEN
+  // ============================================
+  // Lade und spiele Element-Animationen ab (wenn vorhanden)
+  (async () => {
+    try {
+      const animations = await animationEngine.loadAnimations(post.id);
+      if (animations && animations.length > 0) {
+        // Kleine Verzögerung damit Container-Animation fertig ist
+        setTimeout(() => {
+          animationEngine.playAnimations(post.id, container);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('Fehler beim Laden der Element-Animationen:', error);
+    }
+  })();
+
   // Nächster Post nach Duration (nicht im Vortragsmodus wenn pausiert)
   clearTimeout(autoRotateTimer);
 
@@ -1252,6 +1707,9 @@ function showNextTextPage() {
 
 // Nächster Post
 function nextPost() {
+  // Stoppe aktive Animationen und cleanup
+  animationEngine.stop();
+  
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
   currentIndex = (currentIndex + 1) % posts.length;
   displayCurrentPost();
@@ -1261,6 +1719,9 @@ function nextPost() {
 
 // Vorheriger Post
 function previousPost() {
+  // Stoppe aktive Animationen und cleanup
+  animationEngine.stop();
+  
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
   currentIndex = (currentIndex - 1 + posts.length) % posts.length;
   displayCurrentPost();
