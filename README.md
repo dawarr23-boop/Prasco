@@ -423,6 +423,44 @@ cat android-tv-app/README.md
 
 **Dokumentation:** [ANDROID-TV-APP.md](ANDROID-TV-APP.md)
 
+### Option 3: Offline-Modus (Android mit WiFi Hotspot)
+
+Android-Gerät als eigenständiger Server mit WiFi-Hotspot:
+
+**Dokumentation:** [ANDROID-OFFLINE-MODE.md](ANDROID-OFFLINE-MODE.md)
+
+---
+
+## 📡 Raspberry Pi Offline-Modus / WiFi Hotspot
+
+Raspberry Pi als WiFi Access Point für vollständigen Offline-Betrieb:
+
+```bash
+# Automatisches Setup
+sudo bash scripts/setup-hotspot.sh
+```
+
+**Features:**
+- ✅ Raspberry Pi als WiFi Hotspot
+- ✅ Kein externes Netzwerk erforderlich
+- ✅ Admin-Panel über WiFi erreichbar
+- ✅ Ideal für mobile Events, Outdoor-Displays
+- ✅ 5-Minuten Setup
+
+**Nach Installation:**
+- WiFi: `PRASCO-Display` (Passwort: `prasco123`)
+- URL: `http://192.168.4.1:3000`
+- Admin: `http://192.168.4.1:3000/admin`
+
+**Anwendungsfälle:**
+- Mobile Messen und Events ohne WLAN
+- Outdoor-Installationen
+- Demo-Präsentationen
+- Remote Locations ohne Netzwerk
+- Notfall-Backup bei Netzwerkausfall
+
+**Dokumentation:** [RASPBERRY-PI-OFFLINE-MODE.md](RASPBERRY-PI-OFFLINE-MODE.md)
+
 ---
 
 ## 🔧 Entwicklung
