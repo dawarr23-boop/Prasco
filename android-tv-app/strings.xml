@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PRASCO Display TV</string>
+    <string name="loading">Lade Inhalte...</string>
+    <string name="error_loading">Fehler beim Laden der Seite</string>
+    <string name="no_internet">Keine Internetverbindung</string>
+    <string name="retry">Erneut versuchen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="server_url">Server URL</string>
+    <string name="auto_reload">Auto-Reload</string>
+    <string name="reload_interval">Reload-Intervall (Minuten)</string>
+</resources>

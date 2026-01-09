@@ -377,6 +377,54 @@ Passen Sie die Header in den HTML-Dateien an:
 4. Aktivieren Sie HTTPS
 5. Beschränken Sie Admin-Zugriff auf lokales Netzwerk
 
+## 📱 Android Deployment
+
+PRASCO kann auch als native Android App auf Smartphones, Tablets und Android TVs bereitgestellt werden:
+
+### Option 1: Android App (Smartphones/Tablets)
+
+WebView-basierte App für Android-Geräte mit Touchscreen:
+
+```bash
+# Siehe vollständige Anleitung
+cat android-app/README.md
+```
+
+**Features:**
+- WebView mit vollem JavaScript-Support
+- Kiosk-Modus für Digital Signage
+- Auto-Start beim Booten
+- Offline-Cache
+
+**Dokumentation:** [ANDROID-APP.md](ANDROID-APP.md)
+
+### Option 2: Android TV App ⭐ (Empfohlen für TV-Displays)
+
+Optimiert für Android TVs, Set-Top-Boxen und TV-Sticks:
+
+```bash
+# Siehe vollständige Anleitung
+cat android-tv-app/README.md
+```
+
+**Features:**
+- Leanback UI für TV
+- Fernbedienungs-Navigation (D-Pad)
+- 4K-optimiert
+- Kiosk-Modus
+- Hardware-beschleunigte Video-Wiedergabe
+
+**Kompatibel mit:**
+- NVIDIA Shield TV
+- Mi Box
+- Chromecast with Google TV
+- Fire TV Stick
+- Sony/Philips Android TVs
+
+**Dokumentation:** [ANDROID-TV-APP.md](ANDROID-TV-APP.md)
+
+---
+
 ## 🔧 Entwicklung
 
 ### Backend-API erweitern
@@ -413,16 +461,17 @@ src/
 
 ## 📝 Roadmap
 
-- [ ] Backend-API mit SQLite/PostgreSQL
-- [ ] Echte Authentifizierung
-- [ ] Medien-Upload Funktion
+- [x] Backend-API mit SQLite/PostgreSQL
+- [x] Echte Authentifizierung
+- [x] Medien-Upload Funktion
 - [ ] Multi-Display-Support
 - [ ] WebSocket für Real-time Updates
 - [ ] QR-Code Generator
 - [ ] Wetter-Widget
 - [ ] Kalender-Integration
 - [ ] Analytics/Statistiken
-- [ ] Mobile App
+- [x] **Android App** (WebView & Capacitor)
+- [x] **Android TV App** (optimiert für TV-Displays)
 
 ## 🐛 Troubleshooting
 
