@@ -461,6 +461,36 @@ sudo bash scripts/setup-hotspot.sh
 
 **Dokumentation:** [RASPBERRY-PI-OFFLINE-MODE.md](RASPBERRY-PI-OFFLINE-MODE.md)
 
+### 🎮 Boot-Menü für Modus-Auswahl
+
+Automatisches Boot-Menü zur Auswahl zwischen Normal- und Hotspot-Modus:
+
+```bash
+# Boot-Menü installieren
+sudo bash scripts/setup-boot-menu.sh
+```
+
+**Features:**
+- ✅ Auswahl beim Booten zwischen Normal- und Hotspot-Modus
+- ✅ 10 Sekunden Timeout für automatischen Start
+- ✅ Permanente Speicherung der Auswahl
+- ✅ Manueller Wechsel jederzeit: `prasco-mode`
+- ✅ Status-Anzeige: `prasco-status`
+
+**Beim Booten:**
+```
+╔════════════════════════════════════════════════╗
+║          🍓 PRASCO Boot Modus Auswahl         ║
+╚════════════════════════════════════════════════╝
+
+  1) Normal-Modus (Standard)
+  2) Hotspot-Modus (Offline)
+  3) Aktuellen Modus ändern
+  4) Beenden
+```
+
+**Dokumentation:** [RASPBERRY-PI-BOOT-MENU.md](RASPBERRY-PI-BOOT-MENU.md)
+
 ---
 
 ## 🔧 Entwicklung
