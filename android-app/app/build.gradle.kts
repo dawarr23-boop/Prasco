@@ -23,7 +23,9 @@ android {
         }
 
         // API Base URL - Using HTTP for development
+        // Leave empty for standalone mode (offline-first)
         buildConfigField("String", "API_BASE_URL", "\"http://10.0.162.110:3000/api/\"")
+        buildConfigField("boolean", "STANDALONE_MODE", "true")
     }
 
     buildTypes {

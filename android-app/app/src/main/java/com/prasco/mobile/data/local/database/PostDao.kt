@@ -10,6 +10,9 @@ interface PostDao {
     @Query("SELECT * FROM posts ORDER BY priority DESC, createdAt DESC")
     fun getAllPosts(): Flow<List<PostEntity>>
     
+    @Query("SELECT * FROM posts ORDER BY priority DESC, createdAt DESC")
+    suspend fun getAllPostsSync(): List<PostEntity>
+    
     @Query("SELECT * FROM posts WHERE id = :id")
     suspend fun getPostById(id: Int): PostEntity?
     

@@ -108,15 +108,49 @@ Konfiguration: `app/src/main/res/xml/network_security_config.xml`
 
 ## Build Varianten
 
-### Debug Build
-```bash
-./gradlew assembleDebug
+### PowerShell Build Script (Empfohlen für Windows)
+
+```powershell
+# Debug Build
+.\build-app.ps1
+
+# Release Build
+.\build-app.ps1 -BuildType release
+
+# Clean Build
+.\build-app.ps1 -Clean
+
+# Build und Installation
+.\build-app.ps1 -Install
+
+# Android Studio öffnen
+.\build-app.ps1 -OpenStudio
+
+# Alle Optionen
+.\build-app.ps1 -BuildType both -Clean -Install
 ```
 
-### Release Build
+### Gradle (Linux/Mac/Windows)
+
 ```bash
+# Debug Build
+./gradlew assembleDebug
+
+# Release Build
 ./gradlew assembleRelease
+
+# Windows
+gradlew.bat assembleDebug
+gradlew.bat assembleRelease
 ```
+
+### Android Studio
+
+1. File → Open → android-app Ordner
+2. Build → Build Bundle(s) / APK(s) → Build APK(s)
+3. Run → Run 'app' (Shift+F10)
+
+📚 **Ausführliche Anleitung**: Siehe [BUILD-GUIDE.md](BUILD-GUIDE.md)
 
 ## Testing
 

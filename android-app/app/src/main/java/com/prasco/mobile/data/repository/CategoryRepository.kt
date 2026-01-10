@@ -15,7 +15,8 @@ import javax.inject.Singleton
 @Singleton
 class CategoryRepository @Inject constructor(
     private val api: PrascoApi,
-    private val categoryDao: CategoryDao
+    private val categoryDao: CategoryDao,
+    private val demoDataProvider: DemoDataProvider
 ) {
 
     fun getAllCategories(): Flow<List<Category>> {
@@ -44,8 +45,16 @@ class CategoryRepository @Inject constructor(
                 Resource.Error("Server-Fehler: ${response.code()}")
             }
         } catch (e: Exception) {
-            Timber.e(e, "Sync categories error")
-            Resource.Error("Netzwerkfehler: ${e.localizedMessage}")
+            Timber.e(e, "Sync categories error - using demo data")
+            // Fallback: Initialisiere mit Demo-Daten
+            val demoCategories = demoDataProvider.getDemoCategories()
+            try {
+                val entities = demoCategories.map { it.toEntity() }
+                categoryDao.insertCategories(entities)
+            } catch (dbError: Exception) {
+                Timber.e(dbError, "Error inserting demo categories")
+            }
+            Resource.Success(demoCategories)
         }
     }
 }

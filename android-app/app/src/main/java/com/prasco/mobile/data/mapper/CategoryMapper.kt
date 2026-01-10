@@ -41,3 +41,14 @@ fun Category.toDto(): CategoryDto {
         icon = icon
     )
 }
+
+fun Category.toEntity(): CategoryEntity {
+    return CategoryEntity(
+        id = id,
+        name = name,
+        color = color,
+        icon = icon,
+        organizationId = null,
+        createdAt = null
+    )
+}

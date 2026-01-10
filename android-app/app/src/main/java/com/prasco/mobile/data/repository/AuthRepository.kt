@@ -11,14 +11,22 @@ import kotlinx.coroutines.flow.first
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.delay
 
 @Singleton
 class AuthRepository @Inject constructor(
     private val authApi: AuthApi,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val demoDataProvider: DemoDataProvider
 ) {
 
     suspend fun login(email: String, password: String): Resource<User> {
+        // Prüfe zuerst Demo-Credentials für Offline-Modus
+        if (demoDataProvider.isValidDemoCredentials(email, password)) {
+            return loginDemoMode()
+        }
+        
+        // Versuche Server-Login
         return try {
             val response = authApi.login(LoginRequest(email, password))
             
@@ -49,9 +57,35 @@ class AuthRepository @Inject constructor(
                 Resource.Error("Server-Fehler: ${response.code()}")
             }
         } catch (e: Exception) {
-            Timber.e(e, "Login error")
-            Resource.Error("Netzwerkfehler: ${e.localizedMessage}")
+            Timber.e(e, "Login error - falling back to demo mode")
+            // Fallback zu Demo-Modus bei Netzwerkfehler
+            if (demoDataProvider.isValidDemoCredentials(email, password)) {
+                return loginDemoMode()
+            }
+            Resource.Error("Offline-Modus: Verwende 'demo' / 'demo' für Demo-Login")
         }
+    }
+    
+    private suspend fun loginDemoMode(): Resource<User> {
+        Timber.d("Using demo mode login")
+        delay(500) // Simuliere Netzwerk-Delay
+        
+        val demoUser = demoDataProvider.getDemoUser()
+        
+        // Speichere Demo-User Daten
+        preferencesManager.saveAuthTokens(
+            authToken = "demo_token_${System.currentTimeMillis()}",
+            refreshToken = "demo_refresh_token"
+        )
+        
+        preferencesManager.saveUserData(
+            userId = demoUser.id,
+            email = demoUser.email,
+            name = demoUser.name,
+            role = demoUser.role.name
+        )
+        
+        return Resource.Success(demoUser)
     }
 
     suspend fun refreshToken(): Resource<String> {

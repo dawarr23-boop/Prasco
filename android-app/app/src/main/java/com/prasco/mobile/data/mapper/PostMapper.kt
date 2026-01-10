@@ -79,3 +79,26 @@ fun Post.toDto(): PostDto {
         isActive = isActive
     )
 }
+
+fun Post.toEntity(): PostEntity {
+    return PostEntity(
+        id = id,
+        title = title,
+        content = content,
+        type = type.value,
+        mediaUrl = mediaUrl,
+        duration = duration,
+        priority = priority,
+        categoryId = category?.id,
+        startDate = startDate,
+        endDate = endDate,
+        isActive = isActive,
+        createdBy = null,
+        organizationId = null,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        isSynced = true,
+        locallyModified = false,
+        locallyCreated = false
+    )
+}

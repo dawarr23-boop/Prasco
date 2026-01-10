@@ -97,7 +97,25 @@
 **Funktionsfähigkeit**: ✅ Bereit zum Testen  
 **Deployment**: ⚠️ Benötigt Android Studio + Emulator/Device  
 
-## 🔧 Deployment-Schritte
+## 🔧 Build & Deployment
+
+### Methode 1: PowerShell Script (Schnell & Einfach)
+
+```powershell
+# Setup prüfen
+.\setup-dev.ps1
+
+# App bauen
+.\build-app.ps1
+
+# Build und installieren
+.\build-app.ps1 -Install
+
+# Release für Produktion
+.\build-app.ps1 -BuildType release
+```
+
+### Methode 2: Android Studio (Development)
 
 1. **Android Studio öffnen**:
    ```
@@ -115,9 +133,27 @@
    - Shift+F10 oder Run-Button
    - Warten bis Build fertig (~2-5 Min beim ersten Mal)
 
-5. **Testen**:
-   - Login: admin@example.com / admin (oder deine Credentials)
-   - Posts anzeigen, erstellen, bearbeiten, löschen
+### Methode 3: Gradle CLI
+
+```powershell
+# Windows
+.\gradlew.bat assembleDebug
+
+# Linux/Mac
+./gradlew assembleDebug
+```
+
+### 📦 Build Outputs
+
+- **Debug APK**: `app/build/outputs/apk/debug/app-debug.apk`
+- **Release APK**: `app/build/outputs/apk/release/app-release.apk`
+
+### 🧪 Testen
+
+- **Login**: admin@example.com / admin (oder deine Credentials)
+- **Features**: Posts anzeigen, erstellen, bearbeiten, löschen
+
+📚 **Vollständige Anleitung**: [BUILD-GUIDE.md](BUILD-GUIDE.md)
 
 ## 📝 Hinweise
 
