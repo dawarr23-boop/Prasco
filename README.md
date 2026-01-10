@@ -377,6 +377,122 @@ Passen Sie die Header in den HTML-Dateien an:
 4. Aktivieren Sie HTTPS
 5. Beschränken Sie Admin-Zugriff auf lokales Netzwerk
 
+## 📱 Android Deployment
+
+PRASCO kann auch als native Android App auf Smartphones, Tablets und Android TVs bereitgestellt werden:
+
+### Option 1: Android App (Smartphones/Tablets)
+
+WebView-basierte App für Android-Geräte mit Touchscreen:
+
+```bash
+# Siehe vollständige Anleitung
+cat android-app/README.md
+```
+
+**Features:**
+- WebView mit vollem JavaScript-Support
+- Kiosk-Modus für Digital Signage
+- Auto-Start beim Booten
+- Offline-Cache
+
+**Dokumentation:** [ANDROID-APP.md](ANDROID-APP.md)
+
+### Option 2: Android TV App ⭐ (Empfohlen für TV-Displays)
+
+Optimiert für Android TVs, Set-Top-Boxen und TV-Sticks:
+
+```bash
+# Siehe vollständige Anleitung
+cat android-tv-app/README.md
+```
+
+**Features:**
+- Leanback UI für TV
+- Fernbedienungs-Navigation (D-Pad)
+- 4K-optimiert
+- Kiosk-Modus
+- Hardware-beschleunigte Video-Wiedergabe
+
+**Kompatibel mit:**
+- NVIDIA Shield TV
+- Mi Box
+- Chromecast with Google TV
+- Fire TV Stick
+- Sony/Philips Android TVs
+
+**Dokumentation:** [ANDROID-TV-APP.md](ANDROID-TV-APP.md)
+
+### Option 3: Offline-Modus (Android mit WiFi Hotspot)
+
+Android-Gerät als eigenständiger Server mit WiFi-Hotspot:
+
+**Dokumentation:** [ANDROID-OFFLINE-MODE.md](ANDROID-OFFLINE-MODE.md)
+
+---
+
+## 📡 Raspberry Pi Offline-Modus / WiFi Hotspot
+
+Raspberry Pi als WiFi Access Point für vollständigen Offline-Betrieb:
+
+```bash
+# Automatisches Setup
+sudo bash scripts/setup-hotspot.sh
+```
+
+**Features:**
+- ✅ Raspberry Pi als WiFi Hotspot
+- ✅ Kein externes Netzwerk erforderlich
+- ✅ Admin-Panel über WiFi erreichbar
+- ✅ Ideal für mobile Events, Outdoor-Displays
+- ✅ 5-Minuten Setup
+
+**Nach Installation:**
+- WiFi: `PRASCO-Display` (Passwort: `prasco123`)
+- URL: `http://192.168.4.1:3000`
+- Admin: `http://192.168.4.1:3000/admin`
+
+**Anwendungsfälle:**
+- Mobile Messen und Events ohne WLAN
+- Outdoor-Installationen
+- Demo-Präsentationen
+- Remote Locations ohne Netzwerk
+- Notfall-Backup bei Netzwerkausfall
+
+**Dokumentation:** [RASPBERRY-PI-OFFLINE-MODE.md](RASPBERRY-PI-OFFLINE-MODE.md)
+
+### 🎮 Boot-Menü für Modus-Auswahl
+
+Automatisches Boot-Menü zur Auswahl zwischen Normal- und Hotspot-Modus:
+
+```bash
+# Boot-Menü installieren
+sudo bash scripts/setup-boot-menu.sh
+```
+
+**Features:**
+- ✅ Auswahl beim Booten zwischen Normal- und Hotspot-Modus
+- ✅ 10 Sekunden Timeout für automatischen Start
+- ✅ Permanente Speicherung der Auswahl
+- ✅ Manueller Wechsel jederzeit: `prasco-mode`
+- ✅ Status-Anzeige: `prasco-status`
+
+**Beim Booten:**
+```
+╔════════════════════════════════════════════════╗
+║          🍓 PRASCO Boot Modus Auswahl         ║
+╚════════════════════════════════════════════════╝
+
+  1) Normal-Modus (Standard)
+  2) Hotspot-Modus (Offline)
+  3) Aktuellen Modus ändern
+  4) Beenden
+```
+
+**Dokumentation:** [RASPBERRY-PI-BOOT-MENU.md](RASPBERRY-PI-BOOT-MENU.md)
+
+---
+
 ## 🔧 Entwicklung
 
 ### Backend-API erweitern
@@ -413,16 +529,17 @@ src/
 
 ## 📝 Roadmap
 
-- [ ] Backend-API mit SQLite/PostgreSQL
-- [ ] Echte Authentifizierung
-- [ ] Medien-Upload Funktion
+- [x] Backend-API mit SQLite/PostgreSQL
+- [x] Echte Authentifizierung
+- [x] Medien-Upload Funktion
 - [ ] Multi-Display-Support
 - [ ] WebSocket für Real-time Updates
 - [ ] QR-Code Generator
 - [ ] Wetter-Widget
 - [ ] Kalender-Integration
 - [ ] Analytics/Statistiken
-- [ ] Mobile App
+- [x] **Android App** (WebView & Capacitor)
+- [x] **Android TV App** (optimiert für TV-Displays)
 
 ## 🐛 Troubleshooting
 
