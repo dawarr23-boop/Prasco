@@ -1,5 +1,6 @@
 import { logger } from '../../utils/logger';
 import { User, Organization, Category } from '../../models';
+import Setting from '../../models/Setting';
 import { seedPermissions } from './permissions';
 
 export const seedDatabase = async (): Promise<void> => {
@@ -7,7 +8,12 @@ export const seedDatabase = async (): Promise<void> => {
     logger.info('🌱 Starte Database-Seeding...');
 
     // Seed permissions first
-    await seedPermissions();
+    try {
+      await seedPermissions();
+    } catch (permError) {
+      logger.error('❌ Fehler beim Permission-Seeding:', permError);
+      throw permError;
+    }
 
     // 1. Create PRASCO Organization
     const [prasco] = await Organization.findOrCreate({
@@ -39,7 +45,7 @@ export const seedDatabase = async (): Promise<void> => {
     });
     logger.info(
       superAdminCreated
-        ? '✅ Super-Admin-User erstellt'
+        ? '✅ Super-Admin-User erstellt (Email: superadmin@prasco.net, Passwort: superadmin123)'
         : `✅ Super-Admin-User existiert bereits (ID: ${superAdmin.id})`
     );
 
@@ -73,7 +79,36 @@ export const seedDatabase = async (): Promise<void> => {
     });
     logger.info('✅ Editor-User erstellt');
 
-    // 4. Create Categories
+    // 5. Create Display Settings
+    try {
+      await Setting.findOrCreate({
+        where: { key: 'display.refreshInterval' },
+        defaults: {
+          key: 'display.refreshInterval',
+          value: '5',
+          type: 'number',
+          category: 'display',
+          description: 'Auto-Refresh Intervall in Minuten',
+        },
+      });
+      
+      await Setting.findOrCreate({
+        where: { key: 'display.defaultDuration' },
+        defaults: {
+          key: 'display.defaultDuration',
+          value: '10',
+          type: 'number',
+          category: 'display',
+          description: 'Standard Anzeigedauer pro Post in Sekunden',
+        },
+      });
+      logger.info('✅ Display-Settings erstellt');
+    } catch (settingsError) {
+      logger.error('❌ Fehler beim Settings-Seeding:', settingsError);
+      throw settingsError;
+    }
+
+    // 6. Create Categories
     const categories = [
       { name: 'Ankündigungen', color: '#c41e3a', icon: '◆' },
       { name: 'Veranstaltungen', color: '#1e90ff', icon: '◇' },

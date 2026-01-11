@@ -720,3 +720,198 @@ body {
     font-size: 2rem;
   }
 }
+
+/* ============================================
+   Blend Effects - Übergangseffekte
+   ============================================ */
+
+/* Fade Effect */
+@keyframes blendFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes blendFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide Left Effect */
+@keyframes blendSlideLeftIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes blendSlideLeftOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+/* Slide Right Effect */
+@keyframes blendSlideRightIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes blendSlideRightOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Slide Up Effect */
+@keyframes blendSlideUpIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes blendSlideUpOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Slide Down Effect */
+@keyframes blendSlideDownIn {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes blendSlideDownOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Zoom In Effect */
+@keyframes blendZoomInIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blendZoomInOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+/* Zoom Out Effect */
+@keyframes blendZoomOutIn {
+  from {
+    transform: scale(2);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blendZoomOutOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Blend effect classes */
+.blend-transition-in {
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.blend-transition-out {
+  animation-duration: 0.6s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+
+.blend-fade-in { animation-name: blendFadeIn; }
+.blend-fade-out { animation-name: blendFadeOut; }
+
+.blend-slide-left-in { animation-name: blendSlideLeftIn; }
+.blend-slide-left-out { animation-name: blendSlideLeftOut; }
+
+.blend-slide-right-in { animation-name: blendSlideRightIn; }
+.blend-slide-right-out { animation-name: blendSlideRightOut; }
+
+.blend-slide-up-in { animation-name: blendSlideUpIn; }
+.blend-slide-up-out { animation-name: blendSlideUpOut; }
+
+.blend-slide-down-in { animation-name: blendSlideDownIn; }
+.blend-slide-down-out { animation-name: blendSlideDownOut; }
+
+.blend-zoom-in-in { animation-name: blendZoomInIn; }
+.blend-zoom-in-out { animation-name: blendZoomInOut; }
+
+.blend-zoom-out-in { animation-name: blendZoomOutIn; }
+.blend-zoom-out-out { animation-name: blendZoomOutOut; }

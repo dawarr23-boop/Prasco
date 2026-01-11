@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PRASCO Modus-Wechsel
+Comment=Zwischen Normal- und Hotspot-Modus wechseln
+Icon=preferences-system-network
+Exec=/usr/local/bin/prasco-mode-gui
+Terminal=false
+Categories=System;Settings;
+Keywords=network;wifi;hotspot;prasco;

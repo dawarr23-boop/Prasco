@@ -1,0 +1,14 @@
+[Unit]
+Description=PRASCO Hotspot Startup
+After=network.target NetworkManager.service
+Before=prasco.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/prasco-start-hotspot
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

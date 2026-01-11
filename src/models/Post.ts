@@ -18,6 +18,7 @@ interface PostAttributes {
   viewCount: number;
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
+  blendEffect?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -36,6 +37,7 @@ interface PostCreationAttributes
     | 'viewCount'
     | 'backgroundMusicUrl'
     | 'backgroundMusicVolume'
+    | 'blendEffect'
     | 'createdAt'
     | 'updatedAt'
   > {}
@@ -57,6 +59,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public viewCount!: number;
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
+  public blendEffect?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -166,6 +169,11 @@ Post.init(
       allowNull: true,
       defaultValue: 50,
       comment: 'Background music volume (0-100)',
+    },
+    blendEffect: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      comment: 'Transition blend effect (fade, slide-left, slide-right, zoom-in, zoom-out, etc.)',
     },
   },
   {

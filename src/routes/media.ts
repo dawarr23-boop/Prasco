@@ -216,4 +216,55 @@ router.get(
   mediaController.getPresentationSlides
 );
 
+/**
+ * @openapi
+ * /api/media/download-external:
+ *   post:
+ *     tags:
+ *       - Media
+ *     summary: Download external videos
+ *     description: |
+ *       Scans all video posts for external URLs (YouTube, Vimeo, etc.) 
+ *       and downloads them to local storage for offline playback.
+ *       Requires 'media.upload' Permission (Editor).
+ *     responses:
+ *       200:
+ *         description: Download process completed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Downloads completed
+ *                 stats:
+ *                   type: object
+ *                   properties:
+ *                     total:
+ *                       type: integer
+ *                     downloaded:
+ *                       type: integer
+ *                     updated:
+ *                       type: integer
+ *                     skipped:
+ *                       type: integer
+ *                     failed:
+ *                       type: integer
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+  '/download-external',
+  requirePermission('media.upload'),
+  mediaController.downloadExternalVideos
+);
+
 export default router;

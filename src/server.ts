@@ -31,6 +31,7 @@ import publicRoutes from './routes/public';
 import mediaRoutes from './routes/media';
 import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
+import systemRoutes from './routes/system';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -181,13 +182,18 @@ app.get('/admin/dashboard', (_req: Request, res: Response) => {
 
 // Swagger API Documentation
 app.use(
-  '/api-docs',
+  '/api/docs',
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: 'Prasco API Dokumentation',
   })
 );
+
+// Legacy redirect for old API docs URL
+app.get('/api-docs', (_req: Request, res: Response) => {
+  res.redirect(301, '/api/docs');
+});
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
@@ -202,6 +208,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/system', systemRoutes); // System management (mode switching, etc.)
 app.use('/api/public', publicRoutes); // No rate limit for public display
 app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);

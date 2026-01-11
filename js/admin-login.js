@@ -48,12 +48,18 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     window.location.href = '/admin/dashboard';
   } catch (error) {
     console.error('Login error:', error);
+    
+    // Fehlermeldung anzeigen
     errorMessage.textContent =
       error.message || 'Login fehlgeschlagen. Bitte versuchen Sie es erneut.';
     errorMessage.style.display = 'block';
 
-    // Passwort-Feld leeren
+    // Beide Felder zurücksetzen
+    document.getElementById('username').value = '';
     document.getElementById('password').value = '';
+    
+    // Focus zurück auf Username-Feld
+    document.getElementById('username').focus();
 
     // Button wieder aktivieren
     submitButton.disabled = false;

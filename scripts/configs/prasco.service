@@ -1,0 +1,21 @@
+[Unit]
+Description=PRASCO Display Server
+Documentation=https://github.com/dawarr23-boop/Prasco
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/Prasco
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=0.0.0.0
+ExecStart=/usr/bin/node /home/pi/Prasco/src/server.js
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=prasco
+
+[Install]
+WantedBy=multi-user.target

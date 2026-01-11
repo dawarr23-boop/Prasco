@@ -1,0 +1,191 @@
+﻿diff --git a/css/admin.css b/css/admin.css
+index 210ac2e..a58b527 100644
+--- a/css/admin.css
++++ b/css/admin.css
+@@ -675,7 +675,7 @@ body {
+ /* Buttons - PRASCO Design */
+ .btn {
+   padding: 0.875rem 1.5rem;
+-  border: none;
++  border: 2px solid transparent;
+   border-radius: var(--radius-md);
+   font-size: 1rem;
+   font-weight: 600;
+@@ -690,15 +690,14 @@ body {
+ .btn-primary {
+   background: var(--prasco-red);
+   color: var(--white);
+-  border: 2px solid var(--prasco-red);
++  border-color: var(--prasco-red);
+ }
+ 
+ .btn-primary:hover {
+-  background: #e0e0e0;
+-  border-color: #e0e0e0;
+-  color: var(--prasco-black);
++  background: #d32f2f;
++  border-color: #d32f2f;
+   transform: translateY(-2px);
+-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
++  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+ }
+ 
+ .btn-primary:active {
+@@ -708,20 +707,20 @@ body {
+ .btn-secondary {
+   background: var(--white);
+   color: var(--prasco-red);
+-  border: 2px solid var(--prasco-red);
++  border-color: var(--prasco-red);
+ }
+ 
+ .btn-secondary:hover {
+-  background: #e0e0e0;
+-  color: var(--prasco-black);
++  background: var(--prasco-red);
++  color: var(--white);
+   transform: translateY(-2px);
+-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
++  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+ }
+ 
+ .btn-accent {
+   background: #009640;
+   color: var(--white);
+-  border: 2px solid #009640;
++  border-color: #009640;
+ }
+ 
+ .btn-accent:hover {
+@@ -732,25 +731,29 @@ body {
+ }
+ 
+ .btn-success {
+-  background: var(--success-color);
++  background: #28a745;
+   color: var(--white);
++  border-color: #28a745;
+ }
+ 
+ .btn-success:hover {
+-  background: #e0e0e0;
+-  color: var(--prasco-black);
++  background: #218838;
++  border-color: #218838;
+   transform: translateY(-2px);
++  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+ }
+ 
+ .btn-danger {
+-  background: var(--danger-color);
++  background: #dc3545;
+   color: var(--white);
++  border-color: #dc3545;
+ }
+ 
+ .btn-danger:hover {
+-  background: #e0e0e0;
+-  color: var(--prasco-black);
++  background: #c82333;
++  border-color: #c82333;
+   transform: translateY(-2px);
++  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+ }
+ 
+ .btn-block {
+@@ -1563,3 +1566,95 @@ body {
+   font-family: var(--font-primary);
+   color: var(--prasco-gray-light);
+ }
++
++/* System Mode Switcher */
++.system-mode-status {
++  margin-bottom: 1.5rem;
++}
++
++.mode-indicator {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++  padding: 1rem;
++  border-radius: 8px;
++  border: 2px solid;
++  font-size: 1rem;
++}
++
++.mode-indicator .mode-icon {
++  font-size: 1.5rem;
++}
++
++.mode-selection {
++  display: grid;
++  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
++  gap: 1rem;
++  margin-bottom: 1rem;
++}
++
++.mode-option {
++  cursor: pointer;
++  display: block;
++}
++
++.mode-option input[type="radio"] {
++  display: none;
++}
++
++.mode-card {
++  border: 2px solid var(--prasco-border);
++  border-radius: 8px;
++  padding: 1.5rem;
++  transition: all 0.2s;
++  background: white;
++}
++
++.mode-option input[type="radio"]:checked + .mode-card {
++  border-color: var(--prasco-red);
++  background: #00964010;
++}
++
++.mode-option:hover .mode-card {
++  border-color: var(--prasco-dark-red);
++  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.15);
++}
++
++.mode-header {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++  margin-bottom: 1rem;
++}
++
++.mode-header .mode-icon {
++  font-size: 2rem;
++}
++
++.mode-header h4 {
++  font-size: 1.1rem;
++  color: var(--prasco-black);
++  margin: 0;
++}
++
++.mode-features {
++  list-style: none;
++  padding: 0;
++  margin: 0;
++}
++
++.mode-features li {
++  padding: 0.4rem 0;
++  padding-left: 1.5rem;
++  position: relative;
++  color: var(--prasco-gray);
++  font-size: 0.9rem;
++}
++
++.mode-features li:before {
++  content: "Ô£ô";
++  position: absolute;
++  left: 0;
++  color: var(--prasco-red);
++  font-weight: bold;
++}

@@ -122,7 +122,13 @@ async function convertWithLibreOffice(
     }
 
     // Benenne die PNG-Dateien um zu slide_001.png, slide_002.png, etc.
-    pngFiles.sort();
+    // Sortiere numerisch basierend auf der Nummer im Dateinamen
+    pngFiles.sort((a, b) => {
+      const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+      const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+      return numA - numB;
+    });
+    
     let slideNumber = 1;
     for (const pngFile of pngFiles) {
       const oldPath = path.join(outputDir, pngFile);
@@ -258,7 +264,12 @@ export function getSlideImages(presentationId: string): PresentationSlide[] {
   const files = fs
     .readdirSync(presFolder)
     .filter((f) => f.startsWith('slide_') && f.endsWith('.png'))
-    .sort();
+    .sort((a, b) => {
+      // Numerische Sortierung basierend auf Slide-Nummer im Dateinamen
+      const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+      const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+      return numA - numB;
+    });
 
   return files.map((file, index) => ({
     slideNumber: index + 1,

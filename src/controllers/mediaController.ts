@@ -6,6 +6,10 @@ import { processPowerPoint, getSlideImages } from '../services/presentationServi
 import { logger } from '../utils/logger';
 import { Op } from 'sequelize';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 // PowerPoint MIME types
 const PRESENTATION_MIME_TYPES = [
@@ -221,6 +225,52 @@ export const getPresentationSlides = async (
       },
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// Download external videos
+export const downloadExternalVideos = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    logger.info('[Video Downloader] Starting manual download triggered by user', {
+      userId: req.user!.id,
+      userEmail: req.user!.email
+    });
+
+    // Execute download script
+    const scriptPath = path.join(__dirname, '../../scripts/download-external-videos.js');
+    const { stdout } = await execAsync(`node "${scriptPath}"`);
+
+    // Parse output for stats
+    const statsMatch = stdout.match(/Total posts: (\d+)[\s\S]*Downloaded: (\d+)[\s\S]*Updated to existing: (\d+)[\s\S]*Skipped: (\d+)[\s\S]*Failed: (\d+)/);
+    
+    const stats = statsMatch ? {
+      total: parseInt(statsMatch[1]),
+      downloaded: parseInt(statsMatch[2]),
+      updated: parseInt(statsMatch[3]),
+      skipped: parseInt(statsMatch[4]),
+      failed: parseInt(statsMatch[5])
+    } : {
+      total: 0,
+      downloaded: 0,
+      updated: 0,
+      skipped: 0,
+      failed: 0
+    };
+
+    logger.info('[Video Downloader] Manual download completed', stats);
+
+    res.json({
+      success: true,
+      message: 'Video-Downloads abgeschlossen',
+      stats
+    });
+  } catch (error) {
+    logger.error('[Video Downloader] Error during manual download:', error);
     next(error);
   }
 };

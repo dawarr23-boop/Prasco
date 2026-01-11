@@ -61,19 +61,19 @@
           <!-- Dashboard Section -->
           <section id="dashboard-section" class="section active">
             <div class="stats-grid">
-              <div class="stat-card">
+              <div class="stat-card clickable" data-target="posts-section">
                 <h3 data-i18n="dashboard.activePosts">Aktive Beiträge</h3>
                 <p class="stat-number" id="active-posts">0</p>
               </div>
-              <div class="stat-card">
+              <div class="stat-card clickable" data-target="posts-section">
                 <h3 data-i18n="dashboard.scheduledPosts">Geplante Beiträge</h3>
                 <p class="stat-number" id="scheduled-posts">0</p>
               </div>
-              <div class="stat-card">
+              <div class="stat-card clickable" data-target="categories-section">
                 <h3 data-i18n="dashboard.categories">Kategorien</h3>
                 <p class="stat-number" id="total-categories">0</p>
               </div>
-              <div class="stat-card">
+              <div class="stat-card clickable" data-target="media-section">
                 <h3 data-i18n="dashboard.media">Medien</h3>
                 <p class="stat-number" id="total-media">0</p>
               </div>
@@ -107,7 +107,7 @@
             <div class="section-header">
               <h2>Beiträge verwalten</h2>
               <div>
-                <button class="btn btn-primary" id="showPostFormBtn">+ Neuer Beitrag</button>
+                <button class="btn btn-success" id="showPostFormBtn">+ Neuer Beitrag</button>
                 <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">🗑️ Alle löschen</button>
               </div>
             </div>
@@ -203,6 +203,21 @@
                     <label for="priority">Priorität</label>
                     <input type="number" id="priority" name="priority" value="0" min="0" max="10" />
                   </div>
+
+                  <div class="form-group">
+                    <label for="blend-effect">Übergangseffekt</label>
+                    <select id="blend-effect" name="blend_effect">
+                      <option value="">Kein Effekt</option>
+                      <option value="fade">Fade (Überblenden)</option>
+                      <option value="slide-left">Slide Left (Nach links)</option>
+                      <option value="slide-right">Slide Right (Nach rechts)</option>
+                      <option value="slide-up">Slide Up (Nach oben)</option>
+                      <option value="slide-down">Slide Down (Nach unten)</option>
+                      <option value="zoom-in">Zoom In (Hineinzoomen)</option>
+                      <option value="zoom-out">Zoom Out (Herauszoomen)</option>
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 0.25rem">Wählen Sie einen Übergangseffekt zum nächsten Beitrag</small>
+                  </div>
                 </div>
 
                 <div class="form-row">
@@ -292,6 +307,10 @@
 
             <div class="posts-list" id="posts-list">
               <!-- Wird dynamisch gefüllt -->
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: center; padding: 1rem 0; border-top: 1px solid #e0e0e0;">
+              <button class="btn btn-secondary" id="downloadExternalVideosBtn">📥 Externe Videos herunterladen</button>
             </div>
           </section>
 
@@ -501,6 +520,60 @@
           <section id="settings-section" class="section">
             <h2>Einstellungen</h2>
 
+            <!-- System-Modus (Raspberry Pi) -->
+            <div class="settings-card" id="system-mode-card" style="display: block;">
+              <h3><span class="settings-icon">📡</span> System-Modus</h3>
+              <p class="settings-description">
+                Wechseln Sie zwischen Normal-Modus (Netzwerk-Verbindung) und Hotspot-Modus (Offline-Betrieb).
+              </p>
+              
+              <div id="system-mode-status" class="system-mode-status">
+                <div class="mode-indicator">
+                  <span class="mode-icon">⏳</span>
+                  <span class="mode-text">Status wird geladen...</span>
+                </div>
+              </div>
+
+              <div class="settings-form">
+                <div class="mode-selection">
+                  <label class="mode-option">
+                    <input type="radio" name="system-mode" value="normal" id="mode-normal">
+                    <div class="mode-card">
+                      <div class="mode-header">
+                        <span class="mode-icon">🌐</span>
+                        <h4>Normal-Modus</h4>
+                      </div>
+                      <ul class="mode-features">
+                        <li>Verbindung zum vorhandenen Netzwerk</li>
+                        <li>Internet-Zugang erforderlich</li>
+                        <li>Externe Server-URL verwendbar</li>
+                      </ul>
+                    </div>
+                  </label>
+
+                  <label class="mode-option">
+                    <input type="radio" name="system-mode" value="hotspot" id="mode-hotspot">
+                    <div class="mode-card">
+                      <div class="mode-header">
+                        <span class="mode-icon">📶</span>
+                        <h4>Hotspot-Modus</h4>
+                      </div>
+                      <ul class="mode-features">
+                        <li>Raspberry Pi erstellt WiFi Hotspot</li>
+                        <li>SSID: <strong>PRASCO-Display</strong></li>
+                        <li>Passwort: <strong>prasco123</strong></li>
+                        <li>IP: <strong>192.168.4.1:3000</strong></li>
+                      </ul>
+                    </div>
+                  </label>
+                </div>
+
+                <button class="btn btn-primary" id="switchSystemMode" style="margin-top: 1rem;">
+                  Modus wechseln
+                </button>
+              </div>
+            </div>
+
             <!-- Allgemeine Einstellungen -->
             <div class="settings-card">
               <h3><span class="settings-icon">&#9881;</span> Display-Einstellungen</h3>
@@ -513,6 +586,16 @@
                 <div class="form-group">
                   <label for="default-duration">Standard Anzeigedauer (Sekunden)</label>
                   <input type="number" id="default-duration" value="10" min="1" />
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="blend-effects-enabled" />
+                    <span>Übergangseffekte aktivieren</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 0.25rem">
+                    Aktiviert animierte Übergänge zwischen Beiträgen (Fade, Slide, Zoom)
+                  </small>
                 </div>
 
                 <button class="btn btn-primary" id="saveDisplaySettings">

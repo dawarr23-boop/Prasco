@@ -9,6 +9,7 @@ let autoRotateTimer = null;
 let displaySettings = {
   refreshInterval: 5, // Standard: 5 Minuten
   defaultDuration: 10, // Standard: 10 Sekunden
+  blendEffectsEnabled: true, // Standard: Blend-Effekte aktiviert
 };
 
 // Vortragsmodus State (manuelle Navigation)
@@ -25,12 +26,21 @@ let presentationState = {
   slideTimer: null,
 };
 
+// Text-Pagination State (für lange Texte)
+let textPaginationState = {
+  isActive: false,
+  pages: [],
+  currentPage: 0,
+  postId: null,
+};
+
 // Hintergrundmusik-State
 let backgroundMusicState = {
   audio: null,
   currentPostId: null,
   fadeInterval: null,
   isGlobalMusic: false,
+  userInteracted: false, // Track ob Benutzer interagiert hat (für Autoplay-Policy)
 };
 
 // Globale Musik-Einstellungen
@@ -52,12 +62,15 @@ async function loadDisplaySettings() {
     if (response.ok) {
       const settings = await response.json();
       
-      // Aktualisiere Einstellungen
-      if (settings.displayRefreshInterval) {
-        displaySettings.refreshInterval = parseInt(settings.displayRefreshInterval.value) || 5;
+      // Aktualisiere Einstellungen mit korrekten Feldnamen
+      if (settings['display.refreshInterval'] !== undefined) {
+        displaySettings.refreshInterval = parseInt(settings['display.refreshInterval']) || 5;
       }
-      if (settings.displayDefaultDuration) {
-        displaySettings.defaultDuration = parseInt(settings.displayDefaultDuration.value) || 10;
+      if (settings['display.defaultDuration'] !== undefined) {
+        displaySettings.defaultDuration = parseInt(settings['display.defaultDuration']) || 10;
+      }
+      if (settings['display.blendEffectsEnabled'] !== undefined) {
+        displaySettings.blendEffectsEnabled = (settings['display.blendEffectsEnabled'] === 'true' || settings['display.blendEffectsEnabled'] === true);
       }
       
       console.log('Display-Einstellungen geladen:', displaySettings);
@@ -68,11 +81,15 @@ async function loadDisplaySettings() {
       return true;
     } else {
       console.log('Verwende Standard-Einstellungen (Backend nicht verfügbar)');
+      // Setze trotzdem Footer-Text mit Standardwerten
+      updateRefreshInfo();
       return false;
     }
   } catch (error) {
     console.log('Fehler beim Laden der Display-Einstellungen:', error);
     console.log('Verwende Standard-Einstellungen');
+    // Setze trotzdem Footer-Text mit Standardwerten
+    updateRefreshInfo();
     return false;
   }
 }
@@ -152,14 +169,22 @@ function playBackgroundMusic(post) {
     return;
   }
 
-  // Gleiche Musik läuft bereits
-  if (audio.src === musicUrl && !audio.paused) {
+  // Gleiche Musik läuft bereits - vergleiche URLs korrekt (relativ vs. absolut)
+  const currentMusicUrl = audio.src ? new URL(audio.src).pathname : '';
+  const newMusicPath = musicUrl.startsWith('http') ? new URL(musicUrl).pathname : musicUrl;
+
+  if (currentMusicUrl && currentMusicUrl === newMusicPath && !audio.paused) {
+    // Musik läuft bereits, nur Lautstärke anpassen falls nötig
+    if (Math.abs(audio.volume - volume) > 0.01) {
+      audio.volume = volume;
+    }
     backgroundMusicState.isGlobalMusic = isGlobal;
+    backgroundMusicState.currentPostId = post.id;
     return;
   }
 
   // Stoppe aktuelle Musik mit Fade-Out, dann starte neue
-  if (!audio.paused && audio.src !== musicUrl) {
+  if (!audio.paused && currentMusicUrl !== newMusicPath) {
     fadeOutMusic(() => {
       startNewMusic(musicUrl, volume);
       backgroundMusicState.isGlobalMusic = isGlobal;
@@ -182,10 +207,17 @@ function startNewMusic(url, targetVolume) {
   audio
     .play()
     .then(() => {
+      backgroundMusicState.userInteracted = true;
       fadeInMusic(targetVolume);
     })
     .catch((err) => {
-      console.log('Hintergrundmusik konnte nicht gestartet werden:', err.message);
+      // Autoplay blockiert - warte auf Benutzerinteraktion
+      if (err.name === 'NotAllowedError') {
+        console.log('Hintergrundmusik wartet auf Benutzerinteraktion...');
+        // Versuche es später bei der ersten Interaktion erneut
+      } else {
+        console.log('Hintergrundmusik konnte nicht gestartet werden:', err.message);
+      }
     });
 }
 
@@ -449,6 +481,9 @@ async function init() {
   await fetchPosts();
   startClock();
   updateDate();
+
+  // Aktualisiere Refresh-Info nachdem DOM geladen ist
+  updateRefreshInfo();
 
   if (posts.length > 0) {
     displayCurrentPost();
@@ -734,8 +769,9 @@ function displayCurrentPost() {
 // Nächster Post
 function nextPost() {
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
+  const currentPost = posts[currentIndex];
   currentIndex = (currentIndex + 1) % posts.length;
-  displayCurrentPost();
+  displayCurrentPostWithBlend(currentPost?.blend_effect);
   updatePostCounter();
   updatePresentationCounter();
 }
@@ -743,10 +779,52 @@ function nextPost() {
 // Vorheriger Post
 function previousPost() {
   restoreHeaderFooter(); // Stelle Header/Footer wieder her
+  const currentPost = posts[currentIndex];
   currentIndex = (currentIndex - 1 + posts.length) % posts.length;
-  displayCurrentPost();
+  displayCurrentPostWithBlend(currentPost?.blend_effect);
   updatePostCounter();
   updatePresentationCounter();
+}
+
+// ============================================
+// Blend Effects - Übergangseffekte
+// ============================================
+
+// Wende Blend-Effekt an beim Wechsel zum nächsten Post
+function displayCurrentPostWithBlend(blendEffect) {
+  const container = document.getElementById('current-post');
+  
+  // Prüfe ob Blend-Effekte global aktiviert sind und ein Effekt definiert ist
+  if (!displaySettings.blendEffectsEnabled || !blendEffect || blendEffect === '') {
+    // Keine Transition - direkter Wechsel
+    displayCurrentPost();
+    return;
+  }
+
+  // Out-Animation des alten Posts
+  const effectClass = blendEffect.replace(/-/g, '-'); // z.B. "fade" oder "slide-left"
+  const outClass = `blend-${effectClass}-out`;
+  const inClass = `blend-${effectClass}-in`;
+  
+  // Füge out-Animation hinzu
+  container.classList.add('blend-transition-out', outClass);
+  
+  // Nach Animation: Neuen Post laden und in-Animation starten
+  setTimeout(() => {
+    // Entferne out-Animation
+    container.classList.remove('blend-transition-out', outClass);
+    
+    // Lade neuen Post-Inhalt
+    displayCurrentPost();
+    
+    // Füge in-Animation hinzu
+    container.classList.add('blend-transition-in', inClass);
+    
+    // Nach in-Animation: Entferne alle Blend-Klassen
+    setTimeout(() => {
+      container.classList.remove('blend-transition-in', inClass);
+    }, 600); // Dauer muss mit CSS animation-duration übereinstimmen
+  }, 600); // Dauer muss mit CSS animation-duration übereinstimmen
 }
 
 // Post-Counter aktualisieren

@@ -19,12 +19,16 @@ const options: Options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development Server',
+        url: 'https://192.168.2.47:3000',
+        description: 'Raspberry Pi Production (HTTPS)',
       },
       {
-        url: 'http://192.168.1.100:3000',
-        description: 'Raspberry Pi Display',
+        url: 'http://192.168.2.47:3000',
+        description: 'Raspberry Pi Production (HTTP)',
+      },
+      {
+        url: 'http://localhost:3000',
+        description: 'Development Server',
       },
     ],
     tags: [

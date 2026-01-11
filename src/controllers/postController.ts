@@ -51,11 +51,25 @@ export const getAllPosts = async (
       where.organizationId = req.user.organizationId;
     }
 
+    // Build order clause - same as display sorting
+    const orderClause: any[] = [];
+    if (sort === 'priority') {
+      // When sorting by priority, add createdAt as secondary sort
+      orderClause.push(['priority', order as string]);
+      orderClause.push(['createdAt', 'DESC']);
+    } else if (sort === 'createdAt') {
+      // When sorting by date, add priority as secondary sort
+      orderClause.push(['createdAt', order as string]);
+      orderClause.push(['priority', 'DESC']);
+    } else {
+      orderClause.push([sort as string, order as string]);
+    }
+
     const { count, rows: posts } = await Post.findAndCountAll({
       where,
       limit: limitNum,
       offset,
-      order: [[sort as string, order as string]],
+      order: orderClause,
       include: [
         {
           model: Category,
@@ -169,6 +183,7 @@ export const createPost = async (
       isActive,
       backgroundMusicUrl,
       backgroundMusicVolume,
+      blendEffect,
     } = req.body;
 
     // Validate category exists and belongs to user's organization
@@ -223,6 +238,7 @@ export const createPost = async (
       isActive: isActive !== undefined ? isActive : true,
       backgroundMusicUrl: musicUrl || null,
       backgroundMusicVolume: musicVolume,
+      blendEffect: blendEffect || null,
     });
 
     // Fetch with associations
@@ -277,6 +293,7 @@ export const updatePost = async (
       isActive,
       backgroundMusicUrl,
       backgroundMusicVolume,
+      blendEffect,
     } = req.body;
 
     const post = await Post.findByPk(id);
@@ -314,6 +331,7 @@ export const updatePost = async (
     if (duration !== undefined) post.duration = duration;
     if (priority !== undefined) post.priority = priority;
     if (isActive !== undefined) post.isActive = isActive;
+    if (blendEffect !== undefined) post.blendEffect = blendEffect;
 
     // Background music fields (only for non-video content)
     const effectiveContentType = contentType !== undefined ? contentType : post.contentType;
@@ -434,6 +452,55 @@ export const reorderPosts = async (
     });
 
     logger.info(`Posts neu sortiert: ${orderedIds.length} Einträge`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update priorities for multiple posts
+ * PUT /api/posts/update-priorities
+ */
+export const updatePriorities = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { updates } = req.body;
+
+    if (!Array.isArray(updates) || updates.length === 0) {
+      throw new AppError('updates muss ein nicht-leeres Array sein', 400);
+    }
+
+    // Validate format: each update must have id and priority
+    for (const update of updates) {
+      if (!update.id || update.priority === undefined) {
+        throw new AppError('Jedes Update muss id und priority enthalten', 400);
+      }
+    }
+
+    // Update each post with new priority
+    const updatePromises = updates.map((update: { id: number; priority: number }) => 
+      Post.update(
+        { priority: update.priority },
+        {
+          where: {
+            id: update.id,
+            ...(req.user?.organizationId && { organizationId: req.user.organizationId }),
+          },
+        }
+      )
+    );
+
+    await Promise.all(updatePromises);
+
+    res.json({
+      success: true,
+      message: `${updates.length} Prioritäten erfolgreich aktualisiert`,
+    });
+
+    logger.info(`Post-Prioritäten aktualisiert: ${updates.length} Einträge`);
   } catch (error) {
     next(error);
   }

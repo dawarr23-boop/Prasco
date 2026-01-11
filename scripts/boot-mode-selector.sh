@@ -61,7 +61,7 @@ echo -e "${YELLOW}════════════════════�
 echo ""
 
 # Timeout für automatischen Start
-TIMEOUT=10
+TIMEOUT=30
 echo -e "${CYAN}Automatischer Start in ${TIMEOUT} Sekunden...${NC}"
 echo -e "${CYAN}Drücke eine Taste zum Wählen${NC}"
 echo ""

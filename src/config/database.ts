@@ -56,18 +56,35 @@ if (dialect === 'sqlite') {
 
 export const sequelize = new Sequelize(sequelizeConfig);
 
+/**
+ * Initialisiert die Datenbank-Tabellen falls sie noch nicht existieren
+ * Erstellt Tabellen nur wenn sie fehlen (sichere Methode für production)
+ */
+export const initializeDatabaseSchema = async (): Promise<void> => {
+    try {
+        // Versuche sync() - wenn Tabellen existieren, wird nichts geändert (force: false)
+        // Bei Berechtigungsfehlern bedeutet das meist dass Tabellen bereits existieren
+        await sequelize.sync({ force: false, alter: false });
+        logger.info('✅ Datenbank-Schema bereit');
+    } catch (error: any) {
+        // Wenn der Fehler "permission denied" ist, existieren die Tabellen bereits
+        if (error?.original?.code === '42501') {
+            logger.info('✅ Datenbank-Schema bereits vorhanden');
+        } else {
+            logger.error('❌ Fehler bei Schema-Initialisierung:', error);
+            throw error;
+        }
+    }
+};
+
 export const connectDatabase = async (): Promise<void> => {
     try {
         await sequelize.authenticate();
         const dbType = dialect === 'sqlite' ? 'SQLite' : 'PostgreSQL';
         logger.info(`✅ ${dbType} Verbindung erfolgreich`);
-
-        // Sync models - OHNE alter, um Crashes zu vermeiden
-        // Schema muss manuell via Seeding erstellt werden
-        if (NODE_ENV === 'development' || dialect === 'sqlite') {
-            await sequelize.sync();
-            logger.info('✅ Datenbank-Schema synchronisiert');
-        }
+        
+        // Initialisiere Schema (in allen Umgebungen)
+        await initializeDatabaseSchema();
     } catch (error) {
         logger.error('❌ Fehler bei Datenbankverbindung:', error);
         throw error;

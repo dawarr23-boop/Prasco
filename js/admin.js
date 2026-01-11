@@ -1084,7 +1084,10 @@ function navigateTo(section) {
     if (section === 'categories') loadCategories();
     if (section === 'users') loadUsers();
     if (section === 'dashboard') updateDashboardStats();
-    if (section === 'settings' && !ssoConfigLoaded) loadSSOConfiguration();
+    if (section === 'settings') {
+      if (!ssoConfigLoaded) loadSSOConfiguration();
+      loadSystemMode(); // Lade System-Modus Einstellungen
+    }
   }
 }
 
@@ -1134,7 +1137,8 @@ async function loadPosts() {
   postsList.innerHTML = '<p style="text-align:center; color: #6c757d;">Lade Beiträge...</p>';
 
   try {
-    const response = await apiRequest('/posts?limit=100');
+    // Sortierung wie im Display: priority DESC, createdAt DESC
+    const response = await apiRequest('/posts?limit=100&sort=priority&order=DESC');
     postsCache = response?.data || [];
 
     if (postsCache.length === 0) {
@@ -1264,15 +1268,32 @@ async function handleDrop(e) {
 async function saveNewOrder() {
   const postsList = document.getElementById('posts-list');
   const items = postsList.querySelectorAll('.draggable-post');
-  const orderedIds = Array.from(items).map((item) => parseInt(item.dataset.postId));
+  
+  // Erstelle Array mit IDs und neuen Prioritäten (höchste Priorität = Position 1)
+  const updates = Array.from(items).map((item, index) => ({
+    id: parseInt(item.dataset.postId),
+    priority: items.length - index // Position 1 = höchste Zahl
+  }));
 
   try {
-    await apiRequest('/posts/reorder', {
+    // Sende alle Prioritäts-Updates
+    await apiRequest('/posts/update-priorities', {
       method: 'PUT',
-      body: JSON.stringify({ orderedIds }),
+      body: JSON.stringify({ updates }),
     });
 
-    showNotification('Reihenfolge gespeichert!', 'success');
+    // Cache aktualisieren
+    updates.forEach(update => {
+      const post = postsCache.find(p => p.id === update.id);
+      if (post) {
+        post.priority = update.priority;
+      }
+    });
+
+    showNotification('Reihenfolge und Prioritäten gespeichert!', 'success');
+    
+    // Liste neu laden um aktualisierte Prioritäten anzuzeigen
+    await loadPosts();
 
     // Cache aktualisieren
     const newPostsCache = [];
@@ -1387,6 +1408,12 @@ async function editPost(id) {
 
   document.getElementById('display-duration').value = post.duration || 10;
   document.getElementById('priority').value = post.priority || 0;
+
+  // Blend-Effekt setzen
+  const blendEffectSelect = document.getElementById('blend-effect');
+  if (blendEffectSelect) {
+    blendEffectSelect.value = post.blendEffect || '';
+  }
 
   // Datum/Zeit korrekt formatieren für datetime-local Input (YYYY-MM-DDTHH:MM)
   if (post.startDate) {
@@ -1783,6 +1810,7 @@ async function handlePostFormSubmit(e) {
     isActive: formData.get('is_active') === 'on',
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
+    blendEffect: formData.get('blend_effect') || null,
   };
 
   if (mediaId) {
@@ -3106,11 +3134,13 @@ window.addEventListener('load', async () => {
     saveDisplaySettingsBtn.addEventListener('click', async () => {
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
+      const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
       
-      if (refreshInterval && defaultDuration) {
+      if (refreshInterval && defaultDuration && blendEffectsEnabled) {
         const settings = {
           'display.refreshInterval': parseInt(refreshInterval.value) || 5,
-          'display.defaultDuration': parseInt(defaultDuration.value) || 10
+          'display.defaultDuration': parseInt(defaultDuration.value) || 10,
+          'display.blendEffectsEnabled': blendEffectsEnabled.checked ? 'true' : 'false'
         };
         
         try {
@@ -3118,7 +3148,7 @@ window.addEventListener('load', async () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             },
             body: JSON.stringify({ settings })
           });
@@ -3130,7 +3160,8 @@ window.addEventListener('load', async () => {
           // Fallback zu localStorage für Kompatibilität
           localStorage.setItem('displaySettings', JSON.stringify({
             refreshInterval: settings['display.refreshInterval'],
-            defaultDuration: settings['display.defaultDuration']
+            defaultDuration: settings['display.defaultDuration'],
+            blendEffectsEnabled: settings['display.blendEffectsEnabled']
           }));
 
           showNotification('Display-Einstellungen gespeichert!', 'success');
@@ -3148,7 +3179,7 @@ window.addEventListener('load', async () => {
       // Versuche von Backend zu laden
       const response = await fetch('/api/settings?category=display', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         }
       });
 
@@ -3158,7 +3189,8 @@ window.addEventListener('load', async () => {
         const data = await response.json();
         settings = {
           refreshInterval: data['display.refreshInterval'],
-          defaultDuration: data['display.defaultDuration']
+          defaultDuration: data['display.defaultDuration'],
+          blendEffectsEnabled: data['display.blendEffectsEnabled']
         };
       } else {
         // Fallback zu localStorage
@@ -3171,12 +3203,16 @@ window.addEventListener('load', async () => {
       // Werte in UI setzen
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
+      const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
       
       if (refreshInterval && settings.refreshInterval) {
         refreshInterval.value = settings.refreshInterval;
       }
       if (defaultDuration && settings.defaultDuration) {
         defaultDuration.value = settings.defaultDuration;
+      }
+      if (blendEffectsEnabled && settings.blendEffectsEnabled !== undefined) {
+        blendEffectsEnabled.checked = (settings.blendEffectsEnabled === 'true' || settings.blendEffectsEnabled === true);
       }
     } catch (error) {
       console.error('Fehler beim Laden der Display-Einstellungen:', error);
@@ -3188,12 +3224,16 @@ window.addEventListener('load', async () => {
           const settings = JSON.parse(savedDisplaySettings);
           const refreshInterval = document.getElementById('refresh-interval');
           const defaultDuration = document.getElementById('default-duration');
+          const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
           
           if (refreshInterval && settings.refreshInterval) {
             refreshInterval.value = settings.refreshInterval;
           }
           if (defaultDuration && settings.defaultDuration) {
             defaultDuration.value = settings.defaultDuration;
+          }
+          if (blendEffectsEnabled && settings.blendEffectsEnabled !== undefined) {
+            blendEffectsEnabled.checked = (settings.blendEffectsEnabled === 'true' || settings.blendEffectsEnabled === true);
           }
         }
       } catch (fallbackError) {
@@ -3203,6 +3243,11 @@ window.addEventListener('load', async () => {
   };
 
   loadDisplaySettings();
+
+  // System Mode Settings laden
+  if (document.getElementById('mode-normal') || document.getElementById('mode-hotspot')) {
+    loadSystemMode();
+  }
 
   // Passwort ändern Modal
   const changePasswordBtn = document.getElementById('changePasswordBtn');
@@ -3305,6 +3350,16 @@ window.addEventListener('load', async () => {
   await loadPosts();
   await loadCategories();
 
+  // Dashboard Statistik-Karten klickbar machen
+  document.querySelectorAll('.stat-card.clickable').forEach((card) => {
+    card.addEventListener('click', () => {
+      const targetSection = card.dataset.target;
+      if (targetSection) {
+        showSection(targetSection.replace('-section', ''));
+      }
+    });
+  });
+
   // SSO-Einstellungen initialisieren (nur für Super-Admin)
   await initSSOSettings();
 
@@ -3372,4 +3427,377 @@ document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async ()
   }
 });
 
+// ============================================
+// System Mode Switcher (Raspberry Pi)
+// ============================================
+async function loadSystemMode() {
+  const systemModeCard = document.getElementById('system-mode-card');
+  if (!systemModeCard) {
+    console.log('System-Mode-Card nicht gefunden');
+    return; // System mode card nicht gefunden
+  }
+
+  try {
+    // Lade System-Settings über die Settings-API
+    const response = await fetch('/api/settings?category=system', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      }
+    });
+
+    if (response.ok) {
+      const systemSettings = await response.json();
+      
+      const networkMode = systemSettings['system.networkMode'] || 'normal';
+      const hotspotSSID = systemSettings['system.hotspotSSID'] || 'PRASCO-Display';
+      const hotspotPassword = systemSettings['system.hotspotPassword'] || 'prasco2024';
+      const hotspotEnabled = systemSettings['system.hotspotEnabled'] === 'true';
+      
+      // Update status display
+      const statusDiv = document.getElementById('system-mode-status');
+      const modeIcon = networkMode === 'hotspot' ? '📶' : '🌐';
+      const modeText = networkMode === 'hotspot' ? 'Hotspot-Modus' : 'Normal-Modus';
+      const statusColor = networkMode === 'hotspot' ? '#10b981' : '#3b82f6';
+      
+      if (statusDiv) {
+        statusDiv.innerHTML = `
+          <div class="mode-indicator" style="background: ${statusColor}20; border-color: ${statusColor};">
+            <span class="mode-icon">${modeIcon}</span>
+            <span class="mode-text">Aktuell: <strong>${modeText}</strong></span>
+          </div>
+        `;
+      }
+      
+      // Set radio buttons
+      const normalRadio = document.getElementById('mode-normal');
+      const hotspotRadio = document.getElementById('mode-hotspot');
+      
+      if (normalRadio) normalRadio.checked = networkMode === 'normal';
+      if (hotspotRadio) hotspotRadio.checked = networkMode === 'hotspot';
+      
+      // Show system settings card
+      systemModeCard.style.display = 'block';
+      
+      console.log('System-Settings geladen:', systemSettings);
+    } else {
+      console.warn('System-Settings nicht verfügbar:', response.status);
+      systemModeCard.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der System-Settings:', error);
+    // Hide system mode card if not available
+    systemModeCard.style.display = 'none';
+  }
+}
+
+document.getElementById('switchSystemMode')?.addEventListener('click', async () => {
+  const selectedMode = document.querySelector('input[name="system-mode"]:checked')?.value;
+  
+  if (!selectedMode) {
+    showNotification('Bitte wählen Sie einen Modus aus', 'error');
+    return;
+  }
+
+  const modeText = selectedMode === 'hotspot' ? 'Hotspot-Modus' : 'Normal-Modus';
+  
+  if (!confirm(`Wirklich zu ${modeText} wechseln?`)) {
+    return;
+  }
+
+  try {
+    const accessToken = localStorage.getItem('accessToken');
+    if (!accessToken) {
+      showNotification('❌ Nicht angemeldet. Bitte melden Sie sich erneut an.', 'error');
+      return;
+    }
+
+    console.log('Switching to mode:', selectedMode);
+    console.log('Auth token available:', !!accessToken);
+    
+    // Try bulk API first, then fallback to PUT
+    let updateResponse = await fetch('/api/settings/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        settings: {
+          'system.networkMode': selectedMode
+        }
+      })
+    });
+
+    // If bulk API fails, try single PUT endpoint
+    if (!updateResponse.ok && updateResponse.status === 401) {
+      console.log('Bulk API failed with 401, trying PUT endpoint...');
+      updateResponse = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({
+          key: 'system.networkMode',
+          value: selectedMode,
+          type: 'string',
+          category: 'system',
+          description: 'Netzwerk-Modus: normal oder hotspot'
+        })
+      });
+    }
+
+    if (updateResponse.ok) {
+      const result = await updateResponse.json();
+      console.log('Settings update successful:', result);
+      showNotification(`✅ System-Modus auf "${modeText}" gesetzt`, 'success');
+      await loadSystemMode(); // Status neu laden
+      
+      // Optional: Info über Neustart anzeigen
+      if (selectedMode === 'hotspot') {
+        showNotification('ℹ️ Hotspot-Modus aktiviert. Neustart empfohlen für vollständige Aktivierung.', 'info');
+      }
+    } else {
+      let errorMessage = `HTTP ${updateResponse.status}`;
+      try {
+        const errorData = await updateResponse.json();
+        errorMessage = errorData.message || errorData.error?.message || errorMessage;
+        console.error('API Error:', errorData);
+      } catch (e) {
+        console.error('Failed to parse error response');
+      }
+      
+      if (updateResponse.status === 401) {
+        showNotification('❌ Sitzung abgelaufen. Bitte melden Sie sich erneut an.', 'error');
+        // Clear potentially invalid token
+        localStorage.removeItem('accessToken');
+        setTimeout(() => window.location.href = '/admin/', 2000);
+      } else if (updateResponse.status === 403) {
+        showNotification('❌ Keine Berechtigung. Sie benötigen Admin-Rechte.', 'error');
+      } else {
+        showNotification(`❌ Fehler beim Speichern: ${errorMessage}`, 'error');
+      }
+      
+      throw new Error(errorMessage);
+    }
+  } catch (error) {
+    console.error('Fehler beim Wechseln des Modus:', error);
+    if (!error.message.includes('HTTP 401') && !error.message.includes('HTTP 403')) {
+      showNotification('❌ Verbindungsfehler: ' + error.message, 'error');
+    }
+  }
+});
+
+// Download External Videos Handler
+document.getElementById('downloadExternalVideosBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('downloadExternalVideosBtn');
+  if (!btn) return;
+  
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Videos werden heruntergeladen...';
+  
+  try {
+    const response = await apiRequest('/media/download-external', {
+      method: 'POST'
+    });
+
+    if (response.success) {
+      const stats = response.stats || {};
+      const message = `✅ Download abgeschlossen!\n` +
+        `Downloads: ${stats.downloaded || 0}\n` +
+        `Aktualisiert: ${stats.updated || 0}\n` +
+        `Übersprungen: ${stats.skipped || 0}\n` +
+        `Fehlgeschlagen: ${stats.failed || 0}`;
+      showNotification(message, 'success');
+      await loadPosts(); // Refresh post list to show updated media
+    }
+  } catch (error) {
+    console.error('Fehler beim Download externer Videos:', error);
+    showNotification('❌ Fehler beim Download der Videos: ' + (error.message || 'Unbekannter Fehler'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+
+// ============================================
+// System Mode Settings
+// ============================================
+
+/**
+ * Load current system mode from settings
+ */
+async function loadSystemMode() {
+  const statusElement = document.querySelector('#system-mode-card .loading-message');
+  
+  try {
+    if (statusElement) {
+      statusElement.textContent = '⏳ Status wird geladen...';
+    }
+    
+    const response = await apiRequest('/settings?category=system');
+    console.log('[System Mode] API Response:', response);
+    
+    // Response is directly the settings object, not wrapped
+    if (response && typeof response === 'object') {
+      const settings = response;
+      
+      // Set radio button for current mode
+      const currentMode = settings['system.networkMode'] || 'normal';
+      const normalRadio = document.getElementById('mode-normal');
+      const hotspotRadio = document.getElementById('mode-hotspot');
+      
+      if (normalRadio && hotspotRadio) {
+        normalRadio.checked = currentMode === 'normal';
+        hotspotRadio.checked = currentMode === 'hotspot';
+        
+        // Update radio button styles
+        updateModeRadioStyles();
+        
+        // Show hotspot info if in hotspot mode
+        const hotspotInfo = document.getElementById('hotspot-info');
+        if (hotspotInfo) {
+          hotspotInfo.style.display = currentMode === 'hotspot' ? 'block' : 'none';
+        }
+        
+        // Update hotspot credentials display
+        if (settings['system.hotspotSSID']) {
+          const ssidEl = document.getElementById('hotspot-ssid');
+          if (ssidEl) ssidEl.textContent = settings['system.hotspotSSID'];
+        }
+        if (settings['system.hotspotPassword']) {
+          const pwdEl = document.getElementById('hotspot-password');
+          if (pwdEl) pwdEl.textContent = '••••••••';
+        }
+      }
+      
+      // Hide loading message
+      if (statusElement) {
+        statusElement.style.display = 'none';
+      }
+    } else {
+      console.warn('[System Mode] Unexpected response format:', response);
+      if (statusElement) {
+        statusElement.textContent = '⚠️ Keine System-Einstellungen gefunden';
+      }
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden des System-Modus:', error);
+    if (statusElement) {
+      statusElement.textContent = '❌ Fehler beim Laden: ' + (error.message || 'Unbekannter Fehler');
+    }
+  }
+}
+
+/**
+ * Update radio button visual styles based on selection
+ */
+function updateModeRadioStyles() {
+  const radios = document.querySelectorAll('input[name="system-mode"]');
+  radios.forEach(radio => {
+    const label = radio.closest('label');
+    if (label) {
+      if (radio.checked) {
+        label.style.borderColor = '#4CAF50';
+        label.style.backgroundColor = '#f0f9f0';
+      } else {
+        label.style.borderColor = '#ddd';
+        label.style.backgroundColor = 'white';
+      }
+    }
+  });
+}
+
+/**
+ * Switch system mode (normal <-> hotspot)
+ */
+async function switchSystemMode() {
+  const normalRadio = document.getElementById('mode-normal');
+  const hotspotRadio = document.getElementById('mode-hotspot');
+  
+  if (!normalRadio || !hotspotRadio) {
+    showNotification('❌ Modus-Auswahl nicht gefunden', 'error');
+    return;
+  }
+  
+  const selectedMode = normalRadio.checked ? 'normal' : 'hotspot';
+  
+  // Confirm mode change
+  const modeNames = { normal: 'Normal Modus', hotspot: 'Hotspot Modus' };
+  if (!confirm(`Möchten Sie zum ${modeNames[selectedMode]} wechseln?\n\n⚠️ Das System wird neu gestartet!`)) {
+    return;
+  }
+  
+  try {
+    console.log(`[Mode Switch] Switching to ${selectedMode} mode...`);
+    
+    // Update setting via PUT endpoint (bulk endpoint has issues with updates)
+    const response = await apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify({
+        key: 'system.networkMode',
+        value: selectedMode,
+        type: 'string',
+        category: 'system',
+        description: 'Network mode: normal (connect to existing networks) or hotspot (create ad-hoc network)'
+      })
+    });
+    
+    console.log('[Mode Switch] API Response:', response);
+    
+    // Check if settings were saved
+    const saved = response.success === true || response.setting || response.message;
+    
+    if (saved) {
+      showNotification(`✅ Modus auf ${modeNames[selectedMode]} umgestellt. Warte auf Netzwerk-Umschaltung...`, 'success');
+      console.log('[Mode Switch] Database updated successfully, monitor will apply changes within 10 seconds');
+      
+      // Reload after 15 seconds to allow mode switch
+      setTimeout(() => {
+        console.log('[Mode Switch] Reloading page...');
+        window.location.reload();
+      }, 15000);
+    } else {
+      console.error('[Mode Switch] API returned unexpected format:', response);
+      showNotification(`❌ Fehler beim Speichern: ${response.error?.message || response.message || 'Unbekannter Fehler'}`, 'error');
+    }
+  } catch (error) {
+    console.error('[Mode Switch] Error:', error);
+    showNotification(`❌ Fehler: ${error.message}`, 'error');
+  }
+}
+
+// Event listeners for system mode
+document.addEventListener('DOMContentLoaded', () => {
+  // Radio button change events
+  const radios = document.querySelectorAll('input[name="system-mode"]');
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      updateModeRadioStyles();
+      
+      // Show/hide hotspot info
+      const hotspotInfo = document.getElementById('hotspot-info');
+      if (hotspotInfo) {
+        hotspotInfo.style.display = radio.value === 'hotspot' && radio.checked ? 'block' : 'none';
+      }
+    });
+  });
+  
+  // Mode switch button
+  const switchBtn = document.getElementById('switchSystemMode');
+  if (switchBtn) {
+    switchBtn.addEventListener('click', switchSystemMode);
+  }
+});
+
 console.log('Admin Dashboard geladen (API-Modus)');
+
+// Load system mode on settings page
+document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
+  setTimeout(loadSystemMode, 100);
+});
+
+console.log('Admin Dashboard geladen (API-Modus)');
+
+

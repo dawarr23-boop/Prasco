@@ -120,6 +120,69 @@ router.put(
 
 /**
  * @openapi
+ * /api/posts/update-priorities:
+ *   put:
+ *     tags:
+ *       - Posts
+ *     summary: Prioritäten mehrerer Beiträge aktualisieren
+ *     description: Aktualisiert die Priorität mehrerer Beiträge basierend auf Drag & Drop Reihenfolge. Erfordert 'posts.update' Permission.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - updates
+ *             properties:
+ *               updates:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - id
+ *                     - priority
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       description: Post-ID
+ *                     priority:
+ *                       type: integer
+ *                       description: Neue Priorität
+ *                 description: Array von Post-Updates mit ID und neuer Priorität
+ *                 example: [{"id": 1, "priority": 10}, {"id": 2, "priority": 9}]
+ *     responses:
+ *       200:
+ *         description: Prioritäten erfolgreich aktualisiert
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequest'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *     security:
+ *       - bearerAuth: []
+ */
+router.put(
+  '/update-priorities',
+  requirePermission('posts.update'),
+  [
+    body('updates')
+      .isArray({ min: 1 })
+      .withMessage('updates muss ein nicht-leeres Array sein'),
+    body('updates.*.id').isInt({ min: 1 }).withMessage('Jedes Update muss eine gültige ID haben'),
+    body('updates.*.priority').isInt().withMessage('Jedes Update muss eine gültige Priorität haben'),
+    validate,
+  ],
+  postController.updatePriorities
+);
+
+/**
+ * @openapi
  * /api/posts/{id}:
  *   get:
  *     tags:
