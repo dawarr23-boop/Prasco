@@ -324,8 +324,8 @@ router.post(
       .withMessage('Dauer muss mindestens 1 Sekunde sein'),
     body('priority')
       .optional()
-      .isInt({ min: 0, max: 10 })
-      .withMessage('Priorität muss zwischen 0 und 10 liegen'),
+      .isInt({ min: 0, max: 100 })
+      .withMessage('Priorität muss zwischen 0 und 100 liegen'),
     body('startDate').optional().isISO8601().withMessage('Ungültiges Start-Datum'),
     body('endDate').optional().isISO8601().withMessage('Ungültiges End-Datum'),
     body('isActive').optional().isBoolean().withMessage('isActive muss boolean sein'),
@@ -422,8 +422,8 @@ router.put(
       .withMessage('Dauer muss mindestens 1 Sekunde sein'),
     body('priority')
       .optional()
-      .isInt({ min: 0, max: 10 })
-      .withMessage('Priorität muss zwischen 0 und 10 liegen'),
+      .isInt({ min: 0, max: 100 })
+      .withMessage('Priorität muss zwischen 0 und 100 liegen'),
     body('startDate').optional().isISO8601().withMessage('Ungültiges Start-Datum'),
     body('endDate').optional().isISO8601().withMessage('Ungültiges End-Datum'),
     body('isActive').optional().isBoolean().withMessage('isActive muss boolean sein'),

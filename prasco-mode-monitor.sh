@@ -11,7 +11,7 @@ log() {
 
 # Create state file if it doesn't exist
 if [ ! -f "$STATE_FILE" ]; then
-    echo "unknown" > "$STATE_FILE"
+    echo "normal" > "$STATE_FILE"
 fi
 
 LAST_MODE=$(cat "$STATE_FILE")
@@ -57,10 +57,6 @@ while true; do
             log "Normal mode activated"
         fi
         
-        # Update state file
+        # Update state file and local variable
         echo "$CURRENT_MODE" > "$STATE_FILE"
-    fi
-    
-    # Wait 10 seconds before next check
-    sleep 10
-done
+        LAST_MODE="$CURRENT_MODE"

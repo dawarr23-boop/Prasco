@@ -5,7 +5,7 @@ interface PostAttributes {
   id: number;
   title: string;
   content: string;
-  contentType: 'text' | 'image' | 'video' | 'html';
+  contentType: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
   mediaId?: number;
   categoryId?: number;
   organizationId?: number;
@@ -15,6 +15,7 @@ interface PostAttributes {
   duration: number;
   priority: number;
   isActive: boolean;
+  showTitle: boolean;
   viewCount: number;
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
@@ -34,6 +35,7 @@ interface PostCreationAttributes
     | 'duration'
     | 'priority'
     | 'isActive'
+    | 'showTitle'
     | 'viewCount'
     | 'backgroundMusicUrl'
     | 'backgroundMusicVolume'
@@ -46,7 +48,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public id!: number;
   public title!: string;
   public content!: string;
-  public contentType!: 'text' | 'image' | 'video' | 'html';
+  public contentType!: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
   public mediaId?: number;
   public categoryId?: number;
   public organizationId?: number;
@@ -56,6 +58,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public duration!: number;
   public priority!: number;
   public isActive!: boolean;
+  public showTitle!: boolean;
   public viewCount!: number;
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
@@ -93,7 +96,7 @@ Post.init(
       allowNull: false,
     },
     contentType: {
-      type: DataTypes.ENUM('text', 'image', 'video', 'html'),
+      type: DataTypes.ENUM('text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'),
       allowNull: false,
       defaultValue: 'text',
     },
@@ -147,12 +150,22 @@ Post.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      comment: 'Higher priority posts are shown more often',
+      validate: {
+        min: 0,
+        max: 100,
+      },
+      comment: 'Higher priority posts are shown more often (0-100)',
     },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    showTitle: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+      comment: 'Whether to display the title on the display screen',
     },
     viewCount: {
       type: DataTypes.INTEGER,

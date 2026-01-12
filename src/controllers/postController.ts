@@ -3,10 +3,13 @@ import { Post, Category, User, Media } from '../models';
 import { AppError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
 import { logger } from '../utils/logger';
+import * as presentationService from '../services/presentationService';
+import { cacheService } from '../utils/cache';
+import { videoDownloadService } from '../services/videoDownloadService';
 
 /**
  * Get all posts with pagination, filtering, and sorting
- * GET /api/posts?page=1&limit=10&category=1&isActive=true&sort=priority
+ * GET /api/posts?page=1&limit=100&category=1&isActive=true&sort=priority
  */
 export const getAllPosts = async (
   req: Request,
@@ -16,7 +19,7 @@ export const getAllPosts = async (
   try {
     const {
       page = '1',
-      limit = '10',
+      limit = '100',
       category,
       isActive,
       sort = 'createdAt',
@@ -181,10 +184,16 @@ export const createPost = async (
       duration,
       priority,
       isActive,
+      showTitle,
       backgroundMusicUrl,
       backgroundMusicVolume,
       blendEffect,
     } = req.body;
+
+    // Validate priority range (0-100)
+    if (priority !== undefined && (priority < 0 || priority > 100)) {
+      throw new AppError('Priorität muss zwischen 0 und 100 liegen', 400);
+    }
 
     // Validate category exists and belongs to user's organization
     if (categoryId) {
@@ -236,10 +245,82 @@ export const createPost = async (
       duration: duration || 10,
       priority: priority || 0,
       isActive: isActive !== undefined ? isActive : true,
+      showTitle: showTitle !== undefined ? showTitle : true,
       backgroundMusicUrl: musicUrl || null,
       backgroundMusicVolume: musicVolume,
       blendEffect: blendEffect || null,
     });
+
+    // Wenn es eine Präsentation ist UND ein Media-Objekt verknüpft ist, extrahiere Slides
+    let createdPosts: any[] = [];
+    logger.info(`[createPost] contentType=${contentType}, content=${content}, mediaId=${mediaId}`);
+    
+    if (contentType === 'presentation' && content) {
+      // Der content enthält die presentationId
+      const presentationId = content;
+      logger.info(`[createPost] Präsentation erkannt, presentationId=${presentationId}`);
+      
+      const slides = presentationService.getSlideImages(presentationId);
+      logger.info(`[createPost] Gefundene Slides: ${slides.length}`);
+      
+      if (slides.length > 0) {
+        logger.info(`Erstelle ${slides.length} Posts für Präsentations-Slides`);
+        
+        // Lösche den ursprünglichen Post (war nur ein Platzhalter)
+        await post.destroy();
+        
+        // Erstelle für jeden Slide einen eigenen Post
+        // Höchste Priorität für ersten Slide, absteigend
+        const basePriority = priority || 100;
+        
+        for (let i = 0; i < slides.length; i++) {
+          const slide = slides[i];
+          const slidePost = await Post.create({
+            title: `${title} - Slide ${slide.slideNumber}`,
+            content: slide.imageUrl, // URL wird im content gespeichert
+            contentType: 'image',
+            categoryId: categoryId || undefined,
+            mediaId: undefined,
+            organizationId: req.user?.organizationId,
+            createdBy: req.user!.id,
+            startDate: startDate || null,
+            endDate: calculatedEndDate || null,
+            duration: duration || 30,
+            priority: basePriority - i, // Absteigende Priorität
+            isActive: isActive !== undefined ? isActive : true,
+            showTitle: false, // Titel bei Slides standardmäßig nicht anzeigen
+            backgroundMusicUrl: musicUrl || null,
+            backgroundMusicVolume: musicVolume,
+            blendEffect: blendEffect || null,
+          });
+            
+          createdPosts.push(slidePost);
+        }
+        
+        // Lade alle erstellten Posts mit Associations in einer Query
+        const slideIds = createdPosts.map(p => p.id);
+        const postsWithAssociations = await Post.findAll({
+          where: { id: slideIds },
+          include: [
+            { model: Category, as: 'category', attributes: ['id', 'name', 'color', 'icon'] },
+            { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName', 'email'] },
+          ],
+        });
+          
+        res.status(201).json({
+          success: true,
+          data: postsWithAssociations,
+          message: `Präsentation erfolgreich erstellt: ${slides.length} Slides`,
+        });
+          
+        logger.info(`Präsentation aufgeteilt: ${slides.length} Slide-Posts erstellt`);
+          
+        // Cache invalidieren
+        cacheService.delByPrefix('public:posts:');
+          
+        return;
+      }
+      }
 
     // Fetch with associations
     const createdPost = await Post.findByPk(post.id, {
@@ -256,6 +337,31 @@ export const createPost = async (
         },
       ],
     });
+
+    // Cache invalidieren
+    cacheService.delByPrefix('public:posts:');
+
+    // Video-Download im Hintergrund starten (für Hotspot-Modus)
+    if (contentType === 'video' && content) {
+      const videoUrl = content;
+      if (videoDownloadService.isYouTubeUrl(videoUrl)) {
+        logger.info(`Starte YouTube-Video-Download im Hintergrund für Post ${post.id}`);
+        videoDownloadService
+          .downloadYouTubeVideo(videoUrl)
+          .then(async (result) => {
+            if (result.success && result.localPath) {
+              // Aktualisiere Post mit lokaler Video-URL
+              await post.update({ 
+                backgroundMusicUrl: result.localPath // Speichere lokalen Pfad für Offline-Verwendung
+              });
+              logger.info(`Video erfolgreich heruntergeladen: ${result.localPath}`);
+            }
+          })
+          .catch((error) => {
+            logger.error('Video-Download fehlgeschlagen:', error);
+          });
+      }
+    }
 
     res.status(201).json({
       success: true,
@@ -320,6 +426,11 @@ export const updatePost = async (
       }
     }
 
+    // Validate priority range (0-100)
+    if (priority !== undefined && (priority < 0 || priority > 100)) {
+      throw new AppError('Priorität muss zwischen 0 und 100 liegen', 400);
+    }
+
     // Update fields
     if (title !== undefined) post.title = title;
     if (content !== undefined) post.content = content;
@@ -364,6 +475,9 @@ export const updatePost = async (
       ],
     });
 
+    // Cache invalidieren
+    cacheService.delByPrefix('public:posts:');
+
     res.json({
       success: true,
       data: updatedPost,
@@ -400,6 +514,9 @@ export const deletePost = async (
     }
 
     await post.destroy();
+
+    // Cache invalidieren
+    cacheService.delByPrefix('public:posts:');
 
     res.json({
       success: true,

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Setting from '../models/Setting';
+import { cacheService } from '../utils/cache';
 
 /**
  * Hole alle Einstellungen oder spezifische nach Kategorie
@@ -7,6 +8,14 @@ import Setting from '../models/Setting';
 export const getSettings = async (req: Request, res: Response) => {
   try {
     const { category } = req.query;
+
+    // Cache key based on category filter
+    const cacheKey = `settings:category_${category || 'all'}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
 
     const where: any = {};
     if (category) {
@@ -20,6 +29,9 @@ export const getSettings = async (req: Request, res: Response) => {
     settings.forEach((setting) => {
       settingsObj[setting.key] = setting.getParsedValue();
     });
+
+    // Cache for 10 minutes (settings rarely change)
+    cacheService.set(cacheKey, settingsObj, 600);
 
     res.json(settingsObj);
   } catch (error: any) {
@@ -90,6 +102,9 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
       description,
     });
 
+    // Invalidate all settings caches
+    cacheService.delByPrefix('settings:');
+
     res.json({
       message: created ? 'Einstellung erstellt' : 'Einstellung aktualisiert',
       key: setting.key,
@@ -145,6 +160,9 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
       });
     }
 
+    // Invalidate all settings caches
+    cacheService.delByPrefix('settings:');
+
     res.json({
       message: 'Einstellungen gespeichert',
       settings: results,
@@ -168,6 +186,9 @@ export const deleteSetting = async (req: Request, res: Response): Promise<void> 
       res.status(404).json({ error: 'Einstellung nicht gefunden' });
       return;
     }
+
+    // Invalidate all settings caches
+    cacheService.delByPrefix('settings:');
 
     res.json({ message: 'Einstellung gelöscht' });
   } catch (error: any) {

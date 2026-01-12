@@ -15,10 +15,23 @@ import fs from 'fs';
 // Load environment variables FIRST
 dotenv.config();
 
+// Import feature flags and log status
+import FEATURES, { logFeatureStatus } from './config/features';
+
+// Make features available globally
+declare global {
+  namespace Express {
+    interface Application {
+      features?: typeof FEATURES;
+    }
+  }
+}
+
 // Import models BEFORE connectDatabase to ensure they're registered
 import './models';
 import { connectDatabase } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
+import { cacheControl, compressionHints } from './middleware/performance';
 import { logger } from './utils/logger';
 import { seedDatabase } from './database/seeders';
 
@@ -31,7 +44,7 @@ import publicRoutes from './routes/public';
 import mediaRoutes from './routes/media';
 import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
-import systemRoutes from './routes/system';
+import kioskRoutes from './routes/kiosk';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -143,8 +156,22 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+// Performance Middlewares
+app.use(cacheControl(86400)); // 1 Tag Cache für statische Ressourcen
+app.use(compressionHints());
+
 // Body parsing & compression
-app.use(compression());
+app.use(compression({
+  level: 6, // Balance zwischen Kompression und CPU (RPi3 optimiert)
+  threshold: 1024, // Nur Dateien >1KB komprimieren
+  filter: (req, res) => {
+    // Komprimiere keine Bilder/Videos (bereits komprimiert)
+    if (req.path.match(/\.(jpg|jpeg|png|gif|mp4|webm)$/i)) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -154,14 +181,29 @@ app.use(mongoSanitize());
 // Logging
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 
-// Static Files
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/css', express.static(path.join(__dirname, '../css')));
-app.use('/js', express.static(path.join(__dirname, '../js')));
-app.use('/views', express.static(path.join(__dirname, '../views')));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+// Static Files mit Caching
+const staticOptions = {
+  maxAge: '1d', // 1 Tag Browser-Cache
+  etag: true,
+  lastModified: true,
+  setHeaders: (res: Response, path: string) => {
+    // Aggressive Caching für unveränderliche Assets
+    if (path.match(/\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  },
+};
+
+app.use(express.static(path.join(__dirname, '../public'), staticOptions));
+app.use('/css', express.static(path.join(__dirname, '../css'), staticOptions));
+app.use('/js', express.static(path.join(__dirname, '../js'), staticOptions));
+app.use('/views', express.static(path.join(__dirname, '../views'), staticOptions));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), staticOptions));
 // PowerPoint Präsentationen statisch ausliefern
-app.use('/uploads/presentations', express.static(path.join(__dirname, '../uploads/presentations')));
+app.use('/uploads/presentations', express.static(path.join(__dirname, '../uploads/presentations'), staticOptions));
+
+// Make features available on app
+app.features = FEATURES;
 
 // Frontend Routes
 app.get('/', (_req: Request, res: Response) => {
@@ -208,10 +250,10 @@ app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/system', systemRoutes); // System management (mode switching, etc.)
 app.use('/api/public', publicRoutes); // No rate limit for public display
 app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);
+app.use('/api/kiosk', kioskRoutes);
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
@@ -236,6 +278,9 @@ app.use(errorHandler);
 // Initialize Database & Start Server
 const startServer = async () => {
   try {
+    // Log feature configuration on startup
+    logFeatureStatus();
+    
     // Connect to database
     await connectDatabase();
     logger.info('✅ Datenbankverbindung hergestellt');

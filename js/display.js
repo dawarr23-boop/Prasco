@@ -446,7 +446,7 @@ function toggleAutoRotation() {
     }
     // Starte Timer für aktuellen Post
     const post = posts[currentIndex];
-    const duration = (post?.display_duration || 10) * 1000;
+    const duration = (post?.duration || 10) * 1000;
     autoRotateTimer = setTimeout(() => nextPost(), duration);
   } else {
     // Pausiere Auto-Rotation
@@ -614,16 +614,21 @@ function displayCurrentPost() {
   switch (post.content_type) {
     case 'text':
       html = `
-                <h1>${escapeHtml(post.title)}</h1>
+                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
                 <p>${escapeHtml(post.content || '')}</p>
             `;
       break;
 
     case 'image':
+      // Wenn kein media_url vorhanden ist, verwende content als Bild-URL (für Presentation Slides)
+      const imageUrl = post.media_url || (post.content && post.content.startsWith('/uploads/') ? post.content : null);
+      // Zeige content nur an, wenn es kein Pfad ist
+      const imageContent = post.content && !post.content.startsWith('/uploads/') ? post.content : '';
+      
       html = `
-                <h1>${escapeHtml(post.title)}</h1>
-                ${post.media_url ? `<img src="${escapeHtml(post.media_url)}" alt="${escapeHtml(post.title)}">` : ''}
-                ${post.content ? `<p>${escapeHtml(post.content)}</p>` : ''}
+                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(post.title)}">` : ''}
+                ${imageContent ? `<p>${escapeHtml(imageContent)}</p>` : ''}
             `;
       break;
 
@@ -636,13 +641,34 @@ function displayCurrentPost() {
         globalMusicSettings.enabled && globalMusicSettings.muteVideos && globalMusicSettings.url;
       const muteParam = shouldMuteVideo ? '1' : '0';
 
-      if (post.media_url) {
-        // Prüfe ob YouTube URL - erweiterte Regex für alle Formate
-        const youtubeMatch = post.media_url.match(
-          /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/
-        );
+      // Video-URL aus verschiedenen Quellen
+      const videoUrl = post.media_url || post.content;
+      // Prüfe auf lokale heruntergeladene Kopie (für Offline-Hotspot-Modus)
+      const localVideoUrl = post.backgroundMusicUrl;
 
-        if (youtubeMatch) {
+      if (videoUrl) {
+        // Wenn lokale Kopie verfügbar ist, verwende diese (Hotspot-Modus)
+        if (localVideoUrl && localVideoUrl.startsWith('/uploads/videos/')) {
+          videoHtml = `<div class="video-fullscreen-container">
+            <video 
+              id="fullscreen-video"
+              src="${escapeHtml(localVideoUrl)}" 
+              autoplay 
+              loop 
+              playsinline
+              ${shouldMuteVideo ? 'muted' : ''}>
+            </video>
+            ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
+            <div class="offline-mode-indicator" title="Offline-Modus: Lokale Video-Kopie">📥</div>
+          </div>`;
+        }
+        // Prüfe ob YouTube URL - erweiterte Regex für alle Formate
+        else {
+          const youtubeMatch = videoUrl.match(
+            /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/
+          );
+
+          if (youtubeMatch) {
           const videoId = youtubeMatch[1];
           // YouTube iframe - mute abhängig von globaler Musik
           videoHtml = `<div class="video-fullscreen-container" ${!shouldMuteVideo ? `onclick="this.querySelector('iframe').src = this.querySelector('iframe').src.replace('mute=1', 'mute=0');"` : ''}>
@@ -660,36 +686,37 @@ function displayCurrentPost() {
               <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noopener">Auf YouTube ansehen</a>
             </div>
           </div>`;
-        }
-        // Prüfe ob Vimeo URL
-        else if (post.media_url.includes('vimeo.com')) {
-          const vimeoMatch = post.media_url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-          if (vimeoMatch) {
-            const videoId = vimeoMatch[1];
+          }
+          // Prüfe ob Vimeo URL
+          else if (videoUrl.includes('vimeo.com')) {
+            const vimeoMatch = videoUrl.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+            if (vimeoMatch) {
+              const videoId = vimeoMatch[1];
+              videoHtml = `<div class="video-fullscreen-container">
+                <iframe 
+                  src="https://player.vimeo.com/video/${videoId}?autoplay=1&loop=1&muted=${muteParam}&controls=1" 
+                  frameborder="0" 
+                  allow="autoplay; fullscreen; picture-in-picture" 
+                  allowfullscreen>
+                </iframe>
+                ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
+              </div>`;
+            }
+          }
+          // Ansonsten normales HTML5 Video
+          else {
             videoHtml = `<div class="video-fullscreen-container">
-              <iframe 
-                src="https://player.vimeo.com/video/${videoId}?autoplay=1&loop=1&muted=${muteParam}&controls=1" 
-                frameborder="0" 
-                allow="autoplay; fullscreen; picture-in-picture" 
-                allowfullscreen>
-              </iframe>
+              <video 
+                id="fullscreen-video"
+                src="${escapeHtml(videoUrl)}" 
+                autoplay 
+                loop 
+                playsinline
+                ${shouldMuteVideo ? 'muted' : ''}>
+              </video>
               ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
             </div>`;
           }
-        }
-        // Ansonsten normales HTML5 Video
-        else {
-          videoHtml = `<div class="video-fullscreen-container">
-            <video 
-              id="fullscreen-video"
-              src="${escapeHtml(post.media_url)}" 
-              autoplay 
-              loop 
-              playsinline
-              ${shouldMuteVideo ? 'muted' : ''}>
-            </video>
-            ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
-          </div>`;
         }
       }
       // Video Vollbild - ohne Titel und Text
@@ -718,7 +745,7 @@ function displayCurrentPost() {
 
     case 'html':
       html = `
-                <h1>${escapeHtml(post.title)}</h1>
+                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
                 <div>${post.content || ''}</div>
             `;
       break;
@@ -728,9 +755,19 @@ function displayCurrentPost() {
       html = renderPresentation(post);
       break;
 
+    case 'pdf':
+      // PDF Dokument anzeigen
+      html = renderPDF(post);
+      break;
+
+    case 'word':
+      // Word Dokument anzeigen
+      html = renderWordDocument(post);
+      break;
+
     default:
       html = `
-                <h1>${escapeHtml(post.title)}</h1>
+                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
                 <p>${escapeHtml(post.content || '')}</p>
             `;
   }
@@ -756,7 +793,7 @@ function displayCurrentPost() {
   clearTimeout(autoRotateTimer);
 
   if (!presentationModeState.isActive || !presentationModeState.isPaused) {
-    const duration = (post.display_duration || 10) * 1000;
+    const duration = (post.duration || 10) * 1000;
     autoRotateTimer = setTimeout(() => {
       nextPost();
     }, duration);
@@ -967,12 +1004,16 @@ function renderSlideshow(post, slides, currentSlideIndex) {
 
   return `
     <div class="presentation-slideshow" style="height: 100%; display: flex; flex-direction: column; background: #1a1a2e;">
-      <div class="slide-header" style="padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3);">
+      ${post.showTitle === true ? `<div class="slide-header" style="padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3);">
         <h2 style="margin: 0; color: #fff; font-size: 24px;">${escapeHtml(post.title)}</h2>
         <div style="color: #fff; font-size: 18px; opacity: 0.8;">
           Folie ${currentSlideIndex + 1} / ${totalSlides}
         </div>
-      </div>
+      </div>` : `<div class="slide-header" style="padding: 15px 30px; display: flex; justify-content: flex-end; align-items: center; background: rgba(0,0,0,0.3);">
+        <div style="color: #fff; font-size: 18px; opacity: 0.8;">
+          Folie ${currentSlideIndex + 1} / ${totalSlides}
+        </div>
+      </div>`}
       <div class="slide-container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; position: relative;">
         <img src="${slide.imageUrl}" alt="Slide ${currentSlideIndex + 1}" 
              style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);"
@@ -1015,9 +1056,9 @@ function startSlideRotation(totalDuration) {
     }
 
     // Aktualisiere nur den Slide-Content
-    const contentDiv = document.getElementById('content');
-    if (contentDiv && posts[currentIndex]) {
-      contentDiv.innerHTML = renderSlideshow(
+    const container = document.getElementById('current-post');
+    if (container && posts[currentIndex]) {
+      container.innerHTML = renderSlideshow(
         posts[currentIndex],
         presentationState.slides,
         presentationState.currentSlide
@@ -1045,6 +1086,71 @@ function updateHeaderCategory(categoryId) {
   }
 
   headerCategory.innerHTML = `<div style="background: ${category.color}; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);\">${category.icon || '🏷️'} ${escapeHtml(category.name)}</div>`;
+}
+
+// PDF Dokument rendern
+function renderPDF(post) {
+  const mediaUrl = post.media?.fileUrl || post.content;
+  
+  if (!mediaUrl) {
+    return `
+      <div style="text-align: center; padding: 60px;">
+        <div style="font-size: 100px; margin-bottom: 30px;">📄</div>
+        <h1>${escapeHtml(post.title)}</h1>
+        <p style="font-size: 24px; color: #666;">PDF Dokument</p>
+        <p style="color: #999; margin-top: 20px;">Keine PDF-Datei verfügbar</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="height: 100%; display: flex; flex-direction: column; background: #f5f5f5;">
+      ${post.showTitle === true ? `<div style="padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="margin: 0; color: #333; font-size: 24px;">📄 ${escapeHtml(post.title)}</h2>
+      </div>` : ''}
+      <div style="flex: 1; position: relative; overflow: hidden;">
+        <iframe 
+          src="${escapeHtml(mediaUrl)}#view=FitH&toolbar=0&navpanes=0" 
+          style="width: 100%; height: 100%; border: none; background: white;"
+          title="${escapeHtml(post.title)}">
+        </iframe>
+      </div>
+    </div>
+  `;
+}
+
+// Word Dokument rendern
+function renderWordDocument(post) {
+  const mediaUrl = post.media?.fileUrl || post.content;
+  
+  if (!mediaUrl) {
+    return `
+      <div style="text-align: center; padding: 60px;">
+        <div style="font-size: 100px; margin-bottom: 30px;">📃</div>
+        <h1>${escapeHtml(post.title)}</h1>
+        <p style="font-size: 24px; color: #666;">Word Dokument</p>
+        <p style="color: #999; margin-top: 20px;">Keine Word-Datei verfügbar</p>
+      </div>
+    `;
+  }
+
+  // Word-Dokumente via Microsoft Office Online Viewer
+  const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(mediaUrl)}`;
+
+  return `
+    <div style="height: 100%; display: flex; flex-direction: column; background: #f5f5f5;">
+      ${post.showTitle === true ? `<div style="padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <h2 style="margin: 0; color: #333; font-size: 24px;">📃 ${escapeHtml(post.title)}</h2>
+      </div>` : ''}
+      <div style="flex: 1; position: relative; overflow: hidden;">
+        <iframe 
+          src="${viewerUrl}" 
+          style="width: 100%; height: 100%; border: none; background: white;"
+          title="${escapeHtml(post.title)}">
+        </iframe>
+      </div>
+    </div>
+  `;
 }
 
 // HTML-Escape für Sicherheit

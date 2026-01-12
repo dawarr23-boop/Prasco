@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Post, Category, Media } from '../models';
 import { Op } from 'sequelize';
 import { logger } from '../utils/logger';
+import { cacheService } from '../utils/cache';
 
 /**
  * Get all active posts for public display
@@ -14,6 +15,16 @@ export const getActivePosts = async (
 ): Promise<void> => {
   try {
     const { organization, category } = req.query;
+
+    // Cache-Key basierend auf Query-Parametern
+    const cacheKey = `public:posts:${organization || 'all'}:${category || 'all'}`;
+    
+    // Versuche aus Cache zu laden (60 Sekunden TTL für Public Display)
+    const cached = cacheService.get<any>(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
 
     const now = new Date();
 
@@ -77,17 +88,24 @@ export const getActivePosts = async (
         'startDate',
         'endDate',
         'viewCount',
+        'showTitle',
         'backgroundMusicUrl',
         'backgroundMusicVolume',
+        'blendEffect',
         'createdAt',
       ],
     });
 
-    res.json({
+    const response = {
       success: true,
       data: posts,
       count: posts.length,
-    });
+    };
+
+    // Speichere im Cache (60 Sekunden TTL)
+    cacheService.set(cacheKey, response, 60);
+
+    res.json(response);
 
     logger.info(`Aktive Posts für Display abgerufen: ${posts.length}`);
   } catch (error) {
@@ -174,6 +192,14 @@ export const getActiveCategories = async (
   try {
     const { organization } = req.query;
 
+    // Cache key includes organization filter
+    const cacheKey = `public:categories:org_${organization || 'all'}`;
+    const cached = cacheService.get(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
     const where: any = {
       isActive: true,
     };
@@ -196,11 +222,16 @@ export const getActiveCategories = async (
       attributes: ['id', 'name', 'color', 'icon'],
     });
 
-    res.json({
+    const response = {
       success: true,
       data: categories,
       count: categories.length,
-    });
+    };
+
+    // Cache for 5 minutes (same as admin categories)
+    cacheService.set(cacheKey, response, 300);
+
+    res.json(response);
 
     logger.info(`Aktive Kategorien für Display abgerufen: ${categories.length}`);
   } catch (error) {

@@ -83,7 +83,6 @@ async function convertWithLibreOffice(
   try {
     // Erst zu PDF konvertieren
     const pdfCmd = `${soffice} --headless --convert-to pdf --outdir "${outputDir}" "${inputPath}"`;
-    logger.info(`Konvertiere zu PDF: ${pdfCmd}`);
     await execAsync(pdfCmd, { timeout: 120000 });
 
     // Finde die PDF-Datei
@@ -96,20 +95,21 @@ async function convertWithLibreOffice(
 
     const pdfPath = path.join(outputDir, pdfFile);
 
-    // PDF zu PNG konvertieren (mehrere Seiten)
-    // LibreOffice kann PDF direkt zu PNG konvertieren
-    const pngCmd = `${soffice} --headless --convert-to png --outdir "${outputDir}" "${pdfPath}"`;
-    logger.info(`Konvertiere zu PNG: ${pngCmd}`);
+    // PDF zu PNG konvertieren mit pdftoppm (erstellt slide-1.png, slide-2.png, etc.)
+    // -png für PNG-Format, -r 150 für 150 DPI Auflösung
+    const pngCmd = `pdftoppm -png -r 150 "${pdfPath}" "${path.join(outputDir, 'slide')}"`;
 
     try {
       await execAsync(pngCmd, { timeout: 120000 });
-    } catch {
-      // Falls PDF->PNG nicht funktioniert, verwende alternative Methode
-      logger.info('Versuche alternative PNG-Konvertierung...');
+    } catch (error) {
+      // Falls pdftoppm nicht funktioniert, versuche ImageMagick convert
+      logger.info('pdftoppm fehlgeschlagen, versuche convert...');
+      const convertCmd = `convert -density 150 "${pdfPath}" "${path.join(outputDir, 'slide-%03d.png')}"`;
+      await execAsync(convertCmd, { timeout: 120000 });
     }
 
     // Zähle die generierten PNG-Dateien
-    const pngFiles = fs.readdirSync(outputDir).filter((f) => f.endsWith('.png'));
+    let pngFiles = fs.readdirSync(outputDir).filter((f) => f.endsWith('.png'));
 
     if (pngFiles.length === 0) {
       // Wenn keine PNGs erzeugt wurden, behalte die PDF
@@ -122,7 +122,7 @@ async function convertWithLibreOffice(
     }
 
     // Benenne die PNG-Dateien um zu slide_001.png, slide_002.png, etc.
-    // Sortiere numerisch basierend auf der Nummer im Dateinamen
+    // pdftoppm erstellt slide-1.png, slide-2.png, etc.
     pngFiles.sort((a, b) => {
       const numA = parseInt(a.match(/\d+/)?.[0] || '0');
       const numB = parseInt(b.match(/\d+/)?.[0] || '0');

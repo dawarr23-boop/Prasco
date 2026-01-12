@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Category } from '../models';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
+import { cacheService } from '../utils/cache';
 
 /**
  * Get all categories
@@ -26,6 +27,14 @@ export const getAllCategories = async (
       where.isActive = isActive === 'true';
     }
 
+    // Cache-Key basierend auf Filtern (Categories ändern sich selten)
+    const cacheKey = `categories:org_${req.user?.organizationId || 'all'}:active_${isActive || 'all'}`;
+    const cached = cacheService.get<any>(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
     const categories = await Category.findAll({
       where,
       order: [
@@ -44,10 +53,15 @@ export const getAllCategories = async (
       ],
     });
 
-    res.json({
+    const response = {
       success: true,
       data: categories,
-    });
+    };
+
+    // Cache für 5 Minuten (Categories ändern sich selten)
+    cacheService.set(cacheKey, response, 300);
+
+    res.json(response);
 
     logger.info(`Kategorien abgerufen: ${categories.length}`);
   } catch (error) {
@@ -134,6 +148,10 @@ export const createCategory = async (
       isActive: true,
     });
 
+    // Invalidate category caches
+    cacheService.delByPrefix('categories:');
+    cacheService.delByPrefix('public:categories:');
+
     res.status(201).json({
       success: true,
       data: category,
@@ -192,6 +210,10 @@ export const updateCategory = async (
 
     await category.save();
 
+    // Invalidate category caches
+    cacheService.delByPrefix('categories:');
+    cacheService.delByPrefix('public:categories:');
+
     res.json({
       success: true,
       data: category,
@@ -241,6 +263,10 @@ export const deleteCategory = async (
     }
 
     await category.destroy();
+
+    // Invalidate category caches
+    cacheService.delByPrefix('categories:');
+    cacheService.delByPrefix('public:categories:');
 
     res.json({
       success: true,

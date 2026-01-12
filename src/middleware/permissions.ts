@@ -30,7 +30,6 @@ export const requirePermission = (permissions: string | string[]) => {
 
       if (!hasPermission) {
         const ip = req.ip || req.socket.remoteAddress || 'unknown';
-        console.log(`[DEBUG] Permission denied for user ${user.email} (${user.role}) - Required: ${permissionArray.join(', ')}`);
         securityLogger.logPermissionDenied(
           user.id,
           user.email,
@@ -40,8 +39,6 @@ export const requirePermission = (permissions: string | string[]) => {
         );
         throw new AppError('Keine Berechtigung für diese Aktion', 403);
       }
-
-      console.log(`[DEBUG] Permission granted for user ${user.email} (${user.role}) - Permission: ${permissionArray.join(', ')}`);
 
       next();
     } catch (error) {

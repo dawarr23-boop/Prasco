@@ -1096,14 +1096,9 @@ function navigateTo(section) {
 // ============================================
 async function updateDashboardStats() {
   try {
-    // Lade Posts und Kategorien parallel
-    const [postsResponse, categoriesResponse] = await Promise.all([
-      apiRequest('/posts'),
-      apiRequest('/categories'),
-    ]);
-
-    const posts = postsResponse?.data || [];
-    const categories = categoriesResponse?.data || [];
+    // Verwende bereits geladene Daten aus dem Cache statt erneut zu laden
+    const posts = postsCache || [];
+    const categories = categoriesCache || [];
 
     const activePosts = posts.filter((p) => p.isActive !== false).length;
     const scheduledPosts = posts.filter(
@@ -1163,6 +1158,9 @@ async function loadPosts() {
 
           return `
         <div class="list-item draggable-post" draggable="true" data-post-id="${post.id}" data-index="${index}">
+            <label class="post-checkbox-wrapper" onclick="event.stopPropagation();">
+              <input type="checkbox" class="post-checkbox" data-post-id="${post.id}" style="width: 18px; height: 18px; cursor: pointer;">
+            </label>
             <div class="drag-handle" title="Ziehen zum Sortieren">⋮⋮</div>
             <div class="list-item-content clickable" data-action="edit" data-post-id="${post.id}" title="Klicken zum Bearbeiten">
                 <h3>${escapeHtml(post.title)}</h3>
@@ -1181,6 +1179,9 @@ async function loadPosts() {
 
     // Drag & Drop Event Listeners initialisieren
     initDragAndDrop();
+    
+    // Bulk Selection Event Listeners initialisieren
+    initBulkSelection();
   } catch (error) {
     postsList.innerHTML = `<p style="text-align:center; color: #dc3545;">Fehler beim Laden: ${error.message}</p>`;
   }
@@ -1282,33 +1283,206 @@ async function saveNewOrder() {
       body: JSON.stringify({ updates }),
     });
 
-    // Cache aktualisieren
-    updates.forEach(update => {
-      const post = postsCache.find(p => p.id === update.id);
-      if (post) {
-        post.priority = update.priority;
-      }
-    });
-
     showNotification('Reihenfolge und Prioritäten gespeichert!', 'success');
     
-    // Liste neu laden um aktualisierte Prioritäten anzuzeigen
+    // Liste neu laden um aktualisierte Prioritäten vom Server zu holen
+    // loadPosts() sortiert automatisch nach priority DESC
     await loadPosts();
-
-    // Cache aktualisieren
-    const newPostsCache = [];
-    orderedIds.forEach((id, index) => {
-      const post = postsCache.find((p) => p.id === id);
-      if (post) {
-        post.priority = orderedIds.length - index;
-        newPostsCache.push(post);
-      }
-    });
-    postsCache = newPostsCache;
   } catch (error) {
     showNotification('Fehler beim Speichern der Reihenfolge: ' + error.message, 'error');
     // Bei Fehler: Posts neu laden um konsistenten State zu haben
     await loadPosts();
+  }
+}
+
+// ============================================
+// Bulk Selection Funktionalität
+// ============================================
+let selectedPostIds = new Set();
+
+function initBulkSelection() {
+  const postCheckboxes = document.querySelectorAll('.post-checkbox');
+  const selectAllCheckbox = document.getElementById('select-all-posts');
+  
+  // Event listener für einzelne Checkboxen
+  postCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', handlePostCheckboxChange);
+  });
+  
+  // Event listener für "Alle auswählen"
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener('change', handleSelectAllChange);
+  }
+  
+  // Event listeners für Bulk-Action Buttons
+  document.getElementById('bulk-activate-btn')?.addEventListener('click', handleBulkActivate);
+  document.getElementById('bulk-deactivate-btn')?.addEventListener('click', handleBulkDeactivate);
+  document.getElementById('bulk-delete-btn')?.addEventListener('click', handleBulkDelete);
+  
+  updateBulkActionsBar();
+}
+
+function handlePostCheckboxChange(e) {
+  const postId = parseInt(e.target.dataset.postId);
+  const listItem = e.target.closest('.list-item');
+  
+  if (e.target.checked) {
+    selectedPostIds.add(postId);
+    listItem?.classList.add('selected');
+  } else {
+    selectedPostIds.delete(postId);
+    listItem?.classList.remove('selected');
+  }
+  
+  updateBulkActionsBar();
+  updateSelectAllCheckbox();
+}
+
+function handleSelectAllChange(e) {
+  const postCheckboxes = document.querySelectorAll('.post-checkbox');
+  
+  if (e.target.checked) {
+    // Alle auswählen
+    postCheckboxes.forEach(checkbox => {
+      checkbox.checked = true;
+      const postId = parseInt(checkbox.dataset.postId);
+      selectedPostIds.add(postId);
+      checkbox.closest('.list-item')?.classList.add('selected');
+    });
+  } else {
+    // Alle abwählen
+    postCheckboxes.forEach(checkbox => {
+      checkbox.checked = false;
+      const postId = parseInt(checkbox.dataset.postId);
+      selectedPostIds.delete(postId);
+      checkbox.closest('.list-item')?.classList.remove('selected');
+    });
+  }
+  
+  updateBulkActionsBar();
+}
+
+function updateSelectAllCheckbox() {
+  const selectAllCheckbox = document.getElementById('select-all-posts');
+  const postCheckboxes = document.querySelectorAll('.post-checkbox');
+  
+  if (selectAllCheckbox && postCheckboxes.length > 0) {
+    const allChecked = Array.from(postCheckboxes).every(cb => cb.checked);
+    const someChecked = Array.from(postCheckboxes).some(cb => cb.checked);
+    
+    selectAllCheckbox.checked = allChecked;
+    selectAllCheckbox.indeterminate = !allChecked && someChecked;
+  }
+}
+
+function updateBulkActionsBar() {
+  const bulkActionsBar = document.getElementById('bulk-actions-bar');
+  const selectedCount = document.getElementById('selected-count');
+  const bulkActivateBtn = document.getElementById('bulk-activate-btn');
+  const bulkDeactivateBtn = document.getElementById('bulk-deactivate-btn');
+  const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+  
+  const count = selectedPostIds.size;
+  
+  if (count > 0) {
+    bulkActionsBar.style.display = 'block';
+    selectedCount.textContent = `${count} ausgewählt`;
+    bulkActivateBtn.disabled = false;
+    bulkDeactivateBtn.disabled = false;
+    bulkDeleteBtn.disabled = false;
+  } else {
+    bulkActionsBar.style.display = 'none';
+    bulkActivateBtn.disabled = true;
+    bulkDeactivateBtn.disabled = true;
+    bulkDeleteBtn.disabled = true;
+  }
+}
+
+async function handleBulkActivate() {
+  if (selectedPostIds.size === 0) return;
+  
+  const btn = document.getElementById('bulk-activate-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Aktiviere...';
+  
+  try {
+    const ids = Array.from(selectedPostIds);
+    await Promise.all(ids.map(id => 
+      apiRequest(`/posts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ isActive: true })
+      })
+    ));
+    
+    showNotification(`✅ ${ids.length} Beiträge aktiviert`, 'success');
+    selectedPostIds.clear();
+    await loadPosts();
+  } catch (error) {
+    showNotification('❌ Fehler beim Aktivieren: ' + error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function handleBulkDeactivate() {
+  if (selectedPostIds.size === 0) return;
+  
+  const btn = document.getElementById('bulk-deactivate-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Deaktiviere...';
+  
+  try {
+    const ids = Array.from(selectedPostIds);
+    await Promise.all(ids.map(id => 
+      apiRequest(`/posts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ isActive: false })
+      })
+    ));
+    
+    showNotification(`✅ ${ids.length} Beiträge deaktiviert`, 'success');
+    selectedPostIds.clear();
+    await loadPosts();
+  } catch (error) {
+    showNotification('❌ Fehler beim Deaktivieren: ' + error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+async function handleBulkDelete() {
+  if (selectedPostIds.size === 0) return;
+  
+  const count = selectedPostIds.size;
+  if (!confirm(`⚠️ Möchten Sie wirklich ${count} Beiträge löschen?`)) {
+    return;
+  }
+  
+  const btn = document.getElementById('bulk-delete-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Lösche...';
+  
+  try {
+    const ids = Array.from(selectedPostIds);
+    await Promise.all(ids.map(id => 
+      apiRequest(`/posts/${id}`, {
+        method: 'DELETE'
+      })
+    ));
+    
+    showNotification(`✅ ${count} Beiträge gelöscht`, 'success');
+    selectedPostIds.clear();
+    await loadPosts();
+  } catch (error) {
+    showNotification('❌ Fehler beim Löschen: ' + error.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 }
 
@@ -1317,11 +1491,16 @@ async function showPostForm() {
   currentPostId = null;
   document.getElementById('postForm').reset();
 
-  // Standard-Startdatum auf jetzt setzen (Enddatum bleibt leer = unbegrenzt)
+  // Standard-Startdatum auf jetzt setzen
   const now = new Date();
   const localDateTime = now.toISOString().slice(0, 16);
   document.getElementById('start-date').value = localDateTime;
-  document.getElementById('end-date').value = ''; // Leer = unbegrenzt
+  
+  // Enddatum auf Startdatum + 7 Tage setzen
+  const endDate = new Date(now);
+  endDate.setDate(endDate.getDate() + 7);
+  const endDateTime = endDate.toISOString().slice(0, 16);
+  document.getElementById('end-date').value = endDateTime;
 
   await loadCategoryDropdown();
 }
@@ -1431,6 +1610,7 @@ async function editPost(id) {
   }
 
   document.querySelector('input[name="is_active"]').checked = post.isActive !== false;
+  document.querySelector('input[name="show_title"]').checked = post.showTitle === true;
 
   const categorySelect = document.getElementById('post-category');
   if (categorySelect && post.category) {
@@ -1647,6 +1827,32 @@ function initGlobalMusicSettings() {
   }
 }
 
+// Upload-Section Sichtbarkeit basierend auf Content-Type steuern
+function updateUploadSectionVisibility(contentType) {
+  const uploadSection = document.getElementById('upload-section');
+  const wordPdfImport = document.getElementById('word-pdf-import');
+  const fileUploadSection = document.getElementById('file-upload-section');
+  const mediaUrlSection = document.getElementById('media-url-section');
+
+  if (!uploadSection) return;
+
+  // Generell Upload-Section anzeigen
+  uploadSection.style.display = 'block';
+
+  // Bei text/html: Nur Word/PDF Import anzeigen
+  if (contentType === 'text' || contentType === 'html') {
+    if (wordPdfImport) wordPdfImport.style.display = 'block';
+    if (fileUploadSection) fileUploadSection.style.display = 'none';
+    if (mediaUrlSection) mediaUrlSection.style.display = 'none';
+  }
+  // Bei anderen Typen: File Upload und URL anzeigen
+  else {
+    if (wordPdfImport) wordPdfImport.style.display = 'none';
+    if (fileUploadSection) fileUploadSection.style.display = 'block';
+    if (mediaUrlSection) mediaUrlSection.style.display = 'block';
+  }
+}
+
 // Event-Listener für Hintergrundmusik-Steuerung initialisieren
 function initBackgroundMusicControls() {
   // Globale Musik-Einstellungen
@@ -1657,6 +1863,7 @@ function initBackgroundMusicControls() {
   if (contentTypeSelect) {
     contentTypeSelect.addEventListener('change', (e) => {
       updateBackgroundMusicVisibility(e.target.value);
+      updateUploadSectionVisibility(e.target.value);
     });
   }
 
@@ -1739,6 +1946,7 @@ async function handlePostFormSubmit(e) {
   const fileInput = document.getElementById('media-file');
   let mediaId = null;
   let isPresentationUpload = false;
+  let presentationId = null;
 
   // Datei-Upload falls vorhanden
   if (fileInput && fileInput.files.length > 0) {
@@ -1748,6 +1956,12 @@ async function handlePostFormSubmit(e) {
     try {
       const uploadResult = await uploadFile(file);
       mediaId = uploadResult.id;
+      
+      // Bei PPT: Speichere presentationId
+      if (uploadResult.type === 'presentation' && uploadResult.presentationId) {
+        presentationId = uploadResult.presentationId;
+        console.log(`PPT hochgeladen: ${uploadResult.totalSlides} Slides, ID: ${presentationId}`);
+      }
     } catch (error) {
       showNotification('Datei-Upload fehlgeschlagen: ' + error.message, 'error');
       return;
@@ -1788,7 +2002,11 @@ async function handlePostFormSubmit(e) {
   // Bei Video/Bild-Posts mit Medien-URL: URL im content speichern
   // Die Medien-URL hat Priorität für Video/Bild-Posts
   let content = formData.get('content') || '';
-  if (mediaUrl && ['video', 'image'].includes(contentType)) {
+  
+  // Bei PPT: presentationId als content speichern
+  if (presentationId) {
+    content = presentationId;
+  } else if (mediaUrl && ['video', 'image'].includes(contentType)) {
     // Medien-URL wird als Content gespeichert (für YouTube, Vimeo, externe Bilder)
     // Falls zusätzlicher Beschreibungstext vorhanden, wird er nach der URL angehängt
     if (content && content !== mediaUrl) {
@@ -1808,6 +2026,7 @@ async function handlePostFormSubmit(e) {
     startDate: formData.get('start_date') || null,
     endDate: formData.get('end_date') || null,
     isActive: formData.get('is_active') === 'on',
+    showTitle: formData.get('show_title') === 'on',
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
     blendEffect: formData.get('blend_effect') || null,
@@ -1827,11 +2046,17 @@ async function handlePostFormSubmit(e) {
       showNotification('Beitrag erfolgreich aktualisiert!', 'success');
     } else {
       // Create
-      await apiRequest('/posts', {
+      const result = await apiRequest('/posts', {
         method: 'POST',
         body: JSON.stringify(postData),
       });
-      showNotification('Beitrag erfolgreich erstellt!', 'success');
+      
+      // Bei PPT: Zeige Anzahl der erstellten Slides
+      if (presentationId && result.data && Array.isArray(result.data)) {
+        showNotification(`Präsentation erfolgreich erstellt! ${result.data.length} Slides wurden als separate Beiträge hinzugefügt.`, 'success');
+      } else {
+        showNotification('Beitrag erfolgreich erstellt!', 'success');
+      }
     }
 
     hidePostForm();
@@ -3114,14 +3339,56 @@ window.addEventListener('load', async () => {
     hideUserFormBtn.addEventListener('click', hideUserForm);
   }
   if (openDisplayBtn) {
-    openDisplayBtn.addEventListener('click', () => window.open('/public/display.html', '_blank'));
+    openDisplayBtn.addEventListener('click', async () => {
+      if (confirm('Möchten Sie den Kiosk-Modus auf dem Raspberry Pi starten?')) {
+        try {
+          const response = await fetch('/api/kiosk/display', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+
+          if (response.ok) {
+            showToast('Display-Modus gestartet', 'success');
+          } else {
+            const error = await response.json();
+            showToast(error.message || 'Fehler beim Starten des Display-Modus', 'error');
+          }
+        } catch (error) {
+          console.error('Error starting display mode:', error);
+          showToast('Fehler beim Starten des Display-Modus', 'error');
+        }
+      }
+    });
   }
 
-  // Vortragsmodus Button
+  // Vortragsmodus Button - Startet Kiosk-Modus auf Raspberry Pi
   const openPresentationBtn = document.getElementById('openPresentationBtn');
   if (openPresentationBtn) {
-    openPresentationBtn.addEventListener('click', () => {
-      window.open('/public/display.html?mode=presentation', '_blank');
+    openPresentationBtn.addEventListener('click', async () => {
+      if (confirm('Möchten Sie den Kiosk-Modus auf dem Raspberry Pi im Präsentationsmodus starten?')) {
+        try {
+          const response = await fetch('/api/kiosk/presentation', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          });
+
+          if (response.ok) {
+            showToast('Präsentationsmodus gestartet', 'success');
+          } else {
+            const error = await response.json();
+            showToast(error.message || 'Fehler beim Starten des Präsentationsmodus', 'error');
+          }
+        } catch (error) {
+          console.error('Error starting presentation mode:', error);
+          showToast('Fehler beim Starten des Präsentationsmodus', 'error');
+        }
+      }
     });
   }
 
@@ -3344,11 +3611,11 @@ window.addEventListener('load', async () => {
     });
   }
 
-  // Initial laden
+  // Initial laden - Posts und Categories werden einmal geladen und für Stats wiederverwendet
   startFooterClock();
-  await updateDashboardStats();
   await loadPosts();
   await loadCategories();
+  await updateDashboardStats();
 
   // Dashboard Statistik-Karten klickbar machen
   document.querySelectorAll('.stat-card.clickable').forEach((card) => {
@@ -3424,6 +3691,39 @@ document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async ()
   } catch (error) {
     console.error('Fehler beim Löschen aller Posts:', error);
     showNotification('❌ Fehler beim Löschen der Beiträge', 'error');
+  }
+});
+
+// Download External Videos Handler
+document.getElementById('downloadExternalVideosBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('downloadExternalVideosBtn');
+  if (!btn) return;
+
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Videos werden heruntergeladen...';
+
+  try {
+    const response = await apiRequest('/media/download-external', {
+      method: 'POST'
+    });
+
+    if (response.success) {
+      const stats = response.stats || {};
+      const message = `✅ Download abgeschlossen!\n` +
+        `Downloads: ${stats.downloaded || 0}\n` +
+        `Aktualisiert: ${stats.updated || 0}\n` +
+        `Übersprungen: ${stats.skipped || 0}\n` +
+        `Fehlgeschlagen: ${stats.failed || 0}`;
+      showNotification(message, 'success');
+      await loadPosts(); // Refresh post list to show updated media
+    }
+  } catch (error) {
+    console.error('Fehler beim Download externer Videos:', error);
+    showNotification('❌ Fehler beim Download der Videos: ' + (error.message || 'Unbekannter Fehler'), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 });
 
@@ -3637,7 +3937,6 @@ async function loadSystemMode() {
     }
     
     const response = await apiRequest('/settings?category=system');
-    console.log('[System Mode] API Response:', response);
     
     // Response is directly the settings object, not wrapped
     if (response && typeof response === 'object') {
@@ -3789,15 +4088,51 @@ document.addEventListener('DOMContentLoaded', () => {
   if (switchBtn) {
     switchBtn.addEventListener('click', switchSystemMode);
   }
+  
+  // File upload button handler
+  const triggerFileUploadBtn = document.getElementById('trigger-file-upload');
+  const mediaFileInput = document.getElementById('media-file');
+  if (triggerFileUploadBtn && mediaFileInput) {
+    triggerFileUploadBtn.addEventListener('click', () => {
+      mediaFileInput.click();
+    });
+  }
+
+  // Update upload section visibility on page load
+  const postTypeSelect = document.getElementById('post-type');
+  if (postTypeSelect) {
+    updateUploadSectionVisibility(postTypeSelect.value);
+  }
 });
 
 console.log('Admin Dashboard geladen (API-Modus)');
 
-// Load system mode on settings page
+// Load system mode only once when visiting settings for the first time
+let systemModeLoaded = false;
 document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
-  setTimeout(loadSystemMode, 100);
+  if (!systemModeLoaded) {
+    setTimeout(loadSystemMode, 100);
+    systemModeLoaded = true;
+  }
 });
 
-console.log('Admin Dashboard geladen (API-Modus)');
+// Automatisches Enddatum: Wenn Startdatum manuell geändert wird, +7 Tage zum Enddatum
+const startDateInput = document.getElementById('start-date');
+const endDateInput = document.getElementById('end-date');
+
+if (startDateInput && endDateInput) {
+  startDateInput.addEventListener('change', function() {
+    if (this.value) {
+      const startDate = new Date(this.value);
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 7);
+      
+      // Format: YYYY-MM-DDTHH:mm
+      const endDateTime = endDate.toISOString().slice(0, 16);
+      endDateInput.value = endDateTime;
+    }
+  });
+}
+
 
 
