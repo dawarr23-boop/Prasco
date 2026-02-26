@@ -48,6 +48,20 @@ build/
 coverage/
 .nyc_output/
 
+# Android Build Artifacts
+.gradle/
+*.apk
+*.aab
+local.properties
+android-app/.gradle/
+android-tv-app/.gradle/
+android-tv-project/.gradle/
+android-tv-project/gradle/lib/
+android-tv-project/gradle/bin/
+
+# Backups (local only)
+backups/
+
 # Legacy/Temp files to be deleted
 löschen/
 stdout.txt

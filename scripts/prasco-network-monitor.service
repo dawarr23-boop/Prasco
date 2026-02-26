@@ -1,0 +1,19 @@
+[Unit]
+Description=PRASCO Network Monitor - Auto Hotspot Failover
+After=network.target prasco-server.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/bin/bash /home/pi/Prasco/scripts/network-monitor.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Logging
+SyslogIdentifier=prasco-network-monitor
+
+[Install]
+WantedBy=multi-user.target

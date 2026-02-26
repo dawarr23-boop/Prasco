@@ -241,6 +241,109 @@ npm run build        # TypeScript kompilieren
 npm start            # Production-Server starten
 ```
 
+---
+
+## 📺 Display Configuration Scripts
+
+### `start-kiosk.sh` ✅
+**Status:** Aktuell (mit Display-Config Support)
+**Zweck:** Startet Kiosk-Modus mit Display-spezifischer Konfiguration
+**Verwendung:** `bash ~/Prasco/scripts/start-kiosk.sh`
+**Features:**
+- Lädt Display-Konfiguration aus `/etc/prasco/display-config.json`
+- HTTPS/HTTP Auto-Detection
+- Display-ID wird an URL angehängt
+- Chromium Fullscreen-Kiosk-Modus
+- Wartet auf Server-Verfügbarkeit
+
+**Ausgabe:**
+```
+🚀 PRASCO Kiosk-Modus wird gestartet...
+✓ Lade Display-Konfiguration: /etc/prasco/display-config.json
+✓ Display-ID: empfang
+✓ Verwende HTTPS
+✓ Öffne Display-spezifische URL: https://localhost:3000/public/display.html?id=empfang
+🌐 Starte Chromium im Kiosk-Modus...
+```
+
+### `setup-display-config.sh` ✅
+**Status:** Neu (Februar 2026)
+**Zweck:** Interaktives Setup für Display-Konfiguration (lokal)
+**Verwendung:** `sudo bash ~/Prasco/scripts/setup-display-config.sh`
+**Features:**
+- Erstellt `/etc/prasco/display-config.json`
+- Interaktive Eingabe von Display-ID, Name, Server-URL
+- JSON-Validierung
+- Prüft Backend-Verfügbarkeit
+- Setzt korrekte Berechtigungen
+
+**Workflow:**
+```bash
+# Auf dem Raspberry Pi
+cd ~/Prasco/scripts
+sudo bash setup-display-config.sh
+
+# Folge den Anweisungen:
+# - Display-Identifier: empfang
+# - Display-Name: Empfangsbereich
+# - Auto-Start: ja
+# - Server-URL: https://localhost:3000
+```
+
+### `remote-display-config.sh` ✅
+**Status:** Neu (Februar 2026)
+**Zweck:** Remote-Konfiguration via SSH (von anderem Computer)
+**Verwendung:** `./remote-display-config.sh <pi-host> <display-id> [name] [url]`
+**Features:**
+- Konfiguration via SSH übertragen
+- Kein Login auf dem Pi notwendig
+- Automatischer Kiosk-Neustart (optional)
+- Für Bulk-Updates mehrerer Pis
+
+**Beispiele:**
+```bash
+# Von deinem Computer aus
+./remote-display-config.sh 192.168.2.173 empfang "Empfangsbereich"
+./remote-display-config.sh pi-display-1 raum-1 "Raum 1"
+./remote-display-config.sh 192.168.2.175 kantine "Kantine" https://192.168.1.100:3000
+```
+
+**Voraussetzungen:**
+```bash
+# SSH-Key Setup (einmalig)
+ssh-copy-id pi@192.168.2.173
+
+# Verbindung testen
+ssh pi@192.168.2.173 "echo OK"
+```
+
+**Bulk-Konfiguration:**
+```bash
+#!/bin/bash
+# Mehrere Pis auf einmal konfigurieren
+./remote-display-config.sh 192.168.2.173 empfang "Empfangsbereich"
+./remote-display-config.sh 192.168.2.174 kantine "Kantine"
+./remote-display-config.sh 192.168.2.175 raum-1 "Raum 1"
+```
+
+### Display Configuration Schema
+**Pfad:** `/etc/prasco/display-config.json`
+
+```json
+{
+  "displayId": "empfang",
+  "displayName": "Empfangsbereich",
+  "autoStart": true,
+  "serverUrl": "https://localhost:3000",
+  "configVersion": "1.0",
+  "lastUpdated": "2026-02-08T20:45:00Z"
+}
+```
+
+**Dokumentation:** Siehe [DISPLAY-CONFIGURATION.md](../docs/DISPLAY-CONFIGURATION.md)
+
+---
+
 ## 🔄 Empfohlene Update-Reihenfolge
 
 1. `update.sh` - Aktuell, kann verwendet werden

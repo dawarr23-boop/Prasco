@@ -16,6 +16,7 @@ interface PostAttributes {
   priority: number;
   isActive: boolean;
   showTitle: boolean;
+  displayMode: 'all' | 'specific';
   viewCount: number;
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
@@ -36,6 +37,7 @@ interface PostCreationAttributes
     | 'priority'
     | 'isActive'
     | 'showTitle'
+    | 'displayMode'
     | 'viewCount'
     | 'backgroundMusicUrl'
     | 'backgroundMusicVolume'
@@ -59,6 +61,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public priority!: number;
   public isActive!: boolean;
   public showTitle!: boolean;
+  public displayMode!: 'all' | 'specific';
   public viewCount!: number;
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
@@ -66,6 +69,9 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  // Associations
+  public readonly displays?: any[];
 
   // Helper method to check if post is currently active
   public get isCurrentlyActive(): boolean {
@@ -166,6 +172,12 @@ Post.init(
       allowNull: false,
       defaultValue: true,
       comment: 'Whether to display the title on the display screen',
+    },
+    displayMode: {
+      type: DataTypes.ENUM('all', 'specific'),
+      allowNull: false,
+      defaultValue: 'all',
+      comment: 'Show on all displays or specific displays only',
     },
     viewCount: {
       type: DataTypes.INTEGER,

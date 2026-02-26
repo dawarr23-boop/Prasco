@@ -38,7 +38,7 @@ const Media = sequelize.define('Media', {
   url: DataTypes.STRING,
   thumbnailUrl: DataTypes.STRING,
   mimeType: DataTypes.STRING,
-  fileSize: DataTypes.BIGINT,
+  size: DataTypes.INTEGER,
   organizationId: DataTypes.INTEGER,
   uploadedBy: DataTypes.INTEGER
 }, { tableName: 'media', timestamps: true, underscored: true });
@@ -164,7 +164,7 @@ async function processPost(post) {
       url: relativeUrl,
       thumbnailUrl: null,
       mimeType: 'video/mp4',
-      fileSize: stats.size,
+      size: stats.size,
       organizationId: null,
       uploadedBy: post.createdBy || 1
     });

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Post, Category, User, Media } from '../models';
+import { Post, Category, User, Media, Display } from '../models';
 import { AppError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
 import { logger } from '../utils/logger';
@@ -89,6 +89,12 @@ export const getAllPosts = async (
           as: 'media',
           attributes: ['id', 'url', 'thumbnailUrl', 'mimeType'],
         },
+        {
+          model: Display,
+          as: 'displays',
+          attributes: ['id', 'name', 'identifier', 'isActive'],
+          through: { attributes: [] }, // Exclude junction table attributes
+        },
       ],
     });
 
@@ -140,6 +146,12 @@ export const getPostById = async (
           as: 'media',
           attributes: ['id', 'url', 'thumbnailUrl', 'mimeType', 'originalName'],
         },
+        {
+          model: Display,
+          as: 'displays',
+          attributes: ['id', 'name', 'identifier', 'isActive'],
+          through: { attributes: [] },
+        },
       ],
     });
 
@@ -185,6 +197,8 @@ export const createPost = async (
       priority,
       isActive,
       showTitle,
+      displayMode,
+      displayIds,
       backgroundMusicUrl,
       backgroundMusicVolume,
       blendEffect,
@@ -246,10 +260,25 @@ export const createPost = async (
       priority: priority || 0,
       isActive: isActive !== undefined ? isActive : true,
       showTitle: showTitle !== undefined ? showTitle : true,
+      displayMode: displayMode || 'all',
       backgroundMusicUrl: musicUrl || null,
       backgroundMusicVolume: musicVolume,
       blendEffect: blendEffect || null,
     });
+
+    // Handle display assignments
+    if (displayMode === 'specific' && displayIds && Array.isArray(displayIds) && displayIds.length > 0) {
+      const { PostDisplay } = require('../models');
+      
+      // Create display assignments
+      const assignments = displayIds.map((displayId: number) => ({
+        postId: post.id,
+        displayId: displayId,
+      }));
+      
+      await PostDisplay.bulkCreate(assignments);
+      logger.info(`Post ${post.id}: ${displayIds.length} Display-Zuweisungen erstellt`);
+    }
 
     // Wenn es eine Präsentation ist UND ein Media-Objekt verknüpft ist, extrahiere Slides
     let createdPosts: any[] = [];
@@ -397,6 +426,9 @@ export const updatePost = async (
       duration,
       priority,
       isActive,
+      showTitle,
+      displayMode,
+      displayIds,
       backgroundMusicUrl,
       backgroundMusicVolume,
       blendEffect,
@@ -442,6 +474,8 @@ export const updatePost = async (
     if (duration !== undefined) post.duration = duration;
     if (priority !== undefined) post.priority = priority;
     if (isActive !== undefined) post.isActive = isActive;
+    if (showTitle !== undefined) post.showTitle = showTitle;
+    if (displayMode !== undefined) post.displayMode = displayMode;
     if (blendEffect !== undefined) post.blendEffect = blendEffect;
 
     // Background music fields (only for non-video content)
@@ -458,6 +492,30 @@ export const updatePost = async (
     }
 
     await post.save();
+
+    // Handle display assignments
+    if (displayMode === 'specific' && displayIds !== undefined) {
+      const { PostDisplay } = require('../models');
+      
+      // Remove old assignments
+      await PostDisplay.destroy({ where: { postId: id } });
+      
+      // Create new assignments
+      if (Array.isArray(displayIds) && displayIds.length > 0) {
+        const assignments = displayIds.map((displayId: number) => ({
+          postId: id,
+          displayId: displayId,
+        }));
+        
+        await PostDisplay.bulkCreate(assignments);
+        logger.info(`Post ${id}: ${displayIds.length} Display-Zuweisungen aktualisiert`);
+      }
+    } else if (displayMode === 'all') {
+      // Clear all display assignments if switching to 'all'
+      const { PostDisplay } = require('../models');
+      await PostDisplay.destroy({ where: { postId: id } });
+      logger.info(`Post ${id}: Display-Zuweisungen entfernt (Modus: all)`);
+    }
 
     // Fetch with associations
     const updatedPost = await Post.findByPk(id, {
@@ -649,6 +707,55 @@ export const deleteAllPosts = async (
     });
 
     logger.info(`SECURITY: ${deletedCount} Posts gelöscht von ${req.user?.email}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Download video for a specific post
+ * POST /api/posts/:id/download-video
+ */
+export const downloadVideo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const postId = parseInt(req.params.id);
+
+    const post = await Post.findByPk(postId);
+    if (!post) {
+      throw new AppError('Post nicht gefunden', 404);
+    }
+
+    // Prüfe ob es ein Video-Post ist
+    if (post.contentType !== 'video') {
+      throw new AppError('Nur Video-Posts können heruntergeladen werden', 400);
+    }
+
+    // Prüfe ob bereits ein lokales Media existiert
+    if (post.mediaId) {
+      throw new AppError('Video ist bereits offline verfügbar', 400);
+    }
+
+    // Prüfe ob externe Video-URL
+    const videoUrl = post.content;
+    if (!videoUrl || !(videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') || videoUrl.includes('vimeo.com'))) {
+      throw new AppError('Keine externe Video-URL gefunden', 400);
+    }
+
+    logger.info(`[Video Download] Starting download for post ${postId} (${post.title})`);
+
+    // Starte Download im Hintergrund
+    videoDownloadService.downloadVideoForPost(postId).catch(err => {
+      logger.error(`[Video Download] Error downloading video for post ${postId}:`, err);
+    });
+
+    res.json({
+      success: true,
+      message: 'Video-Download wurde gestartet',
+    });
   } catch (error) {
     next(error);
   }

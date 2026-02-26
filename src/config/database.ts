@@ -42,7 +42,7 @@ if (dialect === 'sqlite') {
         ...baseConfig,
         host: DB_HOST || 'localhost',
         port: parseInt(DB_PORT || '5432'),
-        database: DB_NAME || 'bulletin_board',
+        database: DB_NAME || 'prasco',  // Changed from 'bulletin_board' to match actual DB
         username: DB_USER || 'postgres',
         password: DB_PASSWORD || 'postgres',
         pool: {

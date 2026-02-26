@@ -148,6 +148,59 @@ body {
   cursor: pointer;
 }
 
+/* Toggle Switch */
+.toggle-switch {
+  display: inline-block;
+  position: relative;
+}
+
+.toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-label {
+  display: block;
+  width: 52px;
+  height: 28px;
+  background-color: #ccc;
+  border-radius: 34px;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+.toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-input:checked + .toggle-label {
+  background-color: var(--prasco-red);
+}
+
+.toggle-input:checked + .toggle-label .toggle-slider {
+  transform: translateX(24px);
+}
+
+.toggle-input:focus + .toggle-label {
+  box-shadow: 0 0 0 3px rgba(0, 150, 64, 0.2);
+}
+
+.toggle-input:disabled + .toggle-label {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .error-message {
   background: #f8d7da;
   color: var(--danger-color);
@@ -1718,4 +1771,285 @@ body {
   left: 0;
   color: var(--prasco-red);
   font-weight: bold;
+}
+
+/* ============================================
+   Live-Daten (ÖPNV & Verkehr) Styles
+   ============================================ */
+
+/* Search Input Group */
+.search-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.search-input-group input {
+  flex: 1;
+}
+
+/* Search Results */
+.search-results-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  background: var(--gray-50);
+}
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  transition: background 0.15s;
+}
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: #e8f5e9; }
+.result-info { flex: 1; }
+.result-info strong { display: block; font-size: 0.95rem; }
+.result-info small { color: var(--gray-500); }
+.result-products { display: flex; gap: 0.25rem; flex-wrap: wrap; }
+
+/* Product Badges */
+.product-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+}
+.product-badge.bus { background: #7b1fa2; }
+.product-badge.sbahn { background: #388e3c; }
+.product-badge.ubahn { background: #1565c0; }
+.product-badge.tram { background: #d32f2f; }
+.product-badge.regional { background: #455a64; }
+.product-badge.fernzug { background: #c62828; }
+
+/* Selected Station Card */
+.selected-station-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e8f5e9;
+  border: 2px solid var(--prasco-red);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+.station-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.station-icon { font-size: 1.5rem; }
+
+/* Transport Filter Grid */
+.transport-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Highway Select */
+.highway-select-wrapper select {
+  width: 100%;
+  font-family: var(--font-mono);
+}
+.selected-highways-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1rem;
+}
+.highway-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.highway-badge .remove-highway {
+  background: none;
+  border: none;
+  color: #c62828;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Departure Board Preview */
+.departure-board {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+}
+.departure-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a237e;
+  color: white;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+.departure-time-label {
+  font-family: var(--font-mono);
+}
+.departure-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.departure-table thead {
+  background: #283593;
+  color: white;
+}
+.departure-table th {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.departure-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--gray-100);
+}
+.departure-table tbody tr:hover {
+  background: var(--gray-50);
+}
+.departure-table tr.row-cancelled {
+  background: #ffebee;
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+.direction-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.time-cell {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+/* Line Badges */
+.line-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: white;
+  min-width: 40px;
+  text-align: center;
+}
+.line-bus { background: #7b1fa2; }
+.line-suburban { background: #388e3c; }
+.line-subway { background: #1565c0; }
+.line-tram { background: #d32f2f; }
+.line-regional { background: #455a64; }
+.line-nationalExpress, .line-national { background: #c62828; }
+
+/* Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.status-badge.on-time {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.status-badge.delayed {
+  background: #fff3e0;
+  color: #e65100;
+}
+.status-badge.cancelled {
+  background: #ffebee;
+  color: #c62828;
+}
+
+/* Traffic Preview */
+.traffic-highway-card {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+.highway-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #263238;
+  color: white;
+  padding: 0.6rem 1rem;
+}
+.highway-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.traffic-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.traffic-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--gray-100);
+  align-items: flex-start;
+}
+.traffic-item:last-child { border-bottom: none; }
+.traffic-type-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+.traffic-details { flex: 1; }
+.traffic-details strong { display: block; margin-bottom: 0.2rem; }
+.traffic-details p { margin: 0; font-size: 0.85rem; color: var(--gray-600); }
+.traffic-details small { color: var(--gray-500); font-size: 0.8rem; }
+.traffic-item.warning { border-left: 3px solid #ff9800; }
+.traffic-item.roadwork { border-left: 3px solid #2196f3; }
+.traffic-item.closure { border-left: 3px solid #f44336; }
+
+/* Cache Stats */
+.cache-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+.cache-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cache-label { font-weight: 500; color: var(--gray-600); }
+.cache-value { font-family: var(--font-mono); font-weight: 700; color: var(--prasco-red); }
+
+/* Helper */
+.text-error { color: #c62828; }
+.live-preview-container { min-height: 60px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transport-filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .departure-table {
+    font-size: 0.8rem;
+  }
+  .departure-table th, .departure-table td {
+    padding: 0.35rem 0.5rem;
+  }
 }

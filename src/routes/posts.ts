@@ -501,8 +501,40 @@ router.delete(
  */
 router.delete(
   '/',
-  requirePermission('posts.manage'),
+  requirePermission('posts.delete'),
   postController.deleteAllPosts
+);
+
+/**
+ * @openapi
+ * /api/posts/{id}/download-video:
+ *   post:
+ *     tags:
+ *       - Posts
+ *     summary: Video offline verfügbar machen
+ *     description: Lädt ein externes Video (YouTube/Vimeo) herunter für einen bestimmten Post
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Post-ID
+ *     responses:
+ *       200:
+ *         description: Video-Download gestartet
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *     security:
+ *       - bearerAuth: []
+ */
+router.post(
+  '/:id/download-video',
+  requirePermission('posts.update'),
+  [param('id').isInt().withMessage('Ungültige Post-ID'), validate],
+  postController.downloadVideo
 );
 
 export default router;

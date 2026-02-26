@@ -7,6 +7,8 @@ import Permission from './Permission';
 import RolePermission from './RolePermission';
 import UserPermission from './UserPermission';
 import Setting from './Setting';
+import Display from './Display';
+import PostDisplay from './PostDisplay';
 
 // Define associations
 
@@ -134,7 +136,50 @@ Permission.belongsToMany(User, {
   as: 'users',
 });
 
-export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting };
+// Organization -> Displays (1:N)
+Organization.hasMany(Display, {
+  foreignKey: 'organizationId',
+  as: 'displays',
+});
+Display.belongsTo(Organization, {
+  foreignKey: 'organizationId',
+  as: 'organization',
+});
+
+// Many-to-Many: Post <-> Display (through PostDisplay)
+Post.belongsToMany(Display, {
+  through: PostDisplay,
+  foreignKey: 'postId',
+  otherKey: 'displayId',
+  as: 'displays',
+});
+Display.belongsToMany(Post, {
+  through: PostDisplay,
+  foreignKey: 'displayId',
+  otherKey: 'postId',
+  as: 'posts',
+});
+
+// PostDisplay Relations
+Post.hasMany(PostDisplay, {
+  foreignKey: 'postId',
+  as: 'postDisplays',
+});
+PostDisplay.belongsTo(Post, {
+  foreignKey: 'postId',
+  as: 'post',
+});
+
+Display.hasMany(PostDisplay, {
+  foreignKey: 'displayId',
+  as: 'postDisplays',
+});
+PostDisplay.belongsTo(Display, {
+  foreignKey: 'displayId',
+  as: 'display',
+});
+
+export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting, Display, PostDisplay };
 
 export default {
   User,
@@ -146,4 +191,6 @@ export default {
   RolePermission,
   UserPermission,
   Setting,
+  Display,
+  PostDisplay,
 };

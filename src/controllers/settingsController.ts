@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import Setting from '../models/Setting';
 import { cacheService } from '../utils/cache';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 /**
  * Hole alle Einstellungen oder spezifische nach Kategorie
@@ -105,6 +109,18 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
     // Invalidate all settings caches
     cacheService.delByPrefix('settings:');
 
+    // Spezielle Behandlung für system.networkMode - update boot-mode file
+    if (key === 'system.networkMode' && (stringValue === 'normal' || stringValue === 'hotspot')) {
+      try {
+        console.log(`🔄 Updating boot-mode file to: ${stringValue}`);
+        await execAsync(`echo "${stringValue}" | sudo tee /etc/prasco/boot-mode > /dev/null`);
+        console.log(`✅ Boot-mode file updated to: ${stringValue}`);
+      } catch (err: any) {
+        console.error('⚠️ Failed to update boot-mode file:', err.message);
+        // Don't fail the request, just log the error
+      }
+    }
+
     res.json({
       message: created ? 'Einstellung erstellt' : 'Einstellung aktualisiert',
       key: setting.key,
@@ -121,16 +137,28 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
  */
 export const setBulkSettings = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('📥 Full req.body:', JSON.stringify(req.body, null, 2));
+    console.log('📥 req.body.settings:', req.body.settings);
+    console.log('📥 typeof req.body:', typeof req.body);
+    console.log('📥 Object.keys(req.body):', Object.keys(req.body));
+    
     const { settings } = req.body;
 
+    console.log('💾 setBulkSettings called with:', settings);
+
     if (!settings || typeof settings !== 'object') {
+      console.log('❌ Invalid settings object');
       res.status(400).json({ error: 'Settings-Objekt ist erforderlich' });
       return;
     }
 
     const results = [];
+    let networkModeChanged = false;
+    let newNetworkMode = '';
 
     for (const [key, value] of Object.entries(settings)) {
+      console.log(`  📝 Processing: ${key} = ${value} (type: ${typeof value})`);
+      
       // Bestimme Typ automatisch
       let type: 'string' | 'number' | 'boolean' | 'json' = 'string';
       let stringValue: string;
@@ -148,16 +176,40 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
         stringValue = String(value);
       }
 
+      console.log(`  💿 Upserting: ${key} = ${stringValue} (type: ${type})`);
+      
       const [setting] = await Setting.upsert({
         key,
         value: stringValue,
         type,
       });
 
+      console.log(`  ✅ Saved: ${setting.key} = ${setting.value}`);
+
+      // Check if network mode was changed
+      if (key === 'system.networkMode' && (stringValue === 'normal' || stringValue === 'hotspot')) {
+        networkModeChanged = true;
+        newNetworkMode = stringValue;
+      }
+
       results.push({
         key: setting.key,
         value: setting.getParsedValue(),
       });
+    }
+
+    console.log('✅ All settings saved, results count:', results.length);
+
+    // Update boot-mode file if network mode changed
+    if (networkModeChanged) {
+      try {
+        console.log(`🔄 Updating boot-mode file to: ${newNetworkMode}`);
+        await execAsync(`echo "${newNetworkMode}" | sudo tee /etc/prasco/boot-mode > /dev/null`);
+        console.log(`✅ Boot-mode file updated to: ${newNetworkMode}`);
+      } catch (err: any) {
+        console.error('⚠️ Failed to update boot-mode file:', err.message);
+        // Don't fail the request, just log the error
+      }
     }
 
     // Invalidate all settings caches

@@ -9,7 +9,7 @@ module.exports = {
       node_args: '--max-old-space-size=512', // Begrenze Node.js Heap auf 512MB
       env: {
         NODE_ENV: 'production',
-        PORT: 3000,
+        PORT: 8443,
       },
       error_file: './logs/pm2-error.log',
       out_file: './logs/pm2-out.log',

@@ -50,6 +50,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 15,
         priority: 100,
+        showTitle: true,
       },
 
       // 2. HTML - Multi-Column Layout
@@ -88,6 +89,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 18,
         priority: 95,
+        showTitle: true,
       },
 
       // 3. HTML - Timeline
@@ -128,6 +130,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 20,
         priority: 90,
+        showTitle: true,
       },
 
       // 4. HTML - Feature Cards
@@ -181,6 +184,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 22,
         priority: 85,
+        showTitle: true,
       },
 
       // 5. HTML - Stats Dashboard
@@ -219,6 +223,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 20,
         priority: 80,
+        showTitle: true,
       },
 
       // 6. HTML - Alert Banner
@@ -256,6 +261,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 18,
         priority: 98,
+        showTitle: true,
       },
 
       // 7. HTML - Contact Info
@@ -313,6 +319,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'html' as const,
         duration: 20,
         priority: 60,
+        showTitle: true,
       },
 
       // 8. Text - Einfacher Post
@@ -323,6 +330,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'text' as const,
         duration: 12,
         priority: 55,
+        showTitle: true,
       },
 
       // 9. Text - Ankündigung
@@ -333,6 +341,7 @@ export const seedHtmlExamples = async (): Promise<void> => {
         contentType: 'text' as const,
         duration: 15,
         priority: 50,
+        showTitle: true,
       },
     ];
 

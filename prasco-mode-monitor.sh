@@ -3,15 +3,26 @@
 # Continuously monitors database for mode changes and applies them
 
 LOG_FILE="/var/log/prasco-mode-monitor.log"
-STATE_FILE="/var/run/prasco-mode.state"
+STATE_FILE="/var/lib/prasco/mode.state"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
-# Create state file if it doesn't exist
+# Create state directory if it doesn't exist
+mkdir -p "$(dirname "$STATE_FILE")"
+
+# Get current mode from database
+CURRENT_MODE=$(sudo -u postgres psql -d prasco -t -c "SELECT value FROM settings WHERE key='system.networkMode';" 2>/dev/null | xargs)
+
+if [ -z "$CURRENT_MODE" ]; then
+    CURRENT_MODE="normal"
+fi
+
+# Initialize state file with current database value if it doesn't exist
 if [ ! -f "$STATE_FILE" ]; then
-    echo "normal" > "$STATE_FILE"
+    echo "$CURRENT_MODE" > "$STATE_FILE"
+    log "Initialized state file with current mode: $CURRENT_MODE"
 fi
 
 LAST_MODE=$(cat "$STATE_FILE")
@@ -60,3 +71,8 @@ while true; do
         # Update state file and local variable
         echo "$CURRENT_MODE" > "$STATE_FILE"
         LAST_MODE="$CURRENT_MODE"
+    fi
+    
+    # Wait before next check
+    sleep 10
+done

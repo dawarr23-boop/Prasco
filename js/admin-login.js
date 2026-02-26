@@ -1,7 +1,19 @@
 // Admin Login JavaScript
 
+// Stelle sicher, dass der Event-Listener nur einmal registriert wird
+let loginInProgress = false;
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  e.stopPropagation();
+
+  // Verhindere mehrfache gleichzeitige Login-Versuche
+  if (loginInProgress) {
+    console.log('Login bereits im Gange...');
+    return;
+  }
+
+  loginInProgress = true;
 
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -30,7 +42,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || 'Login fehlgeschlagen');
+      throw new Error(data.message || data.error?.message || 'Login fehlgeschlagen');
     }
 
     // Erfolgreicher Login - Token speichern
@@ -60,10 +72,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     
     // Focus zurück auf Username-Feld
     document.getElementById('username').focus();
-
-    // Button wieder aktivieren
+  } finally {
+    // Button IMMER wieder aktivieren (auch bei unerwarteten Fehlern)
     submitButton.disabled = false;
     submitButton.textContent = 'Anmelden';
+    loginInProgress = false;
   }
 });
 

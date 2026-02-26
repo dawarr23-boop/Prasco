@@ -42,7 +42,7 @@ export class VideoDownloadService {
    */
   async isYtDlpAvailable(): Promise<boolean> {
     try {
-      await execAsync('yt-dlp --version', { timeout: 5000 });
+      await execAsync('/usr/local/bin/yt-dlp --version', { timeout: 5000 });
       return true;
     } catch {
       logger.warn('yt-dlp not found. Video download will be skipped.');
@@ -100,7 +100,7 @@ export class VideoDownloadService {
       // - Format: Best quality up to 720p (better performance on Pi)
       // - Max filesize to prevent huge downloads
       // - No thumbnail embedding for better compatibility
-      const command = `yt-dlp -f "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best" \
+      const command = `/usr/local/bin/yt-dlp -f "bestvideo[height<=720][ext=mp4]+bestaudio[ext=m4a]/best[height<=720][ext=mp4]/best" \
         --merge-output-format mp4 \
         --max-filesize ${this.MAX_VIDEO_SIZE} \
         --no-playlist \
@@ -172,6 +172,71 @@ export class VideoDownloadService {
       logger.info(`Deleted video file: ${filename}`);
     } catch (error) {
       logger.error('Failed to delete video file:', error);
+    }
+  }
+
+  /**
+   * Download video for a specific post
+   */
+  async downloadVideoForPost(postId: number): Promise<void> {
+    const { Post, Media } = await import('../models');
+    
+    try {
+      const post = await Post.findByPk(postId);
+      if (!post) {
+        throw new Error(`Post ${postId} not found`);
+      }
+
+      if (post.contentType !== 'video') {
+        throw new Error(`Post ${postId} is not a video`);
+      }
+
+      if (post.mediaId) {
+        logger.info(`[Video Download] Post ${postId} already has local media`);
+        return;
+      }
+
+      const videoUrl = post.content;
+      if (!videoUrl || !(this.isYouTubeUrl(videoUrl) || this.isVimeoUrl(videoUrl))) {
+        throw new Error(`Post ${postId} has no external video URL`);
+      }
+
+      logger.info(`[Video Download] Starting download for post ${postId}: ${videoUrl}`);
+
+      const result = await this.downloadYouTubeVideo(videoUrl);
+      
+      if (!result.success || !result.localPath) {
+        throw new Error(result.error || 'Download failed');
+      }
+
+      // Get file stats
+      const fsSync = require('fs');
+      const fullPath = path.join(this.UPLOAD_DIR, path.basename(result.localPath));
+      const stats = fsSync.statSync(fullPath);
+      const filename = path.basename(result.localPath);
+
+      // Create media entry
+      const media = await Media.create({
+        filename: filename,
+        originalName: `${post.title}.mp4`,
+        url: result.localPath,
+        mimeType: 'video/mp4',
+        size: stats.size,
+        uploadedBy: post.createdBy || 1,
+      } as any);
+
+      logger.info(`[Video Download] Created media entry ${media.id} for post ${postId}`);
+
+      // Update post
+      await post.update({
+        mediaId: media.id,
+        content: `Downloaded from: ${videoUrl}`,
+      });
+
+      logger.info(`[Video Download] ✅ Successfully processed post ${postId}`);
+    } catch (error: any) {
+      logger.error(`[Video Download] ❌ Error processing post ${postId}:`, error);
+      throw error;
     }
   }
 }

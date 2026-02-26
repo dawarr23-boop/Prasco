@@ -159,6 +159,21 @@ const translations = {
     'ldap.editorGroup': 'Editor-Gruppe',
     'ldap.tlsReject': 'Selbstsignierte Zertifikate ablehnen',
 
+    // System Mode
+    'systemMode.title': 'System-Modus',
+    'systemMode.description': 'Wechseln Sie zwischen Normal-Modus (Netzwerk-Verbindung) und Hotspot-Modus (Offline-Betrieb).',
+    'systemMode.loading': 'Status wird geladen...',
+    'systemMode.switch': 'Modus wechseln',
+    'systemMode.normal.title': 'Normal-Modus',
+    'systemMode.normal.feature1': 'Verbindung zum vorhandenen Netzwerk',
+    'systemMode.normal.feature2': 'Internet-Zugang erforderlich',
+    'systemMode.normal.feature3': 'Externe Server-URL verwendbar',
+    'systemMode.hotspot.title': 'Hotspot-Modus',
+    'systemMode.hotspot.feature1': 'Raspberry Pi erstellt WiFi Hotspot',
+    'systemMode.hotspot.ssid': 'SSID',
+    'systemMode.hotspot.password': 'Passwort',
+    'systemMode.hotspot.ip': 'IP',
+
     // Hints
     'hint.dragDropPosts':
       '→ Tipp: Ziehe die Beiträge per Drag & Drop um die Anzeigereihenfolge zu ändern',
@@ -179,6 +194,73 @@ const translations = {
     'validation.invalidNumber': 'muss eine Zahl sein',
     'validation.positiveNumber': 'muss eine positive Zahl sein',
     'validation.invalidDate': 'Ungültiges Datum',
+
+    // Form Labels (Dashboard)
+    'form.title': 'Titel *',
+    'form.type': 'Typ *',
+    'form.category': 'Kategorie',
+    'form.noCategory': '-- Keine Kategorie --',
+    'form.content': 'Inhalt',
+    'form.uploadContent': 'Inhalte hochladen',
+    'form.importDocument': 'Word/PDF importieren',
+    'form.importDocumentHint': 'Importieren Sie .docx oder .pdf Dateien (max. 10MB)',
+    'form.uploadFile': 'Datei hochladen',
+    'form.uploadFileHint': 'Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)',
+    'form.uploading': 'Uploading...',
+    'form.mediaUrl': 'Medien-URL (oder Datei hochladen)',
+    'form.mediaUrlPlaceholder': 'https://... oder /uploads/originals/...',
+    'form.mediaUrlHint': 'YouTube/Vimeo URLs werden automatisch als Video eingebettet',
+    'form.offlineDownload': 'Video offline verfügbar machen',
+    'form.offlineDownloadHint': 'Lädt das Video automatisch herunter für bessere Performance und Offline-Nutzung',
+    'form.displayDuration': 'Anzeigedauer (Sek.)',
+    'form.priority': 'Priorität (0-100)',
+    'form.blendEffect': 'Übergangseffekt',
+    'form.blendEffectNone': 'Kein Effekt',
+    'form.blendEffectFade': 'Fade (Überblenden)',
+    'form.blendEffectSlideLeft': 'Slide Left (Nach links)',
+    'form.blendEffectSlideRight': 'Slide Right (Nach rechts)',
+    'form.blendEffectSlideUp': 'Slide Up (Nach oben)',
+    'form.blendEffectSlideDown': 'Slide Down (Nach unten)',
+    'form.blendEffectZoomIn': 'Zoom In (Hineinzoomen)',
+    'form.blendEffectZoomOut': 'Zoom Out (Herauszoomen)',
+    'form.blendEffectHint': 'Wählen Sie einen Übergangseffekt zum nächsten Beitrag',
+    'form.startDate': 'Start-Datum',
+    'form.endDate': 'End-Datum',
+    'form.backgroundMusicSection': 'Hintergrundmusik (optional)',
+    'form.backgroundMusicHint': 'Nur für Text, Bild und HTML-Inhalte. Bei Videos wird der Original-Ton verwendet.',
+    'form.musicFile': 'Musik-Datei',
+    'form.musicVolume': 'Lautstärke',
+    'form.currentMusic': 'Aktuelle Musik',
+    'form.removeMusic': 'Entfernen',
+    'form.previewMusic': 'Vorschau',
+
+    // Content Types
+    'type.text': '📝 Text',
+    'type.image': '🖼️ Bild',
+    'type.video': '🎥 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 PowerPoint Präsentation',
+    'type.pdf': '📄 PDF Dokument',
+    'type.word': '📃 Word Dokument',
+
+    // Buttons
+    'btn.save': 'Speichern',
+    'btn.cancel': 'Abbrechen',
+    'btn.newPost': '+ Neuer Beitrag',
+    'btn.deleteAll': '🗑️ Alle löschen',
+    'btn.savePost': 'Beitrag speichern',
+    'btn.saveCategory': 'Kategorie erstellen',
+    'btn.saveUser': 'Benutzer speichern',
+    'btn.changePassword': 'Passwort ändern',
+    'btn.newCategory': '+ Neue Kategorie',
+    'btn.newUser': '+ Neuer Benutzer',
+
+    // Category Form
+    'category.name': 'Name *',
+    'category.color': 'Farbe',
+    'category.icon': 'Icon',
+    'category.description': 'Beschreibung',
+    'category.descriptionPlaceholder': 'Optionale Beschreibung...',
   },
 
   en: {
@@ -335,6 +417,21 @@ const translations = {
     'ldap.editorGroup': 'Editor Group',
     'ldap.tlsReject': 'Reject self-signed certificates',
 
+    // System Mode
+    'systemMode.title': 'System Mode',
+    'systemMode.description': 'Switch between Normal Mode (network connection) and Hotspot Mode (offline operation).',
+    'systemMode.loading': 'Loading status...',
+    'systemMode.switch': 'Switch Mode',
+    'systemMode.normal.title': 'Normal Mode',
+    'systemMode.normal.feature1': 'Connect to existing network',
+    'systemMode.normal.feature2': 'Internet access required',
+    'systemMode.normal.feature3': 'External server URL usable',
+    'systemMode.hotspot.title': 'Hotspot Mode',
+    'systemMode.hotspot.feature1': 'Raspberry Pi creates WiFi hotspot',
+    'systemMode.hotspot.ssid': 'SSID',
+    'systemMode.hotspot.password': 'Password',
+    'systemMode.hotspot.ip': 'IP',
+
     // Hints
     'hint.dragDropPosts': '→ Tip: Drag and drop posts to change the display order',
     'hint.dragDropCategories': '→ Tip: Drag and drop categories to change the order',
@@ -353,6 +450,73 @@ const translations = {
     'validation.invalidNumber': 'must be a number',
     'validation.positiveNumber': 'must be a positive number',
     'validation.invalidDate': 'Invalid date',
+
+    // Form Labels (Dashboard)
+    'form.title': 'Title *',
+    'form.type': 'Type *',
+    'form.category': 'Category',
+    'form.noCategory': '-- No Category --',
+    'form.content': 'Content',
+    'form.uploadContent': 'Upload Content',
+    'form.importDocument': 'Import Word/PDF',
+    'form.importDocumentHint': 'Import .docx or .pdf files (max. 10MB)',
+    'form.uploadFile': 'Upload File',
+    'form.uploadFileHint': 'Images, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)',
+    'form.uploading': 'Uploading...',
+    'form.mediaUrl': 'Media URL (or upload file)',
+    'form.mediaUrlPlaceholder': 'https://... or /uploads/originals/...',
+    'form.mediaUrlHint': 'YouTube/Vimeo URLs are automatically embedded as video',
+    'form.offlineDownload': 'Make video available offline',
+    'form.offlineDownloadHint': 'Automatically downloads the video for better performance and offline use',
+    'form.displayDuration': 'Display Duration (Sec.)',
+    'form.priority': 'Priority (0-100)',
+    'form.blendEffect': 'Transition Effect',
+    'form.blendEffectNone': 'No Effect',
+    'form.blendEffectFade': 'Fade',
+    'form.blendEffectSlideLeft': 'Slide Left',
+    'form.blendEffectSlideRight': 'Slide Right',
+    'form.blendEffectSlideUp': 'Slide Up',
+    'form.blendEffectSlideDown': 'Slide Down',
+    'form.blendEffectZoomIn': 'Zoom In',
+    'form.blendEffectZoomOut': 'Zoom Out',
+    'form.blendEffectHint': 'Choose a transition effect to the next post',
+    'form.startDate': 'Start Date',
+    'form.endDate': 'End Date',
+    'form.backgroundMusicSection': 'Background Music (optional)',
+    'form.backgroundMusicHint': 'Only for text, image and HTML content. Videos use their original audio.',
+    'form.musicFile': 'Music File',
+    'form.musicVolume': 'Volume',
+    'form.currentMusic': 'Current Music',
+    'form.removeMusic': 'Remove',
+    'form.previewMusic': 'Preview',
+
+    // Content Types
+    'type.text': '📝 Text',
+    'type.image': '🖼️ Image',
+    'type.video': '🎥 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 PowerPoint Presentation',
+    'type.pdf': '📄 PDF Document',
+    'type.word': '📃 Word Document',
+
+    // Buttons
+    'btn.save': 'Save',
+    'btn.cancel': 'Cancel',
+    'btn.newPost': '+ New Post',
+    'btn.deleteAll': '🗑️ Delete All',
+    'btn.savePost': 'Save Post',
+    'btn.saveCategory': 'Create Category',
+    'btn.saveUser': 'Save User',
+    'btn.changePassword': 'Change Password',
+    'btn.newCategory': '+ New Category',
+    'btn.newUser': '+ New User',
+
+    // Category Form
+    'category.name': 'Name *',
+    'category.color': 'Color',
+    'category.icon': 'Icon',
+    'category.description': 'Description',
+    'category.descriptionPlaceholder': 'Optional description...',
   },
 
   it: {
@@ -405,11 +569,14 @@ const translations = {
     'posts.immediately': 'Immediatamente',
     'posts.unlimited': 'Illimitato',
     'posts.confirmDelete': 'Eliminare davvero questo articolo?',
-    'posts.backgroundMusic': 'Musica di sottofondo',
-    'posts.musicUrl': 'URL musica (opzionale)',
+    'posts.backgroundMusic': 'Musica di sottofondo (opzionale)',
+    'posts.backgroundMusicHint':
+      'Solo per testo, immagini e contenuto HTML. I video usano il loro audio originale.',
+    'posts.musicFile': 'File Musicale',
     'posts.musicVolume': 'Volume',
-    'posts.musicHint': 'Solo per post di testo, immagini e HTML (non per video)',
-    'posts.uploadMusic': 'Carica musica',
+    'posts.currentMusic': 'Musica Corrente',
+    'posts.removeMusic': 'Rimuovi',
+    'posts.previewMusic': 'Anteprima',
 
     // Media
     'media.title': 'Media',
@@ -506,6 +673,21 @@ const translations = {
     'ldap.editorGroup': 'Gruppo Editor',
     'ldap.tlsReject': 'Rifiuta certificati autofirmati',
 
+    // System Mode
+    'systemMode.title': 'Modalità Sistema',
+    'systemMode.description': 'Passa tra Modalità Normale (connessione di rete) e Modalità Hotspot (funzionamento offline).',
+    'systemMode.loading': 'Caricamento stato...',
+    'systemMode.switch': 'Cambia Modalità',
+    'systemMode.normal.title': 'Modalità Normale',
+    'systemMode.normal.feature1': 'Connessione alla rete esistente',
+    'systemMode.normal.feature2': 'Accesso Internet richiesto',
+    'systemMode.normal.feature3': 'URL server esterno utilizzabile',
+    'systemMode.hotspot.title': 'Modalità Hotspot',
+    'systemMode.hotspot.feature1': 'Raspberry Pi crea hotspot WiFi',
+    'systemMode.hotspot.ssid': 'SSID',
+    'systemMode.hotspot.password': 'Password',
+    'systemMode.hotspot.ip': 'IP',
+
     // Hints
     'hint.dragDropPosts':
       "→ Suggerimento: Trascina e rilascia gli articoli per modificare l'ordine di visualizzazione",
@@ -526,6 +708,73 @@ const translations = {
     'validation.invalidNumber': 'deve essere un numero',
     'validation.positiveNumber': 'deve essere un numero positivo',
     'validation.invalidDate': 'Data non valida',
+
+    // Form Labels (Dashboard)
+    'form.title': 'Titolo *',
+    'form.type': 'Tipo *',
+    'form.category': 'Categoria',
+    'form.noCategory': '-- Nessuna Categoria --',
+    'form.content': 'Contenuto',
+    'form.uploadContent': 'Carica Contenuto',
+    'form.importDocument': 'Importa Word/PDF',
+    'form.importDocumentHint': 'Importa file .docx o .pdf (max. 10MB)',
+    'form.uploadFile': 'Carica File',
+    'form.uploadFileHint': 'Immagini, Video, Audio, PDF, Word, PowerPoint (max. 100MB)',
+    'form.uploading': 'Caricamento in corso...',
+    'form.mediaUrl': 'URL Media (o carica file)',
+    'form.mediaUrlPlaceholder': 'https://... o /uploads/originals/...',
+    'form.mediaUrlHint': 'Gli URL di YouTube/Vimeo vengono incorporati automaticamente come video',
+    'form.offlineDownload': 'Rendi video disponibile offline',
+    'form.offlineDownloadHint': 'Scarica automaticamente il video per migliori prestazioni e uso offline',
+    'form.displayDuration': 'Durata Visualizzazione (Sec.)',
+    'form.priority': 'Priorità (0-100)',
+    'form.blendEffect': 'Effetto di Transizione',
+    'form.blendEffectNone': 'Nessun Effetto',
+    'form.blendEffectFade': 'Dissolvenza',
+    'form.blendEffectSlideLeft': 'Scorri a Sinistra',
+    'form.blendEffectSlideRight': 'Scorri a Destra',
+    'form.blendEffectSlideUp': 'Scorri in Alto',
+    'form.blendEffectSlideDown': 'Scorri in Basso',
+    'form.blendEffectZoomIn': 'Zoom Avanti',
+    'form.blendEffectZoomOut': 'Zoom Indietro',
+    'form.blendEffectHint': 'Scegli un effetto di transizione al prossimo articolo',
+    'form.startDate': 'Data Inizio',
+    'form.endDate': 'Data Fine',
+    'form.backgroundMusicSection': 'Musica di Sottofondo (opzionale)',
+    'form.backgroundMusicHint': 'Solo per testo, immagini e contenuto HTML. I video usano il loro audio originale.',
+    'form.musicFile': 'File Musicale',
+    'form.musicVolume': 'Volume',
+    'form.currentMusic': 'Musica Corrente',
+    'form.removeMusic': 'Rimuovi',
+    'form.previewMusic': 'Anteprima',
+
+    // Content Types
+    'type.text': '📝 Testo',
+    'type.image': '🖼️ Immagine',
+    'type.video': '🎥 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 Presentazione PowerPoint',
+    'type.pdf': '📄 Documento PDF',
+    'type.word': '📃 Documento Word',
+
+    // Buttons
+    'btn.save': 'Salva',
+    'btn.cancel': 'Annulla',
+    'btn.newPost': '+ Nuovo Articolo',
+    'btn.deleteAll': '🗑️ Elimina Tutti',
+    'btn.savePost': 'Salva Articolo',
+    'btn.saveCategory': 'Crea Categoria',
+    'btn.saveUser': 'Salva Utente',
+    'btn.changePassword': 'Cambia Password',
+    'btn.newCategory': '+ Nuova Categoria',
+    'btn.newUser': '+ Nuovo Utente',
+
+    // Category Form
+    'category.name': 'Nome *',
+    'category.color': 'Colore',
+    'category.icon': 'Icona',
+    'category.description': 'Descrizione',
+    'category.descriptionPlaceholder': 'Descrizione opzionale...',
   },
 };
 
@@ -545,11 +794,42 @@ function t(key, params = {}) {
   return text;
 }
 
+// Translate all elements with data-translate attribute
+function translatePage() {
+  // Translate text content
+  document.querySelectorAll('[data-translate]').forEach((el) => {
+    const key = el.getAttribute('data-translate');
+    const translated = t(key);
+    if (translated !== key) {
+      el.textContent = translated;
+    }
+  });
+
+  // Translate placeholders
+  document.querySelectorAll('[data-translate-placeholder]').forEach((el) => {
+    const key = el.getAttribute('data-translate-placeholder');
+    const translated = t(key);
+    if (translated !== key) {
+      el.placeholder = translated;
+    }
+  });
+
+  // Translate options with data-translate-value
+  document.querySelectorAll('option[data-translate]').forEach((el) => {
+    const key = el.getAttribute('data-translate');
+    const translated = t(key);
+    if (translated !== key) {
+      el.textContent = translated;
+    }
+  });
+}
+
 // Change language
 function changeLanguage(lang) {
   if (translations[lang]) {
     currentLanguage = lang;
     localStorage.setItem('appLanguage', lang);
+    translatePage();
     applyTranslations();
     showNotification(getLanguageChangedMessage(lang), 'success');
   }
@@ -943,17 +1223,20 @@ async function apiRequest(endpoint, options = {}) {
     if (!response.ok) {
       // Token abgelaufen - versuche Refresh
       if (response.status === 401 && endpoint !== '/auth/refresh') {
+        console.log('🔄 Token expired, attempting refresh...');
         const refreshed = await refreshToken();
         if (refreshed) {
           // Wiederhole Request mit neuem Token
+          console.log('✅ Token refreshed successfully, retrying request...');
           return apiRequest(endpoint, options);
         } else {
           // Refresh fehlgeschlagen - Logout
+          console.error('❌ Token refresh failed, logging out...');
           logout();
           return null;
         }
       }
-      throw new Error(data.error?.message || `HTTP ${response.status}`);
+      throw new Error(data.error?.message || data.message || `HTTP ${response.status}`);
     }
 
     return data;
@@ -965,16 +1248,23 @@ async function apiRequest(endpoint, options = {}) {
 
 async function refreshToken() {
   const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) return false;
+  if (!refreshToken) {
+    console.warn('⚠️ No refresh token available');
+    return false;
+  }
 
   try {
+    console.log('🔄 Attempting to refresh access token...');
     const response = await fetch(`${API_BASE}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
     });
 
-    if (!response.ok) return false;
+    if (!response.ok) {
+      console.error('❌ Token refresh failed:', response.status);
+      return false;
+    }
 
     const data = await response.json();
     if (data.data?.accessToken) {
@@ -982,10 +1272,13 @@ async function refreshToken() {
       if (data.data.refreshToken) {
         localStorage.setItem('refreshToken', data.data.refreshToken);
       }
+      console.log('✅ Access token refreshed successfully');
       return true;
     }
+    console.warn('⚠️ Token refresh response missing accessToken');
     return false;
-  } catch {
+  } catch (error) {
+    console.error('❌ Token refresh error:', error);
     return false;
   }
 }
@@ -1075,6 +1368,7 @@ function navigateTo(section) {
       categories: 'Kategorien',
       users: 'Benutzer',
       media: 'Medien',
+      livedata: 'Live-Daten',
       settings: 'Einstellungen',
     };
     document.getElementById('page-title').textContent = titles[section] || section;
@@ -1082,8 +1376,10 @@ function navigateTo(section) {
     // Daten laden bei Navigation
     if (section === 'posts') loadPosts();
     if (section === 'categories') loadCategories();
+    if (section === 'displays') loadDisplays();
     if (section === 'users') loadUsers();
     if (section === 'dashboard') updateDashboardStats();
+    if (section === 'livedata') loadLiveDataSettings();
     if (section === 'settings') {
       if (!ssoConfigLoaded) loadSSOConfiguration();
       loadSystemMode(); // Lade System-Modus Einstellungen
@@ -1099,6 +1395,7 @@ async function updateDashboardStats() {
     // Verwende bereits geladene Daten aus dem Cache statt erneut zu laden
     const posts = postsCache || [];
     const categories = categoriesCache || [];
+    const displays = displaysCache || [];
 
     const activePosts = posts.filter((p) => p.isActive !== false).length;
     const scheduledPosts = posts.filter(
@@ -1108,6 +1405,7 @@ async function updateDashboardStats() {
     document.getElementById('active-posts').textContent = activePosts;
     document.getElementById('scheduled-posts').textContent = scheduledPosts;
     document.getElementById('total-categories').textContent = categories.length;
+    document.getElementById('total-displays').textContent = displays.length;
     document.getElementById('total-media').textContent = '0'; // TODO: Media API
   } catch (error) {
     console.error('Dashboard Stats Fehler:', error);
@@ -1115,6 +1413,7 @@ async function updateDashboardStats() {
     document.getElementById('active-posts').textContent = '0';
     document.getElementById('scheduled-posts').textContent = '0';
     document.getElementById('total-categories').textContent = '0';
+    document.getElementById('total-displays').textContent = '0';
     document.getElementById('total-media').textContent = '0';
   }
 }
@@ -1158,15 +1457,20 @@ async function loadPosts() {
 
           return `
         <div class="list-item draggable-post" draggable="true" data-post-id="${post.id}" data-index="${index}">
-            <label class="post-checkbox-wrapper" onclick="event.stopPropagation();">
-              <input type="checkbox" class="post-checkbox" data-post-id="${post.id}" style="width: 18px; height: 18px; cursor: pointer;">
-            </label>
             <div class="drag-handle" title="Ziehen zum Sortieren">⋮⋮</div>
             <div class="list-item-content clickable" data-action="edit" data-post-id="${post.id}" title="Klicken zum Bearbeiten">
                 <h3>${escapeHtml(post.title)}</h3>
                 <p>Typ: ${post.contentType} | Dauer: ${post.duration || 10}s | Priorität: ${post.priority || 0} | Status: ${post.isActive !== false ? t('common.active') : t('common.inactive')}</p>
                 <p style="font-size: 12px; color: #666;">▸ Zeitraum: ${zeitraum}</p>
-                ${post.category ? `<span style="background: ${post.category.color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${post.category.icon || ''} ${post.category.name}</span>` : ''}
+                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  ${post.category ? `<span style="background: ${post.category.color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${post.category.icon || ''} ${post.category.name}</span>` : ''}
+                  ${post.displayMode === 'all' 
+                    ? '<span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">📺 Alle Displays</span>' 
+                    : post.displays && post.displays.length > 0
+                      ? post.displays.map(d => `<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">📺 ${escapeHtml(d.name)}</span>`).join('')
+                      : '<span style="background: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">⚠ Keine Displays</span>'
+                  }
+                </div>
             </div>
             <div class="list-item-actions">
                 <button class="btn btn-secondary" data-action="edit" data-post-id="${post.id}">${t('common.edit')}</button>
@@ -1179,9 +1483,6 @@ async function loadPosts() {
 
     // Drag & Drop Event Listeners initialisieren
     initDragAndDrop();
-    
-    // Bulk Selection Event Listeners initialisieren
-    initBulkSelection();
   } catch (error) {
     postsList.innerHTML = `<p style="text-align:center; color: #dc3545;">Fehler beim Laden: ${error.message}</p>`;
   }
@@ -1295,201 +1596,16 @@ async function saveNewOrder() {
   }
 }
 
-// ============================================
-// Bulk Selection Funktionalität
-// ============================================
-let selectedPostIds = new Set();
-
-function initBulkSelection() {
-  const postCheckboxes = document.querySelectorAll('.post-checkbox');
-  const selectAllCheckbox = document.getElementById('select-all-posts');
-  
-  // Event listener für einzelne Checkboxen
-  postCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', handlePostCheckboxChange);
-  });
-  
-  // Event listener für "Alle auswählen"
-  if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener('change', handleSelectAllChange);
-  }
-  
-  // Event listeners für Bulk-Action Buttons
-  document.getElementById('bulk-activate-btn')?.addEventListener('click', handleBulkActivate);
-  document.getElementById('bulk-deactivate-btn')?.addEventListener('click', handleBulkDeactivate);
-  document.getElementById('bulk-delete-btn')?.addEventListener('click', handleBulkDelete);
-  
-  updateBulkActionsBar();
-}
-
-function handlePostCheckboxChange(e) {
-  const postId = parseInt(e.target.dataset.postId);
-  const listItem = e.target.closest('.list-item');
-  
-  if (e.target.checked) {
-    selectedPostIds.add(postId);
-    listItem?.classList.add('selected');
-  } else {
-    selectedPostIds.delete(postId);
-    listItem?.classList.remove('selected');
-  }
-  
-  updateBulkActionsBar();
-  updateSelectAllCheckbox();
-}
-
-function handleSelectAllChange(e) {
-  const postCheckboxes = document.querySelectorAll('.post-checkbox');
-  
-  if (e.target.checked) {
-    // Alle auswählen
-    postCheckboxes.forEach(checkbox => {
-      checkbox.checked = true;
-      const postId = parseInt(checkbox.dataset.postId);
-      selectedPostIds.add(postId);
-      checkbox.closest('.list-item')?.classList.add('selected');
-    });
-  } else {
-    // Alle abwählen
-    postCheckboxes.forEach(checkbox => {
-      checkbox.checked = false;
-      const postId = parseInt(checkbox.dataset.postId);
-      selectedPostIds.delete(postId);
-      checkbox.closest('.list-item')?.classList.remove('selected');
-    });
-  }
-  
-  updateBulkActionsBar();
-}
-
-function updateSelectAllCheckbox() {
-  const selectAllCheckbox = document.getElementById('select-all-posts');
-  const postCheckboxes = document.querySelectorAll('.post-checkbox');
-  
-  if (selectAllCheckbox && postCheckboxes.length > 0) {
-    const allChecked = Array.from(postCheckboxes).every(cb => cb.checked);
-    const someChecked = Array.from(postCheckboxes).some(cb => cb.checked);
-    
-    selectAllCheckbox.checked = allChecked;
-    selectAllCheckbox.indeterminate = !allChecked && someChecked;
-  }
-}
-
-function updateBulkActionsBar() {
-  const bulkActionsBar = document.getElementById('bulk-actions-bar');
-  const selectedCount = document.getElementById('selected-count');
-  const bulkActivateBtn = document.getElementById('bulk-activate-btn');
-  const bulkDeactivateBtn = document.getElementById('bulk-deactivate-btn');
-  const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
-  
-  const count = selectedPostIds.size;
-  
-  if (count > 0) {
-    bulkActionsBar.style.display = 'block';
-    selectedCount.textContent = `${count} ausgewählt`;
-    bulkActivateBtn.disabled = false;
-    bulkDeactivateBtn.disabled = false;
-    bulkDeleteBtn.disabled = false;
-  } else {
-    bulkActionsBar.style.display = 'none';
-    bulkActivateBtn.disabled = true;
-    bulkDeactivateBtn.disabled = true;
-    bulkDeleteBtn.disabled = true;
-  }
-}
-
-async function handleBulkActivate() {
-  if (selectedPostIds.size === 0) return;
-  
-  const btn = document.getElementById('bulk-activate-btn');
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Aktiviere...';
-  
-  try {
-    const ids = Array.from(selectedPostIds);
-    await Promise.all(ids.map(id => 
-      apiRequest(`/posts/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ isActive: true })
-      })
-    ));
-    
-    showNotification(`✅ ${ids.length} Beiträge aktiviert`, 'success');
-    selectedPostIds.clear();
-    await loadPosts();
-  } catch (error) {
-    showNotification('❌ Fehler beim Aktivieren: ' + error.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function handleBulkDeactivate() {
-  if (selectedPostIds.size === 0) return;
-  
-  const btn = document.getElementById('bulk-deactivate-btn');
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Deaktiviere...';
-  
-  try {
-    const ids = Array.from(selectedPostIds);
-    await Promise.all(ids.map(id => 
-      apiRequest(`/posts/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ isActive: false })
-      })
-    ));
-    
-    showNotification(`✅ ${ids.length} Beiträge deaktiviert`, 'success');
-    selectedPostIds.clear();
-    await loadPosts();
-  } catch (error) {
-    showNotification('❌ Fehler beim Deaktivieren: ' + error.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
-async function handleBulkDelete() {
-  if (selectedPostIds.size === 0) return;
-  
-  const count = selectedPostIds.size;
-  if (!confirm(`⚠️ Möchten Sie wirklich ${count} Beiträge löschen?`)) {
-    return;
-  }
-  
-  const btn = document.getElementById('bulk-delete-btn');
-  const originalText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '⏳ Lösche...';
-  
-  try {
-    const ids = Array.from(selectedPostIds);
-    await Promise.all(ids.map(id => 
-      apiRequest(`/posts/${id}`, {
-        method: 'DELETE'
-      })
-    ));
-    
-    showNotification(`✅ ${count} Beiträge gelöscht`, 'success');
-    selectedPostIds.clear();
-    await loadPosts();
-  } catch (error) {
-    showNotification('❌ Fehler beim Löschen: ' + error.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-}
-
 async function showPostForm() {
   document.getElementById('post-form').style.display = 'block';
   currentPostId = null;
   document.getElementById('postForm').reset();
+
+  // Standard-Checkboxen setzen (nur für NEUE Posts!)
+  const isActiveCheckbox = document.getElementById('is-active');
+  const showTitleCheckbox = document.getElementById('show-title');
+  if (isActiveCheckbox) isActiveCheckbox.checked = true;
+  if (showTitleCheckbox) showTitleCheckbox.checked = true;
 
   // Standard-Startdatum auf jetzt setzen
   const now = new Date();
@@ -1502,7 +1618,12 @@ async function showPostForm() {
   const endDateTime = endDate.toISOString().slice(0, 16);
   document.getElementById('end-date').value = endDateTime;
 
+  // Display-Auswahl auf "alle" zurücksetzen
+  document.getElementById('display-mode-all').checked = true;
+  document.getElementById('display-selection-container').style.display = 'none';
+
   await loadCategoryDropdown();
+  await loadDisplayCheckboxes();
 }
 
 async function loadCategoryDropdown() {
@@ -1524,6 +1645,139 @@ async function loadCategoryDropdown() {
     });
   } catch (error) {
     categorySelect.innerHTML = '<option value="">-- Fehler beim Laden --</option>';
+  }
+}
+
+async function loadDisplayCheckboxes(selectedDisplayIds = []) {
+  const container = document.getElementById('displays-checkboxes');
+  if (!container) return;
+
+  container.innerHTML = '<p style="color: #6c757d; text-align: center;">Lade Displays...</p>';
+
+  try {
+    // Verwende Cache falls vorhanden, sonst lade neu
+    let displays = displaysCache;
+    if (!displays || displays.length === 0) {
+      const response = await apiRequest('/displays');
+      displays = response?.data || [];
+      displaysCache = displays;
+    }
+
+    if (displays.length === 0) {
+      container.innerHTML = '<p style="color: #dc3545; text-align: center; font-size: 0.9em;">Keine Displays verfügbar. Erstellen Sie zuerst Displays in der Display-Verwaltung.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <style>
+        .display-checkbox-card {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.875rem;
+          margin-bottom: 0.5rem;
+          cursor: pointer;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          background: white;
+          transition: all 0.2s ease;
+        }
+        
+        .display-checkbox-card:hover:not(.disabled) {
+          border-color: #007bff;
+          background: #f8f9ff;
+          box-shadow: 0 2px 6px rgba(0,123,255,0.1);
+          transform: translateY(-1px);
+        }
+        
+        .display-checkbox-card.checked {
+          border-color: #28a745;
+          background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+          box-shadow: 0 2px 8px rgba(40,167,69,0.15);
+        }
+        
+        .display-checkbox-card.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: #f5f5f5;
+        }
+        
+        .display-checkbox-card input[type="checkbox"] {
+          width: 20px;
+          height: 20px;
+          cursor: pointer;
+          accent-color: #28a745;
+          flex-shrink: 0;
+        }
+        
+        .display-checkbox-card.disabled input[type="checkbox"] {
+          cursor: not-allowed;
+        }
+        
+        .display-checkbox-info {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        
+        .display-status-icon {
+          font-size: 0.75rem;
+          flex-shrink: 0;
+        }
+        
+        .display-name {
+          font-weight: 500;
+          color: #333;
+        }
+        
+        .display-checkbox-card.disabled .display-name {
+          color: #6c757d;
+        }
+        
+        .display-status-badge {
+          margin-left: auto;
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+          border-radius: 4px;
+          font-weight: 500;
+          flex-shrink: 0;
+        }
+        
+        .status-active {
+          background: #d4edda;
+          color: #155724;
+        }
+        
+        .status-inactive {
+          background: #f8d7da;
+          color: #721c24;
+        }
+      </style>
+    ` + displays
+      .map(
+        (display) => `
+        <label class="display-checkbox-card ${!display.isActive ? 'disabled' : ''} ${selectedDisplayIds.includes(display.id) ? 'checked' : ''}" 
+               data-display-id="${display.id}">
+          <input type="checkbox" 
+                 name="display_ids" 
+                 value="${display.id}" 
+                 ${selectedDisplayIds.includes(display.id) ? 'checked' : ''}
+                 ${!display.isActive ? 'disabled' : ''}
+                 onchange="this.closest('.display-checkbox-card').classList.toggle('checked', this.checked)" />
+          <div class="display-checkbox-info">
+            <span class="display-status-icon">${display.isActive ? '🟢' : '🔴'}</span>
+            <span class="display-name">${escapeHtml(display.name)}</span>
+            <span class="display-status-badge ${display.isActive ? 'status-active' : 'status-inactive'}">
+              ${display.isActive ? '● Aktiv' : '○ Inaktiv'}
+            </span>
+          </div>
+        </label>
+      `
+      )
+      .join('');
+  } catch (error) {
+    container.innerHTML = `<p style="color: #dc3545; text-align: center;">Fehler beim Laden: ${error.message}</p>`;
   }
 }
 
@@ -1573,6 +1827,20 @@ async function editPost(id) {
   document.getElementById('post-type').value = post.contentType || 'text';
   document.getElementById('post-content').value = post.content || '';
 
+  // Display-Auswahl laden und setzen
+  const displayMode = post.displayMode || 'all';
+  document.getElementById(`display-mode-${displayMode}`).checked = true;
+  
+  // Display-Auswahl-Container ein/ausblenden
+  const displayContainer = document.getElementById('display-selection-container');
+  if (displayContainer) {
+    displayContainer.style.display = displayMode === 'specific' ? 'block' : 'none';
+  }
+
+  // Lade Display-Checkboxen mit zugewiesenen Displays
+  const assignedDisplayIds = post.displays?.map(d => d.id) || [];
+  await loadDisplayCheckboxes(assignedDisplayIds);
+
   // Medien-URL: Prüfe verschiedene Quellen (Media-Objekt, content bei Video/Bild-URLs)
   let mediaUrl = '';
   if (post.media?.url) {
@@ -1610,7 +1878,11 @@ async function editPost(id) {
   }
 
   document.querySelector('input[name="is_active"]').checked = post.isActive !== false;
-  document.querySelector('input[name="show_title"]').checked = post.showTitle === true;
+  
+  const showTitleCheckbox = document.querySelector('input[name="show_title"]');
+  if (showTitleCheckbox) {
+    showTitleCheckbox.checked = post.showTitle === true;
+  }
 
   const categorySelect = document.getElementById('post-category');
   if (categorySelect && post.category) {
@@ -1745,6 +2017,11 @@ function initGlobalMusicSettings() {
     muteVideosCheckbox.checked = savedSettings.muteVideos !== false; // Default true
   }
 
+  const prioritySelect = document.getElementById('global-music-priority');
+  if (prioritySelect) {
+    prioritySelect.value = savedSettings.priority || 'global'; // Default: global hat Vorrang
+  }
+
   // Musik-Datei Upload
   let uploadedMusicUrl = null;
   if (musicFileInput) {
@@ -1784,6 +2061,7 @@ function initGlobalMusicSettings() {
         url: uploadedMusicUrl || urlInput?.value || '',
         volume: parseInt(volumeSlider?.value) || 30,
         muteVideos: muteVideosCheckbox?.checked !== false,
+        priority: prioritySelect?.value || 'global',
       };
       localStorage.setItem('globalMusicSettings', JSON.stringify(settings));
       showNotification('Globale Musik-Einstellungen gespeichert!', 'success');
@@ -1851,6 +2129,30 @@ function updateUploadSectionVisibility(contentType) {
     if (fileUploadSection) fileUploadSection.style.display = 'block';
     if (mediaUrlSection) mediaUrlSection.style.display = 'block';
   }
+  
+  // Bei Video-Typ: Offline-Download-Option initial verstecken
+  updateOfflineDownloadVisibility();
+}
+
+// Zeige/Verstecke Offline-Download-Option basierend auf URL
+function updateOfflineDownloadVisibility() {
+  const mediaUrlInput = document.getElementById('media-url');
+  const offlineSection = document.getElementById('offline-download-section');
+  const contentType = document.getElementById('post-type')?.value;
+  
+  if (!mediaUrlInput || !offlineSection || contentType !== 'video') {
+    if (offlineSection) offlineSection.style.display = 'none';
+    return;
+  }
+  
+  const url = mediaUrlInput.value.trim();
+  const isExternalVideo = url && (
+    url.includes('youtube.com') || 
+    url.includes('youtu.be') || 
+    url.includes('vimeo.com')
+  );
+  
+  offlineSection.style.display = isExternalVideo ? 'block' : 'none';
 }
 
 // Event-Listener für Hintergrundmusik-Steuerung initialisieren
@@ -2016,6 +2318,18 @@ async function handlePostFormSubmit(e) {
     }
   }
 
+  const showTitleCheckbox = document.getElementById('show-title');
+  const showTitleValue = showTitleCheckbox?.checked ?? true;
+
+  // Display-Auswahl sammeln
+  const displayMode = document.querySelector('input[name=\"display_mode\"]:checked')?.value || 'all';
+  const displayIds = [];
+  if (displayMode === 'specific') {
+    document.querySelectorAll('input[name=\"display_ids\"]:checked').forEach(checkbox => {
+      displayIds.push(parseInt(checkbox.value));
+    });
+  }
+
   const postData = {
     title: formData.get('title'),
     contentType: contentType,
@@ -2025,11 +2339,13 @@ async function handlePostFormSubmit(e) {
     priority: parseInt(formData.get('priority')) || 0,
     startDate: formData.get('start_date') || null,
     endDate: formData.get('end_date') || null,
-    isActive: formData.get('is_active') === 'on',
-    showTitle: formData.get('show_title') === 'on',
+    isActive: document.getElementById('is-active')?.checked ?? true,
+    showTitle: showTitleValue,
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
     blendEffect: formData.get('blend_effect') || null,
+    displayMode: displayMode,
+    displayIds: displayIds,
   };
 
   if (mediaId) {
@@ -2051,6 +2367,29 @@ async function handlePostFormSubmit(e) {
         body: JSON.stringify(postData),
       });
       
+      // Prüfe ob Video offline verfügbar gemacht werden soll
+      const downloadOfflineCheckbox = document.getElementById('download-video-offline');
+      if (downloadOfflineCheckbox && downloadOfflineCheckbox.checked && 
+          contentType === 'video' && mediaUrl && 
+          (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be') || mediaUrl.includes('vimeo.com'))) {
+        
+        const postId = Array.isArray(result.data) ? result.data[0]?.id : result.data?.id;
+        if (postId) {
+          showNotification('Beitrag erstellt! Video-Download wird gestartet...', 'info');
+          
+          // Triggere Video-Download im Hintergrund
+          try {
+            await apiRequest(`/posts/${postId}/download-video`, {
+              method: 'POST'
+            });
+            showNotification('Video wird heruntergeladen und ist bald offline verfügbar!', 'success');
+          } catch (downloadError) {
+            console.error('Video-Download Fehler:', downloadError);
+            showNotification('Beitrag erstellt, aber Video-Download fehlgeschlagen: ' + downloadError.message, 'warning');
+          }
+        }
+      }
+      
       // Bei PPT: Zeige Anzahl der erstellten Slides
       if (presentationId && result.data && Array.isArray(result.data)) {
         showNotification(`Präsentation erfolgreich erstellt! ${result.data.length} Slides wurden als separate Beiträge hinzugefügt.`, 'success');
@@ -2063,7 +2402,9 @@ async function handlePostFormSubmit(e) {
     await loadPosts();
     await updateDashboardStats();
   } catch (error) {
+    console.error('Fehler beim Speichern:', error);
     showNotification('Fehler beim Speichern: ' + error.message, 'error');
+    // Formular bleibt bei Fehler offen, damit Nutzer Änderungen vornehmen kann
   }
 }
 
@@ -2391,6 +2732,155 @@ async function handleCategoryFormSubmit(e) {
 
     hideCategoryForm();
     await loadCategories();
+    await updateDashboardStats();
+  } catch (error) {
+    showNotification('Fehler beim Speichern: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// Display Management
+// ============================================
+let displaysCache = [];
+let currentDisplayId = null;
+
+async function loadDisplays() {
+  const displaysList = document.getElementById('displays-list');
+  displaysList.innerHTML = '<p style="text-align:center; color: #6c757d;">Lade Displays...</p>';
+
+  try {
+    const response = await apiRequest('/displays');
+    displaysCache = response?.data || [];
+
+    if (displaysCache.length === 0) {
+      displaysList.innerHTML =
+        '<p style="text-align:center; color: #6c757d;">Noch keine Displays registriert. Erstellen Sie das erste Display!</p>';
+      return;
+    }
+
+    displaysList.innerHTML = displaysCache
+      .map(
+        (display) => `
+        <div class="list-item" data-display-id="${display.id}">
+            <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Klicken zum Bearbeiten">
+                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}</h3>
+                <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">🔗 ${escapeHtml(display.identifier)}</p>
+                ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
+                <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
+                  📺 Display-URL: <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                </p>
+            </div>
+            <div class="list-item-actions">
+                <button class="btn btn-secondary btn-sm" onclick="window.open('/public/display.html?id=${escapeHtml(display.identifier)}', '_blank')" title="Display öffnen">
+                  ▷ Öffnen
+                </button>
+                <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">Bearbeiten</button>
+                <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">Löschen</button>
+            </div>
+        </div>
+      `
+      )
+      .join('');
+  } catch (error) {
+    displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">Fehler beim Laden: ${error.message}</p>`;
+  }
+}
+
+function showDisplayForm() {
+  currentDisplayId = null;
+  document.getElementById('display-form').style.display = 'block';
+
+  // Formular-Titel aktualisieren
+  const formTitle = document.querySelector('#display-form h2');
+  if (formTitle) formTitle.textContent = '+ Neues Display';
+
+  // Submit-Button aktualisieren
+  const submitBtn = document.querySelector('#displayForm button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Display erstellen';
+}
+
+function hideDisplayForm() {
+  document.getElementById('display-form').style.display = 'none';
+  document.getElementById('displayForm').reset();
+  currentDisplayId = null;
+}
+
+async function editDisplay(id) {
+  // Finde Display im Cache
+  const display = displaysCache.find((d) => d.id === parseInt(id));
+  if (!display) {
+    showNotification('Display nicht gefunden', 'error');
+    return;
+  }
+
+  currentDisplayId = id;
+
+  // Formular anzeigen
+  document.getElementById('display-form').style.display = 'block';
+
+  // Formular-Titel aktualisieren
+  const formTitle = document.querySelector('#display-form h2');
+  if (formTitle) formTitle.textContent = 'Display bearbeiten';
+
+  // Submit-Button aktualisieren
+  const submitBtn = document.querySelector('#displayForm button[type="submit"]');
+  if (submitBtn) submitBtn.textContent = 'Änderungen speichern';
+
+  // Formular-Felder füllen
+  document.getElementById('display-name').value = display.name || '';
+  document.getElementById('display-identifier').value = display.identifier || '';
+  document.getElementById('display-description').value = display.description || '';
+  document.getElementById('display-isActive').checked = display.isActive !== false;
+
+  // Scrolle zum Formular
+  document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deleteDisplay(id) {
+  if (!confirm('Display wirklich löschen? Zugewiesene Beiträge werden nicht gelöscht.')) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/displays/${id}`, { method: 'DELETE' });
+    await loadDisplays();
+    await updateDashboardStats();
+    showNotification('Display erfolgreich gelöscht!', 'success');
+  } catch (error) {
+    showNotification('Fehler beim Löschen: ' + error.message, 'error');
+  }
+}
+
+async function handleDisplayFormSubmit(e) {
+  e.preventDefault();
+
+  const formData = new FormData(e.target);
+  const displayData = {
+    name: formData.get('name'),
+    identifier: formData.get('identifier'),
+    description: formData.get('description') || '',
+    isActive: document.getElementById('display-isActive').checked,
+  };
+
+  try {
+    if (currentDisplayId) {
+      // Update
+      await apiRequest(`/displays/${currentDisplayId}`, {
+        method: 'PUT',
+        body: JSON.stringify(displayData),
+      });
+      showNotification('Display erfolgreich aktualisiert!', 'success');
+    } else {
+      // Create
+      await apiRequest('/displays', {
+        method: 'POST',
+        body: JSON.stringify(displayData),
+      });
+      showNotification('Display erfolgreich erstellt!', 'success');
+    }
+
+    hideDisplayForm();
+    await loadDisplays();
     await updateDashboardStats();
   } catch (error) {
     showNotification('Fehler beim Speichern: ' + error.message, 'error');
@@ -3296,10 +3786,22 @@ window.addEventListener('load', async () => {
   if (postForm) {
     postForm.addEventListener('submit', handlePostFormSubmit);
   }
+  
+  // Media-URL Input: Zeige Offline-Download Option für externe Videos
+  const mediaUrlInput = document.getElementById('media-url');
+  if (mediaUrlInput) {
+    mediaUrlInput.addEventListener('input', updateOfflineDownloadVisibility);
+    mediaUrlInput.addEventListener('blur', updateOfflineDownloadVisibility);
+  }
 
   const categoryForm = document.getElementById('categoryForm');
   if (categoryForm) {
     categoryForm.addEventListener('submit', handleCategoryFormSubmit);
+  }
+
+  const displayForm = document.getElementById('displayForm');
+  if (displayForm) {
+    displayForm.addEventListener('submit', handleDisplayFormSubmit);
   }
 
   const userForm = document.getElementById('userForm');
@@ -3313,6 +3815,8 @@ window.addEventListener('load', async () => {
   const hidePostFormBtn = document.getElementById('hidePostFormBtn');
   const showCategoryFormBtn = document.getElementById('showCategoryFormBtn');
   const hideCategoryFormBtn = document.getElementById('hideCategoryFormBtn');
+  const showDisplayFormBtn = document.getElementById('showDisplayFormBtn');
+  const hideDisplayFormBtn = document.getElementById('hideDisplayFormBtn');
   const showUserFormBtn = document.getElementById('showUserFormBtn');
   const hideUserFormBtn = document.getElementById('hideUserFormBtn');
   const openDisplayBtn = document.getElementById('openDisplayBtn');
@@ -3326,11 +3830,39 @@ window.addEventListener('load', async () => {
   if (hidePostFormBtn) {
     hidePostFormBtn.addEventListener('click', hidePostForm);
   }
+
+  // Display-Mode Radio-Buttons
+  const displayModeAll = document.getElementById('display-mode-all');
+  const displayModeSpecific = document.getElementById('display-mode-specific');
+  const displaySelectionContainer = document.getElementById('display-selection-container');
+
+  if (displayModeAll && displayModeSpecific && displaySelectionContainer) {
+    displayModeAll.addEventListener('change', () => {
+      if (displayModeAll.checked) {
+        displaySelectionContainer.style.display = 'none';
+      }
+    });
+
+    displayModeSpecific.addEventListener('change', async () => {
+      if (displayModeSpecific.checked) {
+        displaySelectionContainer.style.display = 'block';
+        // Displays laden wenn noch nicht geschehen
+        await loadDisplayCheckboxes();
+      }
+    });
+  }
+
   if (showCategoryFormBtn) {
     showCategoryFormBtn.addEventListener('click', showCategoryForm);
   }
   if (hideCategoryFormBtn) {
     hideCategoryFormBtn.addEventListener('click', hideCategoryForm);
+  }
+  if (showDisplayFormBtn) {
+    showDisplayFormBtn.addEventListener('click', showDisplayForm);
+  }
+  if (hideDisplayFormBtn) {
+    hideDisplayFormBtn.addEventListener('click', hideDisplayForm);
   }
   if (showUserFormBtn) {
     showUserFormBtn.addEventListener('click', showUserForm);
@@ -3339,56 +3871,18 @@ window.addEventListener('load', async () => {
     hideUserFormBtn.addEventListener('click', hideUserForm);
   }
   if (openDisplayBtn) {
-    openDisplayBtn.addEventListener('click', async () => {
-      if (confirm('Möchten Sie den Kiosk-Modus auf dem Raspberry Pi starten?')) {
-        try {
-          const response = await fetch('/api/kiosk/display', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          });
-
-          if (response.ok) {
-            showToast('Display-Modus gestartet', 'success');
-          } else {
-            const error = await response.json();
-            showToast(error.message || 'Fehler beim Starten des Display-Modus', 'error');
-          }
-        } catch (error) {
-          console.error('Error starting display mode:', error);
-          showToast('Fehler beim Starten des Display-Modus', 'error');
-        }
-      }
+    openDisplayBtn.addEventListener('click', () => {
+      // Öffne Display lokal im Browser
+      window.open('/public/display.html', '_blank');
     });
   }
 
-  // Vortragsmodus Button - Startet Kiosk-Modus auf Raspberry Pi
+  // Vortragsmodus Button - Öffnet Vortragsmodus im lokalen Browser
   const openPresentationBtn = document.getElementById('openPresentationBtn');
   if (openPresentationBtn) {
-    openPresentationBtn.addEventListener('click', async () => {
-      if (confirm('Möchten Sie den Kiosk-Modus auf dem Raspberry Pi im Präsentationsmodus starten?')) {
-        try {
-          const response = await fetch('/api/kiosk/presentation', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          });
-
-          if (response.ok) {
-            showToast('Präsentationsmodus gestartet', 'success');
-          } else {
-            const error = await response.json();
-            showToast(error.message || 'Fehler beim Starten des Präsentationsmodus', 'error');
-          }
-        } catch (error) {
-          console.error('Error starting presentation mode:', error);
-          showToast('Fehler beim Starten des Präsentationsmodus', 'error');
-        }
-      }
+    openPresentationBtn.addEventListener('click', () => {
+      // Öffne Display mit Vortragsmodus-Parameter in neuem Tab
+      window.open('/public/display.html?mode=presentation', '_blank');
     });
   }
 
@@ -3402,13 +3896,26 @@ window.addEventListener('load', async () => {
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
       const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
+      const transitionsExternalOnly = document.getElementById('transitions-external-only');
       
-      if (refreshInterval && defaultDuration && blendEffectsEnabled) {
-        const settings = {
-          'display.refreshInterval': parseInt(refreshInterval.value) || 5,
-          'display.defaultDuration': parseInt(defaultDuration.value) || 10,
-          'display.blendEffectsEnabled': blendEffectsEnabled.checked ? 'true' : 'false'
-        };
+      if (refreshInterval && defaultDuration && blendEffectsEnabled && transitionsExternalOnly) {
+        const settingsArray = [
+          { key: 'display.refreshInterval', value: parseInt(refreshInterval.value) || 5 },
+          { key: 'display.defaultDuration', value: parseInt(defaultDuration.value) || 10 },
+          { key: 'display.blendEffectsEnabled', value: blendEffectsEnabled.checked ? 'true' : 'false' },
+          { key: 'display.transitionsExternalOnly', value: transitionsExternalOnly.checked ? 'true' : 'false' }
+        ];
+        
+        console.log('💾 Speichere Display-Einstellungen (Array):', settingsArray);
+        
+        // Konvertiere zu normalem Objekt für API
+        const settings = {};
+        settingsArray.forEach(item => {
+          settings[item.key] = item.value;
+        });
+        
+        const requestBody = { settings };
+        console.log('📦 Request Body:', JSON.stringify(requestBody, null, 2));
         
         try {
           const response = await fetch('/api/settings/bulk', {
@@ -3417,23 +3924,30 @@ window.addEventListener('load', async () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
             },
-            body: JSON.stringify({ settings })
+            body: JSON.stringify(requestBody)
           });
 
+          console.log('📡 Response Status:', response.status, response.statusText);
+          
           if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('❌ Server-Fehler:', errorData);
             throw new Error('Fehler beim Speichern der Einstellungen');
           }
 
+          const result = await response.json();
+          console.log('✅ Erfolgreich gespeichert:', result);
+
           // Fallback zu localStorage für Kompatibilität
           localStorage.setItem('displaySettings', JSON.stringify({
-            refreshInterval: settings['display.refreshInterval'],
-            defaultDuration: settings['display.defaultDuration'],
-            blendEffectsEnabled: settings['display.blendEffectsEnabled']
+            refreshInterval: parseInt(refreshInterval.value) || 5,
+            defaultDuration: parseInt(defaultDuration.value) || 10,
+            blendEffectsEnabled: blendEffectsEnabled.checked ? 'true' : 'false'
           }));
 
           showNotification('Display-Einstellungen gespeichert!', 'success');
         } catch (error) {
-          console.error('Fehler beim Speichern:', error);
+          console.error('❌ Fehler beim Speichern:', error);
           showNotification('Fehler beim Speichern der Einstellungen', 'error');
         }
       }
@@ -3457,7 +3971,8 @@ window.addEventListener('load', async () => {
         settings = {
           refreshInterval: data['display.refreshInterval'],
           defaultDuration: data['display.defaultDuration'],
-          blendEffectsEnabled: data['display.blendEffectsEnabled']
+          blendEffectsEnabled: data['display.blendEffectsEnabled'],
+          transitionsExternalOnly: data['display.transitionsExternalOnly']
         };
       } else {
         // Fallback zu localStorage
@@ -3471,6 +3986,7 @@ window.addEventListener('load', async () => {
       const refreshInterval = document.getElementById('refresh-interval');
       const defaultDuration = document.getElementById('default-duration');
       const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
+      const transitionsExternalOnly = document.getElementById('transitions-external-only');
       
       if (refreshInterval && settings.refreshInterval) {
         refreshInterval.value = settings.refreshInterval;
@@ -3480,6 +3996,9 @@ window.addEventListener('load', async () => {
       }
       if (blendEffectsEnabled && settings.blendEffectsEnabled !== undefined) {
         blendEffectsEnabled.checked = (settings.blendEffectsEnabled === 'true' || settings.blendEffectsEnabled === true);
+      }
+      if (transitionsExternalOnly && settings.transitionsExternalOnly !== undefined) {
+        transitionsExternalOnly.checked = (settings.transitionsExternalOnly === 'true' || settings.transitionsExternalOnly === true);
       }
     } catch (error) {
       console.error('Fehler beim Laden der Display-Einstellungen:', error);
@@ -3492,6 +4011,7 @@ window.addEventListener('load', async () => {
           const refreshInterval = document.getElementById('refresh-interval');
           const defaultDuration = document.getElementById('default-duration');
           const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
+          const transitionsExternalOnly = document.getElementById('transitions-external-only');
           
           if (refreshInterval && settings.refreshInterval) {
             refreshInterval.value = settings.refreshInterval;
@@ -3501,6 +4021,9 @@ window.addEventListener('load', async () => {
           }
           if (blendEffectsEnabled && settings.blendEffectsEnabled !== undefined) {
             blendEffectsEnabled.checked = (settings.blendEffectsEnabled === 'true' || settings.blendEffectsEnabled === true);
+          }
+          if (transitionsExternalOnly && settings.transitionsExternalOnly !== undefined) {
+            transitionsExternalOnly.checked = (settings.transitionsExternalOnly === 'true' || settings.transitionsExternalOnly === true);
           }
         }
       } catch (fallbackError) {
@@ -3588,6 +4111,24 @@ window.addEventListener('load', async () => {
     });
   }
 
+  // Event Delegation für Displays
+  const displaysList = document.getElementById('displays-list');
+  if (displaysList) {
+    displaysList.addEventListener('click', (e) => {
+      const actionElement = e.target.closest('[data-action]');
+      if (!actionElement) return;
+
+      const action = actionElement.dataset.action;
+      const displayId = parseInt(actionElement.dataset.displayId);
+
+      if (action === 'edit-display' && displayId) {
+        editDisplay(displayId);
+      } else if (action === 'delete-display' && displayId) {
+        deleteDisplay(displayId);
+      }
+    });
+  }
+
   // Event Delegation für Benutzer
   const usersList = document.getElementById('users-list');
   if (usersList) {
@@ -3615,6 +4156,7 @@ window.addEventListener('load', async () => {
   startFooterClock();
   await loadPosts();
   await loadCategories();
+  await loadDisplays();
   await updateDashboardStats();
 
   // Dashboard Statistik-Karten klickbar machen
@@ -3730,65 +4272,6 @@ document.getElementById('downloadExternalVideosBtn')?.addEventListener('click', 
 // ============================================
 // System Mode Switcher (Raspberry Pi)
 // ============================================
-async function loadSystemMode() {
-  const systemModeCard = document.getElementById('system-mode-card');
-  if (!systemModeCard) {
-    console.log('System-Mode-Card nicht gefunden');
-    return; // System mode card nicht gefunden
-  }
-
-  try {
-    // Lade System-Settings über die Settings-API
-    const response = await fetch('/api/settings?category=system', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-      }
-    });
-
-    if (response.ok) {
-      const systemSettings = await response.json();
-      
-      const networkMode = systemSettings['system.networkMode'] || 'normal';
-      const hotspotSSID = systemSettings['system.hotspotSSID'] || 'PRASCO-Display';
-      const hotspotPassword = systemSettings['system.hotspotPassword'] || 'prasco2024';
-      const hotspotEnabled = systemSettings['system.hotspotEnabled'] === 'true';
-      
-      // Update status display
-      const statusDiv = document.getElementById('system-mode-status');
-      const modeIcon = networkMode === 'hotspot' ? '📶' : '🌐';
-      const modeText = networkMode === 'hotspot' ? 'Hotspot-Modus' : 'Normal-Modus';
-      const statusColor = networkMode === 'hotspot' ? '#10b981' : '#3b82f6';
-      
-      if (statusDiv) {
-        statusDiv.innerHTML = `
-          <div class="mode-indicator" style="background: ${statusColor}20; border-color: ${statusColor};">
-            <span class="mode-icon">${modeIcon}</span>
-            <span class="mode-text">Aktuell: <strong>${modeText}</strong></span>
-          </div>
-        `;
-      }
-      
-      // Set radio buttons
-      const normalRadio = document.getElementById('mode-normal');
-      const hotspotRadio = document.getElementById('mode-hotspot');
-      
-      if (normalRadio) normalRadio.checked = networkMode === 'normal';
-      if (hotspotRadio) hotspotRadio.checked = networkMode === 'hotspot';
-      
-      // Show system settings card
-      systemModeCard.style.display = 'block';
-      
-      console.log('System-Settings geladen:', systemSettings);
-    } else {
-      console.warn('System-Settings nicht verfügbar:', response.status);
-      systemModeCard.style.display = 'none';
-    }
-  } catch (error) {
-    console.error('Fehler beim Laden der System-Settings:', error);
-    // Hide system mode card if not available
-    systemModeCard.style.display = 'none';
-  }
-}
 
 document.getElementById('switchSystemMode')?.addEventListener('click', async () => {
   const selectedMode = document.querySelector('input[name="system-mode"]:checked')?.value;
@@ -3929,11 +4412,12 @@ document.getElementById('downloadExternalVideosBtn')?.addEventListener('click', 
  * Load current system mode from settings
  */
 async function loadSystemMode() {
-  const statusElement = document.querySelector('#system-mode-card .loading-message');
+  const statusDiv = document.getElementById('system-mode-status');
+  const statusTextEl = document.querySelector('#system-mode-status .mode-text');
   
   try {
-    if (statusElement) {
-      statusElement.textContent = '⏳ Status wird geladen...';
+    if (statusTextEl) {
+      statusTextEl.textContent = 'Status wird geladen...';
     }
     
     const response = await apiRequest('/settings?category=system');
@@ -3954,6 +4438,19 @@ async function loadSystemMode() {
         // Update radio button styles
         updateModeRadioStyles();
         
+        // Update status display
+        const modeIcon = currentMode === 'hotspot' ? '📶' : '🌐';
+        const modeText = currentMode === 'hotspot' ? 'Hotspot-Modus' : 'Normal-Modus';
+        
+        if (statusDiv) {
+          statusDiv.innerHTML = `
+            <div class="mode-indicator">
+              <span class="mode-icon">${modeIcon}</span>
+              <span class="mode-text">Aktuell: <strong>${modeText}</strong></span>
+            </div>
+          `;
+        }
+        
         // Show hotspot info if in hotspot mode
         const hotspotInfo = document.getElementById('hotspot-info');
         if (hotspotInfo) {
@@ -3970,21 +4467,16 @@ async function loadSystemMode() {
           if (pwdEl) pwdEl.textContent = '••••••••';
         }
       }
-      
-      // Hide loading message
-      if (statusElement) {
-        statusElement.style.display = 'none';
-      }
     } else {
       console.warn('[System Mode] Unexpected response format:', response);
-      if (statusElement) {
-        statusElement.textContent = '⚠️ Keine System-Einstellungen gefunden';
+      if (statusTextEl) {
+        statusTextEl.textContent = '⚠️ Keine System-Einstellungen gefunden';
       }
     }
   } catch (error) {
     console.error('Fehler beim Laden des System-Modus:', error);
-    if (statusElement) {
-      statusElement.textContent = '❌ Fehler beim Laden: ' + (error.message || 'Unbekannter Fehler');
+    if (statusTextEl) {
+      statusTextEl.textContent = '❌ Fehler: ' + (error.message || 'Unbekannter Fehler');
     }
   }
 }
@@ -4069,6 +4561,9 @@ async function switchSystemMode() {
 
 // Event listeners for system mode
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize translations on page load
+  translatePage();
+  
   // Radio button change events
   const radios = document.querySelectorAll('input[name="system-mode"]');
   radios.forEach(radio => {
@@ -4107,6 +4602,530 @@ document.addEventListener('DOMContentLoaded', () => {
 
 console.log('Admin Dashboard geladen (API-Modus)');
 
+// ============================================
+// Live-Daten (ÖPNV & Verkehr) Management
+// ============================================
+let liveDataSettingsLoaded = false;
+let transitSearchTimeout = null;
+
+async function loadLiveDataSettings() {
+  // Lade Transit-Einstellungen
+  await loadTransitSettings();
+  // Lade Traffic-Einstellungen
+  await loadTrafficSettings();
+  // Lade Autobahn-Liste
+  await loadHighwayList();
+  // Lade Cache-Stats
+  await loadCacheStats();
+  // Event-Listener initialisieren (nur einmal)
+  if (!liveDataSettingsLoaded) {
+    initLiveDataEventListeners();
+    liveDataSettingsLoaded = true;
+  }
+}
+
+function initLiveDataEventListeners() {
+  // Transit toggle
+  const transitEnabled = document.getElementById('transit-enabled');
+  if (transitEnabled) {
+    transitEnabled.addEventListener('change', () => {
+      const config = document.getElementById('transit-config');
+      if (config) config.style.display = transitEnabled.checked ? 'block' : 'none';
+    });
+  }
+
+  // Traffic toggle
+  const trafficEnabled = document.getElementById('traffic-enabled');
+  if (trafficEnabled) {
+    trafficEnabled.addEventListener('change', () => {
+      const config = document.getElementById('traffic-config');
+      if (config) config.style.display = trafficEnabled.checked ? 'block' : 'none';
+    });
+  }
+
+  // Transit station search
+  const searchBtn = document.getElementById('transit-search-btn');
+  const searchInput = document.getElementById('transit-station-search');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => searchTransitStations());
+  }
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        searchTransitStations();
+      }
+    });
+  }
+
+  // Remove station
+  const removeBtn = document.getElementById('transit-remove-station');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', () => {
+      document.getElementById('transit-selected-station').style.display = 'none';
+      document.getElementById('transit-station-name').textContent = '–';
+      document.getElementById('transit-station-id').textContent = '';
+    });
+  }
+
+  // Save buttons
+  document.getElementById('saveTransitSettings')?.addEventListener('click', saveTransitSettings);
+  document.getElementById('saveTrafficSettings')?.addEventListener('click', saveTrafficSettings);
+
+  // Preview buttons
+  document.getElementById('previewTransitData')?.addEventListener('click', previewTransitData);
+  document.getElementById('previewTrafficData')?.addEventListener('click', previewTrafficData);
+
+  // Cache buttons
+  document.getElementById('clearTransitCache')?.addEventListener('click', async () => {
+    try {
+      await apiRequest('/transit/cache/clear', { method: 'POST' });
+      showNotification('ÖPNV-Cache geleert', 'success');
+      loadCacheStats();
+    } catch (e) {
+      showNotification('Fehler beim Leeren des Cache', 'error');
+    }
+  });
+  document.getElementById('clearTrafficCache')?.addEventListener('click', async () => {
+    try {
+      await apiRequest('/traffic/cache/clear', { method: 'POST' });
+      showNotification('Verkehr-Cache geleert', 'success');
+      loadCacheStats();
+    } catch (e) {
+      showNotification('Fehler beim Leeren des Cache', 'error');
+    }
+  });
+
+  // Highway multi-select change
+  const highwaySelect = document.getElementById('traffic-highway-select');
+  if (highwaySelect) {
+    highwaySelect.addEventListener('change', updateSelectedHighwaysDisplay);
+  }
+}
+
+async function searchTransitStations() {
+  const query = document.getElementById('transit-station-search')?.value?.trim();
+  if (!query || query.length < 2) {
+    showNotification('Bitte mindestens 2 Zeichen eingeben', 'warning');
+    return;
+  }
+
+  const resultsDiv = document.getElementById('transit-search-results');
+  resultsDiv.innerHTML = '<p class="text-muted">Suche läuft...</p>';
+  resultsDiv.style.display = 'block';
+
+  try {
+    const data = await apiRequest(`/transit/stations/search?q=${encodeURIComponent(query)}&limit=8`);
+    if (data.success && data.data.length > 0) {
+      resultsDiv.innerHTML = data.data.map(station => `
+        <div class="search-result-item" data-id="${station.id}" data-name="${station.name}">
+          <div class="result-info">
+            <strong>${station.name}</strong>
+            <small class="text-muted">${station.id}</small>
+          </div>
+          <div class="result-products">
+            ${station.products?.bus ? '<span class="product-badge bus">Bus</span>' : ''}
+            ${station.products?.suburban ? '<span class="product-badge sbahn">S</span>' : ''}
+            ${station.products?.subway ? '<span class="product-badge ubahn">U</span>' : ''}
+            ${station.products?.tram ? '<span class="product-badge tram">Tram</span>' : ''}
+            ${station.products?.regional ? '<span class="product-badge regional">RE</span>' : ''}
+            ${station.products?.nationalExpress || station.products?.national ? '<span class="product-badge fernzug">ICE</span>' : ''}
+          </div>
+          <button class="btn btn-sm btn-primary select-station-btn">Auswählen</button>
+        </div>
+      `).join('');
+
+      // Attach click handlers
+      resultsDiv.querySelectorAll('.select-station-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.search-result-item');
+          selectTransitStation(item.dataset.id, item.dataset.name);
+          resultsDiv.style.display = 'none';
+        });
+      });
+    } else {
+      resultsDiv.innerHTML = '<p class="text-muted">Keine Stationen gefunden.</p>';
+    }
+  } catch (error) {
+    resultsDiv.innerHTML = '<p class="text-error">Fehler bei der Suche. Ist der Server erreichbar?</p>';
+    console.error('Transit search error:', error);
+  }
+}
+
+function selectTransitStation(id, name) {
+  const selectedDiv = document.getElementById('transit-selected-station');
+  document.getElementById('transit-station-name').textContent = name;
+  document.getElementById('transit-station-id').textContent = `ID: ${id}`;
+  selectedDiv.style.display = 'flex';
+  selectedDiv.dataset.stationId = id;
+}
+
+async function loadTransitSettings() {
+  try {
+    const response = await fetch('/api/settings?category=transit', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+
+    const enabled = data['transit.enabled'] === true || data['transit.enabled'] === 'true';
+    const transitEnabled = document.getElementById('transit-enabled');
+    if (transitEnabled) {
+      transitEnabled.checked = enabled;
+      document.getElementById('transit-config').style.display = enabled ? 'block' : 'none';
+    }
+
+    if (data['transit.stationId'] && data['transit.stationName']) {
+      selectTransitStation(data['transit.stationId'], data['transit.stationName']);
+    }
+
+    const maxDep = document.getElementById('transit-max-departures');
+    if (maxDep && data['transit.maxDepartures']) maxDep.value = data['transit.maxDepartures'];
+
+    const duration = document.getElementById('transit-duration');
+    if (duration && data['transit.duration']) duration.value = data['transit.duration'];
+
+    const refresh = document.getElementById('transit-refresh-interval');
+    if (refresh && data['transit.refreshInterval']) refresh.value = data['transit.refreshInterval'];
+
+    // Transport filters
+    const filters = {
+      'filter-bus': data['transit.filter.bus'] !== 'false',
+      'filter-suburban': data['transit.filter.suburban'] !== 'false',
+      'filter-subway': data['transit.filter.subway'] !== 'false',
+      'filter-tram': data['transit.filter.tram'] !== 'false',
+      'filter-regional': data['transit.filter.regional'] !== 'false',
+      'filter-national': data['transit.filter.national'] !== 'false',
+      'filter-ferry': data['transit.filter.ferry'] === 'true',
+    };
+    Object.entries(filters).forEach(([id, checked]) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = checked;
+    });
+  } catch (error) {
+    console.warn('Transit-Einstellungen konnten nicht geladen werden:', error);
+  }
+}
+
+async function saveTransitSettings() {
+  const selectedStation = document.getElementById('transit-selected-station');
+  const stationId = selectedStation?.dataset?.stationId || '';
+  const stationName = document.getElementById('transit-station-name')?.textContent || '';
+
+  const settings = {
+    'transit.enabled': document.getElementById('transit-enabled')?.checked ? 'true' : 'false',
+    'transit.stationId': stationId,
+    'transit.stationName': stationName,
+    'transit.maxDepartures': document.getElementById('transit-max-departures')?.value || '10',
+    'transit.duration': document.getElementById('transit-duration')?.value || '60',
+    'transit.refreshInterval': document.getElementById('transit-refresh-interval')?.value || '30',
+    'transit.filter.bus': document.getElementById('filter-bus')?.checked ? 'true' : 'false',
+    'transit.filter.suburban': document.getElementById('filter-suburban')?.checked ? 'true' : 'false',
+    'transit.filter.subway': document.getElementById('filter-subway')?.checked ? 'true' : 'false',
+    'transit.filter.tram': document.getElementById('filter-tram')?.checked ? 'true' : 'false',
+    'transit.filter.regional': document.getElementById('filter-regional')?.checked ? 'true' : 'false',
+    'transit.filter.national': document.getElementById('filter-national')?.checked ? 'true' : 'false',
+    'transit.filter.ferry': document.getElementById('filter-ferry')?.checked ? 'true' : 'false',
+  };
+
+  try {
+    const response = await fetch('/api/settings/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({ settings })
+    });
+
+    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    showNotification('ÖPNV-Einstellungen gespeichert!', 'success');
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    showNotification('Fehler beim Speichern der ÖPNV-Einstellungen', 'error');
+  }
+}
+
+async function previewTransitData() {
+  const selectedStation = document.getElementById('transit-selected-station');
+  const stationId = selectedStation?.dataset?.stationId;
+
+  if (!stationId) {
+    showNotification('Bitte zuerst eine Station auswählen', 'warning');
+    return;
+  }
+
+  const previewCard = document.getElementById('transit-preview-card');
+  const previewContent = document.getElementById('transit-preview-content');
+  previewCard.style.display = 'block';
+  previewContent.innerHTML = '<p class="text-muted">Lade Abfahrten...</p>';
+
+  const maxDep = document.getElementById('transit-max-departures')?.value || 10;
+  const duration = document.getElementById('transit-duration')?.value || 60;
+
+  try {
+    const data = await apiRequest(`/transit/departures/${stationId}?limit=${maxDep}&duration=${duration}`);
+    if (data.success && data.data.length > 0) {
+      const stationName = document.getElementById('transit-station-name')?.textContent || stationId;
+      previewContent.innerHTML = `
+        <div class="departure-board">
+          <div class="departure-board-header">
+            <span>Abfahrten ${stationName}</span>
+            <span class="departure-time-label">${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span>
+          </div>
+          <table class="departure-table">
+            <thead>
+              <tr>
+                <th>Linie</th>
+                <th>Richtung</th>
+                <th>Abfahrt</th>
+                <th>Gleis</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.data.map(dep => {
+                const when = dep.when ? new Date(dep.when) : null;
+                const planned = dep.plannedWhen ? new Date(dep.plannedWhen) : null;
+                const timeStr = when ? when.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}) : (planned ? planned.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'}) : '–');
+                const delayMin = dep.delay ? Math.round(dep.delay / 60) : 0;
+                const delayClass = dep.cancelled ? 'cancelled' : (delayMin > 0 ? 'delayed' : 'on-time');
+                const statusText = dep.cancelled ? 'Ausfall' : (delayMin > 0 ? `+${delayMin} min` : 'pünktl.');
+                const lineClass = dep.line?.product || 'bus';
+                return `
+                  <tr class="${dep.cancelled ? 'row-cancelled' : ''}">
+                    <td><span class="line-badge line-${lineClass}">${dep.line?.name || '?'}</span></td>
+                    <td class="direction-cell">${dep.direction || '–'}</td>
+                    <td class="time-cell">${timeStr}</td>
+                    <td>${dep.platform || dep.plannedPlatform || '–'}</td>
+                    <td><span class="status-badge ${delayClass}">${statusText}</span></td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    } else {
+      previewContent.innerHTML = '<p class="text-muted">Keine Abfahrten im gewählten Zeitraum.</p>';
+    }
+  } catch (error) {
+    previewContent.innerHTML = `<p class="text-error">Fehler: ${error.message || 'Konnte Abfahrten nicht laden'}</p>`;
+    console.error('Transit preview error:', error);
+  }
+}
+
+async function loadTrafficSettings() {
+  try {
+    const response = await fetch('/api/settings?category=traffic', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+
+    const enabled = data['traffic.enabled'] === true || data['traffic.enabled'] === 'true';
+    const trafficEnabled = document.getElementById('traffic-enabled');
+    if (trafficEnabled) {
+      trafficEnabled.checked = enabled;
+      document.getElementById('traffic-config').style.display = enabled ? 'block' : 'none';
+    }
+
+    const refresh = document.getElementById('traffic-refresh-interval');
+    if (refresh && data['traffic.refreshInterval']) refresh.value = data['traffic.refreshInterval'];
+
+    const maxWarn = document.getElementById('traffic-max-warnings');
+    if (maxWarn && data['traffic.maxWarnings']) maxWarn.value = data['traffic.maxWarnings'];
+
+    // Selected highways
+    if (data['traffic.highways']) {
+      const highways = data['traffic.highways'].split(',').map(h => h.trim());
+      setTimeout(() => {
+        const select = document.getElementById('traffic-highway-select');
+        if (select) {
+          Array.from(select.options).forEach(opt => {
+            opt.selected = highways.includes(opt.value);
+          });
+          updateSelectedHighwaysDisplay();
+        }
+      }, 500);
+    }
+
+    // Show types
+    const showWarnings = document.getElementById('show-warnings');
+    if (showWarnings) showWarnings.checked = data['traffic.showWarnings'] !== false && data['traffic.showWarnings'] !== 'false';
+    const showRoadworks = document.getElementById('show-roadworks');
+    if (showRoadworks) showRoadworks.checked = data['traffic.showRoadworks'] !== false && data['traffic.showRoadworks'] !== 'false';
+    const showClosures = document.getElementById('show-closures');
+    if (showClosures) showClosures.checked = data['traffic.showClosures'] !== false && data['traffic.showClosures'] !== 'false';
+  } catch (error) {
+    console.warn('Traffic-Einstellungen konnten nicht geladen werden:', error);
+  }
+}
+
+async function loadHighwayList() {
+  const select = document.getElementById('traffic-highway-select');
+  if (!select) return;
+
+  try {
+    const data = await apiRequest('/traffic/roads');
+    if (data.success && data.data.length > 0) {
+      select.innerHTML = data.data.map(road => 
+        `<option value="${road}">${road}</option>`
+      ).join('');
+    }
+  } catch (error) {
+    select.innerHTML = '<option value="" disabled>Fehler beim Laden</option>';
+    console.error('Highway list error:', error);
+  }
+}
+
+function updateSelectedHighwaysDisplay() {
+  const select = document.getElementById('traffic-highway-select');
+  const display = document.getElementById('traffic-selected-highways');
+  if (!select || !display) return;
+
+  const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+  if (selected.length === 0) {
+    display.innerHTML = '<p class="text-muted">Keine Autobahnen ausgewählt</p>';
+    return;
+  }
+  display.innerHTML = selected.map(h => 
+    `<span class="highway-badge">${h} <button type="button" class="remove-highway" data-highway="${h}">&times;</button></span>`
+  ).join('');
+
+  display.querySelectorAll('.remove-highway').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const highway = btn.dataset.highway;
+      const opt = Array.from(select.options).find(o => o.value === highway);
+      if (opt) opt.selected = false;
+      updateSelectedHighwaysDisplay();
+    });
+  });
+}
+
+async function saveTrafficSettings() {
+  const select = document.getElementById('traffic-highway-select');
+  const selectedHighways = select ? Array.from(select.selectedOptions).map(o => o.value).join(',') : '';
+
+  const settings = {
+    'traffic.enabled': document.getElementById('traffic-enabled')?.checked ? 'true' : 'false',
+    'traffic.highways': selectedHighways,
+    'traffic.refreshInterval': document.getElementById('traffic-refresh-interval')?.value || '5',
+    'traffic.maxWarnings': document.getElementById('traffic-max-warnings')?.value || '5',
+    'traffic.showWarnings': document.getElementById('show-warnings')?.checked ? 'true' : 'false',
+    'traffic.showRoadworks': document.getElementById('show-roadworks')?.checked ? 'true' : 'false',
+    'traffic.showClosures': document.getElementById('show-closures')?.checked ? 'true' : 'false',
+  };
+
+  try {
+    const response = await fetch('/api/settings/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({ settings })
+    });
+
+    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    showNotification('Verkehrs-Einstellungen gespeichert!', 'success');
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    showNotification('Fehler beim Speichern der Verkehrs-Einstellungen', 'error');
+  }
+}
+
+async function previewTrafficData() {
+  const select = document.getElementById('traffic-highway-select');
+  const selectedHighways = select ? Array.from(select.selectedOptions).map(o => o.value) : [];
+
+  if (selectedHighways.length === 0) {
+    showNotification('Bitte mindestens eine Autobahn auswählen', 'warning');
+    return;
+  }
+
+  const previewCard = document.getElementById('traffic-preview-card');
+  const previewContent = document.getElementById('traffic-preview-content');
+  previewCard.style.display = 'block';
+  previewContent.innerHTML = '<p class="text-muted">Lade Verkehrsdaten...</p>';
+
+  try {
+    const maxWarnings = document.getElementById('traffic-max-warnings')?.value || 5;
+    let allHtml = '';
+
+    for (const highway of selectedHighways.slice(0, 5)) {
+      const data = await apiRequest(`/traffic/highways/${highway}`);
+      if (data.success) {
+        const warnings = (data.data.warnings || []).slice(0, maxWarnings);
+        const roadworks = (data.data.roadworks || []).slice(0, maxWarnings);
+        const closures = (data.data.closures || []).slice(0, maxWarnings);
+
+        allHtml += `
+          <div class="traffic-highway-card">
+            <div class="highway-header">
+              <span class="highway-icon">🛣️</span>
+              <h4>${highway}</h4>
+              <span class="traffic-count">${warnings.length} Warnungen, ${roadworks.length} Baustellen, ${closures.length} Sperrungen</span>
+            </div>
+            ${warnings.length === 0 && roadworks.length === 0 && closures.length === 0 
+              ? '<p class="text-muted" style="padding: 0.5rem 1rem;">Keine Meldungen – freie Fahrt! ✅</p>' 
+              : ''}
+            ${warnings.map(w => `
+              <div class="traffic-item warning">
+                <span class="traffic-type-icon">⚠️</span>
+                <div class="traffic-details">
+                  <strong>${w.title || 'Verkehrswarnung'}</strong>
+                  <p>${w.subtitle || ''}</p>
+                  ${w.description && w.description.length > 0 ? `<small>${w.description.slice(0, 3).join(' | ')}</small>` : ''}
+                </div>
+              </div>
+            `).join('')}
+            ${roadworks.map(r => `
+              <div class="traffic-item roadwork">
+                <span class="traffic-type-icon">🚧</span>
+                <div class="traffic-details">
+                  <strong>${r.title || 'Baustelle'}</strong>
+                  <p>${r.subtitle || ''}</p>
+                  ${r.description && r.description.length > 0 ? `<small>${r.description.slice(0, 3).join(' | ')}</small>` : ''}
+                </div>
+              </div>
+            `).join('')}
+            ${closures.map(c => `
+              <div class="traffic-item closure">
+                <span class="traffic-type-icon">🚫</span>
+                <div class="traffic-details">
+                  <strong>${c.title || 'Sperrung'}</strong>
+                  <p>${c.subtitle || ''}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    previewContent.innerHTML = allHtml || '<p class="text-muted">Keine Verkehrsdaten verfügbar.</p>';
+  } catch (error) {
+    previewContent.innerHTML = `<p class="text-error">Fehler: ${error.message || 'Konnte Verkehrsdaten nicht laden'}</p>`;
+    console.error('Traffic preview error:', error);
+  }
+}
+
+async function loadCacheStats() {
+  try {
+    const transitData = await apiRequest('/transit/cache/stats');
+    const trafficData = await apiRequest('/traffic/cache/stats');
+    
+    const transitCount = document.getElementById('transit-cache-count');
+    const trafficCount = document.getElementById('traffic-cache-count');
+    
+    if (transitCount) transitCount.textContent = `${transitData?.data?.keys || 0} Einträge`;
+    if (trafficCount) trafficCount.textContent = `${trafficData?.data?.keys || 0} Einträge`;
+  } catch (error) {
+    console.warn('Cache-Stats konnten nicht geladen werden:', error);
+  }
+}
+
 // Load system mode only once when visiting settings for the first time
 let systemModeLoaded = false;
 document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
@@ -4130,6 +5149,59 @@ if (startDateInput && endDateInput) {
       // Format: YYYY-MM-DDTHH:mm
       const endDateTime = endDate.toISOString().slice(0, 16);
       endDateInput.value = endDateTime;
+    }
+  });
+}
+
+// ============================================
+// YouTube Video Duration Auto-Detection
+// ============================================
+const mediaUrlInput = document.getElementById('media-url');
+const durationInput = document.getElementById('display-duration');
+const postTypeInput = document.getElementById('post-type');
+
+let youtubeFetchTimeout = null;
+
+if (mediaUrlInput && durationInput && postTypeInput) {
+  mediaUrlInput.addEventListener('input', function() {
+    // Debounce: Warte 500ms nach letzter Eingabe
+    clearTimeout(youtubeFetchTimeout);
+    
+    const url = this.value.trim();
+    const contentType = postTypeInput.value;
+    
+    // Nur bei Video-Content und YouTube URLs
+    if (contentType === 'video' && url && 
+        (url.includes('youtube.com') || url.includes('youtu.be'))) {
+      
+      youtubeFetchTimeout = setTimeout(async () => {
+        try {
+          // Zeige Loading-Indikator
+          durationInput.style.borderColor = '#ffc107';
+          durationInput.disabled = true;
+          
+          const response = await apiRequest('/youtube/duration', {
+            method: 'POST',
+            body: JSON.stringify({ url }),
+          });
+          
+          if (response.success && response.data.duration) {
+            durationInput.value = response.data.duration;
+            durationInput.style.borderColor = '#28a745';
+            showNotification(`Video-Dauer automatisch gesetzt: ${response.data.duration}s`, 'success');
+          }
+        } catch (error) {
+          console.warn('Fehler beim Abrufen der Video-Dauer:', error);
+          durationInput.style.borderColor = '#dc3545';
+          // Fallback: Behalte Standard-Wert bei
+        } finally {
+          durationInput.disabled = false;
+          // Reset border color nach 2 Sekunden
+          setTimeout(() => {
+            durationInput.style.borderColor = '';
+          }, 2000);
+        }
+      }, 500); // 500ms Debounce
     }
   });
 }

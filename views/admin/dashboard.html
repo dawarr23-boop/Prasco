@@ -30,7 +30,13 @@
             <a href="#categories"><span class="icon">◈</span> Kategorien</a>
           </li>
           <li>
+            <a href="#displays"><span class="icon">▦</span> Displays</a>
+          </li>
+          <li>
             <a href="#users"><span class="icon">◎</span> Benutzer</a>
+          </li>
+          <li>
+            <a href="#livedata"><span class="icon">🚌</span> Live-Daten</a>
           </li>
           <li>
             <a href="#settings"><span class="icon">⚙</span> Einstellungen</a>
@@ -73,6 +79,10 @@
                 <h3 data-i18n="dashboard.categories">Kategorien</h3>
                 <p class="stat-number" id="total-categories">0</p>
               </div>
+              <div class="stat-card clickable" data-target="displays-section">
+                <h3>Displays</h3>
+                <p class="stat-number" id="total-displays">0</p>
+              </div>
               <div class="stat-card clickable" data-target="media-section">
                 <h3 data-i18n="dashboard.media">Medien</h3>
                 <p class="stat-number" id="total-media">0</p>
@@ -108,24 +118,7 @@
               <h2>Beiträge verwalten</h2>
               <div>
                 <button class="btn btn-success" id="showPostFormBtn">+ Neuer Beitrag</button>
-                <button class="btn btn-primary" id="downloadExternalVideosBtn" style="margin-left: 10px;" title="YouTube/Vimeo Videos herunterladen für Offline-Nutzung">⬇️ Videos offline</button>
                 <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">🗑️ Alle löschen</button>
-              </div>
-            </div>
-
-            <!-- Bulk Actions Bar (hidden by default) -->
-            <div id="bulk-actions-bar" style="display: none; padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #dee2e6;">
-              <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin: 0;">
-                  <input type="checkbox" id="select-all-posts" style="width: 18px; height: 18px; cursor: pointer;">
-                  Alle auswählen
-                </label>
-                <span id="selected-count" style="color: #007bff; font-weight: 600;">0 ausgewählt</span>
-                <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                  <button class="btn btn-primary" id="bulk-activate-btn" disabled>✓ Aktivieren</button>
-                  <button class="btn btn-secondary" id="bulk-deactivate-btn" disabled>✗ Deaktivieren</button>
-                  <button class="btn btn-danger" id="bulk-delete-btn" disabled>🗑️ Löschen</button>
-                </div>
               </div>
             </div>
 
@@ -133,45 +126,119 @@
               <form id="postForm">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="post-title">Titel *</label>
+                    <label for="post-title" data-translate="form.title">Titel *</label>
                     <input type="text" id="post-title" name="title" required />
                   </div>
 
                   <div class="form-group">
-                    <label for="post-type">Typ *</label>
+                    <label for="post-type" data-translate="form.type">Typ *</label>
                     <select id="post-type" name="content_type" required>
-                      <option value="text">📝 Text</option>
-                      <option value="image">🖼️ Bild</option>
-                      <option value="video">🎥 Video</option>
-                      <option value="html">🌐 HTML</option>
-                      <option value="presentation">📊 PowerPoint Präsentation</option>
-                      <option value="pdf">📄 PDF Dokument</option>
-                      <option value="word">📃 Word Dokument</option>
+                      <option value="text" data-translate="type.text">📝 Text</option>
+                      <option value="image" data-translate="type.image">🖼️ Bild</option>
+                      <option value="video" data-translate="type.video">🎥 Video</option>
+                      <option value="html" data-translate="type.html">🌐 HTML</option>
+                      <option value="presentation" data-translate="type.presentation">📊 PowerPoint Präsentation</option>
+                      <option value="pdf" data-translate="type.pdf">📄 PDF Dokument</option>
+                      <option value="word" data-translate="type.word">📃 Word Dokument</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label for="post-category">Kategorie</label>
+                  <label for="post-category" data-translate="form.category">Kategorie</label>
                   <select id="post-category" name="category_id">
-                    <option value="">-- Keine Kategorie --</option>
+                    <option value="" data-translate="form.noCategory">-- Keine Kategorie --</option>
                   </select>
                 </div>
 
+                <!-- Display-Auswahl -->
                 <div class="form-group">
-                  <label for="post-content">Inhalt</label>
+                  <label style="font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
+                    <span style="font-size: 1.3rem;">📺</span>
+                    <span>Display-Zuweisung</span>
+                  </label>
+                  
+                  <!-- Modern Radio Button Cards -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                    <label class="display-mode-card" for="display-mode-all" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
+                      <input type="radio" name="display_mode" value="all" id="display-mode-all" checked style="width: 20px; height: 20px; accent-color: #007bff;" />
+                      <div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">🌐 Alle Displays</div>
+                        <div style="font-size: 0.85rem; color: #6c757d;">Auf allen Displays anzeigen</div>
+                      </div>
+                    </label>
+                    <label class="display-mode-card" for="display-mode-specific" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
+                      <input type="radio" name="display_mode" value="specific" id="display-mode-specific" style="width: 20px; height: 20px; accent-color: #007bff;" />
+                      <div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">🎯 Spezifische Displays</div>
+                        <div style="font-size: 0.85rem; color: #6c757d;">Nur bestimmte Displays</div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Display Selection Container -->
+                  <div id="display-selection-container" style="display: none; border: 2px solid #e3f2fd; border-radius: 8px; padding: 1.25rem; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                      <span style="font-size: 1.1rem;">✓</span>
+                      <label style="font-weight: 600; color: #333; margin: 0;">Displays auswählen:</label>
+                    </div>
+                    <div id="displays-checkboxes" style="max-height: 240px; overflow-y: auto; padding-right: 0.5rem;">
+                      <p style="color: #6c757d; text-align: center; padding: 1rem;">Lade Displays...</p>
+                    </div>
+                  </div>
+                </div>
+
+                <style>
+                  .display-mode-card:hover {
+                    border-color: #007bff !important;
+                    background: #f8f9ff !important;
+                    box-shadow: 0 2px 8px rgba(0,123,255,0.15) !important;
+                  }
+                  
+                  .display-mode-card:has(input:checked) {
+                    border-color: #007bff !important;
+                    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+                    box-shadow: 0 4px 12px rgba(0,123,255,0.2) !important;
+                  }
+                  
+                  .display-mode-card input[type="radio"] {
+                    cursor: pointer;
+                    flex-shrink: 0;
+                  }
+                  
+                  #displays-checkboxes::-webkit-scrollbar {
+                    width: 8px;
+                  }
+                  
+                  #displays-checkboxes::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 4px;
+                  }
+                  
+                  #displays-checkboxes::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 4px;
+                  }
+                  
+                  #displays-checkboxes::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                  }
+                </style>
+
+                <div class="form-group">
+                  <label for="post-content" data-translate="form.content">Inhalt</label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
                 </div>
 
                 <div class="form-group" id="upload-section" style="display: none;">
-                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Inhalte hochladen</label>
+                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-translate="form.uploadContent">Inhalte hochladen</label>
                   
                   <!-- Option 1: Word/PDF Import (nur bei Text/HTML) -->
                   <div id="word-pdf-import" style="margin-bottom: 1rem;">
-                    <button type="button" class="btn btn-secondary" id="import-document-btn" style="width: 100%; font-size: 0.95rem;">
+                    <button type="button" class="btn btn-secondary" id="import-document-btn" style="width: 100%; font-size: 0.95rem;" data-translate="form.importDocument">
                       📄 Word/PDF importieren
                     </button>
-                    <small style="color: #666; display: block; margin-top: 0.5rem; text-align: center;">
+                    <small style="color: #666; display: block; margin-top: 0.5rem; text-align: center;" data-translate="form.importDocumentHint">
                       Importieren Sie .docx oder .pdf Dateien (max. 10MB)
                     </small>
                   </div>
@@ -179,10 +246,10 @@
                   <!-- Option 2: Datei hochladen (nur bei anderen Typen) -->
                   <div id="file-upload-section" style="display: none;">
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                      <button type="button" class="btn btn-secondary" id="trigger-file-upload" style="font-size: 0.9rem; display: inline-block;">
+                      <button type="button" class="btn btn-secondary" id="trigger-file-upload" style="font-size: 0.9rem; display: inline-block;" data-translate="form.uploadFile">
                         📁 Datei hochladen
                       </button>
-                      <small style="color: #666; align-self: center;">
+                      <small style="color: #666; align-self: center;" data-translate="form.uploadFileHint">
                         Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)
                       </small>
                     </div>
@@ -197,80 +264,104 @@
                       <div style="background: #e0e0e0; border-radius: 4px; height: 20px; overflow: hidden;">
                         <div id="upload-progress-bar" style="background: #007bff; height: 100%; width: 0%; transition: width 0.3s"></div>
                       </div>
-                      <small id="upload-status" style="color: #007bff">Uploading...</small>
+                      <small id="upload-status" style="color: #007bff" data-translate="form.uploading">Uploading...</small>
                     </div>
                   </div>
 
                   <!-- Option 3: Medien-URL (nur bei anderen Typen) -->
                   <div id="media-url-section" style="margin-top: 1rem; display: none;">
-                    <label for="media-url" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">Medien-URL (oder Datei hochladen)</label>
+                    <label for="media-url" style="font-weight: 500; margin-bottom: 0.5rem; display: block;" data-translate="form.mediaUrl">Medien-URL (oder Datei hochladen)</label>
                     <input
                       type="text"
                       id="media-url"
                       name="media_url"
+                      data-translate-placeholder="form.mediaUrlPlaceholder"
                       placeholder="https://... oder /uploads/originals/..."
                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"
                     />
-                    <small style="color: #666; display: block; margin-top: 0.5rem;">
+                    <small style="color: #666; display: block; margin-top: 0.5rem;" data-translate="form.mediaUrlHint">
                       YouTube/Vimeo URLs werden automatisch als Video eingebettet
                     </small>
+                    
+                    <!-- Offline-Download Option (nur für externe Videos) -->
+                    <div id="offline-download-section" style="margin-top: 1rem; display: none;">
+                      <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="download-video-offline" />
+                        <span data-translate="form.offlineDownload">📥 Video offline verfügbar machen</span>
+                      </label>
+                      <small style="color: #666; display: block; margin-top: 0.25rem; margin-left: 1.5rem;" data-translate="form.offlineDownloadHint">
+                        Lädt das Video automatisch herunter für bessere Performance und Offline-Nutzung
+                      </small>
+                    </div>
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="display-duration">Anzeigedauer (Sek.)</label>
+                    <label for="display-duration" data-translate="form.displayDuration">Anzeigedauer (Sek.)</label>
                     <input
                       type="number"
                       id="display-duration"
                       name="display_duration"
-                      value="10"
+                      value="60"
                       min="1"
                     />
                   </div>
 
                   <div class="form-group">
-                    <label for="priority">Priorität (0-100)</label>
+                    <label for="priority" data-translate="form.priority">Priorität (0-100)</label>
                     <input type="number" id="priority" name="priority" value="0" min="0" max="100" />
                   </div>
 
                   <div class="form-group">
-                    <label for="blend-effect">Übergangseffekt</label>
-                    <select id="blend-effect" name="blend_effect">
-                      <option value="">Kein Effekt</option>
-                      <option value="fade">Fade (Überblenden)</option>
-                      <option value="slide-left">Slide Left (Nach links)</option>
-                      <option value="slide-right">Slide Right (Nach rechts)</option>
-                      <option value="slide-up">Slide Up (Nach oben)</option>
-                      <option value="slide-down">Slide Down (Nach unten)</option>
-                      <option value="zoom-in">Zoom In (Hineinzoomen)</option>
-                      <option value="zoom-out">Zoom Out (Herauszoomen)</option>
-                    </select>
-                    <small style="color: #666; display: block; margin-top: 0.25rem">Wählen Sie einen Übergangseffekt zum nächsten Beitrag</small>
+                    <label for="show-title" style="display: block; margin-bottom: 0.5rem;">Titel anzeigen</label>
+                    <div class="toggle-switch">
+                      <input type="checkbox" name="show_title" id="show-title" class="toggle-input" />
+                      <label for="show-title" class="toggle-label">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="start-date">Start-Datum</label>
+                    <label for="blend-effect" data-translate="form.blendEffect">Übergangseffekt</label>
+                    <select id="blend-effect" name="blend_effect">
+                      <option value="" data-translate="form.blendEffectNone">Kein Effekt</option>
+                      <option value="fade" data-translate="form.blendEffectFade">Fade (Überblenden)</option>
+                      <option value="slide-left" data-translate="form.blendEffectSlideLeft">Slide Left (Nach links)</option>
+                      <option value="slide-right" data-translate="form.blendEffectSlideRight">Slide Right (Nach rechts)</option>
+                      <option value="slide-up" data-translate="form.blendEffectSlideUp">Slide Up (Nach oben)</option>
+                      <option value="slide-down" data-translate="form.blendEffectSlideDown">Slide Down (Nach unten)</option>
+                      <option value="zoom-in" data-translate="form.blendEffectZoomIn">Zoom In (Hineinzoomen)</option>
+                      <option value="zoom-out" data-translate="form.blendEffectZoomOut">Zoom Out (Herauszoomen)</option>
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="form.blendEffectHint">Wählen Sie einen Übergangseffekt zum nächsten Beitrag</small>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="start-date" data-translate="form.startDate">Start-Datum</label>
                     <input type="datetime-local" id="start-date" name="start_date" />
                   </div>
 
                   <div class="form-group">
-                    <label for="end-date">End-Datum</label>
+                    <label for="end-date" data-translate="form.endDate">End-Datum</label>
                     <input type="datetime-local" id="end-date" name="end_date" />
                   </div>
                 </div>
 
                 <!-- Hintergrundmusik (nur für nicht-Video-Inhalte) -->
                 <div class="form-group background-music-section" id="background-music-section">
-                  <label> <span class="settings-icon">♪</span> Hintergrundmusik (optional) </label>
-                  <small style="color: #666; display: block; margin-bottom: 0.5rem">
+                  <label> <span class="settings-icon">♪</span> <span data-translate="form.backgroundMusicSection">Hintergrundmusik (optional)</span> </label>
+                  <small style="color: #666; display: block; margin-bottom: 0.5rem" data-translate="form.backgroundMusicHint">
                     Nur für Text, Bild und HTML-Inhalte. Bei Videos wird der Original-Ton verwendet.
                   </small>
                   <div class="form-row">
                     <div class="form-group" style="flex: 2">
-                      <label for="background-music-file">Musik-Datei</label>
+                      <label for="background-music-file" data-translate="form.musicFile">Musik-Datei</label>
                       <input
                         type="file"
                         id="background-music-file"
@@ -280,7 +371,7 @@
                       <small style="color: #666">Unterstützt: MP3, WAV, OGG, M4A</small>
                     </div>
                     <div class="form-group" style="flex: 1">
-                      <label for="background-music-volume">Lautstärke</label>
+                      <label for="background-music-volume" data-translate="form.musicVolume">Lautstärke</label>
                       <div class="volume-control">
                         <input
                           type="range"
@@ -320,22 +411,18 @@
                 </div>
 
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" name="is_active" checked />
-                    <span>Aktiv</span>
-                  </label>
-                </div>
-
-                <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" name="show_title" id="show-title" checked />
-                    <span>Titel anzeigen</span>
-                  </label>
+                  <label for="is-active" style="display: block; margin-bottom: 0.5rem;">Aktiv</label>
+                  <div class="toggle-switch">
+                    <input type="checkbox" name="is_active" id="is-active" checked class="toggle-input" />
+                    <label for="is-active" class="toggle-label">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Beitrag speichern</button>
-                  <button type="button" class="btn btn-secondary" id="hidePostFormBtn">
+                  <button type="submit" class="btn btn-primary" data-translate="btn.savePost">Beitrag speichern</button>
+                  <button type="button" class="btn btn-secondary" id="hidePostFormBtn" data-translate="btn.cancel">
                     Abbrechen
                   </button>
                 </div>
@@ -346,34 +433,31 @@
               <!-- Wird dynamisch gefüllt -->
             </div>
 
-            <div style="margin-top: 1.5rem; text-align: center; padding: 1rem 0; border-top: 1px solid #e0e0e0;">
-              <button class="btn btn-secondary" id="downloadExternalVideosBtn">📥 Externe Videos herunterladen</button>
-            </div>
           </section>
 
           <!-- Categories Section -->
           <section id="categories-section" class="section">
             <div class="section-header">
               <h2>Kategorien verwalten</h2>
-              <button class="btn btn-primary" id="showCategoryFormBtn">+ Neue Kategorie</button>
+              <button class="btn btn-primary" id="showCategoryFormBtn" data-translate="btn.newCategory">+ Neue Kategorie</button>
             </div>
 
             <div id="category-form" class="form-container" style="display: none">
               <h2>+ Neue Kategorie</h2>
               <form id="categoryForm">
                 <div class="form-group">
-                  <label for="category-name">Name *</label>
+                  <label for="category-name" data-translate="category.name">Name *</label>
                   <input type="text" id="category-name" name="name" required />
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="category-color">Farbe</label>
+                    <label for="category-color" data-translate="category.color">Farbe</label>
                     <input type="color" id="category-color" name="color" value="#4caf50" />
                   </div>
 
                   <div class="form-group">
-                    <label for="category-icon">Icon</label>
+                    <label for="category-icon" data-translate="category.icon">Icon</label>
                     <select id="category-icon" name="icon" class="icon-select">
                       <optgroup label="Geometrische Formen">
                         <option value="●">● Kreis (gefüllt)</option>
@@ -460,18 +544,19 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="category-description">Beschreibung</label>
+                  <label for="category-description" data-translate="category.description">Beschreibung</label>
                   <textarea
                     id="category-description"
                     name="description"
                     rows="2"
+                    data-translate-placeholder="category.descriptionPlaceholder"
                     placeholder="Optionale Beschreibung..."
                   ></textarea>
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Kategorie erstellen</button>
-                  <button type="button" class="btn btn-secondary" id="hideCategoryFormBtn">
+                  <button type="submit" class="btn btn-primary" data-translate="btn.saveCategory">Kategorie erstellen</button>
+                  <button type="button" class="btn btn-secondary" id="hideCategoryFormBtn" data-translate="btn.cancel">
                     Abbrechen
                   </button>
                 </div>
@@ -483,47 +568,108 @@
             </div>
           </section>
 
+          <!-- Displays Section -->
+          <section id="displays-section" class="section">
+            <div class="section-header">
+              <h2>Display-Verwaltung</h2>
+              <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
+            </div>
+
+            <div id="display-form" class="form-container" style="display: none">
+              <h2>+ Neues Display</h2>
+              <form id="displayForm">
+                <div class="form-group">
+                  <label for="display-name">Display-Name *</label>
+                  <input type="text" id="display-name" name="name" required placeholder="z.B. Empfangsbereich" />
+                </div>
+
+                <div class="form-group">
+                  <label for="display-identifier">Identifier *</label>
+                  <input 
+                    type="text" 
+                    id="display-identifier" 
+                    name="identifier" 
+                    required 
+                    pattern="[a-zA-Z0-9-_]+"
+                    placeholder="z.B. empfangsbereich-1" 
+                    title="Nur Buchstaben, Zahlen, Bindestriche und Unterstriche"
+                  />
+                  <small style="color: #6c757d;">Eindeutiger Identifier für die Display-URL (nur a-z, 0-9, -, _)</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="display-description">Beschreibung</label>
+                  <textarea 
+                    id="display-description" 
+                    name="description" 
+                    rows="3"
+                    placeholder="Optionale Beschreibung oder Standort des Displays"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="display-isActive" name="isActive" checked />
+                    Display ist aktiv
+                  </label>
+                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Inaktive Displays erhalten keine Beiträge</small>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Display erstellen</button>
+                  <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn">
+                    Abbrechen
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div class="displays-list" id="displays-list">
+              <!-- Wird dynamisch gefüllt -->
+            </div>
+          </section>
+
           <!-- Users Section -->
           <section id="users-section" class="section">
             <div class="section-header">
               <h2>Benutzer verwalten</h2>
-              <button class="btn btn-primary" id="showUserFormBtn">+ Neuer Benutzer</button>
+              <button class="btn btn-primary" id="showUserFormBtn" data-translate="btn.newUser">+ Neuer Benutzer</button>
             </div>
 
             <div id="user-form" class="form-container" style="display: none">
               <form id="userForm">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="user-firstName">Vorname *</label>
+                    <label for="user-firstName" data-translate="users.firstName">Vorname *</label>
                     <input type="text" id="user-firstName" name="firstName" required />
                   </div>
 
                   <div class="form-group">
-                    <label for="user-lastName">Nachname *</label>
+                    <label for="user-lastName" data-translate="users.lastName">Nachname *</label>
                     <input type="text" id="user-lastName" name="lastName" required />
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="user-email">E-Mail *</label>
+                    <label for="user-email" data-translate="users.email">E-Mail *</label>
                     <input type="email" id="user-email" name="email" required />
                   </div>
 
                   <div class="form-group">
-                    <label for="user-role">Rolle *</label>
+                    <label for="user-role" data-translate="users.role">Rolle *</label>
                     <select id="user-role" name="role" required>
-                      <option value="viewer">Betrachter</option>
-                      <option value="editor">Editor</option>
-                      <option value="admin">Administrator</option>
-                      <option value="display">Display</option>
+                      <option value="viewer" data-translate="role.viewer">Betrachter</option>
+                      <option value="editor" data-translate="role.editor">Editor</option>
+                      <option value="admin" data-translate="role.admin">Administrator</option>
+                      <option value="display" data-translate="role.display">Display</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="user-password">Passwort *</label>
+                    <label for="user-password" data-translate="users.password">Passwort *</label>
                     <input type="password" id="user-password" name="password" minlength="6" />
                     <small class="form-hint"
                       >Min. 6 Zeichen (leer lassen für keine Änderung bei Bearbeitung)</small
@@ -531,17 +677,17 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="user-isActive">Status</label>
+                    <label for="user-isActive" data-translate="common.status">Status</label>
                     <select id="user-isActive" name="isActive">
-                      <option value="true">Aktiv</option>
-                      <option value="false">Inaktiv</option>
+                      <option value="true" data-translate="common.active">Aktiv</option>
+                      <option value="false" data-translate="common.inactive">Inaktiv</option>
                     </select>
                   </div>
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Benutzer speichern</button>
-                  <button type="button" class="btn btn-secondary" id="hideUserFormBtn">
+                  <button type="submit" class="btn btn-primary" data-translate="btn.saveUser">Benutzer speichern</button>
+                  <button type="button" class="btn btn-secondary" id="hideUserFormBtn" data-translate="btn.cancel">
                     Abbrechen
                   </button>
                 </div>
@@ -550,6 +696,173 @@
 
             <div class="users-list" id="users-list">
               <!-- Wird dynamisch gefüllt -->
+            </div>
+          </section>
+
+          <!-- Live-Daten Section -->
+          <section id="livedata-section" class="section">
+            <h2>🚌 Live-Daten (ÖPNV & Verkehr)</h2>
+
+            <!-- Transit / ÖPNV Konfiguration -->
+            <div class="settings-card">
+              <h3><span class="settings-icon">🚉</span> ÖPNV-Abfahrten</h3>
+              <p class="settings-description">
+                Konfigurieren Sie die Anzeige von Live-Abfahrtszeiten für Busse und Bahnen in Ihrer Nähe.
+              </p>
+              <div class="settings-form">
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="transit-enabled" />
+                    <span>ÖPNV-Abfahrten auf Display anzeigen</span>
+                  </label>
+                </div>
+
+                <div id="transit-config" style="display: none">
+                  <div class="form-group">
+                    <label for="transit-station-search">Station suchen</label>
+                    <div class="search-input-group">
+                      <input type="text" id="transit-station-search" placeholder="z.B. Hamburg Hbf, Berlin Alexanderplatz..." />
+                      <button type="button" class="btn btn-secondary btn-sm" id="transit-search-btn">Suchen</button>
+                    </div>
+                  </div>
+
+                  <div id="transit-search-results" class="search-results-list" style="display: none"></div>
+
+                  <div id="transit-selected-station" class="selected-station-card" style="display: none">
+                    <div class="station-info">
+                      <span class="station-icon">📍</span>
+                      <div>
+                        <strong id="transit-station-name">–</strong>
+                        <small id="transit-station-id" class="text-muted"></small>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" id="transit-remove-station">✕</button>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="transit-max-departures">Maximale Abfahrten</label>
+                      <input type="number" id="transit-max-departures" value="10" min="3" max="30" />
+                    </div>
+                    <div class="form-group">
+                      <label for="transit-duration">Zeitfenster (Minuten)</label>
+                      <input type="number" id="transit-duration" value="60" min="10" max="180" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="transit-refresh-interval">Aktualisierungsintervall (Sekunden)</label>
+                    <input type="number" id="transit-refresh-interval" value="30" min="10" max="300" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Verkehrsmittel filtern</label>
+                    <div class="transport-filter-grid">
+                      <label class="checkbox-label"><input type="checkbox" id="filter-bus" checked /><span>🚌 Bus</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-suburban" checked /><span>🚆 S-Bahn</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-subway" checked /><span>🚇 U-Bahn</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-tram" checked /><span>🚊 Tram</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-regional" checked /><span>🚂 Regionalzug</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-national" checked /><span>🚄 Fernzug</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-ferry" /><span>⛴ Fähre</span></label>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary" id="saveTransitSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewTransitData" style="margin-left: 0.5rem">Vorschau</button>
+              </div>
+            </div>
+
+            <!-- Live-Vorschau ÖPNV -->
+            <div id="transit-preview-card" class="settings-card" style="display: none">
+              <h3><span class="settings-icon">📋</span> ÖPNV-Vorschau</h3>
+              <div id="transit-preview-content" class="live-preview-container">
+                <p class="text-muted">Klicken Sie auf "Vorschau" um Live-Abfahrten zu laden.</p>
+              </div>
+            </div>
+
+            <!-- Verkehr / Autobahn Konfiguration -->
+            <div class="settings-card">
+              <h3><span class="settings-icon">🛣️</span> Autobahn-Verkehrslage</h3>
+              <p class="settings-description">
+                Zeigen Sie Staumeldungen, Baustellen und Verkehrswarnungen für ausgewählte Autobahnen an.
+              </p>
+              <div class="settings-form">
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="traffic-enabled" />
+                    <span>Verkehrslage auf Display anzeigen</span>
+                  </label>
+                </div>
+
+                <div id="traffic-config" style="display: none">
+                  <div class="form-group">
+                    <label for="traffic-highway-select">Autobahnen auswählen</label>
+                    <div class="highway-select-wrapper">
+                      <select id="traffic-highway-select" multiple size="6">
+                        <option value="loading" disabled>Lade Autobahnen...</option>
+                      </select>
+                      <small>Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl</small>
+                    </div>
+                  </div>
+
+                  <div id="traffic-selected-highways" class="selected-highways-list"></div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="traffic-refresh-interval">Aktualisierung (Minuten)</label>
+                      <input type="number" id="traffic-refresh-interval" value="5" min="1" max="60" />
+                    </div>
+                    <div class="form-group">
+                      <label for="traffic-max-warnings">Max. Meldungen pro Autobahn</label>
+                      <input type="number" id="traffic-max-warnings" value="5" min="1" max="20" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Meldungstypen anzeigen</label>
+                    <div class="transport-filter-grid">
+                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span>⚠️ Verkehrswarnungen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span>🚧 Baustellen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span>🚫 Sperrungen</span></label>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary" id="saveTrafficSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewTrafficData" style="margin-left: 0.5rem">Vorschau</button>
+              </div>
+            </div>
+
+            <!-- Live-Vorschau Verkehr -->
+            <div id="traffic-preview-card" class="settings-card" style="display: none">
+              <h3><span class="settings-icon">📋</span> Verkehrs-Vorschau</h3>
+              <div id="traffic-preview-content" class="live-preview-container">
+                <p class="text-muted">Klicken Sie auf "Vorschau" um Verkehrsdaten zu laden.</p>
+              </div>
+            </div>
+
+            <!-- Cache Management -->
+            <div class="settings-card">
+              <h3><span class="settings-icon">🗑️</span> Cache-Verwaltung</h3>
+              <p class="settings-description">
+                Leeren Sie den Cache für ÖPNV- und Verkehrsdaten, um aktuelle Daten zu erzwingen.
+              </p>
+              <div class="settings-form">
+                <div class="cache-stats" id="cache-stats">
+                  <div class="cache-stat-item">
+                    <span class="cache-label">ÖPNV-Cache:</span>
+                    <span id="transit-cache-count" class="cache-value">–</span>
+                  </div>
+                  <div class="cache-stat-item">
+                    <span class="cache-label">Verkehr-Cache:</span>
+                    <span id="traffic-cache-count" class="cache-value">–</span>
+                  </div>
+                </div>
+                <button class="btn btn-secondary" id="clearTransitCache">ÖPNV-Cache leeren</button>
+                <button class="btn btn-secondary" id="clearTrafficCache" style="margin-left: 0.5rem">Verkehr-Cache leeren</button>
+              </div>
             </div>
           </section>
 
@@ -611,7 +924,7 @@
               </div>
             </div>
 
-            <!-- Allgemeine Einstellungen -->
+            <!-- Display-Einstellungen -->
             <div class="settings-card">
               <h3><span class="settings-icon">&#9881;</span> Display-Einstellungen</h3>
               <div class="settings-form">
@@ -632,6 +945,16 @@
                   </label>
                   <small style="color: #666; display: block; margin-top: 0.25rem">
                     Aktiviert animierte Übergänge zwischen Beiträgen (Fade, Slide, Zoom)
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="transitions-external-only" />
+                    <span>Übergangseffekte nur auf externen Displays</span>
+                  </label>
+                  <small style="color: #666; display: block; margin-top: 0.25rem">
+                    Spart Ressourcen: Raspberry Pi zeigt Posts ohne Animationen, externe Bildschirme mit Effekten
                   </small>
                 </div>
 
@@ -683,6 +1006,15 @@
                       <input type="checkbox" id="global-music-mute-videos" checked />
                       <span>Videos automatisch stumm schalten</span>
                     </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="global-music-priority">Musik-Priorität</label>
+                    <select id="global-music-priority">
+                      <option value="global">Globale Musik hat Vorrang</option>
+                      <option value="post">Post-spezifische Musik hat Vorrang</option>
+                    </select>
+                    <small>Bestimmt, welche Musik abgespielt wird, wenn sowohl globale als auch post-spezifische Musik konfiguriert sind.</small>
                   </div>
                 </div>
 
@@ -1082,6 +1414,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=1.1"></script>
+    <script src="/js/admin.js?v=2.1"></script>
   </body>
 </html>

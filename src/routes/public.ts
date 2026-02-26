@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { param, query } from 'express-validator';
 import { validate } from '../middleware/validator';
 import * as publicController from '../controllers/publicController';
+import * as displayController from '../controllers/displayController';
 import fs from 'fs';
 import path from 'path';
 
@@ -66,6 +67,18 @@ router.get(
   '/categories',
   [query('organization').optional().isString().trim(), validate],
   publicController.getActiveCategories
+);
+
+// GET /api/public/display/:identifier/posts - Get posts for specific display (for display page)
+router.get(
+  '/display/:identifier/posts',
+  [
+    param('identifier')
+      .matches(/^[a-zA-Z0-9-_]+$/)
+      .withMessage('Ungültiger Display-Identifier'),
+    validate,
+  ],
+  displayController.getPublicDisplayPosts
 );
 
 export default router;

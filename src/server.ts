@@ -28,7 +28,7 @@ declare global {
 }
 
 // Import models BEFORE connectDatabase to ensure they're registered
-import './models';
+// REMOVED: import './models';  // Moved to startServer() to avoid deadlock
 import { connectDatabase } from './config/database';
 import { errorHandler } from './middleware/errorHandler';
 import { cacheControl, compressionHints } from './middleware/performance';
@@ -45,12 +45,16 @@ import mediaRoutes from './routes/media';
 import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
 import kioskRoutes from './routes/kiosk';
+import youtubeRoutes from './routes/youtube';
+import displayRoutes from './routes/displays';
+import transitRoutes from './routes/transit';
+import trafficRoutes from './routes/traffic';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8443;
 const SSL_ENABLED = process.env.SSL_ENABLED === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || './ssl/server.key';
 const SSL_CERT_PATH = process.env.SSL_CERT_PATH || './ssl/server.crt';
@@ -112,27 +116,39 @@ app.use(
 // Configurable via environment variables, defaults are suitable for single-admin usage
 const apiLimiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes default
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '1000', 10), // 1000 requests per window
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '5000', 10), // 5000 requests per window (erhöht von 1000)
   message: 'Zu viele Anfragen von dieser IP, bitte versuchen Sie es später erneut.',
   standardHeaders: true,
   legacyHeaders: false,
-  handler: (req, _res, next) => {
+  handler: (req, res) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     logger.warn('Rate limit exceeded', { ip, path: req.path });
-    next(new Error('Zu viele Anfragen von dieser IP, bitte versuchen Sie es später erneut.'));
+    res.status(429).json({
+      success: false,
+      error: {
+        message: 'Zu viele Anfragen von dieser IP, bitte versuchen Sie es später erneut.'
+      }
+    });
   },
 });
 
 // Rate Limiter for Authentication - more lenient for development/small deployments
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '30', 10), // 30 login attempts per 15 min
-  message: 'Zu viele Login-Versuche. Bitte versuchen Sie es in 15 Minuten erneut.',
+  windowMs: 5 * 60 * 1000, // 5 minutes (verkürzt für bessere UX)
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '100', 10), // 100 login attempts per 5 min
+  message: 'Zu viele Login-Versuche. Bitte warten Sie 5 Minuten.',
   skipSuccessfulRequests: true,
-  handler: (req, _res, next) => {
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  handler: (req, res) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     logger.warn('Auth rate limit exceeded', { ip, path: req.path });
-    next(new Error('Zu viele Login-Versuche. Bitte versuchen Sie es in 15 Minuten erneut.'));
+    res.status(429).json({
+      success: false,
+      error: {
+        message: 'Zu viele Login-Versuche. Bitte warten Sie 5 Minuten.'
+      }
+    });
   },
 });
 
@@ -141,10 +157,36 @@ const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: parseInt(process.env.UPLOAD_RATE_LIMIT_MAX || '100', 10), // 100 uploads per hour
   message: 'Zu viele Upload-Versuche. Bitte versuchen Sie es in einer Stunde erneut.',
-  handler: (req, _res, next) => {
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     logger.warn('Upload rate limit exceeded', { ip, path: req.path, user: req.user?.email });
-    next(new Error('Zu viele Upload-Versuche. Bitte versuchen Sie es in einer Stunde erneut.'));
+    res.status(429).json({
+      success: false,
+      error: {
+        message: 'Zu viele Upload-Versuche. Bitte versuchen Sie es in einer Stunde erneut.'
+      }
+    });
+  },
+});
+
+// Display Rate Limiter - Sehr großzügig für kontinuierliches Polling
+const displayLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.DISPLAY_RATE_LIMIT_MAX || '10000', 10), // 10000 requests per 15 min
+  message: 'Zu viele Display-Anfragen.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    logger.warn('Display rate limit exceeded', { ip, path: req.path });
+    res.status(429).json({
+      success: false,
+      error: {
+        message: 'Zu viele Display-Anfragen. Bitte kontaktieren Sie den Administrator.'
+      }
+    });
   },
 });
 
@@ -176,7 +218,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Input Sanitization - Protect against NoSQL injection
-app.use(mongoSanitize());
+// Erlauben von Punkten in Keys für Settings-API
+app.use(mongoSanitize({
+  allowDots: true
+}));
 
 // Logging
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
@@ -243,17 +288,22 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // API Routes with Rate Limiting
-app.use('/api/', apiLimiter); // Global API rate limit
+// WICHTIG: Display-Routes ZUERST registrieren (vor globalem apiLimiter)
+app.use('/api/public', displayLimiter, publicRoutes); // Großzügiger Limiter für Displays
+app.use('/api/', apiLimiter); // Global API rate limit für alle anderen /api/* Routes
 app.use('/api/auth', authLimiter, authRoutes); // Strict limit for auth
 app.use('/api/auth/sso', ssoRoutes); // SSO Routes (Azure AD)
 app.use('/api/posts', postRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/public', publicRoutes); // No rate limit for public display
 app.use('/api/media/upload', uploadLimiter); // Strict limit for uploads
 app.use('/api/media', mediaRoutes);
 app.use('/api/kiosk', kioskRoutes);
+app.use('/api/youtube', youtubeRoutes);
+app.use('/api/displays', displayRoutes);
+app.use('/api/transit', transitRoutes);
+app.use('/api/traffic', trafficRoutes);
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
@@ -284,6 +334,9 @@ const startServer = async () => {
     // Connect to database
     await connectDatabase();
     logger.info('✅ Datenbankverbindung hergestellt');
+    
+    // Import models AFTER database connection
+    await import('./models');
 
     // Seed database (always seed if users table is empty)
     try {
@@ -362,6 +415,9 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-startServer();
+startServer().catch((error) => {
+  logger.error('❌ Fatal error during server start:', error);
+  process.exit(1);
+});
 
 export default app;
