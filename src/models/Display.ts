@@ -7,6 +7,8 @@ interface DisplayAttributes {
   identifier: string;
   description?: string;
   isActive: boolean;
+  showTransitData: boolean;
+  showTrafficData: boolean;
   organizationId?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -15,7 +17,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'isActive' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -27,6 +29,8 @@ class Display
   public identifier!: string;
   public description?: string;
   public isActive!: boolean;
+  public showTransitData!: boolean;
+  public showTrafficData!: boolean;
   public organizationId?: number;
 
   public readonly createdAt!: Date;
@@ -60,6 +64,16 @@ Display.init(
       allowNull: true,
     },
     isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    showTransitData: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    showTrafficData: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,

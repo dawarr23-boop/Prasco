@@ -615,6 +615,21 @@
                   <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Inaktive Displays erhalten keine Beiträge</small>
                 </div>
 
+                <div class="form-group">
+                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Live-Daten auf diesem Display</label>
+                  <div style="display: flex; gap: 2rem; margin-top: 0.25rem;">
+                    <label>
+                      <input type="checkbox" id="display-showTransitData" name="showTransitData" checked />
+                      ÖPNV-Abfahrten anzeigen
+                    </label>
+                    <label>
+                      <input type="checkbox" id="display-showTrafficData" name="showTrafficData" checked />
+                      Autobahn-Verkehr anzeigen
+                    </label>
+                  </div>
+                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden</small>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary">Display erstellen</button>
                   <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn">

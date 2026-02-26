@@ -121,6 +121,8 @@ export const getDisplayByIdentifier = async (
         'identifier',
         'description',
         'isActive',
+        'showTransitData',
+        'showTrafficData',
         'createdAt',
         'updatedAt',
       ],
@@ -179,6 +181,8 @@ export const createDisplay = async (
       identifier,
       description: description || null,
       isActive: isActive !== undefined ? isActive : true,
+      showTransitData: req.body.showTransitData !== undefined ? req.body.showTransitData : true,
+      showTrafficData: req.body.showTrafficData !== undefined ? req.body.showTrafficData : true,
       organizationId: req.user?.organizationId,
     });
 
@@ -236,6 +240,8 @@ export const updateDisplay = async (
     if (identifier !== undefined) display.identifier = identifier;
     if (description !== undefined) display.description = description;
     if (isActive !== undefined) display.isActive = isActive;
+    if (req.body.showTransitData !== undefined) display.showTransitData = req.body.showTransitData;
+    if (req.body.showTrafficData !== undefined) display.showTrafficData = req.body.showTrafficData;
 
     await display.save();
 
@@ -389,7 +395,7 @@ export const getPublicDisplays = async (
     const displays = await Display.findAll({
       where: { isActive: true },
       order: [['name', 'ASC']],
-      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'organizationId'],
+      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'showTransitData', 'showTrafficData', 'organizationId'],
     });
 
     const response = {
@@ -499,6 +505,8 @@ export const getPublicDisplayPosts = async (
         id: display.id,
         name: display.name,
         identifier: display.identifier,
+        showTransitData: display.showTransitData,
+        showTrafficData: display.showTrafficData,
       },
     };
 

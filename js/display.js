@@ -8,6 +8,7 @@ let autoRotateTimer = null;
 // Display-Identifikation
 let currentDisplayIdentifier = null;
 let currentDisplayName = null;
+let currentDisplayInfo = null; // Vollständige Display-Daten inkl. showTransitData/showTrafficData
 
 // Display-Einstellungen (werden vom Backend geladen)
 let displaySettings = {
@@ -128,14 +129,18 @@ async function loadLiveDataDisplaySettings() {
   }
 }
 
-// Prüfe ob Live-Daten gerade angezeigt werden sollen (Zeitplan)
+// Prüfe ob Live-Daten gerade angezeigt werden sollen (Zeitplan + Display-Einstellung)
 function isLiveDataScheduled() {
   const ts = liveDataState.transitSettings;
   const tr = liveDataState.trafficSettings;
   if (!ts && !tr) return false;
 
-  const transitEnabled = ts?.['transit.enabled'] === 'true';
-  const trafficEnabled = tr?.['traffic.enabled'] === 'true';
+  // Per-Display Einstellung prüfen: Wenn das aktuelle Display Transit/Traffic deaktiviert hat
+  const displayAllowsTransit = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : true;
+  const displayAllowsTraffic = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : true;
+
+  const transitEnabled = ts?.['transit.enabled'] === 'true' && displayAllowsTransit;
+  const trafficEnabled = tr?.['traffic.enabled'] === 'true' && displayAllowsTraffic;
   if (!transitEnabled && !trafficEnabled) return false;
 
   const now = new Date();
@@ -173,6 +178,8 @@ function shouldInsertLiveDataWidget() {
 async function renderTransitWidget() {
   const ts = liveDataState.transitSettings;
   if (!ts || ts['transit.enabled'] !== 'true') return '';
+  // Per-Display Einstellung prüfen
+  if (currentDisplayInfo && currentDisplayInfo.showTransitData === false) return '';
 
   const stationId = ts['transit.stationId'];
   const stationName = ts['transit.stationName'] || 'Haltestelle';
@@ -252,6 +259,8 @@ async function renderTransitWidget() {
 async function renderTrafficWidget() {
   const tr = liveDataState.trafficSettings;
   if (!tr || tr['traffic.enabled'] !== 'true') return '';
+  // Per-Display Einstellung prüfen
+  if (currentDisplayInfo && currentDisplayInfo.showTrafficData === false) return '';
 
   const highways = (tr['traffic.highways'] || '').split(',').filter(Boolean);
   const maxWarnings = parseInt(tr['traffic.maxWarnings'] || '5', 10);
@@ -461,7 +470,8 @@ async function loadDisplayInfo(identifier) {
       const data = await response.json();
       if (data.success && data.data) {
         currentDisplayName = data.data.name;
-        console.log('Display geladen:', data.data.name);
+        currentDisplayInfo = data.data;
+        console.log('Display geladen:', data.data.name, '| Transit:', data.data.showTransitData, '| Traffic:', data.data.showTrafficData);
         updateRefreshInfo();
         return data.data;
       }

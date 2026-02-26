@@ -2764,6 +2764,10 @@ async function loadDisplays() {
                 <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}</h3>
                 <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">🔗 ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
+                <p style="font-size: 0.8em; margin-top: 0.4rem;">
+                  ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
+                  ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
+                </p>
                 <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
                   📺 Display-URL: <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
                 </p>
@@ -2795,6 +2799,10 @@ function showDisplayForm() {
   // Submit-Button aktualisieren
   const submitBtn = document.querySelector('#displayForm button[type="submit"]');
   if (submitBtn) submitBtn.textContent = 'Display erstellen';
+
+  // Live-Daten Checkboxen auf Standard setzen
+  document.getElementById('display-showTransitData').checked = true;
+  document.getElementById('display-showTrafficData').checked = true;
 }
 
 function hideDisplayForm() {
@@ -2829,6 +2837,8 @@ async function editDisplay(id) {
   document.getElementById('display-identifier').value = display.identifier || '';
   document.getElementById('display-description').value = display.description || '';
   document.getElementById('display-isActive').checked = display.isActive !== false;
+  document.getElementById('display-showTransitData').checked = display.showTransitData !== false;
+  document.getElementById('display-showTrafficData').checked = display.showTrafficData !== false;
 
   // Scrolle zum Formular
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
@@ -2858,6 +2868,8 @@ async function handleDisplayFormSubmit(e) {
     identifier: formData.get('identifier'),
     description: formData.get('description') || '',
     isActive: document.getElementById('display-isActive').checked,
+    showTransitData: document.getElementById('display-showTransitData').checked,
+    showTrafficData: document.getElementById('display-showTrafficData').checked,
   };
 
   try {
