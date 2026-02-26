@@ -31,26 +31,6 @@ function extractYouTubeId(url: string): string | null {
 }
 
 /**
- * Convert duration string (HH:MM:SS or MM:SS or SS) to seconds
- */
-function parseDuration(duration: string): number {
-  const parts = duration.split(':').map(Number);
-  
-  if (parts.length === 3) {
-    // HH:MM:SS
-    return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  } else if (parts.length === 2) {
-    // MM:SS
-    return parts[0] * 60 + parts[1];
-  } else if (parts.length === 1) {
-    // SS
-    return parts[0];
-  }
-  
-  return 60; // Fallback
-}
-
-/**
  * @openapi
  * /api/youtube/duration:
  *   post:
