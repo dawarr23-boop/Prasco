@@ -4630,6 +4630,15 @@ let liveDataSettingsLoaded = false;
 let transitSearchTimeout = null;
 
 async function loadLiveDataSettings() {
+  // Displays laden falls noch nicht im Cache
+  if (!displaysCache || displaysCache.length === 0) {
+    try {
+      const response = await apiRequest('/displays');
+      displaysCache = response?.data || [];
+    } catch (e) { console.warn('Displays konnten nicht geladen werden:', e); }
+  }
+  // Display-Checkboxen rendern
+  populateLiveDataDisplays();
   // Lade Transit-Einstellungen
   await loadTransitSettings();
   // Lade Traffic-Einstellungen
@@ -4642,6 +4651,52 @@ async function loadLiveDataSettings() {
   if (!liveDataSettingsLoaded) {
     initLiveDataEventListeners();
     liveDataSettingsLoaded = true;
+  }
+}
+
+function populateLiveDataDisplays() {
+  const displays = displaysCache || [];
+  const containers = ['transit-display-checkboxes', 'traffic-display-checkboxes'];
+  containers.forEach(containerId => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (displays.length === 0) {
+      container.innerHTML = '<p class="text-muted">Keine Displays vorhanden</p>';
+      return;
+    }
+    const prefix = containerId.startsWith('transit') ? 'transit' : 'traffic';
+    container.innerHTML = displays.map(d => `
+      <label class="checkbox-label">
+        <input type="checkbox" id="${prefix}-display-${d.id}" data-display-id="${d.id}" checked />
+        <span>🖥️ ${escapeHtml(d.name)}</span>
+      </label>
+    `).join('');
+  });
+}
+
+// Aktualisiere showTransitData/showTrafficData Flags auf allen Displays
+async function updateDisplayLiveDataFlags(type, displayIdsCsv) {
+  const selectedIds = displayIdsCsv ? displayIdsCsv.split(',').map(id => id.trim()) : [];
+  const allDisplays = displaysCache || [];
+  const flagField = type === 'transit' ? 'showTransitData' : 'showTrafficData';
+
+  for (const display of allDisplays) {
+    const shouldShow = selectedIds.includes(String(display.id));
+    if (display[flagField] !== shouldShow) {
+      try {
+        await fetch(`/api/displays/${display.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          },
+          body: JSON.stringify({ [flagField]: shouldShow })
+        });
+        display[flagField] = shouldShow; // Cache aktualisieren
+      } catch (e) {
+        console.warn(`Display ${display.id} ${flagField} Update fehlgeschlagen:`, e);
+      }
+    }
   }
 }
 
@@ -4823,6 +4878,17 @@ async function loadTransitSettings() {
       const el = document.getElementById(id);
       if (el) el.checked = checked;
     });
+
+    // Display-Auswahl setzen
+    if (data['transit.displayIds']) {
+      const selectedIds = data['transit.displayIds'].split(',').map(id => id.trim());
+      const container = document.getElementById('transit-display-checkboxes');
+      if (container) {
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = selectedIds.includes(cb.dataset.displayId);
+        });
+      }
+    }
   } catch (error) {
     console.warn('Transit-Einstellungen konnten nicht geladen werden:', error);
   }
@@ -4849,6 +4915,10 @@ async function saveTransitSettings() {
     'transit.filter.ferry': document.getElementById('filter-ferry')?.checked ? 'true' : 'false',
   };
 
+  // Ausgewählte Displays
+  const transitDisplayCheckboxes = document.querySelectorAll('#transit-display-checkboxes input[type="checkbox"]:checked');
+  settings['transit.displayIds'] = Array.from(transitDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
+
   try {
     const response = await fetch('/api/settings/bulk', {
       method: 'POST',
@@ -4860,6 +4930,10 @@ async function saveTransitSettings() {
     });
 
     if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+
+    // Per-Display Flags aktualisieren
+    await updateDisplayLiveDataFlags('transit', settings['transit.displayIds']);
+
     showNotification('ÖPNV-Einstellungen gespeichert!', 'success');
   } catch (error) {
     console.error('Fehler beim Speichern:', error);
@@ -4978,6 +5052,17 @@ async function loadTrafficSettings() {
     if (showRoadworks) showRoadworks.checked = data['traffic.showRoadworks'] !== false && data['traffic.showRoadworks'] !== 'false';
     const showClosures = document.getElementById('show-closures');
     if (showClosures) showClosures.checked = data['traffic.showClosures'] !== false && data['traffic.showClosures'] !== 'false';
+
+    // Display-Auswahl setzen
+    if (data['traffic.displayIds']) {
+      const selectedIds = data['traffic.displayIds'].split(',').map(id => id.trim());
+      const container = document.getElementById('traffic-display-checkboxes');
+      if (container) {
+        container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.checked = selectedIds.includes(cb.dataset.displayId);
+        });
+      }
+    }
   } catch (error) {
     console.warn('Traffic-Einstellungen konnten nicht geladen werden:', error);
   }
@@ -5038,6 +5123,10 @@ async function saveTrafficSettings() {
     'traffic.showClosures': document.getElementById('show-closures')?.checked ? 'true' : 'false',
   };
 
+  // Ausgewählte Displays
+  const trafficDisplayCheckboxes = document.querySelectorAll('#traffic-display-checkboxes input[type="checkbox"]:checked');
+  settings['traffic.displayIds'] = Array.from(trafficDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
+
   try {
     const response = await fetch('/api/settings/bulk', {
       method: 'POST',
@@ -5049,6 +5138,10 @@ async function saveTrafficSettings() {
     });
 
     if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+
+    // Per-Display Flags aktualisieren
+    await updateDisplayLiveDataFlags('traffic', settings['traffic.displayIds']);
+
     showNotification('Verkehrs-Einstellungen gespeichert!', 'success');
   } catch (error) {
     console.error('Fehler beim Speichern:', error);

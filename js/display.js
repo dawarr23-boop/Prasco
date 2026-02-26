@@ -139,8 +139,23 @@ function isLiveDataScheduled() {
   const displayAllowsTransit = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : true;
   const displayAllowsTraffic = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : true;
 
-  const transitEnabled = ts?.['transit.enabled'] === 'true' && displayAllowsTransit;
-  const trafficEnabled = tr?.['traffic.enabled'] === 'true' && displayAllowsTraffic;
+  // Zusätzlich: Prüfe ob Display in der displayIds-Liste der Settings enthalten ist
+  const currentDisplayId = currentDisplayInfo ? String(currentDisplayInfo.id) : null;
+  let transitDisplayAllowed = displayAllowsTransit;
+  let trafficDisplayAllowed = displayAllowsTraffic;
+  if (currentDisplayId) {
+    if (ts?.['transit.displayIds']) {
+      const transitIds = ts['transit.displayIds'].split(',').map(id => id.trim());
+      transitDisplayAllowed = transitIds.includes(currentDisplayId);
+    }
+    if (tr?.['traffic.displayIds']) {
+      const trafficIds = tr['traffic.displayIds'].split(',').map(id => id.trim());
+      trafficDisplayAllowed = trafficIds.includes(currentDisplayId);
+    }
+  }
+
+  const transitEnabled = ts?.['transit.enabled'] === 'true' && transitDisplayAllowed;
+  const trafficEnabled = tr?.['traffic.enabled'] === 'true' && trafficDisplayAllowed;
   if (!transitEnabled && !trafficEnabled) return false;
 
   const now = new Date();
