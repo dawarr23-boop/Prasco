@@ -2625,7 +2625,7 @@ function updateHeaderCategory(categoryId) {
 
 // PDF Dokument rendern
 function renderPDF(post) {
-  const mediaUrl = post.media?.fileUrl || post.content;
+  const mediaUrl = post.media?.url || post.content;
   
   if (!mediaUrl) {
     return `
@@ -2656,7 +2656,7 @@ function renderPDF(post) {
 
 // Word Dokument rendern
 function renderWordDocument(post) {
-  const mediaUrl = post.media?.fileUrl || post.content;
+  const mediaUrl = post.media?.url || post.content;
   
   if (!mediaUrl) {
     return `
