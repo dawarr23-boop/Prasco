@@ -1109,9 +1109,9 @@ body {
 .live-data-widget {
   width: 100%;
   height: 100%;
-  background: linear-gradient(160deg, #101820 0%, #1b2838 100%);
+  background: linear-gradient(160deg, #0c1218 0%, #151f2e 100%);
   overflow: hidden;
-  color: #dce0e5;
+  color: #eef1f5;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
@@ -1123,8 +1123,8 @@ body {
   align-items: center;
   gap: 2vw;
   padding: 2vh 3vw;
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
 }
 
@@ -1142,15 +1142,15 @@ body {
 }
 
 .live-title {
-  font-size: 3.2vh;
-  font-weight: 600;
+  font-size: 3.5vh;
+  font-weight: 700;
   flex: 1;
-  color: #c8cdd3;
+  color: #f0f2f5;
 }
 
 .live-time {
-  font-size: 2.2vh;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 2.4vh;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* --- Content Area --- */
@@ -1181,12 +1181,12 @@ body {
 .live-departure-table thead th {
   text-align: left;
   padding: 1.5vh 1vw;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 2vh;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 2.2vh;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Spaltenbreiten */
@@ -1204,15 +1204,15 @@ body {
 .live-departure-table td:nth-child(6) { width: 12%; } /* Delay */
 
 .live-departure-table tbody .dep-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .live-departure-table tbody .dep-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .dep-row td {
-  padding: 1.8vh 1vw;
+  padding: 2vh 1vw;
   vertical-align: middle;
 }
 
@@ -1222,27 +1222,28 @@ body {
 
 .line-badge {
   display: inline-block;
-  padding: 0.6vh 1.2vw;
+  padding: 0.8vh 1.2vw;
   border-radius: 0.6vh;
   font-weight: 700;
-  font-size: 2.4vh;
+  font-size: 2.6vh;
   min-width: 4vw;
   text-align: center;
-  color: #e0e0e0;
+  color: #ffffff;
 }
 
-/* Gedämpfte, augenfreundliche Linienfarben */
-.line-bus { background: #5c3060; }
-.line-regional, .line-regional-express { background: #2a5080; }
-.line-suburban { background: #285a3e; }
-.line-subway { background: #264570; }
-.line-tram { background: #6a3030; }
-.line-national, .line-national-express { background: #424750; }
-.line-ferry { background: #255258; }
+/* Kräftigere Linienfarben für besseren Kontrast */
+.line-bus { background: #7a3d82; }
+.line-regional, .line-regional-express { background: #356aa0; }
+.line-suburban { background: #33724e; }
+.line-subway { background: #2f5890; }
+.line-tram { background: #8a3e3e; }
+.line-national, .line-national-express { background: #555d68; }
+.line-ferry { background: #2e6a72; }
 
 .dep-direction {
-  color: #bfc5cc;
-  font-size: 2.6vh;
+  color: #e8ecf0;
+  font-size: 2.8vh;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1250,35 +1251,35 @@ body {
 
 .dep-platform {
   text-align: center;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 2.2vh;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 2.4vh;
 }
 
 .dep-countdown {
   font-weight: 700;
-  font-size: 2.8vh;
-  color: #8ab0d0;
+  font-size: 3.2vh;
+  color: #a0d0f0;
   font-variant-numeric: tabular-nums;
 }
 
 .dep-time {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  font-size: 2.6vh;
-  color: #a0a8b2;
+  font-size: 2.8vh;
+  color: #c8d0da;
 }
 
 .dep-delay {
   text-align: right;
-  font-weight: 600;
-  font-size: 2.2vh;
+  font-weight: 700;
+  font-size: 2.4vh;
 }
 
-/* Gedämpfte Status-Farben */
-.dep-delay.on-time { color: #508a54; }
-.dep-delay.delayed { color: #b88030; }
-.dep-delay.cancelled { color: #a04545; text-decoration: line-through; }
-.dep-row.cancelled td { opacity: 0.4; text-decoration: line-through; }
+/* Kräftigere Status-Farben */
+.dep-delay.on-time { color: #5fbf65; }
+.dep-delay.delayed { color: #e8a040; }
+.dep-delay.cancelled { color: #d05555; text-decoration: line-through; }
+.dep-row.cancelled td { opacity: 0.45; text-decoration: line-through; }
 
 /* === Verkehrslage Traffic List === */
 .live-traffic-list {
@@ -1291,21 +1292,21 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 1.5vw;
-  padding: 2vh 2vw;
+  padding: 2.5vh 2.5vw;
   border-radius: 1vh;
-  background: rgba(255, 255, 255, 0.03);
-  border-left-width: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left-width: 6px;
   border-left-style: solid;
 }
 
-/* Gedämpfte Akzentfarben */
-.traffic-row.warning { border-left-color: #a07028; }
-.traffic-row.roadwork { border-left-color: #908028; }
-.traffic-row.closure { border-left-color: #803838; }
-.traffic-row.clear { border-left-color: #3d7842; }
+/* Kräftigere Akzentfarben */
+.traffic-row.warning { border-left-color: #d09030; }
+.traffic-row.roadwork { border-left-color: #c0a830; }
+.traffic-row.closure { border-left-color: #c04545; }
+.traffic-row.clear { border-left-color: #4da858; }
 
 .traffic-icon { 
-  font-size: 3.5vh; 
+  font-size: 4vh; 
   flex-shrink: 0;
   line-height: 1;
 }
@@ -1313,33 +1314,33 @@ body {
 .traffic-hw {
   font-weight: 700;
   min-width: 5vw;
-  color: #7090a8;
-  font-size: 2.8vh;
+  color: #a0c8e0;
+  font-size: 3.2vh;
   flex-shrink: 0;
 }
 
 .traffic-msg {
   flex: 1;
-  color: #a8b0b8;
+  color: #dce2e8;
   line-height: 1.5;
-  font-size: 2.4vh;
+  font-size: 2.8vh;
 }
 
 .traffic-detail {
   display: block;
-  font-size: 2vh;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 2.2vh;
+  color: rgba(255, 255, 255, 0.5);
   margin-top: 0.5vh;
 }
 
 /* --- Footer --- */
 .live-widget-footer {
   padding: 1.5vh 3vw;
-  background: rgba(255, 255, 255, 0.02);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
-  font-size: 1.8vh;
-  color: rgba(255, 255, 255, 0.25);
+  font-size: 2vh;
+  color: rgba(255, 255, 255, 0.4);
   flex-shrink: 0;
 }
 
