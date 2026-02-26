@@ -22,6 +22,9 @@ RUN npm run build
 # Production image
 FROM node:20-alpine AS production
 
+# LibreOffice + PDF-to-image tools for PowerPoint slide conversion
+RUN apk add --no-cache libreoffice poppler-utils font-noto font-noto-cjk ttf-dejavu ttf-freefont
+
 WORKDIR /app
 
 # Copy package files
