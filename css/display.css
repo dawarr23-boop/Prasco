@@ -311,6 +311,7 @@ body {
   border-bottom: 2px solid #009640; /* PRASCO Logo Grün */
   gap: 2rem;
   min-height: 51px;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -361,6 +362,8 @@ body {
   padding: 2.5rem;
   position: relative;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .post-container {
@@ -537,6 +540,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .footer-info {
