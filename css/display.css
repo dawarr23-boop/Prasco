@@ -1094,6 +1094,7 @@ body {
 
 /* ============================================
    Live-Daten Widget (Transit/Traffic)
+   Separate Vollbild-Slides
    ============================================ */
 
 .type-livedata {
@@ -1116,11 +1117,12 @@ body {
   flex-direction: column;
 }
 
+/* --- Header --- */
 .live-widget-header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.5vh 3vw;
+  gap: 2vw;
+  padding: 2vh 3vw;
   background: rgba(255, 255, 255, 0.04);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
@@ -1129,184 +1131,219 @@ body {
 .live-indicator {
   color: #c45c5c;
   font-weight: 700;
-  font-size: 1.8vh;
+  font-size: 2.2vh;
   animation: livePulse 2s ease-in-out infinite;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
 }
 
 @keyframes livePulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50% { opacity: 0.3; }
 }
 
 .live-title {
-  font-size: 2.8vh;
+  font-size: 3.2vh;
   font-weight: 600;
   flex: 1;
   color: #c8cdd3;
 }
 
 .live-time {
-  font-size: 2vh;
-  color: rgba(255, 255, 255, 0.45);
+  font-size: 2.2vh;
+  color: rgba(255, 255, 255, 0.4);
 }
 
+/* --- Content Area --- */
 .live-widget-content {
   padding: 2vh 3vw;
   display: flex;
   flex-direction: column;
-  gap: 2.5vh;
   flex: 1;
   overflow: hidden;
 }
 
-.live-widget-section h3 {
-  font-size: 2.6vh;
-  font-weight: 600;
-  margin: 0 0 1.5vh 0;
-  padding-bottom: 0.8vh;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-  color: #b0b8c2;
+/* --- Fullscreen Containers pro Slide --- */
+.transit-fullscreen,
+.traffic-fullscreen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Departure Table */
+/* === ÖPNV Departure Table === */
 .live-departure-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 2.2vh;
+  table-layout: fixed;
 }
 
 .live-departure-table thead th {
   text-align: left;
-  padding: 1vh 1.2vw;
+  padding: 1.5vh 1vw;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 1.8vh;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 2vh;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* Spaltenbreiten */
+.live-departure-table th:nth-child(1),
+.live-departure-table td:nth-child(1) { width: 12%; } /* Linie */
+.live-departure-table th:nth-child(2),
+.live-departure-table td:nth-child(2) { width: 40%; } /* Richtung */
+.live-departure-table th:nth-child(3),
+.live-departure-table td:nth-child(3) { width: 10%; } /* Gleis */
+.live-departure-table th:nth-child(4),
+.live-departure-table td:nth-child(4) { width: 12%; } /* in min */
+.live-departure-table th:nth-child(5),
+.live-departure-table td:nth-child(5) { width: 14%; } /* Abfahrt */
+.live-departure-table th:nth-child(6),
+.live-departure-table td:nth-child(6) { width: 12%; } /* Delay */
 
 .live-departure-table tbody .dep-row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .live-departure-table tbody .dep-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .dep-row td {
-  padding: 1.2vh 1.2vw;
+  padding: 1.8vh 1vw;
   vertical-align: middle;
 }
 
 .dep-line {
-  width: 10vw;
+  /* Spaltenbreite über table-layout */
 }
 
 .line-badge {
   display: inline-block;
-  padding: 0.4vh 1vw;
+  padding: 0.6vh 1.2vw;
   border-radius: 0.6vh;
   font-weight: 700;
-  font-size: 2vh;
-  min-width: 5vw;
+  font-size: 2.4vh;
+  min-width: 4vw;
   text-align: center;
-  color: #e8e8e8;
+  color: #e0e0e0;
 }
 
 /* Gedämpfte, augenfreundliche Linienfarben */
-.line-bus { background: #6b3a6e; }
-.line-regional, .line-regional-express { background: #2d5a8e; }
-.line-suburban { background: #2d6644; }
-.line-subway { background: #2a4f7a; }
-.line-tram { background: #7a3535; }
-.line-national, .line-national-express { background: #4a4f55; }
-.line-ferry { background: #2a5e63; }
+.line-bus { background: #5c3060; }
+.line-regional, .line-regional-express { background: #2a5080; }
+.line-suburban { background: #285a3e; }
+.line-subway { background: #264570; }
+.line-tram { background: #6a3030; }
+.line-national, .line-national-express { background: #424750; }
+.line-ferry { background: #255258; }
 
 .dep-direction {
-  flex: 1;
   color: #bfc5cc;
-  font-size: 2.2vh;
+  font-size: 2.6vh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dep-platform {
-  width: 4vw;
   text-align: center;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 2vh;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2.2vh;
+}
+
+.dep-countdown {
+  font-weight: 700;
+  font-size: 2.8vh;
+  color: #8ab0d0;
+  font-variant-numeric: tabular-nums;
 }
 
 .dep-time {
-  width: 8vw;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  font-size: 2.5vh;
-  color: #d0d5db;
+  font-size: 2.6vh;
+  color: #a0a8b2;
 }
 
 .dep-delay {
-  width: 5vw;
   text-align: right;
   font-weight: 600;
-  font-size: 2vh;
+  font-size: 2.2vh;
 }
 
 /* Gedämpfte Status-Farben */
-.dep-delay.on-time { color: #5a9a5e; }
-.dep-delay.delayed { color: #c49040; }
-.dep-delay.cancelled { color: #b05050; text-decoration: line-through; }
-.dep-row.cancelled td { opacity: 0.45; text-decoration: line-through; }
+.dep-delay.on-time { color: #508a54; }
+.dep-delay.delayed { color: #b88030; }
+.dep-delay.cancelled { color: #a04545; text-decoration: line-through; }
+.dep-row.cancelled td { opacity: 0.4; text-decoration: line-through; }
 
-/* Traffic List */
+/* === Verkehrslage Traffic List === */
 .live-traffic-list {
   display: flex;
   flex-direction: column;
-  gap: 1vh;
+  gap: 1.5vh;
 }
 
 .traffic-row {
   display: flex;
-  align-items: center;
-  gap: 1.2vw;
-  padding: 1.2vh 1.5vw;
+  align-items: flex-start;
+  gap: 1.5vw;
+  padding: 2vh 2vw;
   border-radius: 1vh;
-  background: rgba(255, 255, 255, 0.035);
-  font-size: 2.2vh;
+  background: rgba(255, 255, 255, 0.03);
+  border-left-width: 5px;
+  border-left-style: solid;
 }
 
 /* Gedämpfte Akzentfarben */
-.traffic-row.warning { border-left: 4px solid #b08030; }
-.traffic-row.roadwork { border-left: 4px solid #a09030; }
-.traffic-row.closure { border-left: 4px solid #904040; }
-.traffic-row.clear { border-left: 4px solid #4a8a50; }
+.traffic-row.warning { border-left-color: #a07028; }
+.traffic-row.roadwork { border-left-color: #908028; }
+.traffic-row.closure { border-left-color: #803838; }
+.traffic-row.clear { border-left-color: #3d7842; }
 
-.traffic-icon { font-size: 2.8vh; }
+.traffic-icon { 
+  font-size: 3.5vh; 
+  flex-shrink: 0;
+  line-height: 1;
+}
 
 .traffic-hw {
   font-weight: 700;
   min-width: 5vw;
-  color: #7a9ab8;
-  font-size: 2.4vh;
+  color: #7090a8;
+  font-size: 2.8vh;
+  flex-shrink: 0;
 }
 
 .traffic-msg {
   flex: 1;
-  color: #b5bcc4;
-  line-height: 1.4;
-  font-size: 2vh;
+  color: #a8b0b8;
+  line-height: 1.5;
+  font-size: 2.4vh;
 }
 
+.traffic-detail {
+  display: block;
+  font-size: 2vh;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 0.5vh;
+}
+
+/* --- Footer --- */
 .live-widget-footer {
-  padding: 1.2vh 3vw;
-  background: rgba(255, 255, 255, 0.025);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 1.5vh 3vw;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   text-align: center;
   font-size: 1.8vh;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   flex-shrink: 0;
 }
 
+/* --- Loading --- */
 .live-widget-loading {
   display: flex;
   flex-direction: column;
@@ -1462,12 +1499,8 @@ body {
     font-size: 1.4rem;
   }
 
-  /* Live Widget - nutzt bereits vh/vw, nur Header-Feintuning */
+  /* Live Widget - nutzt bereits vh/vw, minimale Anpassungen */
   .live-widget-header {
-    padding: 2vh 3vw;
-  }
-
-  .live-widget-content {
     padding: 2.5vh 3vw;
   }
 

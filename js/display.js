@@ -193,7 +193,7 @@ function shouldInsertLiveDataWidget() {
   return false;
 }
 
-// Erstelle Transit-Widget HTML
+// Erstelle Transit-Widget HTML (Vollbild-Slide)
 async function renderTransitWidget() {
   const ts = liveDataState.transitSettings;
   if (!ts || ts['transit.enabled'] !== 'true') return '';
@@ -212,7 +212,7 @@ async function renderTransitWidget() {
     if (!response.ok) return '';
     const data = await response.json();
     if (!data.success || !data.data || data.data.length === 0) {
-      return `<div class="live-widget-section"><h3>🚌 ${stationName}</h3><p class="no-data">Aktuell keine Abfahrten</p></div>`;
+      return `<div class="transit-fullscreen"><p class="no-data">Aktuell keine Abfahrten</p></div>`;
     }
 
     // Filtere nach aktivierten Verkehrsmitteln
@@ -237,34 +237,37 @@ async function renderTransitWidget() {
     });
 
     if (filteredDeps.length === 0) {
-      return `<div class="live-widget-section"><h3>🚌 ${stationName}</h3><p class="no-data">Keine passenden Abfahrten</p></div>`;
+      return `<div class="transit-fullscreen"><p class="no-data">Keine passenden Abfahrten</p></div>`;
     }
 
-    const rows = filteredDeps.slice(0, maxDep).map(dep => {
+    const rows = filteredDeps.slice(0, maxDep).map((dep, i) => {
       const when = dep.when ? new Date(dep.when) : null;
-      const planned = dep.plannedWhen ? new Date(dep.plannedWhen) : null;
+      const now = new Date();
       const timeStr = when ? when.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+      // Minuten bis Abfahrt
+      const minUntil = when ? Math.max(0, Math.round((when - now) / 60000)) : null;
+      const minStr = minUntil !== null ? (minUntil === 0 ? 'jetzt' : `${minUntil} min`) : '';
       const delayMin = dep.delay ? Math.round(dep.delay / 60) : 0;
       const delayClass = delayMin > 0 ? 'delayed' : (dep.cancelled ? 'cancelled' : 'on-time');
-      const delayStr = dep.cancelled ? 'Fällt aus' : (delayMin > 0 ? `+${delayMin}` : '');
+      const delayStr = dep.cancelled ? 'Fällt aus' : (delayMin > 0 ? `+${delayMin}'` : '');
       const lineName = dep.line?.name || '?';
       const product = dep.line?.product || 'bus';
       const direction = dep.direction || '';
-      const platform = dep.platform || '';
+      const platform = dep.platform ? `Gl. ${dep.platform}` : '';
 
       return `<tr class="dep-row ${delayClass}">
         <td class="dep-line"><span class="line-badge line-${product}">${lineName}</span></td>
         <td class="dep-direction">${direction}</td>
         <td class="dep-platform">${platform}</td>
+        <td class="dep-countdown">${minStr}</td>
         <td class="dep-time">${timeStr}</td>
         <td class="dep-delay ${delayClass}">${delayStr}</td>
       </tr>`;
     }).join('');
 
-    return `<div class="live-widget-section">
-      <h3>🚌 Abfahrten ${stationName}</h3>
+    return `<div class="transit-fullscreen">
       <table class="live-departure-table">
-        <thead><tr><th>Linie</th><th>Richtung</th><th>Gl.</th><th>Abfahrt</th><th></th></tr></thead>
+        <thead><tr><th>Linie</th><th>Richtung</th><th>Gleis</th><th>in</th><th>Abfahrt</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -274,7 +277,7 @@ async function renderTransitWidget() {
   }
 }
 
-// Erstelle Traffic-Widget HTML
+// Erstelle Traffic-Widget HTML (Vollbild-Slide)
 async function renderTrafficWidget() {
   const tr = liveDataState.trafficSettings;
   if (!tr || tr['traffic.enabled'] !== 'true') return '';
@@ -302,24 +305,42 @@ async function renderTrafficWidget() {
       const closures = showClosures ? (data.data.closures || []).slice(0, maxWarnings) : [];
 
       if (warnings.length === 0 && roadworks.length === 0 && closures.length === 0) {
-        allItems.push(`<div class="traffic-row clear"><span class="traffic-icon">✅</span><span class="traffic-hw">${hw}</span><span class="traffic-msg">Freie Fahrt</span></div>`);
+        allItems.push(`<div class="traffic-row clear">
+          <span class="traffic-icon">✅</span>
+          <span class="traffic-hw">${hw}</span>
+          <span class="traffic-msg">Freie Fahrt — keine Meldungen</span>
+        </div>`);
       } else {
         warnings.forEach(w => {
-          allItems.push(`<div class="traffic-row warning"><span class="traffic-icon">⚠️</span><span class="traffic-hw">${hw}</span><span class="traffic-msg">${w.title || 'Verkehrswarnung'}</span></div>`);
+          const subtitle = w.subtitle ? `<span class="traffic-detail">${w.subtitle}</span>` : '';
+          allItems.push(`<div class="traffic-row warning">
+            <span class="traffic-icon">⚠️</span>
+            <span class="traffic-hw">${hw}</span>
+            <span class="traffic-msg">${w.title || 'Verkehrswarnung'}${subtitle}</span>
+          </div>`);
         });
         roadworks.forEach(r => {
-          allItems.push(`<div class="traffic-row roadwork"><span class="traffic-icon">🚧</span><span class="traffic-hw">${hw}</span><span class="traffic-msg">${r.title || 'Baustelle'}</span></div>`);
+          const subtitle = r.subtitle ? `<span class="traffic-detail">${r.subtitle}</span>` : '';
+          allItems.push(`<div class="traffic-row roadwork">
+            <span class="traffic-icon">🚧</span>
+            <span class="traffic-hw">${hw}</span>
+            <span class="traffic-msg">${r.title || 'Baustelle'}${subtitle}</span>
+          </div>`);
         });
         closures.forEach(c => {
-          allItems.push(`<div class="traffic-row closure"><span class="traffic-icon">🚫</span><span class="traffic-hw">${hw}</span><span class="traffic-msg">${c.title || 'Sperrung'}</span></div>`);
+          const subtitle = c.subtitle ? `<span class="traffic-detail">${c.subtitle}</span>` : '';
+          allItems.push(`<div class="traffic-row closure">
+            <span class="traffic-icon">🚫</span>
+            <span class="traffic-hw">${hw}</span>
+            <span class="traffic-msg">${c.title || 'Sperrung'}${subtitle}</span>
+          </div>`);
         });
       }
     }
 
     if (allItems.length === 0) return '';
 
-    return `<div class="live-widget-section">
-      <h3>🛣️ Verkehrslage ${highways.join(', ')}</h3>
+    return `<div class="traffic-fullscreen">
       <div class="live-traffic-list">${allItems.join('')}</div>
     </div>`;
   } catch (e) {
@@ -328,7 +349,7 @@ async function renderTrafficWidget() {
   }
 }
 
-// Zeige Live-Daten-Widget als virtuellen Post
+// Zeige Live-Daten-Widget als separate Slides (ÖPNV + Verkehr)
 async function showLiveDataWidget() {
   liveDataState.lastInsertTime = Date.now();
   liveDataState.isWidgetActive = true;
@@ -345,7 +366,6 @@ async function showLiveDataWidget() {
   ]);
 
   if (!transitHtml && !trafficHtml) {
-    // Nichts anzuzeigen, weiter zum nächsten normalen Post
     liveDataState.isWidgetActive = false;
     nextPost();
     return;
@@ -353,30 +373,66 @@ async function showLiveDataWidget() {
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const intervalMin = liveDataState.transitSettings?.['transit.displayInterval'] || '20';
 
-  container.innerHTML = `
-    <div class="live-data-widget">
-      <div class="live-widget-header">
-        <span class="live-indicator">● LIVE</span>
-        <span class="live-title">Verkehrsinformationen</span>
-        <span class="live-time">Stand: ${timeStr}</span>
-      </div>
-      <div class="live-widget-content">
-        ${transitHtml}
-        ${trafficHtml}
-      </div>
-      <div class="live-widget-footer">
-        <span>Nächste Aktualisierung in ${liveDataState.transitSettings?.['transit.displayInterval'] || '20'} Minuten</span>
-      </div>
-    </div>
-  `;
+  // Sammle die Slides
+  const slides = [];
 
-  // Zeige Widget für 30 Sekunden, dann weiter
-  clearTimeout(autoRotateTimer);
-  autoRotateTimer = setTimeout(() => {
-    liveDataState.isWidgetActive = false;
-    nextPost();
-  }, 30000);
+  if (transitHtml) {
+    const stationName = liveDataState.transitSettings?.['transit.stationName'] || 'ÖPNV';
+    slides.push({
+      icon: '🚉',
+      title: `Abfahrten ${stationName}`,
+      content: transitHtml,
+      timeStr,
+      intervalMin,
+    });
+  }
+
+  if (trafficHtml) {
+    const highways = (liveDataState.trafficSettings?.['traffic.highways'] || '').split(',').filter(Boolean).join(', ');
+    slides.push({
+      icon: '🛣️',
+      title: `Verkehrslage ${highways}`,
+      content: trafficHtml,
+      timeStr,
+      intervalMin,
+    });
+  }
+
+  // Zeige Slides nacheinander
+  let currentSlideIndex = 0;
+
+  function showSlide(index) {
+    const slide = slides[index];
+    container.innerHTML = `
+      <div class="live-data-widget">
+        <div class="live-widget-header">
+          <span class="live-indicator">● LIVE</span>
+          <span class="live-title">${slide.icon} ${slide.title}</span>
+          <span class="live-time">Stand: ${slide.timeStr}</span>
+        </div>
+        <div class="live-widget-content">
+          ${slide.content}
+        </div>
+        <div class="live-widget-footer">
+          <span>${slides.length > 1 ? `Seite ${index + 1} von ${slides.length} · ` : ''}Nächste Aktualisierung in ${slide.intervalMin} Minuten</span>
+        </div>
+      </div>
+    `;
+
+    clearTimeout(autoRotateTimer);
+    autoRotateTimer = setTimeout(() => {
+      if (index + 1 < slides.length) {
+        showSlide(index + 1);
+      } else {
+        liveDataState.isWidgetActive = false;
+        nextPost();
+      }
+    }, 30000);
+  }
+
+  showSlide(0);
 }
 
 // ============================================
