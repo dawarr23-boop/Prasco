@@ -1460,6 +1460,17 @@ function exitBulkSelection() {
   hideBulkBar();
 }
 
+// ESC zum Beenden der Mehrfachauswahl
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('post-context-menu')) {
+      hidePostContextMenu();
+    } else if (bulkSelectionMode) {
+      exitBulkSelection();
+    }
+  }
+});
+
 function updateBulkSelectionUI() {
   document.querySelectorAll('#posts-list .list-item').forEach(el => {
     const id = parseInt(el.dataset.postId);
@@ -1476,10 +1487,14 @@ function showBulkBar() {
     bar.id = 'bulk-bar';
     bar.innerHTML = `
       <span><strong id="bulk-selected-count">${bulkSelectedIds.size}</strong> ausgewählt</span>
-      <button class="btn btn-secondary btn-sm" onclick="exitBulkSelection()">✕ Abbrechen</button>
+      <button class="btn btn-secondary btn-sm" id="bulk-cancel-btn">✕ Abbrechen</button>
     `;
     const postsList = document.getElementById('posts-list');
     postsList.parentNode.insertBefore(bar, postsList);
+    document.getElementById('bulk-cancel-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      exitBulkSelection();
+    });
   }
   bar.style.display = 'flex';
   const countEl = document.getElementById('bulk-selected-count');
@@ -1488,7 +1503,7 @@ function showBulkBar() {
 
 function hideBulkBar() {
   const bar = document.getElementById('bulk-bar');
-  if (bar) bar.style.display = 'none';
+  if (bar) bar.remove();
 }
 
 // Kontextmenü
@@ -1527,34 +1542,30 @@ function showPostContextMenu(e, postId) {
   if (rect.bottom > window.innerHeight) menu.style.top = (window.innerHeight - rect.height - 8) + 'px';
 
   // Klick-Handler
-  menu.addEventListener('click', async (ev) => {
+  menu.addEventListener('mousedown', async (ev) => {
     const item = ev.target.closest('[data-ctx]');
     if (!item) return;
+    ev.stopPropagation();
     const action = item.dataset.ctx;
+    const capturedIds = [...ids];
     hidePostContextMenu();
 
-    if (action === 'delete') await bulkDeletePosts(ids);
-    else if (action === 'deactivate') await bulkTogglePosts(ids, false);
-    else if (action === 'activate') await bulkTogglePosts(ids, true);
-    else if (action === 'duplicate') await bulkDuplicatePosts(ids);
+    if (action === 'delete') await bulkDeletePosts(capturedIds);
+    else if (action === 'deactivate') await bulkTogglePosts(capturedIds, false);
+    else if (action === 'activate') await bulkTogglePosts(capturedIds, true);
+    else if (action === 'duplicate') await bulkDuplicatePosts(capturedIds);
   });
 
   // Schließen bei Klick außerhalb
   setTimeout(() => {
-    document.addEventListener('click', closeCtxOnClick);
-    document.addEventListener('contextmenu', closeCtxOnContext);
-  }, 10);
-}
-
-function closeCtxOnClick() {
-  hidePostContextMenu();
-  document.removeEventListener('click', closeCtxOnClick);
-  document.removeEventListener('contextmenu', closeCtxOnContext);
-}
-function closeCtxOnContext() {
-  hidePostContextMenu();
-  document.removeEventListener('click', closeCtxOnClick);
-  document.removeEventListener('contextmenu', closeCtxOnContext);
+    function closeHandler(ev) {
+      // Nicht schließen wenn Klick im Menü
+      if (menu.contains(ev.target)) return;
+      hidePostContextMenu();
+      document.removeEventListener('mousedown', closeHandler, true);
+    }
+    document.addEventListener('mousedown', closeHandler, true);
+  }, 50);
 }
 
 function hidePostContextMenu() {
