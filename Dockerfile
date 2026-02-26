@@ -1,5 +1,5 @@
 # PRASCO Digital Signage - Production Dockerfile
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Build dependencies for native modules
 RUN apk add --no-cache python3 make g++ vips-dev
@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Production image
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 # Install runtime dependencies for sharp
 RUN apk add --no-cache vips
