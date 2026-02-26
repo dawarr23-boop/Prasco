@@ -24,6 +24,7 @@ PostDisplay.init(
     postId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: 'posts',
         key: 'id',
@@ -34,6 +35,7 @@ PostDisplay.init(
     displayId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      primaryKey: true,
       references: {
         model: 'displays',
         key: 'id',
@@ -53,10 +55,6 @@ PostDisplay.init(
     timestamps: true,
     updatedAt: false,
     indexes: [
-      {
-        fields: ['post_id', 'display_id'],
-        unique: true,
-      },
       {
         fields: ['display_id'],
       },
