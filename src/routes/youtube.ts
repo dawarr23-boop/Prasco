@@ -3,11 +3,8 @@ import { body } from 'express-validator';
 import { validate } from '../middleware/validator';
 import { authenticate } from '../middleware/auth';
 import { requirePermission } from '../middleware/permissions';
-import { exec } from 'child_process';
-import { promisify } from 'util';
 import { logger } from '../utils/logger';
 
-const execAsync = promisify(exec);
 const router = Router();
 
 // All routes require authentication
@@ -128,20 +125,48 @@ router.post(
 
       logger.info(`Rufe Video-Dauer ab für: ${videoId}`);
 
-      // Use yt-dlp to get duration (with full path)
-      const { stdout, stderr } = await execAsync(
-        `/usr/local/bin/yt-dlp --get-duration "https://www.youtube.com/watch?v=${videoId}"`,
-        { timeout: 10000 } // 10 second timeout
-      );
+      let durationSeconds = 0;
 
-      if (stderr) {
-        logger.warn(`yt-dlp stderr: ${stderr}`);
+      try {
+        // Fetch YouTube page and extract duration from embedded JSON
+        const response = await fetch(
+          `https://www.youtube.com/watch?v=${videoId}`,
+          {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept-Language': 'en-US,en;q=0.9',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`YouTube returned ${response.status}`);
+        }
+
+        const html = await response.text();
+
+        // Try to extract lengthSeconds from the page data
+        const lengthMatch = html.match(/"lengthSeconds"\s*:\s*"(\d+)"/);
+        if (lengthMatch) {
+          durationSeconds = parseInt(lengthMatch[1], 10);
+        } else {
+          // Fallback: try approxDurationMs
+          const approxMatch = html.match(/"approxDurationMs"\s*:\s*"(\d+)"/);
+          if (approxMatch) {
+            durationSeconds = Math.round(parseInt(approxMatch[1], 10) / 1000);
+          }
+        }
+      } catch (fetchError: any) {
+        logger.warn(`Fetch-Methode fehlgeschlagen: ${fetchError.message}`);
       }
 
-      const durationString = stdout.trim();
-      const durationSeconds = parseDuration(durationString);
+      // If we couldn't get a duration, use a sensible default
+      if (!durationSeconds || durationSeconds <= 0) {
+        logger.warn(`Konnte Video-Dauer nicht ermitteln für ${videoId}, verwende Standard 60s`);
+        durationSeconds = 60;
+      }
 
-      logger.info(`Video-Dauer: ${durationString} = ${durationSeconds} Sekunden`);
+      logger.info(`Video-Dauer: ${durationSeconds} Sekunden`);
 
       res.json({
         success: true,
@@ -153,10 +178,14 @@ router.post(
     } catch (error: any) {
       logger.error('Fehler beim Abrufen der Video-Dauer:', error);
       
-      res.status(500).json({
-        success: false,
-        message: 'Fehler beim Abrufen der Video-Dauer',
-        error: error.message,
+      // Return a default duration instead of crashing
+      res.json({
+        success: true,
+        data: {
+          duration: 60,
+          videoId: extractYouTubeId(req.body.url) || 'unknown',
+          estimated: true,
+        },
       });
     }
   }
