@@ -370,6 +370,46 @@ export const getDisplayPosts = async (
 };
 
 /**
+ * Get all active displays (public API for Android TV app)
+ * GET /api/public/displays
+ */
+export const getPublicDisplays = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const cacheKey = 'public:displays:list';
+    const cached = cacheService.get<any>(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
+    const displays = await Display.findAll({
+      where: { isActive: true },
+      order: [['name', 'ASC']],
+      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'organizationId'],
+    });
+
+    const response = {
+      success: true,
+      data: displays,
+      count: displays.length,
+    };
+
+    // Cache für 60 Sekunden
+    cacheService.set(cacheKey, response, 60);
+
+    res.json(response);
+
+    logger.info(`Public displays abgerufen: ${displays.length}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get posts for a specific display (public API for display page)
  * GET /api/public/display/:identifier/posts
  */

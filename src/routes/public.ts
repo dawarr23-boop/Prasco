@@ -69,6 +69,9 @@ router.get(
   publicController.getActiveCategories
 );
 
+// GET /api/public/displays - Get all active displays (for Android TV app)
+router.get('/displays', displayController.getPublicDisplays);
+
 // GET /api/public/display/:identifier/posts - Get posts for specific display (for display page)
 router.get(
   '/display/:identifier/posts',
