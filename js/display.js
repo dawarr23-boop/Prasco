@@ -1893,28 +1893,24 @@ async function displayCurrentPost() {
 
       // Video-URL aus verschiedenen Quellen
       const videoUrl = post.media_url || post.content;
-      // Prüfe auf lokale heruntergeladene Kopie (für Offline-Hotspot-Modus)
-      const localVideoUrl = post.backgroundMusicUrl || post.background_music_url;
       
       // Debug: Video-Quellen loggen
-      console.log('🎬 Video-Post:', JSON.stringify({ videoUrl, localVideoUrl, bgm: post.backgroundMusicUrl }));
+      console.log('🎬 Video-Post:', JSON.stringify({ videoUrl, mediaUrl: post.media_url, content: post.content }));
 
       if (videoUrl) {
-        // YouTube-Video-ID extrahieren (brauchen wir für lokale Kopie-Erkennung)
+        // YouTube-Video-ID extrahieren
         const youtubeMatch = videoUrl.match(
           /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/|youtube\.com\/watch\?.*v=)([a-zA-Z0-9_-]{11})/
         );
         
-        // Bei YouTube: Versuche IMMER die lokale Kopie zu verwenden (GPU-Probleme mit iframes auf Pi)
-        const youtubeLocalPath = youtubeMatch ? '/uploads/videos/' + youtubeMatch[1] + '.mp4' : null;
-        const effectiveLocalUrl = localVideoUrl || youtubeLocalPath;
-        
-        if (effectiveLocalUrl && effectiveLocalUrl.startsWith('/uploads/videos/')) {
-          console.log('🎬 Verwende lokale Video-Kopie:', effectiveLocalUrl);
+        // Lokale Video-Datei: Nur verwenden wenn media_url auf eine lokale Datei zeigt
+        // (z.B. wenn der Video-Download-Service das Video heruntergeladen hat)
+        if (!youtubeMatch && videoUrl.startsWith('/uploads/')) {
+          console.log('🎬 Verwende lokale Video-Datei:', videoUrl);
           videoHtml = `<div class="video-fullscreen-container">
             <video 
               id="fullscreen-video"
-              src="${escapeHtml(effectiveLocalUrl)}" 
+              src="${escapeHtml(videoUrl)}" 
               autoplay 
               loop 
               playsinline
@@ -1923,7 +1919,7 @@ async function displayCurrentPost() {
             ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
           </div>`;
         }
-        // Fallback: YouTube iframe (nur wenn keine lokale Kopie vorhanden)
+        // YouTube: Immer iframe verwenden (lokale Kopie kommt über media_url wenn heruntergeladen)
         else if (youtubeMatch) {
           const videoId = youtubeMatch[1];
           const uniqueId = `youtube-player-${Date.now()}`;
