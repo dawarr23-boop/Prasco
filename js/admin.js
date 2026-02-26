@@ -1764,7 +1764,7 @@ async function loadDisplayCheckboxes(selectedDisplayIds = []) {
                  value="${display.id}" 
                  ${selectedDisplayIds.includes(display.id) ? 'checked' : ''}
                  ${!display.isActive ? 'disabled' : ''}
-                 onchange="this.closest('.display-checkbox-card').classList.toggle('checked', this.checked)" />
+                 data-toggle-card="true" />
           <div class="display-checkbox-info">
             <span class="display-status-icon">${display.isActive ? '🟢' : '🔴'}</span>
             <span class="display-name">${escapeHtml(display.name)}</span>
@@ -2771,7 +2771,7 @@ async function loadDisplays() {
                 </p>
             </div>
             <div class="list-item-actions">
-                <button class="btn btn-secondary btn-sm" onclick="window.open('/public/display.html?id=${escapeHtml(display.identifier)}', '_blank')" title="Display öffnen">
+                <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="Display öffnen">
                   ▷ Öffnen
                 </button>
                 <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">Bearbeiten</button>
@@ -4125,6 +4125,9 @@ window.addEventListener('load', async () => {
         editDisplay(displayId);
       } else if (action === 'delete-display' && displayId) {
         deleteDisplay(displayId);
+      } else if (action === 'open-display') {
+        const url = actionElement.dataset.displayUrl;
+        if (url) window.open(url, '_blank');
       }
     });
   }
@@ -4598,6 +4601,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (postTypeSelect) {
     updateUploadSectionVisibility(postTypeSelect.value);
   }
+
+  // Delegated handler for display checkbox cards (replaces inline onchange)
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('[data-toggle-card]')) {
+      const card = e.target.closest('.display-checkbox-card');
+      if (card) card.classList.toggle('checked', e.target.checked);
+    }
+  });
 });
 
 console.log('Admin Dashboard geladen (API-Modus)');

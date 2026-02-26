@@ -590,7 +590,7 @@
                     id="display-identifier" 
                     name="identifier" 
                     required 
-                    pattern="[a-zA-Z0-9-_]+"
+                    pattern="[a-zA-Z0-9_-]+"
                     placeholder="z.B. empfangsbereich-1" 
                     title="Nur Buchstaben, Zahlen, Bindestriche und Unterstriche"
                   />
@@ -670,7 +670,7 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="user-password" data-translate="users.password">Passwort *</label>
-                    <input type="password" id="user-password" name="password" minlength="6" />
+                    <input type="password" id="user-password" name="password" minlength="6" autocomplete="new-password" />
                     <small class="form-hint"
                       >Min. 6 Zeichen (leer lassen für keine Änderung bei Bearbeitung)</small
                     >
@@ -1387,11 +1387,11 @@
         <form id="changePasswordForm">
           <div class="form-group">
             <label for="current-password">Aktuelles Passwort *</label>
-            <input type="password" id="current-password" name="currentPassword" required />
+            <input type="password" id="current-password" name="currentPassword" autocomplete="current-password" required />
           </div>
           <div class="form-group">
             <label for="new-password">Neues Passwort *</label>
-            <input type="password" id="new-password" name="newPassword" minlength="6" required />
+            <input type="password" id="new-password" name="newPassword" minlength="6" autocomplete="new-password" required />
             <small class="form-hint">Mindestens 6 Zeichen</small>
           </div>
           <div class="form-group">
@@ -1401,6 +1401,7 @@
               id="confirm-password"
               name="confirmPassword"
               minlength="6"
+              autocomplete="new-password"
               required
             />
           </div>
@@ -1414,6 +1415,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=2.1"></script>
+    <script src="/js/admin.js?v=2.2"></script>
   </body>
 </html>
