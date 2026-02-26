@@ -139,19 +139,23 @@ function isLiveDataScheduled() {
   const displayAllowsTransit = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : true;
   const displayAllowsTraffic = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : true;
 
-  // Zusätzlich: Prüfe ob Display in der displayIds-Liste der Settings enthalten ist
+  // Prüfe ob Display in der displayIds-Liste der Settings enthalten ist
   const currentDisplayId = currentDisplayInfo ? String(currentDisplayInfo.id) : null;
-  let transitDisplayAllowed = displayAllowsTransit;
-  let trafficDisplayAllowed = displayAllowsTraffic;
+  let transitDisplayAllowed = false;
+  let trafficDisplayAllowed = false;
   if (currentDisplayId) {
     if (ts?.['transit.displayIds']) {
-      const transitIds = ts['transit.displayIds'].split(',').map(id => id.trim());
+      const transitIds = ts['transit.displayIds'].split(',').map(id => id.trim()).filter(id => id);
       transitDisplayAllowed = transitIds.includes(currentDisplayId);
     }
     if (tr?.['traffic.displayIds']) {
-      const trafficIds = tr['traffic.displayIds'].split(',').map(id => id.trim());
+      const trafficIds = tr['traffic.displayIds'].split(',').map(id => id.trim()).filter(id => id);
       trafficDisplayAllowed = trafficIds.includes(currentDisplayId);
     }
+  } else {
+    // Kein Display ausgewählt (z.B. kein Identifier) → Fallback auf per-Display Flags
+    transitDisplayAllowed = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : false;
+    trafficDisplayAllowed = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : false;
   }
 
   const transitEnabled = ts?.['transit.enabled'] === 'true' && transitDisplayAllowed;
