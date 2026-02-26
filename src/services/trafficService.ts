@@ -72,7 +72,7 @@ class TrafficService {
         lat: 51.7633, // Ahlen, NRW
         lon: 7.8919,
       },
-      maxDistance: 20, // 20 km Radius um Ahlen
+      maxDistance: 35, // 35 km Radius um Ahlen
     };
 
     // Axios Client für Autobahn API
