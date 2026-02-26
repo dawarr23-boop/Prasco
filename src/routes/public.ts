@@ -72,6 +72,18 @@ router.get(
 // GET /api/public/displays - Get all active displays (for Android TV app)
 router.get('/displays', displayController.getPublicDisplays);
 
+// GET /api/public/display/:identifier - Get display info by identifier (for display page, no auth needed)
+router.get(
+  '/display/:identifier',
+  [
+    param('identifier')
+      .matches(/^[a-zA-Z0-9-_]+$/)
+      .withMessage('Ungültiger Display-Identifier'),
+    validate,
+  ],
+  displayController.getDisplayByIdentifier
+);
+
 // GET /api/public/display/:identifier/posts - Get posts for specific display (for display page)
 router.get(
   '/display/:identifier/posts',
