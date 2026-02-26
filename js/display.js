@@ -357,6 +357,12 @@ async function showLiveDataWidget() {
   const container = document.getElementById('current-post');
   if (!container) return;
 
+  // Header-Kategorie auf Live-Daten setzen (gleicher Pill-Stil wie andere Kategorien)
+  const headerCategory = document.getElementById('header-category');
+  if (headerCategory) {
+    headerCategory.innerHTML = `<div style="background: #2a5080; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">🚉 Live-Daten</div>`;
+  }
+
   container.className = 'post type-livedata';
   container.innerHTML = '<div class="live-widget-loading"><div class="spinner"></div><p>Lade Live-Daten...</p></div>';
 
