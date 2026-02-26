@@ -1726,7 +1726,12 @@ async function init() {
   updateRefreshInfo();
 
   if (posts.length > 0) {
-    displayCurrentPost();
+    // Prüfe ob sofort Live-Daten angezeigt werden sollen
+    if (shouldInsertLiveDataWidget()) {
+      showLiveDataWidget();
+    } else {
+      displayCurrentPost();
+    }
     updatePostCounter();
     updatePresentationCounter();
     
