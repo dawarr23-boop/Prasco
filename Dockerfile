@@ -41,8 +41,8 @@ COPY css ./css
 COPY js ./js
 COPY public ./public
 
-# Create uploads directory
-RUN mkdir -p uploads/originals uploads/thumbnails uploads/presentations uploads/temp
+# Create uploads and logs directories
+RUN mkdir -p uploads/originals uploads/thumbnails uploads/presentations uploads/temp logs
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
