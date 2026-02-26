@@ -165,9 +165,9 @@ function isLiveDataScheduled() {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Lies Zeitplan aus Settings (Default: 14:00 - 23:59)
-  const startStr = ts?.['transit.scheduleStart'] || tr?.['traffic.scheduleStart'] || '14:00';
-  const endStr = ts?.['transit.scheduleEnd'] || tr?.['traffic.scheduleEnd'] || '20:00';
+  // Lies Zeitplan aus Settings (Default: ganztägig 00:00 - 23:59)
+  const startStr = ts?.['transit.scheduleStart'] || tr?.['traffic.scheduleStart'] || '00:00';
+  const endStr = ts?.['transit.scheduleEnd'] || tr?.['traffic.scheduleEnd'] || '23:59';
 
   const [startH, startM] = startStr.split(':').map(Number);
   const [endH, endM] = endStr.split(':').map(Number);
