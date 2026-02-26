@@ -820,12 +820,23 @@
 
                 <div id="traffic-config" style="display: none">
                   <div class="form-group">
+                    <label for="traffic-location-preset">Standort-Vorauswahl</label>
+                    <select id="traffic-location-preset">
+                      <option value="">— Manuell auswählen —</option>
+                      <option value="ahlen" selected>Ahlen (A1, A2, A43, A44)</option>
+                      <option value="muenster">Münster (A1, A2, A43)</option>
+                      <option value="dortmund">Dortmund (A1, A2, A40, A44, A45)</option>
+                      <option value="bielefeld">Bielefeld (A2, A33)</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
                     <label for="traffic-highway-select">Autobahnen auswählen</label>
                     <div class="highway-select-wrapper">
                       <select id="traffic-highway-select" multiple size="6">
                         <option value="loading" disabled>Lade Autobahnen...</option>
                       </select>
-                      <small>Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl</small>
+                      <small>Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl oder nutzen Sie die Standort-Vorauswahl</small>
                     </div>
                   </div>
 
@@ -1444,6 +1455,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=2.3"></script>
+    <script src="/js/admin.js?v=2.4"></script>
   </body>
 </html>

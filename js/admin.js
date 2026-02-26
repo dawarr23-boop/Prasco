@@ -4777,6 +4777,16 @@ function initLiveDataEventListeners() {
   if (highwaySelect) {
     highwaySelect.addEventListener('change', updateSelectedHighwaysDisplay);
   }
+
+  // Location preset change
+  const locationPreset = document.getElementById('traffic-location-preset');
+  if (locationPreset) {
+    locationPreset.addEventListener('change', (e) => {
+      if (e.target.value) {
+        applyTrafficLocationPreset(e.target.value);
+      }
+    });
+  }
 }
 
 async function searchTransitStations() {
@@ -5083,6 +5093,25 @@ async function loadHighwayList() {
     select.innerHTML = '<option value="" disabled>Fehler beim Laden</option>';
     console.error('Highway list error:', error);
   }
+}
+
+// Standort-Presets für Autobahnen
+const TRAFFIC_LOCATION_PRESETS = {
+  ahlen: ['A1', 'A2', 'A43', 'A44'],
+  muenster: ['A1', 'A2', 'A43'],
+  dortmund: ['A1', 'A2', 'A40', 'A44', 'A45'],
+  bielefeld: ['A2', 'A33'],
+};
+
+function applyTrafficLocationPreset(presetKey) {
+  const select = document.getElementById('traffic-highway-select');
+  if (!select || !presetKey) return;
+  const highways = TRAFFIC_LOCATION_PRESETS[presetKey];
+  if (!highways) return;
+  Array.from(select.options).forEach(opt => {
+    opt.selected = highways.includes(opt.value);
+  });
+  updateSelectedHighwaysDisplay();
 }
 
 function updateSelectedHighwaysDisplay() {
