@@ -1933,10 +1933,11 @@ async function displayCurrentPost() {
         else if (youtubeMatch) {
           const videoId = youtubeMatch[1];
           const uniqueId = `youtube-player-${Date.now()}`;
+          // YouTube muss immer mute=1 sein, sonst blockiert der Browser Autoplay
           videoHtml = `<div class="video-fullscreen-container" id="video-fs-container">
             <iframe 
               id="${uniqueId}"
-              src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=${muteParam}&loop=1&playlist=${videoId}&controls=0&rel=0&playsinline=1&enablejsapi=1&modestbranding=1&iv_load_policy=3&fs=1&disablekb=1&showinfo=0" 
+              src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&rel=0&playsinline=1&enablejsapi=1&modestbranding=1&iv_load_policy=3&fs=1&disablekb=1&showinfo=0" 
               frameborder="0" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" 
               referrerpolicy="no-referrer-when-downgrade"
