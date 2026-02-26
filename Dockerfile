@@ -39,7 +39,7 @@ COPY --from=builder /app/dist ./dist
 COPY views ./views
 COPY css ./css
 COPY js ./js
-COPY index.html ./
+COPY public ./public
 
 # Create uploads directory
 RUN mkdir -p uploads/originals uploads/thumbnails uploads/presentations uploads/temp
