@@ -975,50 +975,83 @@ body {
 /* ============================================
    Bulk Selection Styles
    ============================================ */
-.post-checkbox-wrapper {
+.list-item.bulk-selected {
+  background-color: rgba(0, 120, 215, 0.12);
+  border: 2px solid #0078d7;
+  box-shadow: 0 2px 8px rgba(0, 120, 215, 0.25);
+}
+
+.list-item.bulk-selected .list-item-actions {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+#bulk-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 0.5rem;
-  margin: 0;
-  cursor: pointer;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #0078d7, #005a9e);
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  animation: slideDown 0.25s ease;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.post-checkbox {
-  cursor: pointer;
-  accent-color: var(--prasco-red);
+#bulk-bar .btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem;
 }
-
-.list-item.selected {
-  background-color: rgba(0, 150, 64, 0.1);
-  border: 2px solid var(--prasco-red);
-  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.2);
-}
-
-#bulk-actions-bar {
-  animation: slideDown 0.3s ease;
+#bulk-bar .btn:hover {
+  background: rgba(255,255,255,0.35);
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-#select-all-posts {
-  accent-color: var(--prasco-red);
+/* Kontextmenü */
+.post-context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  min-width: 180px;
+  padding: 0.35rem 0;
+  animation: ctxFadeIn 0.12s ease;
 }
 
-#selected-count {
-  font-size: 0.95rem;
-  padding: 0.25rem 0.75rem;
-  background: rgba(0, 102, 204, 0.1);
-  border-radius: 12px;
+@keyframes ctxFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.ctx-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  color: #888;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+}
+
+.ctx-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.1s;
+  user-select: none;
+}
+
+.ctx-item:hover {
+  background: #f0f4ff;
 }
 
 /* Settings */

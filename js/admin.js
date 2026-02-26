@@ -1426,6 +1426,206 @@ let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
 
+// ============================================
+// Bulk Selection & Context Menu
+// ============================================
+let bulkSelectedIds = new Set();
+let bulkSelectionMode = false;
+let longPressTimer = null;
+const LONG_PRESS_MS = 500;
+
+function toggleBulkSelect(postId) {
+  if (bulkSelectedIds.has(postId)) {
+    bulkSelectedIds.delete(postId);
+  } else {
+    bulkSelectedIds.add(postId);
+  }
+  if (bulkSelectedIds.size === 0) exitBulkSelection();
+  updateBulkSelectionUI();
+}
+
+function enterBulkSelection(postId) {
+  bulkSelectionMode = true;
+  bulkSelectedIds.clear();
+  bulkSelectedIds.add(postId);
+  updateBulkSelectionUI();
+  // Hinweis-Bar einblenden
+  showBulkBar();
+}
+
+function exitBulkSelection() {
+  bulkSelectionMode = false;
+  bulkSelectedIds.clear();
+  updateBulkSelectionUI();
+  hideBulkBar();
+}
+
+function updateBulkSelectionUI() {
+  document.querySelectorAll('#posts-list .list-item').forEach(el => {
+    const id = parseInt(el.dataset.postId);
+    el.classList.toggle('bulk-selected', bulkSelectedIds.has(id));
+  });
+  const countEl = document.getElementById('bulk-selected-count');
+  if (countEl) countEl.textContent = bulkSelectedIds.size;
+}
+
+function showBulkBar() {
+  let bar = document.getElementById('bulk-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'bulk-bar';
+    bar.innerHTML = `
+      <span><strong id="bulk-selected-count">${bulkSelectedIds.size}</strong> ausgewählt</span>
+      <button class="btn btn-secondary btn-sm" onclick="exitBulkSelection()">✕ Abbrechen</button>
+    `;
+    const postsList = document.getElementById('posts-list');
+    postsList.parentNode.insertBefore(bar, postsList);
+  }
+  bar.style.display = 'flex';
+  const countEl = document.getElementById('bulk-selected-count');
+  if (countEl) countEl.textContent = bulkSelectedIds.size;
+}
+
+function hideBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+// Kontextmenü
+function showPostContextMenu(e, postId) {
+  e.preventDefault();
+  hidePostContextMenu();
+
+  const isInSelection = bulkSelectionMode && bulkSelectedIds.size > 0;
+  const count = isInSelection ? bulkSelectedIds.size : 1;
+  const ids = isInSelection ? [...bulkSelectedIds] : [postId];
+
+  // Prüfe Status der gewählten Posts
+  const selectedPosts = postsCache.filter(p => ids.includes(p.id));
+  const allActive = selectedPosts.every(p => p.isActive !== false);
+  const allInactive = selectedPosts.every(p => p.isActive === false);
+
+  const menu = document.createElement('div');
+  menu.id = 'post-context-menu';
+  menu.className = 'post-context-menu';
+  menu.innerHTML = `
+    <div class="ctx-header">${count} ${count === 1 ? 'Beitrag' : 'Beiträge'}</div>
+    <div class="ctx-item" data-ctx="delete">🗑️ Löschen</div>
+    ${!allInactive ? `<div class="ctx-item" data-ctx="deactivate">⏸ Deaktivieren</div>` : ''}
+    ${!allActive ? `<div class="ctx-item" data-ctx="activate">▶ Aktivieren</div>` : ''}
+    <div class="ctx-item" data-ctx="duplicate">📋 Duplizieren</div>
+  `;
+
+  // Positionierung
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  document.body.appendChild(menu);
+
+  // Sicherstellen, dass Menü im Viewport bleibt
+  const rect = menu.getBoundingClientRect();
+  if (rect.right > window.innerWidth) menu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+  if (rect.bottom > window.innerHeight) menu.style.top = (window.innerHeight - rect.height - 8) + 'px';
+
+  // Klick-Handler
+  menu.addEventListener('click', async (ev) => {
+    const item = ev.target.closest('[data-ctx]');
+    if (!item) return;
+    const action = item.dataset.ctx;
+    hidePostContextMenu();
+
+    if (action === 'delete') await bulkDeletePosts(ids);
+    else if (action === 'deactivate') await bulkTogglePosts(ids, false);
+    else if (action === 'activate') await bulkTogglePosts(ids, true);
+    else if (action === 'duplicate') await bulkDuplicatePosts(ids);
+  });
+
+  // Schließen bei Klick außerhalb
+  setTimeout(() => {
+    document.addEventListener('click', closeCtxOnClick);
+    document.addEventListener('contextmenu', closeCtxOnContext);
+  }, 10);
+}
+
+function closeCtxOnClick() {
+  hidePostContextMenu();
+  document.removeEventListener('click', closeCtxOnClick);
+  document.removeEventListener('contextmenu', closeCtxOnContext);
+}
+function closeCtxOnContext() {
+  hidePostContextMenu();
+  document.removeEventListener('click', closeCtxOnClick);
+  document.removeEventListener('contextmenu', closeCtxOnContext);
+}
+
+function hidePostContextMenu() {
+  const menu = document.getElementById('post-context-menu');
+  if (menu) menu.remove();
+}
+
+// Bulk-Aktionen
+async function bulkDeletePosts(ids) {
+  if (!confirm(`${ids.length} ${ids.length === 1 ? 'Beitrag' : 'Beiträge'} wirklich löschen?`)) return;
+  try {
+    for (const id of ids) {
+      await apiRequest(`/posts/${id}`, { method: 'DELETE' });
+    }
+    showNotification(`${ids.length} ${ids.length === 1 ? 'Beitrag' : 'Beiträge'} gelöscht`, 'success');
+    exitBulkSelection();
+    await loadPosts();
+    await updateDashboardStats();
+  } catch (error) {
+    showNotification('Fehler: ' + error.message, 'error');
+  }
+}
+
+async function bulkTogglePosts(ids, active) {
+  try {
+    for (const id of ids) {
+      await apiRequest(`/posts/${id}`, { method: 'PUT', body: JSON.stringify({ isActive: active }) });
+    }
+    showNotification(`${ids.length} ${ids.length === 1 ? 'Beitrag' : 'Beiträge'} ${active ? 'aktiviert' : 'deaktiviert'}`, 'success');
+    exitBulkSelection();
+    await loadPosts();
+  } catch (error) {
+    showNotification('Fehler: ' + error.message, 'error');
+  }
+}
+
+async function bulkDuplicatePosts(ids) {
+  try {
+    let created = 0;
+    for (const id of ids) {
+      const post = postsCache.find(p => p.id === id);
+      if (!post) continue;
+      await apiRequest('/posts', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: post.title + ' (Kopie)',
+          content: post.content,
+          contentType: post.contentType,
+          categoryId: post.categoryId || null,
+          duration: post.duration,
+          priority: post.priority,
+          isActive: post.isActive,
+          displayMode: post.displayMode || 'all',
+          displayIds: post.displays ? post.displays.map(d => d.id) : [],
+          startDate: post.startDate,
+          endDate: post.endDate,
+          showTitle: post.showTitle,
+          blendEffect: post.blendEffect,
+        }),
+      });
+      created++;
+    }
+    showNotification(`${created} ${created === 1 ? 'Beitrag' : 'Beiträge'} dupliziert`, 'success');
+    exitBulkSelection();
+    await loadPosts();
+    await updateDashboardStats();
+  } catch (error) {
+    showNotification('Fehler: ' + error.message, 'error');
+  }
+}
+
 async function loadPosts() {
   const postsList = document.getElementById('posts-list');
   postsList.innerHTML = '<p style="text-align:center; color: #6c757d;">Lade Beiträge...</p>';
@@ -4077,25 +4277,80 @@ window.addEventListener('load', async () => {
     });
   }
 
-  // Event Delegation für Posts
+  // Event Delegation für Posts (Klick, Long-Press, Rechtsklick)
   const postsList = document.getElementById('posts-list');
   if (postsList) {
+    // Normaler Klick
     postsList.addEventListener('click', (e) => {
-      // Klick auf Button oder klickbaren Bereich
-      const actionElement = e.target.closest('[data-action]');
-      if (!actionElement) return;
-
-      // Ignoriere Klicks auf drag-handle
       if (e.target.closest('.drag-handle')) return;
 
-      const action = actionElement.dataset.action;
-      const postId = parseInt(actionElement.dataset.postId);
+      const listItem = e.target.closest('.list-item[data-post-id]');
+      const postId = listItem ? parseInt(listItem.dataset.postId) : null;
 
-      if (action === 'edit' && postId) {
-        editPost(postId);
-      } else if (action === 'delete' && postId) {
-        deletePost(postId);
+      // Im Selektionsmodus: Klick toggelt Auswahl
+      if (bulkSelectionMode && listItem && postId) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleBulkSelect(postId);
+        return;
       }
+
+      // Normaler Modus: Button-Aktionen
+      const actionElement = e.target.closest('[data-action]');
+      if (!actionElement) return;
+      const action = actionElement.dataset.action;
+      const actionPostId = parseInt(actionElement.dataset.postId);
+
+      if (action === 'edit' && actionPostId) editPost(actionPostId);
+      else if (action === 'delete' && actionPostId) deletePost(actionPostId);
+    });
+
+    // Long-Press für Selektionsmodus
+    postsList.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return; // Nur linke Maustaste
+      if (e.target.closest('.drag-handle') || e.target.closest('.list-item-actions')) return;
+      const listItem = e.target.closest('.list-item[data-post-id]');
+      if (!listItem) return;
+      const postId = parseInt(listItem.dataset.postId);
+
+      longPressTimer = setTimeout(() => {
+        longPressTimer = null;
+        if (!bulkSelectionMode) {
+          enterBulkSelection(postId);
+          // Visuelles Feedback
+          if (navigator.vibrate) navigator.vibrate(50);
+        }
+      }, LONG_PRESS_MS);
+    });
+
+    postsList.addEventListener('pointerup', () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    });
+    postsList.addEventListener('pointerleave', () => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+    });
+    postsList.addEventListener('pointermove', (e) => {
+      // Abbrechen bei zu viel Bewegung (Drag)
+      if (longPressTimer && (Math.abs(e.movementX) > 5 || Math.abs(e.movementY) > 5)) {
+        clearTimeout(longPressTimer); longPressTimer = null;
+      }
+    });
+
+    // Rechtsklick-Kontextmenü
+    postsList.addEventListener('contextmenu', (e) => {
+      const listItem = e.target.closest('.list-item[data-post-id]');
+      if (!listItem) return;
+      const postId = parseInt(listItem.dataset.postId);
+
+      // Falls nicht im Selektionsmodus, wähle diesen Post
+      if (!bulkSelectionMode || !bulkSelectedIds.has(postId)) {
+        if (!bulkSelectionMode) {
+          bulkSelectedIds.clear();
+          bulkSelectedIds.add(postId);
+        }
+      }
+
+      showPostContextMenu(e, postId);
     });
   }
 
