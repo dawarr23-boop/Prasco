@@ -446,10 +446,9 @@ function getDisplayIdentifier() {
     return storedId;
   }
 
-  // 3. Keine ID gefunden - Standard: display01
-  console.log('Keine Display-ID gefunden - verwende display01 als Standard');
-  localStorage.setItem('selectedDisplayId', 'display01');
-  return 'display01';
+  // 3. Keine ID gefunden - Display-Auswahl anzeigen
+  console.log('Keine Display-ID gefunden - zeige Display-Auswahl');
+  return null;
 }
 
 // Lade Display-Informationen
@@ -518,9 +517,9 @@ async function showDisplaySelection() {
 
   document.body.appendChild(overlay);
 
-  // Lade verfügbare Displays
+  // Lade verfügbare Displays (öffentlicher Endpoint, kein Auth nötig)
   try {
-    const response = await fetch('/api/displays');
+    const response = await fetch('/api/public/displays');
     if (response.ok) {
       const data = await response.json();
       const displays = data.data || [];
@@ -2728,7 +2727,7 @@ document.addEventListener('click', (e) => {
   if (!currentDisplayIdentifier && !skipSelection) {
     // Prüfe ob Displays existieren
     try {
-      const response = await fetch('/api/displays');
+      const response = await fetch('/api/public/displays');
       if (response.ok) {
         const data = await response.json();
         const activeDisplays = data.data?.filter(d => d.isActive) || [];
