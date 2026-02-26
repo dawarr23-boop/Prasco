@@ -67,12 +67,12 @@ class TrafficService {
       cacheEnabled: true,
       cacheTTL: 300, // 5 Minuten Cache für Verkehrsdaten
       apiBaseUrl: 'https://verkehr.autobahn.de/o/autobahn',
-      defaultRoads: ['A1', 'A2', 'A3', 'A7'], // Deutsche Hauptautobahnen
+      defaultRoads: ['A1', 'A2'], // Autobahnen im Umkreis von Ahlen
       centerPoint: {
         lat: 51.7633, // Ahlen, NRW
         lon: 7.8919,
       },
-      maxDistance: 50, // 50 km Radius (Ahlen bis Dortmund ca. 40 km)
+      maxDistance: 20, // 20 km Radius um Ahlen
     };
 
     // Axios Client für Autobahn API
