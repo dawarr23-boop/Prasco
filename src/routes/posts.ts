@@ -314,21 +314,21 @@ router.post(
     body('title').notEmpty().trim().withMessage('Titel erforderlich'),
     body('content').optional(),
     body('contentType')
-      .isIn(['text', 'image', 'video', 'html', 'presentation'])
+      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'])
       .withMessage('Ungültiger Content-Type'),
-    body('categoryId').optional().isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
-    body('mediaId').optional().isInt().withMessage('Media-ID muss eine Zahl sein'),
+    body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
+    body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),
     body('duration')
-      .optional()
+      .optional({ values: 'null' })
       .isInt({ min: 1 })
       .withMessage('Dauer muss mindestens 1 Sekunde sein'),
     body('priority')
-      .optional()
+      .optional({ values: 'null' })
       .isInt({ min: 0, max: 100 })
       .withMessage('Priorität muss zwischen 0 und 100 liegen'),
-    body('startDate').optional().isISO8601().withMessage('Ungültiges Start-Datum'),
-    body('endDate').optional().isISO8601().withMessage('Ungültiges End-Datum'),
-    body('isActive').optional().isBoolean().withMessage('isActive muss boolean sein'),
+    body('startDate').optional({ values: 'null' }).isISO8601().withMessage('Ungültiges Start-Datum'),
+    body('endDate').optional({ values: 'null' }).isISO8601().withMessage('Ungültiges End-Datum'),
+    body('isActive').optional({ values: 'null' }).isBoolean().withMessage('isActive muss boolean sein'),
     validate,
   ],
   postController.createPost
@@ -411,22 +411,22 @@ router.put(
     body('title').optional().trim().notEmpty().withMessage('Titel darf nicht leer sein'),
     body('content').optional(),
     body('contentType')
-      .optional()
-      .isIn(['text', 'image', 'video', 'html', 'presentation'])
+      .optional({ values: 'null' })
+      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'])
       .withMessage('Ungültiger Content-Type'),
-    body('categoryId').optional().isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
-    body('mediaId').optional().isInt().withMessage('Media-ID muss eine Zahl sein'),
+    body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
+    body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),
     body('duration')
-      .optional()
+      .optional({ values: 'null' })
       .isInt({ min: 1 })
       .withMessage('Dauer muss mindestens 1 Sekunde sein'),
     body('priority')
-      .optional()
+      .optional({ values: 'null' })
       .isInt({ min: 0, max: 100 })
       .withMessage('Priorität muss zwischen 0 und 100 liegen'),
-    body('startDate').optional().isISO8601().withMessage('Ungültiges Start-Datum'),
-    body('endDate').optional().isISO8601().withMessage('Ungültiges End-Datum'),
-    body('isActive').optional().isBoolean().withMessage('isActive muss boolean sein'),
+    body('startDate').optional({ values: 'null' }).isISO8601().withMessage('Ungültiges Start-Datum'),
+    body('endDate').optional({ values: 'null' }).isISO8601().withMessage('Ungültiges End-Datum'),
+    body('isActive').optional({ values: 'null' }).isBoolean().withMessage('isActive muss boolean sein'),
     validate,
   ],
   postController.updatePost
