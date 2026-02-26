@@ -446,9 +446,10 @@ function getDisplayIdentifier() {
     return storedId;
   }
 
-  // 3. Keine ID gefunden
-  console.log('Keine Display-ID gefunden - zeige alle Posts');
-  return null;
+  // 3. Keine ID gefunden - Standard: display01
+  console.log('Keine Display-ID gefunden - verwende display01 als Standard');
+  localStorage.setItem('selectedDisplayId', 'display01');
+  return 'display01';
 }
 
 // Lade Display-Informationen
