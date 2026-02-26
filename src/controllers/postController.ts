@@ -267,8 +267,8 @@ export const createPost = async (
     });
 
     // Handle display assignments
+    const { PostDisplay } = require('../models');
     if (displayMode === 'specific' && displayIds && Array.isArray(displayIds) && displayIds.length > 0) {
-      const { PostDisplay } = require('../models');
       
       // Create display assignments
       const assignments = displayIds.map((displayId: number) => ({
@@ -318,10 +318,20 @@ export const createPost = async (
             priority: basePriority - i, // Absteigende Priorität
             isActive: isActive !== undefined ? isActive : true,
             showTitle: false, // Titel bei Slides standardmäßig nicht anzeigen
+            displayMode: displayMode || 'all',
             backgroundMusicUrl: musicUrl || null,
             backgroundMusicVolume: musicVolume,
             blendEffect: blendEffect || null,
           });
+
+          // Display-Zuweisungen vom Original-Post übernehmen
+          if (displayMode === 'specific' && displayIds && Array.isArray(displayIds) && displayIds.length > 0) {
+            const slideAssignments = displayIds.map((did: number) => ({
+              postId: slidePost.id,
+              displayId: did,
+            }));
+            await PostDisplay.bulkCreate(slideAssignments);
+          }
             
           createdPosts.push(slidePost);
         }
