@@ -1607,16 +1607,14 @@ async function showPostForm() {
   if (isActiveCheckbox) isActiveCheckbox.checked = true;
   if (showTitleCheckbox) showTitleCheckbox.checked = true;
 
-  // Standard-Startdatum auf jetzt setzen
+  // Standard-Startdatum auf jetzt setzen (lokale Zeit für datetime-local Input)
   const now = new Date();
-  const localDateTime = now.toISOString().slice(0, 16);
-  document.getElementById('start-date').value = localDateTime;
+  document.getElementById('start-date').value = formatDateTimeLocal(now);
   
   // Enddatum auf Startdatum + 7 Tage setzen
   const endDate = new Date(now);
   endDate.setDate(endDate.getDate() + 7);
-  const endDateTime = endDate.toISOString().slice(0, 16);
-  document.getElementById('end-date').value = endDateTime;
+  document.getElementById('end-date').value = formatDateTimeLocal(endDate);
 
   // Display-Auswahl auf "alle" zurücksetzen
   document.getElementById('display-mode-all').checked = true;
@@ -2337,8 +2335,8 @@ async function handlePostFormSubmit(e) {
     categoryId: categoryId ? parseInt(categoryId) : null,
     duration: parseInt(formData.get('display_duration')) || 10,
     priority: parseInt(formData.get('priority')) || 0,
-    startDate: formData.get('start_date') || null,
-    endDate: formData.get('end_date') || null,
+    startDate: formData.get('start_date') ? new Date(formData.get('start_date')).toISOString() : null,
+    endDate: formData.get('end_date') ? new Date(formData.get('end_date')).toISOString() : null,
     isActive: document.getElementById('is-active')?.checked ?? true,
     showTitle: showTitleValue,
     backgroundMusicUrl: backgroundMusicUrl,
