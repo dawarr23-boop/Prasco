@@ -72,11 +72,13 @@ Display.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+      field: 'show_transit_data',
     },
     showTrafficData: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+      field: 'show_traffic_data',
     },
     organizationId: {
       type: DataTypes.INTEGER,
