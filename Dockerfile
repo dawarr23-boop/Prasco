@@ -2,7 +2,7 @@
 FROM node:20-alpine AS builder
 
 # Build dependencies for native modules
-RUN apk add --no-cache python3 make g++ vips-dev
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -10,7 +10,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies for build)
-RUN npm ci
+RUN npm ci --ignore-scripts
+RUN npm rebuild
 
 # Copy source code
 COPY . .
@@ -21,16 +22,14 @@ RUN npm run build
 # Production image
 FROM node:20-alpine AS production
 
-# Install runtime dependencies for sharp
-RUN apk add --no-cache vips
-
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --only=production --ignore-scripts
+RUN npm rebuild
 
 # Copy built files from builder
 COPY --from=builder /app/dist ./dist
