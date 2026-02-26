@@ -176,12 +176,16 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
         stringValue = String(value);
       }
 
-      console.log(`  💿 Upserting: ${key} = ${stringValue} (type: ${type})`);
+      // Kategorie automatisch aus dem Key-Prefix ableiten (z.B. 'transit.enabled' → 'transit')
+      const category = key.includes('.') ? key.split('.')[0] : undefined;
+
+      console.log(`  💿 Upserting: ${key} = ${stringValue} (type: ${type}, category: ${category})`);
       
       const [setting] = await Setting.upsert({
         key,
         value: stringValue,
         type,
+        category,
       });
 
       console.log(`  ✅ Saved: ${setting.key} = ${setting.value}`);
