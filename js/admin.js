@@ -801,7 +801,15 @@ function translatePage() {
     const key = el.getAttribute('data-translate');
     const translated = t(key);
     if (translated !== key) {
-      el.textContent = translated;
+      // Wenn das Element Kind-Elemente hat (z.B. Tooltips), nur den ersten Textknoten ersetzen
+      if (el.querySelector('.info-tooltip-wrapper')) {
+        const textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+        if (textNode) {
+          textNode.textContent = translated + ' ';
+        }
+      } else {
+        el.textContent = translated;
+      }
     }
   });
 
