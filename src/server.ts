@@ -52,6 +52,7 @@ import trafficRoutes from './routes/traffic';
 import weatherRoutes from './routes/weather';
 import aiRoutes from './routes/ai';
 import deviceRoutes from './routes/devices';
+import newsRoutes from './routes/news';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -74,7 +75,7 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
-        connectSrc: ["'self'", 'https://api.rainviewer.com'],
+        connectSrc: ["'self'", 'https://api.rainviewer.com', 'https://www.tagesschau.de', 'https://www.spiegel.de', 'https://www.wa.de'],
         imgSrc: [
           "'self'",
           'data:',
@@ -319,6 +320,7 @@ app.use('/api/displays', displayRoutes);
 app.use('/api/transit', transitRoutes);
 app.use('/api/traffic', trafficRoutes);
 app.use('/api/weather', weatherRoutes);
+app.use('/api/news', newsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/devices', displayLimiter, deviceRoutes);
 

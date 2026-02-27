@@ -2193,3 +2193,124 @@ body {
   .display-footer { padding: 1rem 4rem; min-height: 60px; }
   .footer-info { font-size: 1.3rem; }
 }
+
+/* ============================================
+   News-Widget
+   ============================================ */
+
+.news-screen {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 1.5vh;
+}
+
+.news-screen-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2vw;
+  padding-bottom: 1.2vh;
+  border-bottom: 2px solid #e8eaee;
+  flex-shrink: 0;
+}
+
+.news-header-icon {
+  font-size: 3.5vh;
+  line-height: 1;
+}
+
+.news-header-title {
+  font-size: 2.8vh;
+  font-weight: 800;
+  color: #1a1d22;
+  letter-spacing: -0.01em;
+}
+
+/* Grid: 2 Spalten, erste Karte groß (lead), Rest klein */
+.news-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 1.2vh 1.5vw;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  align-content: start;
+}
+
+.news-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5vh;
+  padding: 1.2vh 1.2vw;
+  background: #ffffff;
+  border: 1px solid #e8eaee;
+  border-radius: 1.2vh;
+  border-left: 4px solid #e8eaee;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* Lead-Karte: volle Breite, größerer Text */
+.news-card-lead {
+  grid-column: 1 / -1;
+  border-left-color: #009640;
+  background: linear-gradient(135deg, #f0faf4 0%, #ffffff 60%);
+  padding: 1.8vh 1.6vw;
+}
+
+.news-card-lead .news-title {
+  font-size: 2.8vh;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.news-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+}
+
+.news-source {
+  font-size: 1.2vh;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #009640;
+  background: #e8f5ee;
+  padding: 0.2vh 0.6vw;
+  border-radius: 0.5vh;
+}
+
+.news-age {
+  font-size: 1.2vh;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.news-title {
+  font-size: 1.9vh;
+  font-weight: 700;
+  color: #1a1d22;
+  line-height: 1.3;
+}
+
+.news-desc {
+  font-size: 1.5vh;
+  color: #666;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Slide-Hintergrund für News */
+.slide-news.live-data-widget {
+  background: #f7f8fa;
+}
+
+.slide-news .live-widget-content {
+  background: transparent;
+}

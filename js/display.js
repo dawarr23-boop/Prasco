@@ -126,6 +126,7 @@ let liveDataState = {
   transitSettings: null,
   trafficSettings: null,
   weatherSettings: null,
+  newsSettings: null,
   lastInsertTime: 0,
   widgetTimer: null,
   isWidgetActive: false,
@@ -134,10 +135,11 @@ let liveDataState = {
 // Lade Live-Daten-Einstellungen vom Backend
 async function loadLiveDataDisplaySettings() {
   try {
-    const [transitRes, trafficRes, weatherRes] = await Promise.all([
+    const [transitRes, trafficRes, weatherRes, newsRes] = await Promise.all([
       fetch('/api/settings?category=transit'),
       fetch('/api/settings?category=traffic'),
       fetch('/api/settings?category=weather'),
+      fetch('/api/settings?category=news'),
     ]);
     if (transitRes.ok) {
       const data = await transitRes.json();
@@ -161,6 +163,14 @@ async function loadLiveDataDisplaySettings() {
         const s = {};
         Object.entries(data).forEach(([key, value]) => { s[key] = String(value); });
         liveDataState.weatherSettings = s;
+      }
+    }
+    if (newsRes.ok) {
+      const data = await newsRes.json();
+      if (data && typeof data === 'object') {
+        const s = {};
+        Object.entries(data).forEach(([key, value]) => { s[key] = String(value); });
+        liveDataState.newsSettings = s;
       }
     }
   } catch (e) {
@@ -658,7 +668,64 @@ function initRainRadar() {
   };
 }
 
-// Zeige Live-Daten-Widget als separate Slides (ÖPNV + Verkehr)
+// ============================================
+// News-Widget
+// ============================================
+async function renderNewsWidget() {
+  const ns = liveDataState.newsSettings;
+  if (!ns || ns['news.enabled'] !== 'true') return [];
+
+  try {
+    const response = await fetch('/api/news');
+    if (!response.ok) return [];
+    const data = await response.json();
+    if (!data.success || !data.data) return [];
+
+    const { world, local } = data.data;
+
+    function formatAge(pubDate) {
+      if (!pubDate) return '';
+      try {
+        const diff = Math.floor((Date.now() - new Date(pubDate).getTime()) / 60000);
+        if (diff < 1) return 'Gerade eben';
+        if (diff < 60) return `vor ${diff} Min.`;
+        const h = Math.floor(diff / 60);
+        if (h < 24) return `vor ${h} Std.`;
+        return `vor ${Math.floor(h / 24)} Tag(en)`;
+      } catch { return ''; }
+    }
+
+    function buildSlide(items, title, icon) {
+      if (!items || items.length === 0) return null;
+      const cards = items.map((item, i) => {
+        const age = formatAge(item.pubDate);
+        return `<div class="news-card${i === 0 ? ' news-card-lead' : ''}">
+          <div class="news-card-meta"><span class="news-source">${item.source}</span>${age ? `<span class="news-age">${age}</span>` : ''}</div>
+          <div class="news-title">${item.title}</div>
+          ${item.description && i < 3 ? `<div class="news-desc">${item.description}</div>` : ''}
+        </div>`;
+      }).join('');
+      return `<div class="news-screen">
+        <div class="news-screen-header"><span class="news-header-icon">${icon}</span><span class="news-header-title">${title}</span></div>
+        <div class="news-grid">${cards}</div>
+      </div>`;
+    }
+
+    const slides = [];
+    if (ns['news.showWorld'] !== 'false') {
+      const s = buildSlide(world, 'Nachrichten — Deutschland & Welt', '📰');
+      if (s) slides.push(s);
+    }
+    if (ns['news.showLocal'] !== 'false') {
+      const s = buildSlide(local, 'Lokales — Ahlen & Region', '🏘️');
+      if (s) slides.push(s);
+    }
+    return slides;
+  } catch (e) {
+    console.warn('News-Widget Fehler:', e);
+    return [];
+  }
+}
 async function showLiveDataWidget() {
   liveDataState.lastInsertTime = Date.now();
   liveDataState.isWidgetActive = true;
@@ -675,13 +742,14 @@ async function showLiveDataWidget() {
   container.className = 'post type-livedata';
   container.innerHTML = '<div class="live-widget-loading"><div class="spinner"></div><p>Lade Live-Daten...</p></div>';
 
-  const [transitHtml, trafficHtml, weatherSlides] = await Promise.all([
+  const [transitHtml, trafficHtml, weatherSlides, newsSlides] = await Promise.all([
     renderTransitWidget(),
     renderTrafficWidget(),
     renderWeatherWidget(),
+    renderNewsWidget(),
   ]);
 
-  if (!transitHtml && !trafficHtml && (!weatherSlides || weatherSlides.length === 0)) {
+  if (!transitHtml && !trafficHtml && (!weatherSlides || weatherSlides.length === 0) && (!newsSlides || newsSlides.length === 0)) {
     liveDataState.isWidgetActive = false;
     nextPost();
     return;
@@ -729,6 +797,21 @@ async function showLiveDataWidget() {
         content: html,
         timeStr,
         intervalMin,
+      });
+    });
+  }
+
+  // Nachrichten: je ein Slide für Welt + Lokal
+  if (newsSlides && newsSlides.length > 0) {
+    const newsTitles = ['Nachrichten', 'Lokales Ahlen'];
+    newsSlides.forEach((html, i) => {
+      slides.push({
+        icon: '📰',
+        title: newsTitles[i] || 'Nachrichten',
+        content: html,
+        timeStr,
+        intervalMin,
+        type: 'news',
       });
     });
   }
