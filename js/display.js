@@ -369,7 +369,7 @@ async function renderTrafficWidget() {
   }
 }
 
-// Erstelle Wetter-Widget HTML (Vollbild-Slide)
+// Erstelle Wetter-Widget HTML (Vollbild-Slide) — Redesign mit Regenwahrscheinlichkeit + Radar
 async function renderWeatherWidget() {
   const ws = liveDataState.weatherSettings;
   if (!ws || ws['weather.enabled'] !== 'true') return '';
@@ -388,57 +388,100 @@ async function renderWeatherWidget() {
 
     const w = data.data;
     const c = w.current;
-    const showForecast = ws['weather.showForecast'] !== 'false';
     const forecastDays = parseInt(ws['weather.forecastDays'] || '5', 10);
 
     // Windrichtung als Text
     const windDirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
     const windDirText = windDirs[Math.round(c.windDirection / 45) % 8] || '';
 
-    // Aktuelles Wetter
-    let html = `<div class="weather-fullscreen">
-      <div class="weather-current">
-        <div class="weather-main">
-          <span class="weather-icon-large">${c.icon}</span>
-          <div class="weather-temp-block">
-            <span class="weather-temp">${c.temperature}°C</span>
-            <span class="weather-desc">${c.description}</span>
-          </div>
-        </div>
-        <div class="weather-details">
-          <div class="weather-detail-item">
-            <span class="weather-detail-icon">🌡️</span>
-            <span class="weather-detail-label">Gefühlt</span>
-            <span class="weather-detail-value">${c.feelsLike}°C</span>
-          </div>
-          <div class="weather-detail-item">
-            <span class="weather-detail-icon">💧</span>
-            <span class="weather-detail-label">Luftfeuchte</span>
-            <span class="weather-detail-value">${c.humidity}%</span>
-          </div>
-          <div class="weather-detail-item">
-            <span class="weather-detail-icon">💨</span>
-            <span class="weather-detail-label">Wind</span>
-            <span class="weather-detail-value">${c.windSpeed} km/h ${windDirText}</span>
-          </div>
-          <div class="weather-detail-item">
-            <span class="weather-detail-icon">🔽</span>
-            <span class="weather-detail-label">Luftdruck</span>
-            <span class="weather-detail-value">${c.pressure} hPa</span>
-          </div>
-          ${c.uvIndex !== undefined ? `<div class="weather-detail-item">
-            <span class="weather-detail-icon">☀️</span>
-            <span class="weather-detail-label">UV-Index</span>
-            <span class="weather-detail-value">${c.uvIndex}</span>
-          </div>` : ''}
+    // Regenwahrscheinlichkeit heute
+    const todayForecast = w.forecast?.[0];
+    const rainProb = todayForecast ? todayForecast.precipProbability : 0;
+    const rainAmount = todayForecast ? todayForecast.precipitation : 0;
+
+    // Stündliche Regen-Balken (nächste 12h für kompakte Darstellung)
+    const hourlyRain = (w.hourlyRain || []).slice(0, 12);
+    const maxProb = Math.max(...hourlyRain.map(h => h.probability), 10);
+
+    let hourlyBarsHtml = '';
+    if (hourlyRain.length > 0) {
+      hourlyBarsHtml = `<div class="weather-rain-chart">
+        <div class="rain-chart-title">Regenwahrscheinlichkeit nächste 12h</div>
+        <div class="rain-chart-bars">
+          ${hourlyRain.map(h => {
+            const pct = Math.round((h.probability / maxProb) * 100);
+            const barColor = h.probability > 60 ? 'rgba(100,180,255,0.9)' : h.probability > 30 ? 'rgba(100,180,255,0.6)' : 'rgba(100,180,255,0.3)';
+            return `<div class="rain-bar-col">
+              <div class="rain-bar-value">${h.probability}%</div>
+              <div class="rain-bar-track"><div class="rain-bar-fill" style="height:${pct}%;background:${barColor}"></div></div>
+              <div class="rain-bar-time">${h.time}</div>
+            </div>`;
+          }).join('')}
         </div>
       </div>`;
+    }
 
-    // Vorhersage
-    if (showForecast && w.forecast && w.forecast.length > 0) {
-      const days = w.forecast.slice(0, forecastDays);
-      html += `<div class="weather-forecast">
-        ${days.map((day, i) => `
+    // Aktuelles Wetter — links
+    let html = `<div class="weather-fullscreen weather-redesign">
+      <div class="weather-top">
+        <div class="weather-current-compact">
+          <div class="weather-main">
+            <span class="weather-icon-large">${c.icon}</span>
+            <div class="weather-temp-block">
+              <span class="weather-temp">${c.temperature}°C</span>
+              <span class="weather-desc">${c.description}</span>
+              <span class="weather-location">${locationName}</span>
+            </div>
+          </div>
+          <div class="weather-key-stats">
+            <div class="weather-stat">
+              <span class="weather-stat-icon">🌧️</span>
+              <div class="weather-stat-text">
+                <span class="weather-stat-value">${rainProb}%</span>
+                <span class="weather-stat-label">Regenwahrsch.</span>
+              </div>
+            </div>
+            <div class="weather-stat">
+              <span class="weather-stat-icon">💧</span>
+              <div class="weather-stat-text">
+                <span class="weather-stat-value">${rainAmount} mm</span>
+                <span class="weather-stat-label">Niederschlag</span>
+              </div>
+            </div>
+            <div class="weather-stat">
+              <span class="weather-stat-icon">🌡️</span>
+              <div class="weather-stat-text">
+                <span class="weather-stat-value">${c.feelsLike}°C</span>
+                <span class="weather-stat-label">Gefühlt</span>
+              </div>
+            </div>
+            <div class="weather-stat">
+              <span class="weather-stat-icon">💨</span>
+              <div class="weather-stat-text">
+                <span class="weather-stat-value">${c.windSpeed} km/h</span>
+                <span class="weather-stat-label">Wind ${windDirText}</span>
+              </div>
+            </div>
+            <div class="weather-stat">
+              <span class="weather-stat-icon">💧</span>
+              <div class="weather-stat-text">
+                <span class="weather-stat-value">${c.humidity}%</span>
+                <span class="weather-stat-label">Luftfeuchte</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="weather-radar-container">
+          <div class="weather-radar-title">Regenradar ${locationName}</div>
+          <iframe class="weather-radar-iframe" src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" loading="lazy"></iframe>
+        </div>
+      </div>
+
+      ${hourlyBarsHtml}
+
+      <div class="weather-forecast-5day">
+        ${w.forecast ? w.forecast.slice(0, forecastDays).map((day, i) => `
           <div class="weather-forecast-day ${i === 0 ? 'today' : ''}">
             <span class="forecast-weekday">${i === 0 ? 'Heute' : day.weekday}</span>
             <span class="forecast-icon">${day.icon}</span>
@@ -446,13 +489,16 @@ async function renderWeatherWidget() {
               <span class="forecast-max">${day.tempMax}°</span>
               <span class="forecast-min">${day.tempMin}°</span>
             </span>
-            <span class="forecast-rain">${day.precipProbability}% 💧</span>
+            <span class="forecast-rain-detail">
+              <span class="forecast-rain-icon">🌧️</span>
+              <span class="forecast-rain-pct">${day.precipProbability}%</span>
+            </span>
+            <span class="forecast-precip">${day.precipitation > 0 ? day.precipitation + ' mm' : '—'}</span>
           </div>
-        `).join('')}
-      </div>`;
-    }
+        `).join('') : ''}
+      </div>
+    </div>`;
 
-    html += '</div>';
     return html;
   } catch (e) {
     console.warn('Wetter-Widget Fehler:', e);

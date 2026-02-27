@@ -1471,7 +1471,7 @@ body {
 }
 
 /* ============================================
-   Wetter-Widget (Live-Daten)
+   Wetter-Widget Redesign (Live-Daten)
    ============================================ */
 .weather-fullscreen {
   width: 100%;
@@ -1479,25 +1479,34 @@ body {
   display: flex;
   flex-direction: column;
   padding: 2vh 3vw;
-  gap: 3vh;
+  gap: 2vh;
   overflow: hidden;
 }
 
-.weather-current {
+/* --- Top: Aktuelles Wetter links + Radar rechts --- */
+.weather-top {
+  display: flex;
+  gap: 2vw;
+  flex: 1;
+  min-height: 0;
+}
+
+.weather-current-compact {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2.5vh;
+  gap: 2vh;
+  justify-content: center;
 }
 
 .weather-main {
   display: flex;
   align-items: center;
-  gap: 3vw;
-  justify-content: center;
+  gap: 2vw;
 }
 
 .weather-icon-large {
-  font-size: 12vh;
+  font-size: 10vh;
   line-height: 1;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
 }
@@ -1505,11 +1514,11 @@ body {
 .weather-temp-block {
   display: flex;
   flex-direction: column;
-  gap: 0.5vh;
+  gap: 0.3vh;
 }
 
 .weather-temp {
-  font-size: 10vh;
+  font-size: 8vh;
   font-weight: 800;
   color: #f0f4f8;
   line-height: 1;
@@ -1517,55 +1526,150 @@ body {
 }
 
 .weather-desc {
-  font-size: 3vh;
+  font-size: 2.5vh;
   color: rgba(240, 244, 248, 0.75);
   font-weight: 500;
 }
 
-.weather-details {
+.weather-location {
+  font-size: 1.8vh;
+  color: rgba(240, 244, 248, 0.45);
+  font-weight: 400;
+  margin-top: 0.3vh;
+}
+
+/* Key Stats (Regen, Temperatur, Wind, Feuchte) */
+.weather-key-stats {
   display: flex;
-  justify-content: center;
-  gap: 2.5vw;
   flex-wrap: wrap;
-  padding: 2vh 2vw;
+  gap: 1.5vw;
+}
+
+.weather-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
+  padding: 1vh 1.2vw;
   background: rgba(255, 255, 255, 0.06);
-  border-radius: 1.5vh;
+  border-radius: 1vh;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.weather-detail-item {
+.weather-stat-icon {
+  font-size: 2.5vh;
+}
+
+.weather-stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.weather-stat-value {
+  font-size: 2.2vh;
+  font-weight: 700;
+  color: #eef1f5;
+}
+
+.weather-stat-label {
+  font-size: 1.4vh;
+  color: rgba(240, 244, 248, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Regenradar */
+.weather-radar-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 1.5vh;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weather-radar-title {
+  font-size: 1.6vh;
+  font-weight: 700;
+  color: rgba(240, 244, 248, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.8vh 1.2vw;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weather-radar-iframe {
+  flex: 1;
+  width: 100%;
+  border: none;
+  min-height: 0;
+}
+
+/* --- Regen-Balkendiagramm (12h) --- */
+.weather-rain-chart {
+  padding: 1vh 0;
+}
+
+.rain-chart-title {
+  font-size: 1.5vh;
+  font-weight: 700;
+  color: rgba(240, 244, 248, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5vh;
+}
+
+.rain-chart-bars {
+  display: flex;
+  gap: 0.5vw;
+  align-items: flex-end;
+  height: 8vh;
+}
+
+.rain-bar-col {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5vh;
-  min-width: 8vw;
+  gap: 0.3vh;
+  min-width: 0;
 }
 
-.weather-detail-icon {
-  font-size: 3vh;
+.rain-bar-value {
+  font-size: 1.1vh;
+  color: rgba(150, 200, 255, 0.8);
+  font-weight: 600;
 }
 
-.weather-detail-label {
-  font-size: 1.8vh;
-  color: rgba(240, 244, 248, 0.5);
+.rain-bar-track {
+  width: 100%;
+  height: 5vh;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.5vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.rain-bar-fill {
+  width: 100%;
+  border-radius: 0.5vh;
+  transition: height 0.3s ease;
+  min-height: 2px;
+}
+
+.rain-bar-time {
+  font-size: 1vh;
+  color: rgba(240, 244, 248, 0.4);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-.weather-detail-value {
-  font-size: 2.5vh;
-  color: #eef1f5;
-  font-weight: 700;
-}
-
-/* Vorhersage */
-.weather-forecast {
+/* --- 5-Tage-Forecast --- */
+.weather-forecast-5day {
   display: flex;
   justify-content: center;
-  gap: 1.5vw;
-  flex: 1;
-  align-items: stretch;
+  gap: 1.2vw;
 }
 
 .weather-forecast-day {
@@ -1573,12 +1677,11 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1vh;
-  padding: 1.5vh 1.5vw;
+  gap: 0.8vh;
+  padding: 1.2vh 1.2vw;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 1.5vh;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  min-width: 8vw;
   flex: 1;
   max-width: 14vw;
   transition: background 0.2s;
@@ -1590,7 +1693,7 @@ body {
 }
 
 .forecast-weekday {
-  font-size: 2vh;
+  font-size: 1.8vh;
   font-weight: 700;
   color: rgba(240, 244, 248, 0.85);
   text-transform: uppercase;
@@ -1598,32 +1701,64 @@ body {
 }
 
 .forecast-icon {
-  font-size: 5vh;
+  font-size: 4vh;
   line-height: 1;
 }
 
 .forecast-temps {
   display: flex;
-  gap: 0.8vw;
+  gap: 0.6vw;
   align-items: baseline;
 }
 
 .forecast-max {
-  font-size: 2.8vh;
+  font-size: 2.4vh;
   font-weight: 800;
   color: #f0f4f8;
 }
 
 .forecast-min {
-  font-size: 2.2vh;
+  font-size: 1.8vh;
   font-weight: 500;
   color: rgba(240, 244, 248, 0.45);
 }
 
+.forecast-rain-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.3vw;
+}
+
+.forecast-rain-icon {
+  font-size: 1.5vh;
+}
+
+.forecast-rain-pct {
+  font-size: 1.6vh;
+  color: rgba(150, 200, 255, 0.8);
+  font-weight: 600;
+}
+
+.forecast-precip {
+  font-size: 1.2vh;
+  color: rgba(240, 244, 248, 0.35);
+}
+
+/* Legacy (unused, kept for compat) */
 .forecast-rain {
   font-size: 1.8vh;
   color: rgba(150, 200, 255, 0.7);
   font-weight: 500;
+}
+
+.weather-details,
+.weather-detail-item,
+.weather-detail-icon,
+.weather-detail-label,
+.weather-detail-value,
+.weather-current,
+.weather-forecast {
+  /* Legacy selectors — no longer rendered but kept to prevent errors */
 }
 
 /* ============================================
@@ -1681,16 +1816,19 @@ body {
   .traffic-subtitle { font-size: 1.5vh; }
 
   /* Wetter */
-  .weather-icon-large { font-size: 8vh; }
-  .weather-temp { font-size: 7vh; }
-  .weather-desc { font-size: 2vh; }
-  .weather-detail-icon { font-size: 2vh; }
-  .weather-detail-label { font-size: 1.3vh; }
-  .weather-detail-value { font-size: 1.8vh; }
-  .forecast-icon { font-size: 3.5vh; }
-  .forecast-weekday { font-size: 1.5vh; }
-  .forecast-max { font-size: 2vh; }
-  .forecast-min { font-size: 1.6vh; }
+  .weather-icon-large { font-size: 6vh; }
+  .weather-temp { font-size: 5vh; }
+  .weather-desc { font-size: 1.6vh; }
+  .weather-stat-icon { font-size: 1.8vh; }
+  .weather-stat-value { font-size: 1.6vh; }
+  .weather-stat-label { font-size: 1vh; }
+  .forecast-icon { font-size: 2.5vh; }
+  .forecast-weekday { font-size: 1.2vh; }
+  .forecast-max { font-size: 1.6vh; }
+  .forecast-min { font-size: 1.2vh; }
+  .rain-chart-bars { height: 5vh; }
+  .rain-bar-value { font-size: 0.9vh; }
+  .weather-top { gap: 1vw; }
 }
 
 /* --- Small Height (720p Höhe) --- */
@@ -1704,10 +1842,11 @@ body {
   .dep-direction { font-size: 2.2vh; }
   .dep-countdown { font-size: 2.5vh; }
   .status-badge { font-size: 1.6vh; padding: 0.5vh 0.8vw; }
-  .weather-icon-large { font-size: 9vh; }
-  .weather-temp { font-size: 8vh; }
-  .weather-details { padding: 1.5vh 1.5vw; }
-  .weather-forecast-day { padding: 1vh 1vw; }
+  .weather-icon-large { font-size: 8vh; }
+  .weather-temp { font-size: 7vh; }
+  .weather-key-stats { gap: 1vw; }
+  .weather-stat { padding: 0.8vh 1vw; }
+  .weather-forecast-day { padding: 0.8vh 0.8vw; }
 }
 
 /* --- Full HD (1920x1080) --- */
@@ -1768,14 +1907,14 @@ body {
   .dep-time { font-size: 3vh; }
   .status-badge { font-size: 2.2vh; padding: 1vh 1.5vw; }
 
-  .weather-icon-large { font-size: 14vh; }
-  .weather-temp { font-size: 12vh; }
-  .weather-desc { font-size: 3.5vh; }
-  .weather-detail-icon { font-size: 3.5vh; }
-  .weather-detail-value { font-size: 3vh; }
-  .forecast-icon { font-size: 6vh; }
-  .forecast-max { font-size: 3.2vh; }
-  .forecast-min { font-size: 2.6vh; }
+  .weather-icon-large { font-size: 12vh; }
+  .weather-temp { font-size: 10vh; }
+  .weather-desc { font-size: 3vh; }
+  .weather-stat-icon { font-size: 3vh; }
+  .weather-stat-value { font-size: 2.8vh; }
+  .forecast-icon { font-size: 5vh; }
+  .forecast-max { font-size: 2.8vh; }
+  .forecast-min { font-size: 2.2vh; }
 }
 
 /* --- 4K Displays (3840x2160) --- */

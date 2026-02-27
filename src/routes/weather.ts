@@ -69,7 +69,7 @@ router.get('/current', async (req: Request, res: Response) => {
     }
 
     // Open-Meteo API (kostenlos, kein API-Key nötig)
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&timezone=Europe%2FBerlin&forecast_days=7`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&timezone=Europe%2FBerlin&forecast_days=7`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -92,6 +92,7 @@ router.get('/current', async (req: Request, res: Response) => {
         windDirection: currentWeather.wind_direction_10m,
         pressure: Math.round(currentWeather.pressure_msl),
         uvIndex: currentWeather.uv_index,
+        precipitation: currentWeather.precipitation || 0,
         weatherCode: currentWeather.weather_code,
         description: weatherInfo.description,
         icon: weatherInfo.icon,
@@ -113,6 +114,19 @@ router.get('/current', async (req: Request, res: Response) => {
           sunset: apiData.daily.sunset[i],
         };
       }),
+      // Stündliche Regenwahrscheinlichkeit (nächste 24h)
+      hourlyRain: (() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const todayStr = now.toISOString().split('T')[0];
+        const startIndex = apiData.hourly.time.findIndex((t: string) => t >= `${todayStr}T${String(currentHour).padStart(2, '0')}:00`);
+        if (startIndex === -1) return [];
+        return apiData.hourly.time.slice(startIndex, startIndex + 24).map((t: string, i: number) => ({
+          time: t.split('T')[1].substring(0, 5),
+          probability: apiData.hourly.precipitation_probability[startIndex + i] || 0,
+          precipitation: apiData.hourly.precipitation[startIndex + i] || 0,
+        }));
+      })(),
     };
 
     // Cache speichern
