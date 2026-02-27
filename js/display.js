@@ -2659,7 +2659,8 @@ function nextPost() {
   const currentPost = posts[currentIndex];
   currentIndex = (currentIndex + 1) % posts.length;
   // Verwende Standard-Blendeffekt "fade" wenn keiner definiert ist
-  const blendEffect = currentPost?.blend_effect || 'fade';
+  // API liefert camelCase (blendEffect), Fallback auf snake_case für Kompatibilität
+  const blendEffect = currentPost?.blendEffect || currentPost?.blend_effect || '';
   displayCurrentPostWithBlend(blendEffect);
   updatePostCounter();
   updatePresentationCounter();
@@ -2671,7 +2672,8 @@ function previousPost() {
   const currentPost = posts[currentIndex];
   currentIndex = (currentIndex - 1 + posts.length) % posts.length;
   // Verwende Standard-Blendeffekt "fade" wenn keiner definiert ist
-  const blendEffect = currentPost?.blend_effect || 'fade';
+  // API liefert camelCase (blendEffect), Fallback auf snake_case für Kompatibilität
+  const blendEffect = currentPost?.blendEffect || currentPost?.blend_effect || '';
   displayCurrentPostWithBlend(blendEffect);
   updatePostCounter();
   updatePresentationCounter();
