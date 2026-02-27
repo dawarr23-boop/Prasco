@@ -24,6 +24,8 @@ services:
       REDIS_PORT: 6379
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@prasco.net}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      DB_TIMETABLES_CLIENT_ID: ${DB_TIMETABLES_CLIENT_ID:-3650a67fa72275b1b7265168bbd3cf50}
+      DB_TIMETABLES_API_KEY: ${DB_TIMETABLES_API_KEY:-413998968b792c74a2734722160e9979}
     volumes:
       - uploads_data:/app/uploads
       - logs_data:/app/logs

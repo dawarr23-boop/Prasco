@@ -48,7 +48,12 @@ class TransitService {
   private cache: NodeCache;
   private config: TransitServiceConfig;
 
-  // DB REST API Base-URL (Echtzeit-Daten für RE, RB, S-Bahn, National Express)
+  // DB Timetables API (offizielle DB API mit Echtzeit)
+  private readonly DB_TIMETABLES_BASE = 'https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1';
+  private readonly DB_CLIENT_ID = process.env.DB_TIMETABLES_CLIENT_ID || '';
+  private readonly DB_API_KEY = process.env.DB_TIMETABLES_API_KEY || '';
+
+  // DB REST API Fallback
   private readonly DB_REST_API = 'https://v6.db.transport.rest';
 
   // Station-ID Mapping: db-busradar-nrw (Busse) nutzt andere IDs als DB (EVA-Nummern)
@@ -76,7 +81,7 @@ class TransitService {
       useClones: false,
     });
 
-    logger.info('TransitService initialisiert mit Dual-HAFAS (Bus + Zug)');
+    logger.info(`TransitService initialisiert mit Dual-HAFAS (Bus + Zug), DB Timetables API ${this.DB_CLIENT_ID ? 'konfiguriert' : 'NICHT konfiguriert'}`);
   }
 
   /**
@@ -126,12 +131,26 @@ class TransitService {
   }
 
   /**
-   * Lade Zug-Abfahrten über DB REST API (v6.db.transport.rest)
-   * Liefert Echtzeit-Daten inkl. Verspätungen für RE, RB, S-Bahn, National Express
-   * Fallback: INSA HAFAS (ohne Echtzeit-Delay, aber zuverlässig)
+   * Lade Zug-Abfahrten — 3-stufige Strategie:
+   * 1. DB Timetables API (offizielle API, Echtzeit mit Verspätungen)
+   * 2. v6.db.transport.rest (öffentlich, Echtzeit)
+   * 3. INSA HAFAS (zuverlässig, ohne Echtzeit-Delay)
    */
   private async fetchTrainDepartures(stationId: string, limit: number, duration: number): Promise<any[]> {
-    // Versuch 1: DB REST API (Echtzeit)
+    // Versuch 1: Offizielle DB Timetables API
+    if (this.DB_CLIENT_ID && this.DB_API_KEY) {
+      try {
+        const departures = await this.fetchFromDbTimetables(stationId, limit);
+        if (departures.length > 0) {
+          logger.info(`DB Timetables API: ${departures.length} Zug-Abfahrten mit Echtzeit geladen`);
+          return departures;
+        }
+      } catch (dbTimetablesError: any) {
+        logger.warn(`DB Timetables API fehlgeschlagen (${dbTimetablesError.message}), versuche Fallback`);
+      }
+    }
+
+    // Versuch 2: DB REST API (Echtzeit)
     try {
       const url = `${this.DB_REST_API}/stops/${stationId}/departures?duration=${duration}&results=${limit}&bus=false&taxi=false`;
       
@@ -149,7 +168,6 @@ class TransitService {
 
       logger.info(`DB REST API: ${departures.length} Zug-Abfahrten mit Echtzeit geladen`);
 
-      // In HAFAS-kompatibles Format umwandeln
       return departures.map((dep: any) => ({
         tripId: dep.tripId || '',
         line: {
@@ -171,7 +189,7 @@ class TransitService {
       logger.warn(`DB REST API nicht verfügbar (${dbError.message}), Fallback auf INSA HAFAS`);
     }
 
-    // Versuch 2: INSA HAFAS Fallback (zuverlässig, ohne Echtzeit-Delay)
+    // Versuch 3: INSA HAFAS Fallback (zuverlässig, ohne Echtzeit-Delay)
     const insaResult = await this.insaClient.departures(stationId, {
       duration,
       results: limit,
@@ -179,6 +197,191 @@ class TransitService {
 
     logger.info(`INSA Fallback: ${insaResult.departures.length} Zug-Abfahrten geladen (ohne Echtzeit)`);
     return insaResult.departures;
+  }
+
+  /**
+   * DB Timetables API: Plan + Echtzeit-Änderungen zusammenführen
+   * Liefert exakte Verspätungsdaten direkt von der Deutschen Bahn
+   */
+  private async fetchFromDbTimetables(evaNumber: string, limit: number): Promise<any[]> {
+    const headers = {
+      'DB-Client-Id': this.DB_CLIENT_ID,
+      'DB-Api-Key': this.DB_API_KEY,
+      'accept': 'application/xml',
+    };
+
+    const now = new Date();
+    const dateStr = now.toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
+    const hour = String(now.getHours()).padStart(2, '0');
+
+    // Parallele Abfrage: Planmäßige Abfahrten + Echtzeit-Änderungen
+    const [planRes, fchgRes] = await Promise.all([
+      fetch(`${this.DB_TIMETABLES_BASE}/plan/${evaNumber}/${dateStr}/${hour}`, {
+        headers, signal: AbortSignal.timeout(8000),
+      }),
+      fetch(`${this.DB_TIMETABLES_BASE}/fchg/${evaNumber}`, {
+        headers, signal: AbortSignal.timeout(8000),
+      }),
+    ]);
+
+    if (!planRes.ok) throw new Error(`Plan API HTTP ${planRes.status}`);
+    if (!fchgRes.ok) throw new Error(`Fchg API HTTP ${fchgRes.status}`);
+
+    const planXml = await planRes.text();
+    const fchgXml = await fchgRes.text();
+
+    // XML parsen (einfacher Regex-basierter Parser für die DB Timetables XML-Struktur)
+    const planStops = this.parseTimetableXml(planXml);
+    const fchgChanges = this.parseFchgXml(fchgXml);
+
+    // Echtzeit-Änderungen auf Plan anwenden
+    const departures: any[] = [];
+    const nowMs = now.getTime();
+
+    for (const stop of planStops) {
+      if (!stop.dpTime) continue; // Kein Abfahrt (Endstation)
+      
+      const change = fchgChanges.get(stop.id);
+      const plannedTime = this.parseTimetableTime(stop.dpTime);
+      if (!plannedTime) continue;
+
+      let actualTime = plannedTime;
+      let delay = 0;
+      let cancelled = false;
+
+      if (change) {
+        if (change.dpCancelled) {
+          cancelled = true;
+        }
+        if (change.dpChangedTime) {
+          actualTime = this.parseTimetableTime(change.dpChangedTime) || plannedTime;
+          delay = Math.round((actualTime.getTime() - plannedTime.getTime()) / 1000);
+        }
+      }
+
+      // Nur zukünftige Abfahrten
+      if (actualTime.getTime() < nowMs - 60000) continue;
+
+      departures.push({
+        tripId: stop.id,
+        line: {
+          id: (stop.line || '').toLowerCase(),
+          name: stop.line || 'Unknown',
+          mode: 'train',
+          product: stop.category === 'NX' ? 'nationalExpress' : 'regional',
+          productName: stop.category || 'RE',
+        },
+        direction: stop.dpPath?.split('|').pop() || 'Unknown',
+        when: actualTime.toISOString(),
+        plannedWhen: plannedTime.toISOString(),
+        delay,
+        platform: change?.dpChangedPlatform || stop.dpPlatform,
+        plannedPlatform: stop.dpPlatform,
+        cancelled,
+      });
+    }
+
+    // Nach Zeit sortieren und limitieren
+    departures.sort((a, b) => new Date(a.when).getTime() - new Date(b.when).getTime());
+    return departures.slice(0, limit);
+  }
+
+  /**
+   * Parse DB Timetables Plan-XML (Planmäßige Stops)
+   */
+  private parseTimetableXml(xml: string): Array<{
+    id: string; line: string; category: string;
+    dpTime?: string; dpPlatform?: string; dpPath?: string;
+    arTime?: string; arPlatform?: string;
+  }> {
+    const stops: any[] = [];
+    const stopRegex = /<s id="([^"]+)">([\s\S]*?)<\/s>/g;
+    let match;
+
+    while ((match = stopRegex.exec(xml)) !== null) {
+      const id = match[1];
+      const content = match[2];
+
+      // Kategorie und Linie aus <tl>
+      const tlMatch = content.match(/<tl[^>]*\bc="([^"]*)"[^>]*/);
+      const category = tlMatch?.[1] || '';
+
+      // Departure
+      const dpMatch = content.match(/<dp\s+([^>]+)/);
+      let dpTime, dpPlatform, dpPath, line;
+      if (dpMatch) {
+        dpTime = dpMatch[1].match(/\bpt="([^"]+)"/)?.[1];
+        dpPlatform = dpMatch[1].match(/\bpp="([^"]+)"/)?.[1];
+        dpPath = dpMatch[1].match(/\bppth="([^"]+)"/)?.[1];
+        line = dpMatch[1].match(/\bl="([^"]+)"/)?.[1];
+      }
+
+      // Arrival (für line-Fallback)
+      const arMatch = content.match(/<ar\s+([^>]+)/);
+      let arTime, arPlatform;
+      if (arMatch) {
+        arTime = arMatch[1].match(/\bpt="([^"]+)"/)?.[1];
+        arPlatform = arMatch[1].match(/\bpp="([^"]+)"/)?.[1];
+        if (!line) line = arMatch[1].match(/\bl="([^"]+)"/)?.[1];
+      }
+
+      stops.push({ id, line: line || '', category, dpTime, dpPlatform, dpPath, arTime, arPlatform });
+    }
+
+    return stops;
+  }
+
+  /**
+   * Parse DB Timetables Fchg-XML (Echtzeit-Änderungen)
+   */
+  private parseFchgXml(xml: string): Map<string, {
+    dpChangedTime?: string; dpChangedPlatform?: string; dpCancelled?: boolean;
+    arChangedTime?: string; arCancelled?: boolean;
+  }> {
+    const changes = new Map<string, any>();
+    const stopRegex = /<s id="([^"]+)">([\s\S]*?)<\/s>/g;
+    let match;
+
+    while ((match = stopRegex.exec(xml)) !== null) {
+      const id = match[1];
+      const content = match[2];
+
+      const entry: any = {};
+
+      // Departure changes
+      const dpMatch = content.match(/<dp\s+([^>]*?)\/?>(?:[\s\S]*?<\/dp>)?/);
+      if (dpMatch) {
+        const dpAttrs = dpMatch[1];
+        entry.dpChangedTime = dpAttrs.match(/\bct="([^"]+)"/)?.[1];
+        entry.dpChangedPlatform = dpAttrs.match(/\bcp="([^"]+)"/)?.[1];
+        entry.dpCancelled = dpAttrs.match(/\bcs="c"/) !== null;
+      }
+
+      // Arrival changes
+      const arMatch = content.match(/<ar\s+([^>]*?)\/?>(?:[\s\S]*?<\/ar>)?/);
+      if (arMatch) {
+        const arAttrs = arMatch[1];
+        entry.arChangedTime = arAttrs.match(/\bct="([^"]+)"/)?.[1];
+        entry.arCancelled = arAttrs.match(/\bcs="c"/) !== null;
+      }
+
+      changes.set(id, entry);
+    }
+
+    return changes;
+  }
+
+  /**
+   * Parse DB Timetable-Zeitformat (YYMMDDHHMM) zu Date
+   */
+  private parseTimetableTime(timeStr: string): Date | null {
+    if (!timeStr || timeStr.length < 10) return null;
+    const year = 2000 + parseInt(timeStr.slice(0, 2));
+    const month = parseInt(timeStr.slice(2, 4)) - 1;
+    const day = parseInt(timeStr.slice(4, 6));
+    const hour = parseInt(timeStr.slice(6, 8));
+    const minute = parseInt(timeStr.slice(8, 10));
+    return new Date(year, month, day, hour, minute);
   }
 
   /**
