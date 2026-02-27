@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PRASCO Admin Dashboard - Digitales Schwarzes Brett</title>
-    <link rel="stylesheet" href="/css/admin.css?v=2.8" />
+    <link rel="stylesheet" href="/css/admin.css?v=2.9" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -81,7 +81,7 @@
               </div>
               <div class="stat-card clickable" data-target="displays-section">
                 <h3>Displays</h3>
-                <p class="stat-number" id="total-displays">0</p>
+                <p class="stat-number"><span id="total-displays">0</span> <span style="font-size: 0.5em; color: #6c757d; font-weight: 400;">/ 2 lizenziert</span></p>
               </div>
               <div class="stat-card clickable" data-target="media-section">
                 <h3 data-i18n="dashboard.media">Medien</h3>
@@ -572,7 +572,15 @@
           <section id="displays-section" class="section">
             <div class="section-header">
               <h2>Display-Verwaltung</h2>
-              <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <span id="display-license-info" style="font-size: 0.85rem; color: #6c757d; background: #f0f1f3; padding: 0.4rem 0.8rem; border-radius: 6px;">📋 Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
+                <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
+              </div>
+            </div>
+
+            <div id="display-license-warning" style="display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+              <strong>⚠️ Display-Lizenzlimit erreicht</strong>
+              <p style="margin: 0.5rem 0 0 0; color: #664d03;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:info@prasco.de" style="color: #0d6efd;">info@prasco.de</a>, um zusätzliche Lizenzen zu erwerben.</p>
             </div>
 
             <div id="display-form" class="form-container" style="display: none">
@@ -1531,6 +1539,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=2.8"></script>
+    <script src="/js/admin.js?v=2.9"></script>
   </body>
 </html>

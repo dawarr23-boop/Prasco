@@ -159,6 +159,16 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
+    // License check: max 2 displays
+    const MAX_LICENSED_DISPLAYS = 2;
+    const displayCount = await Display.count();
+    if (displayCount >= MAX_LICENSED_DISPLAYS) {
+      throw new AppError(
+        `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter info@prasco.de, um weitere Display-Lizenzen zu erwerben.`,
+        403
+      );
+    }
+
     // Validate required fields
     if (!name || !identifier) {
       throw new AppError('Name und Identifier sind erforderlich', 400);

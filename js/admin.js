@@ -1331,6 +1331,12 @@ function setupRoleBasedUI(user) {
     showUserFormBtn.style.display = 'none';
   }
 
+  // Nur Super-Admin kann Displays erstellen
+  const showDisplayFormBtn = document.getElementById('showDisplayFormBtn');
+  if (showDisplayFormBtn && user.role !== 'super_admin') {
+    showDisplayFormBtn.style.display = 'none';
+  }
+
   // Benutzer-Menüpunkt ausblenden für Viewer/Display
   const usersNavItem = document.querySelector('a[href="#users"]');
   if (usersNavItem && ['viewer', 'display'].includes(user.role)) {
@@ -2999,6 +3005,7 @@ async function handleCategoryFormSubmit(e) {
 // ============================================
 let displaysCache = [];
 let currentDisplayId = null;
+const MAX_LICENSED_DISPLAYS = 2;
 
 async function loadDisplays() {
   const displaysList = document.getElementById('displays-list');
@@ -3044,9 +3051,54 @@ async function loadDisplays() {
   } catch (error) {
     displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">Fehler beim Laden: ${error.message}</p>`;
   }
+
+  // License info aktualisieren
+  updateDisplayLicenseInfo();
+}
+
+function updateDisplayLicenseInfo() {
+  const count = displaysCache.length;
+  const licenseUsed = document.getElementById('display-license-used');
+  if (licenseUsed) licenseUsed.textContent = count;
+
+  const licenseInfo = document.getElementById('display-license-info');
+  if (licenseInfo) {
+    if (count >= MAX_LICENSED_DISPLAYS) {
+      licenseInfo.style.background = '#fff3cd';
+      licenseInfo.style.color = '#664d03';
+    } else {
+      licenseInfo.style.background = '#d1e7dd';
+      licenseInfo.style.color = '#0f5132';
+    }
+  }
+
+  const warningBox = document.getElementById('display-license-warning');
+  if (warningBox) {
+    warningBox.style.display = count >= MAX_LICENSED_DISPLAYS ? 'block' : 'none';
+  }
+
+  const addBtn = document.getElementById('showDisplayFormBtn');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (addBtn && user.role === 'super_admin') {
+    if (count >= MAX_LICENSED_DISPLAYS) {
+      addBtn.disabled = true;
+      addBtn.style.opacity = '0.5';
+      addBtn.title = 'Lizenzlimit erreicht';
+    } else {
+      addBtn.disabled = false;
+      addBtn.style.opacity = '1';
+      addBtn.title = '';
+    }
+  }
 }
 
 function showDisplayForm() {
+  // License-Check: Wenn Limit erreicht, Warnung anzeigen
+  if (displaysCache.length >= MAX_LICENSED_DISPLAYS) {
+    showNotification(`Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Kontaktieren Sie info@prasco.de für weitere Lizenzen.`, 'warning');
+    return;
+  }
+
   currentDisplayId = null;
   document.getElementById('display-form').style.display = 'block';
 
@@ -3151,7 +3203,13 @@ async function handleDisplayFormSubmit(e) {
     await loadDisplays();
     await updateDashboardStats();
   } catch (error) {
-    showNotification('Fehler beim Speichern: ' + error.message, 'error');
+    const msg = error.message || 'Unbekannter Fehler';
+    if (msg.includes('Lizenzlimit') || msg.includes('lizenz') || error.status === 403) {
+      showNotification('Display-Lizenzlimit erreicht. Kontaktieren Sie info@prasco.de für weitere Lizenzen.', 'warning');
+      updateDisplayLicenseInfo();
+    } else {
+      showNotification('Fehler beim Speichern: ' + msg, 'error');
+    }
   }
 }
 

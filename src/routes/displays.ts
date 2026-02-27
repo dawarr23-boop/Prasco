@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validator';
 import { authenticate } from '../middleware/auth';
-import { requirePermission } from '../middleware/permissions';
+import { requirePermission, requireSuperAdmin } from '../middleware/permissions';
 import * as displayController from '../controllers/displayController';
 
 const router = Router();
@@ -51,10 +51,10 @@ router.get(
   displayController.getDisplayPosts
 );
 
-// POST /api/displays - Create new display (Admin/Superadmin only)
+// POST /api/displays - Create new display (Superadmin only, license limited)
 router.post(
   '/',
-  requirePermission('displays.create'),
+  requireSuperAdmin,
   [
     body('name').notEmpty().trim().withMessage('Display-Name erforderlich'),
     body('identifier')
