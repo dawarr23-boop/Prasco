@@ -2811,9 +2811,6 @@ async function displayCurrentPost() {
   // Zeige globale Musik-Indikator wenn aktiv
   updateGlobalMusicIndicator();
 
-  // Keine Animation - direkter Wechsel für bessere Performance
-  container.style.animation = 'none';
-
   // Nächster Post nach Duration (nicht im Vortragsmodus wenn pausiert)
   clearTimeout(autoRotateTimer);
 
@@ -2885,13 +2882,11 @@ function previousPost() {
 function applyBlendTransition(container, renderFn, blendEffect) {
   if (!container) { renderFn(); return; }
 
-  if (!shouldUseTransitions()) {
-    renderFn();
-    return;
-  }
-
   // Effekt aus Rotation wenn kein spezifischer angegeben
   const effect = (blendEffect && blendEffect !== '') ? blendEffect : getNextBlendEffect();
+
+  // Inline-Stil von vorherigen Aufrufen clearen
+  container.style.animation = '';
 
   // Klassen aus vorherigen Animationen bereinigen
   container.className = container.className
@@ -2905,33 +2900,50 @@ function applyBlendTransition(container, renderFn, blendEffect) {
   // OUT-Phase
   container.classList.add('blend-transition-out', outClass);
 
+  const outDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
+  console.log(`🎬 Blend [${effect}] OUT: ${outDuration}ms | transitions-enabled: ${document.body.classList.contains('transitions-enabled')}`);
+
+  let outDone = false;
+  let outTimer = null;
+
   function onOutEnd() {
+    if (outDone) return;
+    outDone = true;
+    clearTimeout(outTimer);
     container.removeEventListener('animationend', onOutEnd);
     container.classList.remove('blend-transition-out', outClass);
+    container.style.animation = '';
 
     renderFn();
 
     // IN-Phase
     container.classList.add('blend-transition-in', inClass);
 
+    const inDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
+    console.log(`🎬 Blend [${effect}] IN: ${inDuration}ms`);
+
+    let inDone = false;
+    let inTimer = null;
+
     function onInEnd() {
+      if (inDone) return;
+      inDone = true;
+      clearTimeout(inTimer);
       container.removeEventListener('animationend', onInEnd);
       container.classList.remove('blend-transition-in', inClass);
     }
 
-    const inDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
     if (inDuration > 0) {
       container.addEventListener('animationend', onInEnd, { once: true });
-      setTimeout(onInEnd, inDuration + 100);
+      inTimer = setTimeout(onInEnd, inDuration + 150);
     } else {
       onInEnd();
     }
   }
 
-  const outDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
   if (outDuration > 0) {
     container.addEventListener('animationend', onOutEnd, { once: true });
-    setTimeout(onOutEnd, outDuration + 100);
+    outTimer = setTimeout(onOutEnd, outDuration + 150);
   } else {
     onOutEnd();
   }
