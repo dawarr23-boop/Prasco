@@ -1054,6 +1054,27 @@ body {
   background: #f0f4ff;
 }
 
+.ctx-separator {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 4px 0;
+}
+
+.ctx-checked {
+  background: #e8f5e9;
+  font-weight: 600;
+}
+
+.ctx-checked::before {
+  content: '✓ ';
+  color: #28a745;
+}
+
+.ctx-display-option {
+  font-size: 0.85rem;
+  padding-left: 1.2rem;
+}
+
 /* Settings */
 .settings-form {
   background: var(--white);

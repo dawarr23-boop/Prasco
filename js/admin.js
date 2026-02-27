@@ -1509,7 +1509,7 @@ function hideBulkBar() {
 }
 
 // Kontextmenü
-function showPostContextMenu(e, postId) {
+async function showPostContextMenu(e, postId) {
   e.preventDefault();
   hidePostContextMenu();
 
@@ -1522,6 +1522,23 @@ function showPostContextMenu(e, postId) {
   const allActive = selectedPosts.every(p => p.isActive !== false);
   const allInactive = selectedPosts.every(p => p.isActive === false);
 
+  // Displays für Submenu laden
+  let displays = displaysCache || [];
+  if (displays.length === 0) {
+    try {
+      const resp = await apiRequest('/displays');
+      displays = resp?.data || [];
+      displaysCache = displays;
+    } catch (_) { /* ignore */ }
+  }
+
+  // Aktuelle Display-Zuweisungen der selektierten Posts ermitteln
+  const commonDisplayIds = new Set();
+  if (count === 1) {
+    const singlePost = postsCache.find(p => p.id === ids[0]);
+    if (singlePost?.displays) singlePost.displays.forEach(d => commonDisplayIds.add(d.id));
+  }
+
   const menu = document.createElement('div');
   menu.id = 'post-context-menu';
   menu.className = 'post-context-menu';
@@ -1531,6 +1548,10 @@ function showPostContextMenu(e, postId) {
     ${!allInactive ? `<div class="ctx-item" data-ctx="deactivate">⏸ Deaktivieren</div>` : ''}
     ${!allActive ? `<div class="ctx-item" data-ctx="activate">▶ Aktivieren</div>` : ''}
     <div class="ctx-item" data-ctx="duplicate">📋 Duplizieren</div>
+    <div class="ctx-separator"></div>
+    <div class="ctx-header" style="margin-top:2px;">📺 Displays zuweisen</div>
+    <div class="ctx-item ctx-display-option ${selectedPosts.every(p => p.displayMode === 'all') ? 'ctx-checked' : ''}" data-ctx="display-all">🌐 Alle Displays</div>
+    ${displays.filter(d => d.isActive).map(d => `<div class="ctx-item ctx-display-option ${commonDisplayIds.has(d.id) ? 'ctx-checked' : ''}" data-ctx="display-specific" data-display-id="${d.id}">📺 ${escapeHtml(d.name)}</div>`).join('')}
   `;
 
   // Positionierung
@@ -1556,6 +1577,11 @@ function showPostContextMenu(e, postId) {
     else if (action === 'deactivate') await bulkTogglePosts(capturedIds, false);
     else if (action === 'activate') await bulkTogglePosts(capturedIds, true);
     else if (action === 'duplicate') await bulkDuplicatePosts(capturedIds);
+    else if (action === 'display-all') await bulkAssignDisplays(capturedIds, 'all', []);
+    else if (action === 'display-specific') {
+      const displayId = parseInt(item.dataset.displayId);
+      if (displayId) await bulkAssignDisplays(capturedIds, 'specific', [displayId]);
+    }
   });
 
   // Schließen bei Klick außerhalb
@@ -1573,6 +1599,25 @@ function showPostContextMenu(e, postId) {
 function hidePostContextMenu() {
   const menu = document.getElementById('post-context-menu');
   if (menu) menu.remove();
+}
+
+async function bulkAssignDisplays(ids, mode, displayIds) {
+  try {
+    let updated = 0;
+    for (const id of ids) {
+      await apiRequest(`/posts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ displayMode: mode, displayIds: displayIds }),
+      });
+      updated++;
+    }
+    const label = mode === 'all' ? 'allen Displays' : displaysCache.find(d => d.id === displayIds[0])?.name || 'Display';
+    showNotification(`${updated} ${updated === 1 ? 'Beitrag' : 'Beiträge'} → ${label}`, 'success');
+    exitBulkSelection();
+    await loadPosts();
+  } catch (error) {
+    showNotification('Fehler: ' + error.message, 'error');
+  }
 }
 
 // Bulk-Aktionen
