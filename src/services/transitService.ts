@@ -1,5 +1,6 @@
 import { createClient, HafasClient } from 'hafas-client';
 import { profile as nrwProfile } from 'hafas-client/p/db-busradar-nrw/index.js';
+import { profile as insaProfile } from 'hafas-client/p/insa/index.js';
 import NodeCache from 'node-cache';
 import logger from '../utils/logger';
 
@@ -43,6 +44,7 @@ export interface TransitServiceConfig {
 
 class TransitService {
   private busClient: HafasClient;
+  private insaClient: HafasClient;
   private cache: NodeCache;
   private config: TransitServiceConfig;
 
@@ -57,6 +59,8 @@ class TransitService {
   constructor() {
     // Bus-Client: DB Busradar NRW (db-regio.hafas.de) - für Busse
     this.busClient = createClient(nrwProfile, 'prasco-transit-v1');
+    // INSA-Client: Fallback für Züge wenn DB REST API nicht verfügbar
+    this.insaClient = createClient(insaProfile, 'prasco-transit-v1');
     
     // Standard-Konfiguration
     this.config = {
@@ -124,40 +128,57 @@ class TransitService {
   /**
    * Lade Zug-Abfahrten über DB REST API (v6.db.transport.rest)
    * Liefert Echtzeit-Daten inkl. Verspätungen für RE, RB, S-Bahn, National Express
+   * Fallback: INSA HAFAS (ohne Echtzeit-Delay, aber zuverlässig)
    */
   private async fetchTrainDepartures(stationId: string, limit: number, duration: number): Promise<any[]> {
-    const url = `${this.DB_REST_API}/stops/${stationId}/departures?duration=${duration}&results=${limit}&bus=false&taxi=false`;
-    
-    const response = await fetch(url, {
-      headers: { 'Accept': 'application/json', 'User-Agent': 'prasco-transit-v1' },
-      signal: AbortSignal.timeout(10000),
-    });
+    // Versuch 1: DB REST API (Echtzeit)
+    try {
+      const url = `${this.DB_REST_API}/stops/${stationId}/departures?duration=${duration}&results=${limit}&bus=false&taxi=false`;
+      
+      const response = await fetch(url, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'prasco-transit-v1' },
+        signal: AbortSignal.timeout(8000),
+      });
 
-    if (!response.ok) {
-      throw new Error(`DB REST API HTTP ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`DB REST API HTTP ${response.status}`);
+      }
+
+      const data: any = await response.json();
+      const departures = data.departures || [];
+
+      logger.info(`DB REST API: ${departures.length} Zug-Abfahrten mit Echtzeit geladen`);
+
+      // In HAFAS-kompatibles Format umwandeln
+      return departures.map((dep: any) => ({
+        tripId: dep.tripId || '',
+        line: {
+          id: dep.line?.id,
+          name: dep.line?.name || 'Unknown',
+          mode: dep.line?.mode || 'train',
+          product: dep.line?.product || 'regional',
+          productName: dep.line?.productName,
+        },
+        direction: dep.direction || 'Unknown',
+        when: dep.when,
+        plannedWhen: dep.plannedWhen,
+        delay: dep.delay,
+        platform: dep.platform,
+        plannedPlatform: dep.plannedPlatform,
+        cancelled: dep.cancelled || false,
+      }));
+    } catch (dbError: any) {
+      logger.warn(`DB REST API nicht verfügbar (${dbError.message}), Fallback auf INSA HAFAS`);
     }
 
-    const data: any = await response.json();
-    const departures = data.departures || [];
+    // Versuch 2: INSA HAFAS Fallback (zuverlässig, ohne Echtzeit-Delay)
+    const insaResult = await this.insaClient.departures(stationId, {
+      duration,
+      results: limit,
+    });
 
-    // In HAFAS-kompatibles Format umwandeln
-    return departures.map((dep: any) => ({
-      tripId: dep.tripId || '',
-      line: {
-        id: dep.line?.id,
-        name: dep.line?.name || 'Unknown',
-        mode: dep.line?.mode || 'train',
-        product: dep.line?.product || 'regional',
-        productName: dep.line?.productName,
-      },
-      direction: dep.direction || 'Unknown',
-      when: dep.when,
-      plannedWhen: dep.plannedWhen,
-      delay: dep.delay,
-      platform: dep.platform,
-      plannedPlatform: dep.plannedPlatform,
-      cancelled: dep.cancelled || false,
-    }));
+    logger.info(`INSA Fallback: ${insaResult.departures.length} Zug-Abfahrten geladen (ohne Echtzeit)`);
+    return insaResult.departures;
   }
 
   /**
