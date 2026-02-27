@@ -27,6 +27,8 @@ class DeviceRegistrationManager(private val context: Context) {
         private const val PREF_AUTH_STATUS = "auth_status"
         private const val PREF_DISPLAY_ID = "display_id"
         private const val PREF_DISPLAY_IDENTIFIER = "display_identifier"
+        private const val PREF_CUSTOM_SERIAL = "custom_serial"
+        private const val PREF_CUSTOM_MAC = "custom_mac"
         private const val APP_VERSION = "2.1.0"
 
         /** Polling-Intervall für Autorisierungsstatus (ms) */
@@ -68,6 +70,44 @@ class DeviceRegistrationManager(private val context: Context) {
     }
 
     /**
+     * Manuell gesetzte Seriennummer (oder null → automatisch ermitteln)
+     */
+    fun getCustomSerial(): String? {
+        val custom = prefs.getString(PREF_CUSTOM_SERIAL, null)
+        return if (custom.isNullOrBlank()) null else custom
+    }
+
+    fun setCustomSerial(serial: String?) {
+        prefs.edit().putString(PREF_CUSTOM_SERIAL, serial?.trim()).apply()
+    }
+
+    /**
+     * Manuell gesetzte MAC-Adresse (oder null → automatisch ermitteln)
+     */
+    fun getCustomMac(): String? {
+        val custom = prefs.getString(PREF_CUSTOM_MAC, null)
+        return if (custom.isNullOrBlank()) null else custom
+    }
+
+    fun setCustomMac(mac: String?) {
+        prefs.edit().putString(PREF_CUSTOM_MAC, mac?.trim()).apply()
+    }
+
+    /**
+     * Effektive Seriennummer (manuell oder automatisch)
+     */
+    fun getEffectiveSerial(): String {
+        return getCustomSerial() ?: DeviceIdentifier.getSerialNumber(context)
+    }
+
+    /**
+     * Effektive MAC-Adresse (manuell oder automatisch)
+     */
+    fun getEffectiveMac(): String? {
+        return getCustomMac() ?: DeviceIdentifier.getMacAddress(context)
+    }
+
+    /**
      * Gerät beim Server registrieren.
      * MUSS in einem Background-Thread aufgerufen werden!
      *
@@ -76,8 +116,8 @@ class DeviceRegistrationManager(private val context: Context) {
      */
     fun registerDevice(serverBaseUrl: String): RegistrationResult {
         return try {
-            val serial = DeviceIdentifier.getSerialNumber(context)
-            val mac = DeviceIdentifier.getMacAddress(context)
+            val serial = getEffectiveSerial()
+            val mac = getEffectiveMac()
             val model = DeviceIdentifier.getDeviceModel()
             val osVersion = DeviceIdentifier.getOsVersion()
 

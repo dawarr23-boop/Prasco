@@ -190,7 +190,7 @@ class MainActivity : FragmentActivity() {
 
         val serverUrl = getServerUrl()
         val url = if (displayIdentifier != null && displayIdentifier.isNotEmpty()) {
-            "$serverUrl/display/$displayIdentifier"
+            "$serverUrl/public/display.html?id=$displayIdentifier"
         } else {
             serverUrl
         }
@@ -650,7 +650,7 @@ class MainActivity : FragmentActivity() {
                 setContentView(webView)
                 val identifier = registrationManager.getDisplayIdentifier()
                 val url = if (identifier != null && identifier.isNotEmpty()) {
-                    "${getServerUrl()}/display/$identifier"
+                    "${getServerUrl()}/public/display.html?id=$identifier"
                 } else {
                     getServerUrl()
                 }
@@ -749,65 +749,116 @@ class MainActivity : FragmentActivity() {
     }
 
     /**
-     * Einstellungs-Dialog: Server-URL konfigurieren + Geräte-Info
+     * Einstellungs-Dialog: Server-URL, Seriennummer, MAC-Adresse konfigurieren
      * Aufruf: 5x Menu-Taste auf der Fernbedienung
      */
     @SuppressLint("SetTextI18n")
     private fun openSettings() {
         val currentUrl = getServerUrl()
+        val autoSerial = DeviceIdentifier.getSerialNumber(this)
+        val autoMac = DeviceIdentifier.getMacAddress(this) ?: ""
+        val customSerial = registrationManager.getCustomSerial() ?: ""
+        val customMac = registrationManager.getCustomMac() ?: ""
 
+        val scrollView = android.widget.ScrollView(this)
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(48, 32, 48, 16)
         }
 
-        val label = TextView(this).apply {
-            text = "PRASCO Server URL:"
+        // --- Server URL ---
+        val urlLabel = TextView(this).apply {
+            text = "Server URL:"
             setTextColor(Color.WHITE)
-            textSize = 16f
+            textSize = 14f
         }
 
-        val input = EditText(this).apply {
+        val urlInput = EditText(this).apply {
             setText(currentUrl)
             setTextColor(Color.WHITE)
             setHintTextColor(Color.GRAY)
-            textSize = 18f
+            textSize = 16f
             isSingleLine = true
             hint = "https://212.227.20.158"
             setSelection(text.length)
         }
 
-        val serial = DeviceIdentifier.getSerialNumber(this)
+        // --- Seriennummer ---
+        val serialLabel = TextView(this).apply {
+            text = "Seriennummer (leer = automatisch: $autoSerial):"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setPadding(0, 24, 0, 0)
+        }
+
+        val serialInput = EditText(this).apply {
+            setText(customSerial)
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            textSize = 16f
+            isSingleLine = true
+            hint = autoSerial
+        }
+
+        // --- MAC-Adresse ---
+        val macLabel = TextView(this).apply {
+            text = "MAC-Adresse (leer = automatisch${if (autoMac.isNotEmpty()) ": $autoMac" else ""}):"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setPadding(0, 24, 0, 0)
+        }
+
+        val macInput = EditText(this).apply {
+            setText(customMac)
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            textSize = 16f
+            isSingleLine = true
+            hint = if (autoMac.isNotEmpty()) autoMac else "AA:BB:CC:DD:EE:FF"
+        }
+
+        // --- Info ---
         val model = DeviceIdentifier.getDeviceModel()
         val authStatus = registrationManager.getAuthStatus()
         val displayId = registrationManager.getDisplayIdentifier() ?: "—"
+        val effectiveSerial = registrationManager.getEffectiveSerial()
 
         val info = TextView(this).apply {
             text = "App Version: 2.1.0 | Menu × 5 = Einstellungen\n" +
                     "Gerät: $model\n" +
-                    "Seriennummer: $serial\n" +
+                    "Aktive SN: $effectiveSerial\n" +
                     "Autorisierung: $authStatus\n" +
                     "Display: $displayId"
             setTextColor(Color.GRAY)
-            textSize = 12f
+            textSize = 11f
             setPadding(0, 16, 0, 0)
         }
 
-        layout.addView(label)
-        layout.addView(input)
+        layout.addView(urlLabel)
+        layout.addView(urlInput)
+        layout.addView(serialLabel)
+        layout.addView(serialInput)
+        layout.addView(macLabel)
+        layout.addView(macInput)
         layout.addView(info)
+        scrollView.addView(layout)
 
         AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog)
             .setTitle("PRASCO TV Einstellungen")
-            .setView(layout)
+            .setView(scrollView)
             .setPositiveButton("Speichern & Registrieren") { _, _ ->
-                val newUrl = input.text.toString().trim()
+                val newUrl = urlInput.text.toString().trim()
+                val newSerial = serialInput.text.toString().trim()
+                val newMac = macInput.text.toString().trim()
+
                 if (newUrl.isNotEmpty()) {
                     saveServerUrl(newUrl)
-                    registrationManager.clearRegistration()
-                    startDeviceRegistration()
-                    Toast.makeText(this, "Server-URL gespeichert: $newUrl — Registrierung gestartet", Toast.LENGTH_LONG).show()
                 }
+                registrationManager.setCustomSerial(if (newSerial.isNotEmpty()) newSerial else null)
+                registrationManager.setCustomMac(if (newMac.isNotEmpty()) newMac else null)
+                registrationManager.clearRegistration()
+                startDeviceRegistration()
+                Toast.makeText(this, "Einstellungen gespeichert — Registrierung gestartet", Toast.LENGTH_LONG).show()
             }
             .setNeutralButton("Seite neu laden") { _, _ ->
                 if (registrationManager.isAuthorized()) {
