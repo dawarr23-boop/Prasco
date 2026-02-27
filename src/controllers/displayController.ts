@@ -167,8 +167,8 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
-    // License check: max 3 displays
-    const MAX_LICENSED_DISPLAYS = 3;
+    // License check: max 2 displays
+    const MAX_LICENSED_DISPLAYS = 2;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
