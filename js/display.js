@@ -768,11 +768,11 @@ async function showDisplaySelection() {
   overlay.innerHTML = `
     <div style="max-width: 800px; width: 90%; text-align: center;">
       <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">▢ Display auswählen</h1>
-      <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #ccc;">Wählen Sie ein Display aus oder zeigen Sie alle Inhalte an</p>
+      <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #ccc;">Wählen Sie ein Display aus oder bestätigen Sie mit OK</p>
       <div id="display-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
         <div style="text-align: center; color: #999;">Lade Displays...</div>
       </div>
-      <button id="btn-show-all" style="
+      <button id="btn-show-all" tabindex="0" style="
         background: #007bff;
         color: white;
         border: none;
@@ -781,6 +781,7 @@ async function showDisplaySelection() {
         border-radius: 8px;
         cursor: pointer;
         margin-top: 1rem;
+        outline: none;
       ">Alle Inhalte anzeigen (kein spezifisches Display)</button>
     </div>
   `;
@@ -788,9 +789,23 @@ async function showDisplaySelection() {
   document.body.appendChild(overlay);
 
   // Event-Listener für "Alle anzeigen" Button (CSP-konform, kein inline onclick)
-  document.getElementById('btn-show-all').addEventListener('click', function() {
+  const btnShowAll = document.getElementById('btn-show-all');
+  btnShowAll.addEventListener('click', function() {
     selectDisplayAndReload(null);
   });
+  btnShowAll.addEventListener('focus', function() {
+    this.style.background = '#009640';
+    this.style.transform = 'scale(1.05)';
+    this.style.boxShadow = '0 0 20px rgba(0, 150, 64, 0.4)';
+  });
+  btnShowAll.addEventListener('blur', function() {
+    this.style.background = '#007bff';
+    this.style.transform = 'scale(1)';
+    this.style.boxShadow = 'none';
+  });
+
+  // D-Pad / Fernbedienungs-Navigation für Display-Auswahl
+  setupDisplaySelectionNavigation(overlay);
 
   // Lade verfügbare Displays (öffentlicher Endpoint, kein Auth nötig)
   try {
@@ -809,14 +824,15 @@ async function showDisplaySelection() {
           </div>
         `;
       } else {
-        displayList.innerHTML = activeDisplays.map(display => `
-          <div class="display-select-card" data-identifier="${escapeHtml(display.identifier)}" style="
+        displayList.innerHTML = activeDisplays.map((display, idx) => `
+          <div class="display-select-card" data-identifier="${escapeHtml(display.identifier)}" tabindex="0" style="
             background: #1a1a1a;
             border: 2px solid #333;
             border-radius: 12px;
             padding: 2rem 1.5rem;
             cursor: pointer;
             transition: all 0.3s;
+            outline: none;
           ">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">▢</div>
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">${escapeHtml(display.name)}</h3>
@@ -825,20 +841,40 @@ async function showDisplaySelection() {
           </div>
         `).join('');
 
-        // Event-Listener für Display-Karten (CSP-konform, kein inline onclick)
+        // Event-Listener für Display-Karten (CSP-konform)
         displayList.querySelectorAll('.display-select-card').forEach(card => {
           card.addEventListener('click', function() {
             selectDisplayAndReload(this.dataset.identifier);
           });
-          card.addEventListener('mouseover', function() {
-            this.style.borderColor = '#007bff';
+          card.addEventListener('focus', function() {
+            this.style.borderColor = '#009640';
             this.style.transform = 'scale(1.05)';
+            this.style.boxShadow = '0 0 20px rgba(0, 150, 64, 0.4)';
           });
-          card.addEventListener('mouseout', function() {
+          card.addEventListener('blur', function() {
             this.style.borderColor = '#333';
             this.style.transform = 'scale(1)';
+            this.style.boxShadow = 'none';
+          });
+          card.addEventListener('mouseover', function() {
+            this.style.borderColor = '#009640';
+            this.style.transform = 'scale(1.05)';
+            this.style.boxShadow = '0 0 20px rgba(0, 150, 64, 0.4)';
+          });
+          card.addEventListener('mouseout', function() {
+            if (document.activeElement !== this) {
+              this.style.borderColor = '#333';
+              this.style.transform = 'scale(1)';
+              this.style.boxShadow = 'none';
+            }
           });
         });
+
+        // Erstes Display fokussieren (für D-Pad Navigation)
+        const firstCard = displayList.querySelector('.display-select-card');
+        if (firstCard) {
+          setTimeout(() => firstCard.focus(), 100);
+        }
       }
     }
   } catch (error) {
@@ -849,6 +885,62 @@ async function showDisplaySelection() {
       </div>
     `;
   }
+}
+
+// D-Pad / Fernbedienungs-Navigation für Display-Auswahl
+function setupDisplaySelectionNavigation(overlay) {
+  // Keyboard/D-Pad Handler (Enter = Auswahl, Pfeiltasten = Navigation)
+  document.addEventListener('keydown', function displayNavHandler(e) {
+    // Nur aktiv wenn Overlay sichtbar
+    if (!document.getElementById('display-selection-overlay')) {
+      document.removeEventListener('keydown', displayNavHandler);
+      return;
+    }
+
+    const cards = Array.from(overlay.querySelectorAll('.display-select-card'));
+    const btnAll = document.getElementById('btn-show-all');
+    // Alle navigierbaren Elemente: Karten + "Alle anzeigen" Button
+    const allItems = [...cards, btnAll];
+    const focused = document.activeElement;
+    const currentIdx = allItems.indexOf(focused);
+
+    switch (e.key) {
+      case 'Enter':
+        e.preventDefault();
+        e.stopPropagation();
+        if (focused && focused.classList.contains('display-select-card')) {
+          selectDisplayAndReload(focused.dataset.identifier);
+        } else if (focused === btnAll) {
+          selectDisplayAndReload(null);
+        } else if (cards.length > 0) {
+          // Nichts fokussiert → erstes Element auswählen
+          cards[0].focus();
+        }
+        break;
+
+      case 'ArrowRight':
+      case 'ArrowDown':
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentIdx >= 0 && currentIdx < allItems.length - 1) {
+          allItems[currentIdx + 1].focus();
+        } else if (currentIdx === -1 && allItems.length > 0) {
+          allItems[0].focus();
+        }
+        break;
+
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        e.preventDefault();
+        e.stopPropagation();
+        if (currentIdx > 0) {
+          allItems[currentIdx - 1].focus();
+        } else if (currentIdx === -1 && allItems.length > 0) {
+          allItems[allItems.length - 1].focus();
+        }
+        break;
+    }
+  });
 }
 
 // Wähle Display und lade Seite neu
