@@ -133,6 +133,18 @@ let liveDataState = {
   nextCategoryIdx: 0, // Zeiger auf nächste Kategorie in der Rotation
 };
 
+// ============================================
+// Blend-Effekt Rotation
+// ============================================
+const BLEND_EFFECTS = ['fade', 'slide-left', 'slide-right', 'zoom-in', 'slide-up', 'slide-down', 'zoom-out'];
+let blendEffectIndex = 0;
+
+function getNextBlendEffect() {
+  const effect = BLEND_EFFECTS[blendEffectIndex % BLEND_EFFECTS.length];
+  blendEffectIndex = (blendEffectIndex + 1) % BLEND_EFFECTS.length;
+  return effect;
+}
+
 // Lade Live-Daten-Einstellungen vom Backend
 async function loadLiveDataDisplaySettings() {
   try {
@@ -940,14 +952,16 @@ async function showLiveDataWidget(categoryFilter) {
         rainRadarCleanup = null;
       }
       if (index + 1 < slides.length) {
-        showSlide(index + 1);
+        // Blend-Übergang zwischen Live-Slides
+        applyBlendTransition(container, () => showSlide(index + 1));
       } else {
         liveDataState.isWidgetActive = false;
-        nextPost();
+        nextPost(); // nextPost() übernimmt eigenen Blend-Übergang
       }
     }, 30000);
   }
 
+  // Erster Slide direkt zeigen (Blend wird beim Eintritt via nextPost() gemacht)
   showSlide(0);
 }
 
@@ -2826,7 +2840,9 @@ function nextPost() {
   // Prüfe ob eine Live-Daten-Kategorie fällig ist
   const liveCategory = shouldInsertLiveDataWidget();
   if (liveCategory) {
-    showLiveDataWidget(liveCategory);
+    // Blend-Übergang zum Live-Daten-Widget
+    const liveContainer = document.getElementById('current-post');
+    applyBlendTransition(liveContainer, () => showLiveDataWidget(liveCategory));
     return;
   }
   
@@ -2858,20 +2874,24 @@ function previousPost() {
 // Blend Effects - Übergangseffekte
 // ============================================
 
-// Wende Blend-Effekt an beim Wechsel zum nächsten Post
-function displayCurrentPostWithBlend(blendEffect) {
-  const container = document.getElementById('current-post');
-  
-  if (!container) {
-    console.error('Post-Container nicht gefunden');
+/**
+ * Generischer Blend-Übergang für beliebige Container.
+ * Führt OUT-Animation → renderFn() → IN-Animation aus.
+ * Wenn transitions deaktiviert: direkt renderFn() aufrufen.
+ * @param {HTMLElement} container  - DOM-Element das animiert wird
+ * @param {Function}    renderFn   - Funktion die den neuen Inhalt rendert (sync oder async start)
+ * @param {string}      [blendEffect] - Effektname (z.B. 'fade'). Fallback: getNextBlendEffect()
+ */
+function applyBlendTransition(container, renderFn, blendEffect) {
+  if (!container) { renderFn(); return; }
+
+  if (!shouldUseTransitions()) {
+    renderFn();
     return;
   }
-  
-  // Keine Transition – direkter Wechsel
-  if (!shouldUseTransitions() || !blendEffect || blendEffect === '') {
-    displayCurrentPost();
-    return;
-  }
+
+  // Effekt aus Rotation wenn kein spezifischer angegeben
+  const effect = (blendEffect && blendEffect !== '') ? blendEffect : getNextBlendEffect();
 
   // Klassen aus vorherigen Animationen bereinigen
   container.className = container.className
@@ -2879,8 +2899,8 @@ function displayCurrentPostWithBlend(blendEffect) {
     .filter(c => !c.startsWith('blend-'))
     .join(' ');
 
-  const outClass = `blend-${blendEffect}-out`;
-  const inClass  = `blend-${blendEffect}-in`;
+  const outClass = `blend-${effect}-out`;
+  const inClass  = `blend-${effect}-in`;
 
   // OUT-Phase
   container.classList.add('blend-transition-out', outClass);
@@ -2889,13 +2909,7 @@ function displayCurrentPostWithBlend(blendEffect) {
     container.removeEventListener('animationend', onOutEnd);
     container.classList.remove('blend-transition-out', outClass);
 
-    try {
-      displayCurrentPost();
-    } catch (error) {
-      console.error('Fehler beim Anzeigen des Posts:', error);
-      showNoContent();
-      return;
-    }
+    renderFn();
 
     // IN-Phase
     container.classList.add('blend-transition-in', inClass);
@@ -2905,11 +2919,10 @@ function displayCurrentPostWithBlend(blendEffect) {
       container.classList.remove('blend-transition-in', inClass);
     }
 
-    // Fallback falls animationend nicht feuert (z.B. duration=0s)
     const inDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
     if (inDuration > 0) {
       container.addEventListener('animationend', onInEnd, { once: true });
-      setTimeout(onInEnd, inDuration + 100); // Sicherheitsnetz
+      setTimeout(onInEnd, inDuration + 100);
     } else {
       onInEnd();
     }
@@ -2918,10 +2931,28 @@ function displayCurrentPostWithBlend(blendEffect) {
   const outDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
   if (outDuration > 0) {
     container.addEventListener('animationend', onOutEnd, { once: true });
-    setTimeout(onOutEnd, outDuration + 100); // Sicherheitsnetz
+    setTimeout(onOutEnd, outDuration + 100);
   } else {
     onOutEnd();
   }
+}
+
+// Wende Blend-Effekt an beim Wechsel zum nächsten Post
+// blendEffect kann leer sein – dann wird automatisch rotiert
+function displayCurrentPostWithBlend(blendEffect) {
+  const container = document.getElementById('current-post');
+  if (!container) {
+    console.error('Post-Container nicht gefunden');
+    return;
+  }
+  applyBlendTransition(container, () => {
+    try {
+      displayCurrentPost();
+    } catch (error) {
+      console.error('Fehler beim Anzeigen des Posts:', error);
+      showNoContent();
+    }
+  }, blendEffect);
 }
 
 // Post-Counter aktualisieren
