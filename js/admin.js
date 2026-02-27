@@ -1387,10 +1387,22 @@ function navigateTo(section) {
     };
     document.getElementById('page-title').textContent = titles[section] || section;
 
+    // Display auto-refresh stoppen wenn Sektion gewechselt wird
+    if (displaysAutoRefreshInterval) {
+      clearInterval(displaysAutoRefreshInterval);
+      displaysAutoRefreshInterval = null;
+    }
+
     // Daten laden bei Navigation
     if (section === 'posts') loadPosts();
     if (section === 'categories') loadCategories();
-    if (section === 'displays') loadDisplays();
+    if (section === 'displays') {
+      loadDisplays();
+      // Auto-Refresh alle 10 Sekunden für neue Registrierungen
+      displaysAutoRefreshInterval = setInterval(() => {
+        loadDisplays();
+      }, 10000);
+    }
     if (section === 'users') loadUsers();
     if (section === 'dashboard') updateDashboardStats();
     if (section === 'livedata') loadLiveDataSettings();
@@ -3014,6 +3026,7 @@ async function handleCategoryFormSubmit(e) {
 let displaysCache = [];
 let currentDisplayId = null;
 const MAX_LICENSED_DISPLAYS = 2;
+let displaysAutoRefreshInterval = null;
 
 async function loadDisplays() {
   const displaysList = document.getElementById('displays-list');

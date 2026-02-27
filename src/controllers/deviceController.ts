@@ -4,6 +4,7 @@ import { AppError } from '../middleware/errorHandler';
 import { logger, securityLogger } from '../utils/logger';
 import { DeviceRequest } from '../middleware/deviceAuth';
 import crypto from 'crypto';
+import sequelize from '../config/database';
 
 /**
  * Register a new device or return existing registration
@@ -63,18 +64,28 @@ export const registerDevice = async (
 
     // Create new display for this device
     const deviceToken = crypto.randomUUID();
-    const identifier = `device-${serialNumber.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20)}`;
     
-    // Ensure unique identifier
-    let uniqueIdentifier = identifier;
-    let counter = 1;
-    while (await Display.findOne({ where: { identifier: uniqueIdentifier } })) {
-      uniqueIdentifier = `${identifier}-${counter}`;
-      counter++;
-    }
+    // Generate sequential identifier: display01, display02, ...
+    const allDisplays = await Display.findAll({
+      attributes: ['identifier'],
+      where: sequelize.where(
+        sequelize.fn('LEFT', sequelize.col('identifier'), 7),
+        'display'
+      ),
+      order: [['identifier', 'ASC']],
+    });
+    
+    let nextNum = 1;
+    const usedNums = new Set(
+      allDisplays
+        .map(d => parseInt(d.identifier.replace('display', ''), 10))
+        .filter(n => !isNaN(n))
+    );
+    while (usedNums.has(nextNum)) nextNum++;
+    const uniqueIdentifier = `display${String(nextNum).padStart(2, '0')}`;
 
     display = await Display.create({
-      name: `${deviceModel || 'Android TV'} (${serialNumber.slice(-6)})`,
+      name: `Display ${String(nextNum).padStart(2, '0')} — ${deviceModel || 'Android TV'}`,
       identifier: uniqueIdentifier,
       description: `Automatisch registriert: ${deviceModel || 'Unbekanntes Gerät'}`,
       isActive: true,
