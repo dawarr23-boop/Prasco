@@ -2359,34 +2359,46 @@ async function displayCurrentPost() {
       // Video Vollbild - ohne Titel und Text
       html = videoHtml;
 
-      // Verstecke Header für Video-Vollbild
-      setTimeout(() => {
-        const header = document.querySelector('.display-header');
-        const footer = document.querySelector('.display-footer');
-        if (header) header.classList.add('hidden-for-video');
-        if (footer) footer.classList.add('hidden-for-video');
+      // Nur Header/Footer verstecken wenn tatsächlich ein Video vorhanden ist
+      if (videoHtml) {
+        // Verstecke Header für Video-Vollbild
+        setTimeout(() => {
+          const header = document.querySelector('.display-header');
+          const footer = document.querySelector('.display-footer');
+          if (header) header.classList.add('hidden-for-video');
+          if (footer) footer.classList.add('hidden-for-video');
 
-        // HTML5 Video: Versuche nativen Vollbildmodus
-        const video = document.getElementById('fullscreen-video');
-        if (video) {
-          video.addEventListener('loadeddata', () => {
-            tryEnterFullscreen(video);
-          });
-          // Falls Video schon geladen
-          if (video.readyState >= 2) {
-            tryEnterFullscreen(video);
+          // HTML5 Video: Versuche nativen Vollbildmodus
+          const video = document.getElementById('fullscreen-video');
+          if (video) {
+            video.addEventListener('loadeddata', () => {
+              tryEnterFullscreen(video);
+            });
+            // Falls Video schon geladen
+            if (video.readyState >= 2) {
+              tryEnterFullscreen(video);
+            }
           }
-        }
 
-        // YouTube/Vimeo iframe: Versuche Vollbild auf dem Container
-        const fsContainer = document.getElementById('video-fs-container');
-        if (fsContainer && !video) {
-          // Kurz warten bis iframe geladen
-          setTimeout(() => {
-            tryEnterFullscreen(fsContainer);
-          }, 500);
-        }
-      }, 100);
+          // YouTube/Vimeo iframe: Versuche Vollbild auf dem Container
+          const fsContainer = document.getElementById('video-fs-container');
+          if (fsContainer && !video) {
+            // Kurz warten bis iframe geladen
+            setTimeout(() => {
+              tryEnterFullscreen(fsContainer);
+            }, 500);
+          }
+        }, 100);
+      } else {
+        // Kein Video vorhanden → Fehlermeldung anzeigen statt schwarzem Bild
+        html = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-secondary);">
+            <div style="font-size:4rem; margin-bottom:1rem;">🎬</div>
+            <h2 style="color:var(--prasco-black);">${escapeHtml(post.title)}</h2>
+            <p style="margin-top:0.5rem;">Kein Video hinterlegt</p>
+          </div>
+        `;
+      }
       break;
 
     case 'html':
