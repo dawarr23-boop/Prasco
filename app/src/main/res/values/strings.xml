@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">PRASCO TV</string>
+
+    <!-- Loading -->
+    <string name="loading_display">Loading display…</string>
+
+    <!-- Errors -->
+    <string name="error_icon_desc">Error icon</string>
+    <string name="error_connection_title">Connection Error</string>
+    <string name="error_connection_message">Could not connect to PRASCO server.\nPlease check network connection and server URL.</string>
+    <string name="error_no_network_title">No Network</string>
+    <string name="error_no_network_message">No network connection available.\nPlease check WiFi or Ethernet cable.</string>
+    <string name="error_page_title">Loading Error</string>
+    <string name="error_page_load_title">Page Load Error</string>
+    <string name="error_page_load_message">Error loading display page: %1$s</string>
+    <string name="error_retry_info">Reconnecting…</string>
+    <string name="error_retry_countdown">Attempt %1$d – Retrying in %2$d seconds…</string>
+    <string name="btn_retry">Retry</string>
+
+    <!-- Status -->
+    <string name="status_icon_desc">Connection status</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_disconnected">Disconnected</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_server">Server Configuration</string>
+    <string name="settings_server_url">Server URL</string>
+    <string name="settings_server_url_hint">https://212.227.20.158</string>
+    <string name="settings_display_name">Display Name</string>
+    <string name="settings_display_name_hint">e.g. Lobby, Reception</string>
+    <string name="settings_display_identifier">Display Identifier</string>
+    <string name="settings_display_identifier_hint">e.g. display-lobby-01</string>
+    <string name="settings_section_app">App Settings</string>
+    <string name="settings_kiosk_mode">Kiosk Mode</string>
+    <string name="settings_auto_start">Auto-Start on Boot</string>
+    <string name="settings_screen_always_on">Screen Always On</string>
+    <string name="settings_section_actions">Actions</string>
+    <string name="settings_test_connection">Test Connection</string>
+    <string name="settings_testing">Testing…</string>
+    <string name="settings_connection_ok">✓ Connection successful!</string>
+    <string name="settings_connection_failed">✗ Connection failed</string>
+    <string name="settings_clear_cache">Clear Cache</string>
+    <string name="settings_cache_cleared">Cache cleared</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="settings_error_url_empty">Please enter a server URL</string>
+    <string name="settings_error_url_invalid">URL must start with http:// or https://</string>
+
+    <!-- Setup Wizard -->
+    <string name="setup_subtitle">Digital Signage System</string>
+    <string name="setup_step1_title">Server Connection</string>
+    <string name="setup_step1_desc">Enter the URL of your PRASCO server</string>
+    <string name="setup_step2_title">Display Selection</string>
+    <string name="setup_step2_desc">Select the display this device should use</string>
+    <string name="setup_step3_title">Setup Complete</string>
+    <string name="setup_test_connection">Test Connection</string>
+    <string name="setup_connection_ok">✓ Connection successful!</string>
+    <string name="setup_connection_failed">✗ Server not reachable</string>
+    <string name="setup_finish">Finish Setup</string>
+    <string name="setup_required">Please complete the setup first.</string>
+    <string name="setup_loading_displays">Loading displays…</string>
+    <string name="setup_no_displays">No displays found on server. Enter a name manually.</string>
+    <string name="setup_displays_load_error">Could not load displays. Enter a name manually.</string>
+    <string name="setup_select_display">Please select a display</string>
+    <string name="setup_enter_display_name">Please enter a display name</string>
+    <string name="setup_manual_input">Enter manually…</string>
+    <string name="setup_show_display_list">Show display list</string>
+
+    <!-- Buttons -->
+    <string name="btn_next">Next</string>
+    <string name="btn_back">Back</string>
+
+    <!-- Notifications -->
+    <string name="notification_title">PRASCO Display Active</string>
+    <string name="notification_text">Digital Signage is running</string>
+
+    <!-- Settings Overlay -->
+    <string name="settings_overlay_title">⚙️ PRASCO Settings</string>
+    <string name="settings_server_label">Server:</string>
+    <string name="settings_display_label">Display:</string>
+    <string name="settings_change_server">Change Server</string>
+    <string name="settings_change_display">Change Display</string>
+    <string name="settings_clear_cache_btn">Clear Cache</string>
+    <string name="settings_autostart">Autostart</string>
+    <string name="settings_close">Close</string>
+</resources>

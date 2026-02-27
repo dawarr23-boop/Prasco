@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Basis-Theme für PRASCO TV -->
+    <style name="Theme.PrascoTV" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:colorBackground">@color/prasco_background</item>
+        <item name="colorPrimary">@color/prasco_primary</item>
+        <item name="colorPrimaryDark">@color/prasco_primary_dark</item>
+        <item name="colorAccent">@color/prasco_accent</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@color/prasco_background</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Fullscreen-Theme für Display (MainActivity) -->
+    <style name="Theme.PrascoTV.Fullscreen" parent="Theme.PrascoTV">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
+    <!-- Settings-Theme (dunkles TV-Theme) -->
+    <style name="Theme.PrascoTV.Settings" parent="Theme.PrascoTV">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@color/prasco_primary</item>
+    </style>
+
+</resources>

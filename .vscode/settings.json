@@ -1,0 +1,33 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[kotlin]": {
+    "editor.defaultFormatter": "mathiasfrohlich.Kotlin",
+    "editor.tabSize": 4
+  },
+  "[xml]": {
+    "editor.tabSize": 4
+  },
+  "[gradle]": {
+    "editor.tabSize": 4
+  },
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.idea": true,
+    "**/local.properties": true
+  },
+  "files.associations": {
+    "*.gradle.kts": "kotlin"
+  },
+  "search.exclude": {
+    "**/build": true,
+    "**/.gradle": true,
+    "**/gradle/wrapper": true
+  },
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "kotlin.languageServer.enabled": true,
+  "editor.rulers": [120],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true
+}

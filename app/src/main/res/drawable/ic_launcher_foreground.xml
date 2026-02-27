@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PRASCO Logo als Adaptive Icon Foreground -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- P-Buchstabe in PRASCO-Grau (#58585A) -->
+    <!-- Vertikaler Strich -->
+    <path
+        android:fillColor="#58585A"
+        android:pathData="M30,22 L30,78 L43,78 L43,56 L30,56 Z" />
+
+    <!-- Oberer horizontaler Balken -->
+    <path
+        android:fillColor="#58585A"
+        android:pathData="M30,22 L72,22 L72,35 L30,35 Z" />
+
+    <!-- Mittlerer horizontaler Balken -->
+    <path
+        android:fillColor="#58585A"
+        android:pathData="M30,49 L68,49 L68,56 L30,56 Z" />
+
+    <!-- Rechte Seite des P (Bogen) -->
+    <path
+        android:fillColor="#58585A"
+        android:pathData="M65,22 L75,22 C78,22 80,24 80,27 L80,49 C80,52 78,54 75,54 L65,54 L65,22 Z" />
+
+    <!-- Innere Aussparung (weiß) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M43,35 L65,35 L65,49 L43,49 Z" />
+
+    <!-- Grüne Unterstreichung (PRASCO-Markenzeichen) -->
+    <path
+        android:fillColor="#009640"
+        android:pathData="M20,84 L88,84 L88,90 L20,90 Z" />
+</vector>

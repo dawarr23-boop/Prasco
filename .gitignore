@@ -1,0 +1,32 @@
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Keystore (sicherheitsrelevant)
+*.keystore
+*.jks
+
+# Log-Dateien
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
+
+# VS Code (nur lokale Einstellungen)
+.vscode/settings.local.json
+
+# Lokale Properties
+local.properties

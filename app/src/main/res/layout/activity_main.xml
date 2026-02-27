@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Haupt-Layout: WebView + Overlay-Container -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".MainActivity">
+
+    <!-- WebView für die PRASCO Display-Seite -->
+    <WebView
+        android:id="@+id/webView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <!-- Lade-Indikator (wird ausgeblendet wenn Seite geladen) -->
+    <LinearLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/loadingSpinner"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:indeterminate="true"
+            android:indeterminateTintMode="src_in" />
+
+        <TextView
+            android:id="@+id/loadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/loading_display"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Status-Overlay (Verbindungsstatus, oben rechts) -->
+    <include
+        layout="@layout/overlay_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp" />
+
+    <!-- Fehler-Overlay (zentriert, bei Verbindungsproblemen) -->
+    <LinearLayout
+        android:id="@+id/errorOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E6000000"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="48dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/errorIcon"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:contentDescription="@string/error_icon_desc"
+            android:src="@android:drawable/ic_dialog_alert"
+            android:tint="#FF5722" />
+
+        <TextView
+            android:id="@+id/errorTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/error_connection_title"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/errorMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:text="@string/error_connection_message"
+            android:textColor="#B0B0B0"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/errorRetryInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/error_retry_info"
+            android:textColor="#808080"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:focusable="true"
+            android:minWidth="200dp"
+            android:text="@string/btn_retry"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Settings-Overlay (über WebView, abgedunkelt) -->
+    <FrameLayout
+        android:id="@+id/settingsOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="420dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="#1A1A2E"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <!-- Titel -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/settings_overlay_title"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="#333366" />
+
+            <!-- Server-Info -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_server_label"
+                android:textColor="#808080"
+                android:textSize="13sp" />
+            <TextView
+                android:id="@+id/settingsServerUrl"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp"
+                android:background="#222244" />
+
+            <!-- Display-Info -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_display_label"
+                android:textColor="#808080"
+                android:textSize="13sp" />
+            <TextView
+                android:id="@+id/settingsDisplayName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="#333366" />
+
+            <!-- Buttons -->
+            <Button
+                android:id="@+id/btnSettingsChangeServer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:focusable="true"
+                android:text="@string/settings_change_server"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnSettingsChangeDisplay"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:focusable="true"
+                android:text="@string/settings_change_display"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnSettingsClearCache"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:focusable="true"
+                android:text="@string/settings_clear_cache_btn"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnSettingsAutostart"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:focusable="true"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/btnSettingsClose"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:focusable="true"
+                android:text="@string/settings_close"
+                android:textSize="15sp" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

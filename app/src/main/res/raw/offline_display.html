@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PRASCO – Offline</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                background: #1a1a2e;
+                color: #ffffff;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                text-align: center;
+            }
+            .container {
+                max-width: 600px;
+                padding: 48px;
+            }
+            .logo {
+                font-size: 48px;
+                font-weight: bold;
+                color: #7b8cde;
+                margin-bottom: 16px;
+            }
+            .subtitle {
+                font-size: 18px;
+                color: #aaa;
+                margin-bottom: 48px;
+            }
+            .offline-icon {
+                font-size: 64px;
+                margin-bottom: 24px;
+            }
+            .message {
+                font-size: 22px;
+                margin-bottom: 12px;
+            }
+            .detail {
+                font-size: 16px;
+                color: #888;
+                margin-bottom: 32px;
+                line-height: 1.5;
+            }
+            .spinner {
+                width: 40px;
+                height: 40px;
+                border: 4px solid #333;
+                border-top: 4px solid #7b8cde;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 16px;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            .retry-text {
+                font-size: 14px;
+                color: #666;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="logo">PRASCO</div>
+            <div class="subtitle">Digital Signage System</div>
+
+            <div class="offline-icon">📡</div>
+            <div class="message">Keine Verbindung zum Server</div>
+            <div class="detail">
+                Die Verbindung zum PRASCO-Server konnte nicht hergestellt
+                werden.<br />
+                Bitte überprüfen Sie die Netzwerkverbindung.
+            </div>
+
+            <div class="spinner"></div>
+            <div class="retry-text" id="retryText">
+                Verbindungsversuch läuft...
+            </div>
+        </div>
+
+        <script>
+            // Auto-Retry: Seite alle 10 Sekunden neu laden
+            var retryCount = 0;
+            var retryInterval = setInterval(function () {
+                retryCount++;
+                document.getElementById("retryText").textContent =
+                    "Versuch " + retryCount + " – Verbinde erneut...";
+
+                // Versuche die Hauptseite zu laden
+                if (window.PrascoNative && window.PrascoNative.isOnline()) {
+                    clearInterval(retryInterval);
+                    document.getElementById("retryText").textContent =
+                        "Verbindung hergestellt!";
+                    // App wird automatisch neu laden
+                }
+            }, 10000);
+        </script>
+    </body>
+</html>

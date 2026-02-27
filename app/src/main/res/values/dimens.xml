@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TV 10-foot UI Dimensionen -->
+
+    <!-- Abstände -->
+    <dimen name="tv_padding_small">8dp</dimen>
+    <dimen name="tv_padding_medium">16dp</dimen>
+    <dimen name="tv_padding_large">32dp</dimen>
+    <dimen name="tv_padding_xlarge">48dp</dimen>
+    <dimen name="tv_padding_xxlarge">64dp</dimen>
+
+    <!-- Textgrößen (10-foot optimiert) -->
+    <dimen name="tv_text_body">18sp</dimen>
+    <dimen name="tv_text_subtitle">22sp</dimen>
+    <dimen name="tv_text_title">32sp</dimen>
+    <dimen name="tv_text_headline">42sp</dimen>
+    <dimen name="tv_text_small">14sp</dimen>
+    <dimen name="tv_text_caption">12sp</dimen>
+
+    <!-- Buttons -->
+    <dimen name="tv_button_height">48dp</dimen>
+    <dimen name="tv_button_min_width">200dp</dimen>
+    <dimen name="tv_button_padding">12dp</dimen>
+
+    <!-- Input Fields -->
+    <dimen name="tv_input_height">56dp</dimen>
+
+    <!-- Icons -->
+    <dimen name="tv_icon_small">20dp</dimen>
+    <dimen name="tv_icon_medium">48dp</dimen>
+    <dimen name="tv_icon_large">96dp</dimen>
+
+    <!-- Banner -->
+    <dimen name="tv_banner_width">320dp</dimen>
+    <dimen name="tv_banner_height">180dp</dimen>
+</resources>

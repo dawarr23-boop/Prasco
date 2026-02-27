@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Setup Wizard: Ersteinrichtung der App -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingStart="32dp"
+    android:paddingEnd="32dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    tools:context=".SetupWizardActivity">
+
+    <!-- Logo / Titel -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@android:color/white"
+        android:textSize="32sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/setup_subtitle"
+        android:textColor="#7B8CDE"
+        android:textSize="16sp" />
+
+    <View
+        android:layout_width="200dp"
+        android:layout_height="2dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="#333366" />
+
+    <!-- Step Container -->
+    <FrameLayout
+        android:id="@+id/stepContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Step 1: Server-URL -->
+        <LinearLayout
+            android:id="@+id/step1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_step1_title"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/setup_step1_desc"
+                android:textColor="#AAAAAA"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/editSetupServerUrl"
+                android:layout_width="400dp"
+                android:layout_height="56dp"
+                android:layout_marginTop="24dp"
+                android:background="#2A2A4A"
+                android:focusable="true"
+                android:gravity="center"
+                android:hint="@string/settings_server_url_hint"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#666666"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/btnTestSetupConnection"
+                android:layout_width="250dp"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:focusable="true"
+                android:text="@string/setup_test_connection"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/textConnectionStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="✓ Verbindung erfolgreich"
+                tools:textColor="#4CAF50"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <!-- Step 2: Display-Auswahl -->
+        <LinearLayout
+            android:id="@+id/step2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_step2_title"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/setup_step2_desc"
+                android:textColor="#AAAAAA"
+                android:textSize="14sp" />
+
+            <!-- Lade-Indikator -->
+            <TextView
+                android:id="@+id/textDisplayLoading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/setup_loading_displays"
+                android:textColor="#7B8CDE"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <!-- Fehlermeldung -->
+            <TextView
+                android:id="@+id/textDisplayError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textColor="#FF5722"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <!-- Display-Liste (scrollbar, für D-Pad) -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:minHeight="120dp"
+                android:fadingEdge="vertical"
+                android:fadingEdgeLength="16dp"
+                android:scrollbars="vertical">
+
+                <LinearLayout
+                    android:id="@+id/displayListContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
+
+            </ScrollView>
+
+            <!-- Manuell eingeben -->
+            <LinearLayout
+                android:id="@+id/manualInputSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnManualDisplayInput"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:focusable="true"
+                    android:text="@string/setup_manual_input"
+                    android:textSize="14sp"
+                    android:background="@android:color/transparent"
+                    android:textColor="#7B8CDE" />
+
+                <LinearLayout
+                    android:id="@+id/manualInputFields"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/editSetupDisplayName"
+                        android:layout_width="400dp"
+                        android:layout_height="50dp"
+                        android:layout_marginTop="8dp"
+                        android:background="#2A2A4A"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:hint="@string/settings_display_name_hint"
+                        android:inputType="text"
+                        android:padding="12dp"
+                        android:textColor="@android:color/white"
+                        android:textColorHint="#666666"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Step 3: Bestätigung -->
+        <LinearLayout
+            android:id="@+id/step3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_step3_title"
+                android:textColor="@android:color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textSetupSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp"
+                tools:text="Server: http://192.168.1.100:3000\nDisplay: Empfang" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Navigation Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnSetupBack"
+            android:layout_width="150dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="16dp"
+            android:focusable="true"
+            android:text="@string/btn_back"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnSetupNext"
+            android:layout_width="200dp"
+            android:layout_height="48dp"
+            android:focusable="true"
+            android:text="@string/btn_next"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Step-Indicator -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/stepDot1"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="#7B8CDE" />
+
+        <View
+            android:id="@+id/stepDot2"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="#333366" />
+
+        <View
+            android:id="@+id/stepDot3"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="4dp"
+            android:background="#333366" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PRASCO Brand Colors -->
+    <color name="prasco_primary">#1A1A2E</color>
+    <color name="prasco_primary_dark">#0F0F1A</color>
+    <color name="prasco_accent">#7B8CDE</color>
+    <color name="prasco_accent_light">#A3B0F0</color>
+    <color name="prasco_surface">#16213E</color>
+    <color name="prasco_background">#0A0A14</color>
+
+    <!-- Status Colors -->
+    <color name="status_connected">#4CAF50</color>
+    <color name="status_disconnected">#FF5722</color>
+    <color name="status_warning">#FFC107</color>
+
+    <!-- UI Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#CCCCCC</color>
+    <color name="text_hint">#666666</color>
+    <color name="divider">#333366</color>
+    <color name="input_background">#2A2A4A</color>
+
+    <!-- Standard Android Colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

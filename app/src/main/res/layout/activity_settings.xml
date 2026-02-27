@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Settings-Layout: TV-optimiert für D-Pad Navigation -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A2E"
+    android:padding="48dp"
+    tools:context=".SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_title"
+            android:textColor="@android:color/white"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:background="#333366" />
+
+        <!-- Server-Konfiguration -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_section_server"
+            android:textColor="#7B8CDE"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Server-URL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_server_url"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/editServerUrl"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A4A"
+                android:focusable="true"
+                android:hint="@string/settings_server_url_hint"
+                android:inputType="textUri"
+                android:padding="12dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#666666"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Display-Name -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_display_name"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/editDisplayName"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A4A"
+                android:focusable="true"
+                android:hint="@string/settings_display_name_hint"
+                android:inputType="text"
+                android:padding="12dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#666666"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Display Identifier -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_display_identifier"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/editDisplayIdentifier"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="4dp"
+                android:background="#2A2A4A"
+                android:focusable="true"
+                android:hint="@string/settings_display_identifier_hint"
+                android:inputType="text"
+                android:padding="12dp"
+                android:textColor="@android:color/white"
+                android:textColorHint="#666666"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="#333366" />
+
+        <!-- App-Einstellungen -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_section_app"
+            android:textColor="#7B8CDE"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Kiosk-Modus Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings_kiosk_mode"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switchKioskMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Auto-Start Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings_auto_start"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switchAutoStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Screen Always On Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings_screen_always_on"
+                android:textColor="#CCCCCC"
+                android:textSize="16sp" />
+
+            <Switch
+                android:id="@+id/switchScreenAlwaysOn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:background="#333366" />
+
+        <!-- Aktionen -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_section_actions"
+            android:textColor="#7B8CDE"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnTestConnection"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:focusable="true"
+                android:text="@string/settings_test_connection"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnClearCache"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:focusable="true"
+                android:text="@string/settings_clear_cache"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:focusable="true"
+                android:text="@string/settings_save"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnBack"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:focusable="true"
+                android:text="@string/settings_back"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="#333366" />
+
+        <!-- App-Info -->
+        <TextView
+            android:id="@+id/textAppInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#666666"
+            android:textSize="12sp"
+            tools:text="PRASCO TV v1.0.0 | Android 12 | NVIDIA Shield" />
+
+    </LinearLayout>
+</ScrollView>

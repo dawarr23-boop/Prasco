@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+        PRASCO Server verwendet typischerweise HTTP im lokalen Netz.
+        Cleartext-Kommunikation wird erlaubt, da der Server im LAN läuft.
+    -->
+
+    <!-- Cleartext (HTTP) global erlaubt für LAN-Server -->
+    <!-- User-Zertifikate für selbstsignierte SSL-Zertifikate -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Debug builds: auch User-Zertifikate vertrauen -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

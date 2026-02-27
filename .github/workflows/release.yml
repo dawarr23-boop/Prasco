@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Build Release AAB (optional)
+        run: ./gradlew bundleRelease
+        continue-on-error: true
+
+      - name: Sign APK
+        if: env.SIGNING_KEY != ''
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$SIGNING_KEY" | base64 -d > keystore.jks
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore keystore.jks \
+            -storepass "$SIGNING_KEY_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            app/build/outputs/apk/release/app-release-unsigned.apk "$ALIAS"
+          # Align
+          ${ANDROID_HOME}/build-tools/34.0.0/zipalign -v 4 \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            app/build/outputs/apk/release/prasco-tv-${{ steps.version.outputs.VERSION }}.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "PRASCO TV v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## PRASCO TV App v${{ steps.version.outputs.VERSION }}
+
+            ### Installation
+            1. APK herunterladen
+            2. Per ADB installieren: `adb install -r prasco-tv-${{ steps.version.outputs.VERSION }}.apk`
+
+            ### Änderungen
+            Siehe [CHANGELOG.md](CHANGELOG.md)
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

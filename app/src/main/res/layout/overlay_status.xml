@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-Overlay: Kleines Icon oben rechts für Verbindungsstatus -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/statusOverlay"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:alpha="0.7"
+    android:background="#80000000"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:visibility="gone">
+
+    <!-- Verbindungsstatus-Icon -->
+    <ImageView
+        android:id="@+id/statusIcon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:contentDescription="@string/status_icon_desc"
+        android:src="@android:drawable/presence_online" />
+
+    <!-- Status-Text (optional, normalerweise ausgeblendet) -->
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+</LinearLayout>
