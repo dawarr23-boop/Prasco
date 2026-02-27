@@ -2862,33 +2862,33 @@ function previousPost() {
 function displayCurrentPostWithBlend(blendEffect) {
   const container = document.getElementById('current-post');
   
-  // Sicherheitsprüfung
   if (!container) {
     console.error('Post-Container nicht gefunden');
     return;
   }
   
-  // Prüfe ob Transitions erlaubt sind (berücksichtigt externe Display-Logik)
+  // Keine Transition – direkter Wechsel
   if (!shouldUseTransitions() || !blendEffect || blendEffect === '') {
-    // Keine Transition - direkter Wechsel
     displayCurrentPost();
     return;
   }
 
-  // Out-Animation des alten Posts
-  const effectClass = blendEffect.replace(/-/g, '-'); // z.B. "fade" oder "slide-left"
-  const outClass = `blend-${effectClass}-out`;
-  const inClass = `blend-${effectClass}-in`;
-  
-  // Füge out-Animation hinzu
+  // Klassen aus vorherigen Animationen bereinigen
+  container.className = container.className
+    .split(' ')
+    .filter(c => !c.startsWith('blend-'))
+    .join(' ');
+
+  const outClass = `blend-${blendEffect}-out`;
+  const inClass  = `blend-${blendEffect}-in`;
+
+  // OUT-Phase
   container.classList.add('blend-transition-out', outClass);
-  
-  // Nach Animation: Neuen Post laden und in-Animation starten
-  setTimeout(() => {
-    // Entferne out-Animation
+
+  function onOutEnd() {
+    container.removeEventListener('animationend', onOutEnd);
     container.classList.remove('blend-transition-out', outClass);
-    
-    // Lade neuen Post-Inhalt (mit Fehlerbehandlung)
+
     try {
       displayCurrentPost();
     } catch (error) {
@@ -2896,15 +2896,32 @@ function displayCurrentPostWithBlend(blendEffect) {
       showNoContent();
       return;
     }
-    
-    // Füge in-Animation hinzu
+
+    // IN-Phase
     container.classList.add('blend-transition-in', inClass);
-    
-    // Nach in-Animation: Entferne alle Blend-Klassen
-    setTimeout(() => {
+
+    function onInEnd() {
+      container.removeEventListener('animationend', onInEnd);
       container.classList.remove('blend-transition-in', inClass);
-    }, 600); // Dauer muss mit CSS animation-duration übereinstimmen
-  }, 600); // Dauer muss mit CSS animation-duration übereinstimmen
+    }
+
+    // Fallback falls animationend nicht feuert (z.B. duration=0s)
+    const inDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
+    if (inDuration > 0) {
+      container.addEventListener('animationend', onInEnd, { once: true });
+      setTimeout(onInEnd, inDuration + 100); // Sicherheitsnetz
+    } else {
+      onInEnd();
+    }
+  }
+
+  const outDuration = parseFloat(getComputedStyle(container).animationDuration || '0') * 1000;
+  if (outDuration > 0) {
+    container.addEventListener('animationend', onOutEnd, { once: true });
+    setTimeout(onOutEnd, outDuration + 100); // Sicherheitsnetz
+  } else {
+    onOutEnd();
+  }
 }
 
 // Post-Counter aktualisieren

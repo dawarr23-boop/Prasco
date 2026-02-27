@@ -428,13 +428,13 @@ body {
   background: var(--white);
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  overflow: auto;
+  overflow: hidden;
   max-height: 100%;
 }
 
-/* Fade-In Animation nur auf externen Displays */
-.transitions-enabled .post {
-  animation: fadeIn 0.8s ease;
+/* Sanftes Einblenden beim ersten Laden – NUR wenn kein Blend-Effekt aktiv */
+.transitions-enabled .post:not(.blend-transition-in):not(.blend-transition-out) {
+  animation: fadeIn 0.5s ease;
 }
 
 @keyframes fadeIn {
@@ -974,7 +974,7 @@ body {
 /* Zoom In Effect */
 @keyframes blendZoomInIn {
   from {
-    transform: scale(0);
+    transform: scale(0.85);
     opacity: 0;
   }
   to {
@@ -989,7 +989,7 @@ body {
     opacity: 1;
   }
   to {
-    transform: scale(0);
+    transform: scale(0.85);
     opacity: 0;
   }
 }
@@ -997,7 +997,7 @@ body {
 /* Zoom Out Effect */
 @keyframes blendZoomOutIn {
   from {
-    transform: scale(2);
+    transform: scale(1.15);
     opacity: 0;
   }
   to {
@@ -1012,7 +1012,7 @@ body {
     opacity: 1;
   }
   to {
-    transform: scale(2);
+    transform: scale(1.15);
     opacity: 0;
   }
 }
@@ -1021,23 +1021,23 @@ body {
 /* Standardmäßig keine Animationen (ressourcenschonend für Raspberry Pi) */
 .blend-transition-in {
   animation-duration: 0s;
-  animation-timing-function: ease-in-out;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
 }
 
 .blend-transition-out {
   animation-duration: 0s;
-  animation-timing-function: ease-in-out;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
 }
 
-/* Aktiviere Animationen nur auf externen Displays oder wenn explizit gewünscht */
+/* Aktiviere Animationen nur wenn transitions-enabled gesetzt ist */
 .transitions-enabled .blend-transition-in {
-  animation-duration: 0.6s;
+  animation-duration: 0.55s;
 }
 
 .transitions-enabled .blend-transition-out {
-  animation-duration: 0.6s;
+  animation-duration: 0.45s;
 }
 
 .blend-fade-in { animation-name: blendFadeIn; }
