@@ -51,6 +51,7 @@ import transitRoutes from './routes/transit';
 import trafficRoutes from './routes/traffic';
 import weatherRoutes from './routes/weather';
 import aiRoutes from './routes/ai';
+import deviceRoutes from './routes/devices';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -309,6 +310,7 @@ app.use('/api/transit', transitRoutes);
 app.use('/api/traffic', trafficRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/devices', deviceRoutes);
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {

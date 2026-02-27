@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { param, query } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validator';
 import * as publicController from '../controllers/publicController';
 import * as displayController from '../controllers/displayController';
+import * as deviceController from '../controllers/deviceController';
+import { MAC_ADDRESS_REGEX } from '../utils/validation';
 import fs from 'fs';
 import path from 'path';
 
@@ -94,6 +96,37 @@ router.get(
     validate,
   ],
   displayController.getPublicDisplayPosts
+);
+
+// POST /api/public/devices/register - Register a client device by serial number + MAC address
+router.post(
+  '/devices/register',
+  [
+    body('serialNumber').notEmpty().trim().withMessage('serialNumber ist erforderlich'),
+    body('macAddress')
+      .notEmpty()
+      .trim()
+      .matches(MAC_ADDRESS_REGEX)
+      .withMessage('Ungültiges MAC-Adress-Format (erwartet: XX:XX:XX:XX:XX:XX)'),
+    body('deviceName').optional().trim(),
+    validate,
+  ],
+  deviceController.registerDevice
+);
+
+// POST /api/public/devices/verify - Verify if a client device is authorized
+router.post(
+  '/devices/verify',
+  [
+    body('serialNumber').notEmpty().trim().withMessage('serialNumber ist erforderlich'),
+    body('macAddress')
+      .notEmpty()
+      .trim()
+      .matches(MAC_ADDRESS_REGEX)
+      .withMessage('Ungültiges MAC-Adress-Format (erwartet: XX:XX:XX:XX:XX:XX)'),
+    validate,
+  ],
+  deviceController.verifyDevice
 );
 
 export default router;
