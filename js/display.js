@@ -682,6 +682,7 @@ async function renderNewsWidget() {
     if (!data.success || !data.data) return [];
 
     const { world, local } = data.data;
+    if (!world.length && !local.length) return [];
 
     function formatAge(pubDate) {
       if (!pubDate) return '';
@@ -695,32 +696,98 @@ async function renderNewsWidget() {
       } catch { return ''; }
     }
 
-    function buildSlide(items, title, icon) {
-      if (!items || items.length === 0) return null;
-      const cards = items.map((item, i) => {
-        const age = formatAge(item.pubDate);
-        return `<div class="news-card${i === 0 ? ' news-card-lead' : ''}">
-          <div class="news-card-meta"><span class="news-source">${item.source}</span>${age ? `<span class="news-age">${age}</span>` : ''}</div>
-          <div class="news-title">${item.title}</div>
-          ${item.description && i < 3 ? `<div class="news-desc">${item.description}</div>` : ''}
-        </div>`;
-      }).join('');
-      return `<div class="news-screen">
-        <div class="news-screen-header"><span class="news-header-icon">${icon}</span><span class="news-header-title">${title}</span></div>
-        <div class="news-grid">${cards}</div>
+    // --- 4-Phasen-Rotation (localStorage) ---
+    // Zyklus:
+    //   Phase 0 (Vollwechsel): W-featured, W-normalA, L-normalB (alle neu)  → phase=1
+    //   Phase 1: neues W-featured, A+B unverändert                          → phase=2
+    //   Phase 2: neues W-featured, altes featured→normalA, B unverändert    → phase=3
+    //   Phase 3: neues W-featured, altes featured→normalA, neues L-normalB  → phase=0
+    function storyAt(arr, idx) {
+      if (!arr || arr.length === 0) return null;
+      return arr[((idx % arr.length) + arr.length) % arr.length];
+    }
+
+    let state = null;
+    try { state = JSON.parse(localStorage.getItem('newsRotationState') || 'null'); } catch {}
+
+    let featured, normalA, normalB;
+
+    if (!state || typeof state.phase !== 'number') {
+      // Erster Start → Phase 0 ausführen
+      featured = storyAt(world, 0);
+      normalA   = storyAt(world, 1);
+      normalB   = storyAt(local, 0);
+      state = { phase: 1, featured, normalA, normalB, worldPtr: 2 % (world.length || 1), localPtr: 1 % (local.length || 1) };
+    } else {
+      const wPtr = state.worldPtr || 0;
+      const lPtr = state.localPtr || 0;
+      const ph   = state.phase;
+
+      if (ph === 1) {
+        // Neues featured, A und B unverändert
+        featured = storyAt(world, wPtr);
+        normalA  = state.normalA;
+        normalB  = state.normalB;
+        state = { phase: 2, featured, normalA, normalB,
+          worldPtr: (wPtr + 1) % (world.length || 1), localPtr: lPtr };
+
+      } else if (ph === 2) {
+        // Neues featured, altes featured → normalA, B unverändert
+        featured = storyAt(world, wPtr);
+        normalA  = state.featured;
+        normalB  = state.normalB;
+        state = { phase: 3, featured, normalA, normalB,
+          worldPtr: (wPtr + 1) % (world.length || 1), localPtr: lPtr };
+
+      } else if (ph === 3) {
+        // Neues featured, altes featured → normalA, neues local → normalB
+        featured = storyAt(world, wPtr);
+        normalA  = state.featured;
+        normalB  = storyAt(local, lPtr);
+        state = { phase: 0, featured, normalA, normalB,
+          worldPtr: (wPtr + 1) % (world.length || 1),
+          localPtr: (lPtr + 1) % (local.length || 1) };
+
+      } else {
+        // Phase 0: Vollwechsel – drei neue Geschichten
+        featured = storyAt(world, wPtr);
+        normalA  = storyAt(world, (wPtr + 1) % (world.length || 1));
+        normalB  = storyAt(local, lPtr);
+        state = { phase: 1, featured, normalA, normalB,
+          worldPtr: (wPtr + 2) % (world.length || 1),
+          localPtr: (lPtr + 1) % (local.length || 1) };
+      }
+    }
+
+    try { localStorage.setItem('newsRotationState', JSON.stringify(state)); } catch {}
+
+    function buildCard(item, isLead) {
+      if (!item) return '';
+      const age = formatAge(item.pubDate);
+      const sourceLabel = item.source || '';
+      return `<div class="news-card${isLead ? ' news-card-lead' : ''}">
+        <div class="news-card-meta">
+          <span class="news-source">${sourceLabel}</span>
+          ${age ? `<span class="news-age">${age}</span>` : ''}
+        </div>
+        <div class="news-title">${item.title || ''}</div>
+        ${isLead && item.description ? `<div class="news-desc">${item.description}</div>` : ''}
       </div>`;
     }
 
-    const slides = [];
-    if (ns['news.showWorld'] !== 'false') {
-      const s = buildSlide(world, 'Nachrichten — Deutschland & Welt', '📰');
-      if (s) slides.push(s);
-    }
-    if (ns['news.showLocal'] !== 'false') {
-      const s = buildSlide(local, 'Lokales — Ahlen & Region', '🏘️');
-      if (s) slides.push(s);
-    }
-    return slides;
+    const slideHtml = `<div class="news-screen">
+      <div class="news-screen-header">
+        <span class="news-header-icon">📰</span>
+        <span class="news-header-title">Nachrichten</span>
+      </div>
+      <div class="news-grid">
+        ${buildCard(featured, true)}
+        ${buildCard(normalA, false)}
+        ${buildCard(normalB, false)}
+      </div>
+    </div>`;
+
+    return [slideHtml];
   } catch (e) {
     console.warn('News-Widget Fehler:', e);
     return [];
@@ -801,13 +868,12 @@ async function showLiveDataWidget() {
     });
   }
 
-  // Nachrichten: je ein Slide für Welt + Lokal
+  // Nachrichten: ein kombinierter Slide (2 Welt + 1 Lokal, rotierende Hervorhebung)
   if (newsSlides && newsSlides.length > 0) {
-    const newsTitles = ['Nachrichten', 'Lokales Ahlen'];
-    newsSlides.forEach((html, i) => {
+    newsSlides.forEach((html) => {
       slides.push({
         icon: '📰',
-        title: newsTitles[i] || 'Nachrichten',
+        title: 'Nachrichten',
         content: html,
         timeStr,
         intervalMin,
