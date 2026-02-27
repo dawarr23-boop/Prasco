@@ -1,20 +1,27 @@
-# PRASCO Android TV App - Build erfolgreich! 📺
+# PRASCO Android TV App - Client Software v2.0 📺
 
-## ✅ Build-Ergebnisse
+## ✅ Übersicht
 
-Die Android TV App wurde erfolgreich mit PowerShell und Android Studio gebaut!
+Vollwertige Android TV Client-App für das PRASCO Digital Signage System.
 
-### Erstellte APK-Dateien:
+### Features (v2.0):
+
+- **Kiosk-Modus**: Vollbild ohne System-UI, Zurück-Taste blockiert
+- **Fernbedienungs-Navigation**: D-Pad Tasten → JavaScript Events
+- **Blend-Effekte**: Hardware-beschleunigtes Rendering für flüssige Übergänge
+- **Auto-Reconnect**: Automatische Wiederverbindung bei Serververlust (15s Intervall)
+- **Persistente Konfiguration**: Server-URL in SharedPreferences gespeichert
+- **Einstellungs-Dialog**: 5× Menu-Taste → URL-Konfiguration ohne Rebuild
+- **Auto-Start**: Startet automatisch beim TV-Booten (BootReceiver)
+- **Mixed Content**: HTTP-Ressourcen auf HTTPS erlaubt
+
+### APK-Dateien:
 
 1. **Debug-Version** (zum Testen)
-   - Datei: `app-debug.apk`
-   - Größe: 4,16 MB
-   - Pfad: `C:\Users\chris\Prasco2\prasco\android-tv-project\app\build\outputs\apk\debug\app-debug.apk`
+   - Pfad: `app/build/outputs/apk/debug/app-debug.apk`
 
-2. **Release-Version** (noch unsigniert)
-   - Datei: `app-release-unsigned.apk`
-   - Größe: 1,18 MB (optimiert!)
-   - Pfad: `C:\Users\chris\Prasco2\prasco\android-tv-project\app\build\outputs\apk\release\app-release-unsigned.apk`
+2. **Release-Version** (signiert für Produktion)
+   - Pfad: `app/build/outputs/apk/release/app-release.apk`
 
 ## 📦 Installation auf Android TV
 
@@ -50,15 +57,21 @@ adb shell am start -n net.prasco.display.tv/.MainActivity
 
 Die App lädt standardmäßig diese URL:
 ```
-http://192.168.1.100:3000/display
+http://192.168.1.100:3000
 ```
 
-### URL ändern:
+### URL ändern (ohne Rebuild):
 
-Bearbeite die Datei [MainActivity.kt](android-tv-project/app/src/main/java/net/prasco/display/tv/MainActivity.kt#L16):
+**Auf dem TV:** 5× die Menu-Taste auf der Fernbedienung drücken → Einstellungs-Dialog öffnet sich → Neue URL eingeben → "Speichern & Neu laden"
+
+Die URL wird dauerhaft gespeichert (SharedPreferences) und überlebt App-Neustarts.
+
+### URL ändern (im Code):
+
+Bearbeite die Datei `app/src/main/java/net/prasco/display/tv/MainActivity.kt`:
 
 ```kotlin
-private val DEFAULT_URL = "http://DEINE-IP:3000/display"
+private const val DEFAULT_SERVER_URL = "http://DEINE-IP:3000"
 ```
 
 Dann neu bauen:
@@ -126,19 +139,10 @@ $env:ANDROID_HOME = "C:\Users\chris\AppData\Local\Android\Sdk"
 
 ## 📝 Weitere Anpassungen
 
-### Autostart beim Boot aktivieren
+### Auto-Start beim Boot
 
-Füge in [AndroidManifest.xml](android-tv-project/app/src/main/AndroidManifest.xml) hinzu:
-
-```xml
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-<receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
-    <intent-filter>
-        <action android:name="android.intent.action.BOOT_COMPLETED" />
-    </intent-filter>
-</receiver>
-```
+Ist bereits eingebaut! Der `BootReceiver` startet die App automatisch nach dem Booten.
+Falls nicht gewünscht, entferne den `<receiver>`-Eintrag aus `AndroidManifest.xml`.
 
 ### App-Icon anpassen
 
@@ -175,7 +179,7 @@ cd C:\Users\chris\Prasco2\prasco\android-tv-project
 
 ---
 
-**Status:** ✅ Build erfolgreich abgeschlossen!  
-**Build-Zeit:** ~50 Sekunden  
+**Status:** ✅ Client Software v2.0  
 **Gradle Version:** 8.2  
-**Android SDK:** 34 (Android 14)
+**Android SDK:** 34 (Android 14)  
+**Kotlin:** 1.9.20
