@@ -543,6 +543,7 @@ async function showLiveDataWidget() {
       content: transitHtml,
       timeStr,
       intervalMin,
+      type: 'transit',
     });
   }
 
@@ -554,6 +555,7 @@ async function showLiveDataWidget() {
       content: trafficHtml,
       timeStr,
       intervalMin,
+      type: 'traffic',
     });
   }
 
@@ -577,8 +579,9 @@ async function showLiveDataWidget() {
 
   function showSlide(index) {
     const slide = slides[index];
+    const slideClass = slide.type ? `slide-${slide.type}` : '';
     container.innerHTML = `
-      <div class="live-data-widget">
+      <div class="live-data-widget ${slideClass}">
         <div class="live-widget-header">
           <div class="live-header-left">
             <span class="live-indicator">● LIVE</span>

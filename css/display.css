@@ -1400,7 +1400,7 @@ body {
 .dep-delay.cancelled { color: #c62828; text-decoration: line-through; }
 .dep-row.cancelled td { opacity: 0.45; text-decoration: line-through; }
 
-/* === Verkehrslage Traffic List === */
+/* === Verkehrslage Traffic List (Autobahn Blue Theme) === */
 .live-traffic-list {
   display: flex;
   flex-direction: column;
@@ -1423,7 +1423,7 @@ body {
 .traffic-row.warning { border-left-color: #d09030; }
 .traffic-row.roadwork { border-left-color: #c0a830; }
 .traffic-row.closure { border-left-color: #dc3545; }
-.traffic-row.clear { border-left-color: #009640; }
+.traffic-row.clear { border-left-color: #004B87; }
 
 .traffic-icon { 
   font-size: 4vh; 
@@ -1434,7 +1434,7 @@ body {
 .traffic-hw {
   font-weight: 700;
   min-width: 5vw;
-  color: #009640;
+  color: #004B87;
   font-size: 3.2vh;
   flex-shrink: 0;
 }
@@ -1451,6 +1451,15 @@ body {
   font-size: 2.2vh;
   color: #777777;
   margin-top: 0.5vh;
+}
+
+/* === Traffic Slide: Autobahn Blue Override === */
+.live-data-widget.slide-traffic .live-widget-header {
+  border-bottom-color: #004B87;
+}
+.live-data-widget.slide-traffic .live-indicator {
+  background: #004B87;
+  border-color: #003666;
 }
 
 /* --- Footer (Corporate Style with Page Dots) --- */
