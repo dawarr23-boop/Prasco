@@ -94,6 +94,7 @@ app.use(
           'https://www.youtube.com',
           'https://www.youtube-nocookie.com',
           'https://player.vimeo.com',
+          'https://embed.windy.com',
         ],
         baseUri: ["'self'"],
         fontSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'data:'],
