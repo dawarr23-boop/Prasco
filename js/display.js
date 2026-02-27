@@ -671,7 +671,7 @@ function updateRefreshInfo() {
   }
   if (nameElement && nameSeparator) {
     if (currentDisplayName) {
-      nameElement.textContent = `▢ ${currentDisplayName}`;
+      nameElement.textContent = currentDisplayName;
       nameElement.style.display = '';
       nameSeparator.style.display = '';
     } else {
