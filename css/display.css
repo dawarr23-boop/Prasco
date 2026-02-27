@@ -1145,15 +1145,15 @@ body {
   justify-content: center;
   height: 100%;
   padding: 0 !important;
-  background: #1a1f25;
+  background: #f0f2f4;
 }
 
 .live-data-widget {
   width: 100%;
   height: 100%;
-  background: linear-gradient(170deg, #1e242c 0%, #23292f 50%, #1a1f25 100%);
+  background: linear-gradient(170deg, #f5f6f8 0%, #eef0f3 50%, #f0f2f4 100%);
   overflow: hidden;
-  color: #eef1f5;
+  color: #2a2d32;
   font-family: var(--font-primary, 'Roboto', 'Segoe UI', sans-serif);
   display: flex;
   flex-direction: column;
@@ -1166,8 +1166,9 @@ body {
   justify-content: space-between;
   gap: 2vw;
   padding: 2vh 3vw;
-  background: linear-gradient(135deg, rgba(0, 150, 64, 0.18) 0%, rgba(0, 120, 48, 0.10) 100%);
+  background: #ffffff;
   border-bottom: 3px solid #009640;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
   flex-shrink: 0;
 }
 
@@ -1180,17 +1181,17 @@ body {
 }
 
 .live-indicator {
-  color: #009640;
+  color: #ffffff;
   font-weight: 800;
   font-size: 2vh;
   animation: livePulse 2s ease-in-out infinite;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   white-space: nowrap;
-  background: rgba(0, 150, 64, 0.12);
+  background: #009640;
   padding: 0.5vh 1vw;
   border-radius: 2vh;
-  border: 1px solid rgba(0, 150, 64, 0.25);
+  border: 1px solid #007830;
 }
 
 @keyframes livePulse {
@@ -1201,7 +1202,7 @@ body {
 .live-title {
   font-size: 3.2vh;
   font-weight: 700;
-  color: #f0f2f5;
+  color: #2a2d32;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1210,7 +1211,7 @@ body {
 
 .live-time {
   font-size: 2.2vh;
-  color: rgba(255, 255, 255, 0.7);
+  color: #666666;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   font-weight: 500;
@@ -1269,6 +1270,7 @@ body {
   background: #58585a;
 }
 
+
 .type-livedata .live-departure-table thead th {
   text-align: left;
   padding: 1.8vh 1vw;
@@ -1282,7 +1284,7 @@ body {
 }
 
 .type-livedata .live-departure-table td {
-  color: #eef1f5;
+  color: #2a2d32;
   background: transparent;
 }
 
@@ -1301,11 +1303,11 @@ body {
 .live-departure-table td:nth-child(6) { width: 18%; } /* Status */
 
 .type-livedata .live-departure-table tbody .dep-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .type-livedata .live-departure-table tbody .dep-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(0, 0, 0, 0.025);
 }
 
 .type-livedata .dep-row td {
@@ -1339,7 +1341,7 @@ body {
 .line-ferry { background: #2e6a72; }
 
 .dep-direction {
-  color: #e8ecf0;
+  color: #333333;
   font-size: 2.8vh;
   font-weight: 500;
   white-space: nowrap;
@@ -1349,14 +1351,14 @@ body {
 
 .dep-platform {
   text-align: center;
-  color: rgba(255, 255, 255, 0.82);
+  color: #58585a;
   font-size: 2.4vh;
 }
 
 .dep-countdown {
   font-weight: 700;
   font-size: 3vh;
-  color: #6dd898;
+  color: #009640;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1364,7 +1366,7 @@ body {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   font-size: 2.8vh;
-  color: #e0e6ee;
+  color: #444444;
 }
 
 /* Status Badges */
@@ -1380,22 +1382,22 @@ body {
   letter-spacing: 0.02em;
 }
 .status-badge.on-time {
-  background: rgba(0, 150, 64, 0.2);
-  color: #5fd87a;
+  background: rgba(0, 150, 64, 0.12);
+  color: #007830;
 }
 .status-badge.delayed {
-  background: rgba(230, 81, 0, 0.2);
-  color: #f0a040;
+  background: rgba(230, 130, 0, 0.12);
+  color: #b86800;
 }
 .status-badge.cancelled {
-  background: rgba(198, 40, 40, 0.2);
-  color: #e05555;
+  background: rgba(198, 40, 40, 0.12);
+  color: #c62828;
 }
 
 /* Kräftigere Status-Farben (Legacy) */
-.dep-delay.on-time { color: #5fd87a; }
-.dep-delay.delayed { color: #e8a040; }
-.dep-delay.cancelled { color: #d05555; text-decoration: line-through; }
+.dep-delay.on-time { color: #009640; }
+.dep-delay.delayed { color: #b86800; }
+.dep-delay.cancelled { color: #c62828; text-decoration: line-through; }
 .dep-row.cancelled td { opacity: 0.45; text-decoration: line-through; }
 
 /* === Verkehrslage Traffic List === */
@@ -1411,9 +1413,10 @@ body {
   gap: 1.5vw;
   padding: 2.5vh 2.5vw;
   border-radius: 1vh;
-  background: rgba(255, 255, 255, 0.045);
+  background: #ffffff;
   border-left-width: 5px;
   border-left-style: solid;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 /* Kräftigere Akzentfarben */
@@ -1431,14 +1434,14 @@ body {
 .traffic-hw {
   font-weight: 700;
   min-width: 5vw;
-  color: #82c8a0;
+  color: #009640;
   font-size: 3.2vh;
   flex-shrink: 0;
 }
 
 .traffic-msg {
   flex: 1;
-  color: #dce2e8;
+  color: #333333;
   line-height: 1.5;
   font-size: 2.8vh;
 }
@@ -1446,15 +1449,15 @@ body {
 .traffic-detail {
   display: block;
   font-size: 2.2vh;
-  color: rgba(255, 255, 255, 0.68);
+  color: #777777;
   margin-top: 0.5vh;
 }
 
 /* --- Footer (Corporate Style with Page Dots) --- */
 .live-widget-footer {
   padding: 1.5vh 3vw;
-  background: rgba(0, 150, 64, 0.06);
-  border-top: 1px solid rgba(0, 150, 64, 0.2);
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1472,7 +1475,7 @@ body {
   width: 1vh;
   height: 1vh;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: #d0d0d0;
   transition: all 0.3s ease;
 }
 
@@ -1485,7 +1488,7 @@ body {
 
 .live-footer-info {
   font-size: 1.8vh;
-  color: rgba(255, 255, 255, 0.6);
+  color: #888888;
   font-weight: 400;
 }
 
@@ -1496,7 +1499,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: rgba(255, 255, 255, 0.5);
+  color: #999999;
 }
 
 .live-widget-loading .spinner {
@@ -1514,7 +1517,7 @@ body {
 }
 
 .no-data {
-  color: rgba(255, 255, 255, 0.55);
+  color: #999999;
   font-style: italic;
   padding: 2vh 0;
   font-size: 2.2vh;
@@ -1586,20 +1589,20 @@ body {
 .w-big-temp {
   font-size: 8vh;
   font-weight: 800;
-  color: #f0f4f8;
+  color: #2a2d32;
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .w-big-desc {
   font-size: 2.5vh;
-  color: rgba(240, 244, 248, 0.85);
+  color: #58585a;
   font-weight: 500;
 }
 
 .w-today-location {
   font-size: 1.8vh;
-  color: rgba(240, 244, 248, 0.55);
+  color: #999999;
   font-weight: 400;
 }
 
@@ -1614,13 +1617,14 @@ body {
   align-items: center;
   gap: 0.5vw;
   padding: 0.7vh 1.2vw;
-  background: rgba(0, 150, 64, 0.08);
-  border: 1px solid rgba(0, 150, 64, 0.18);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 2vh;
   font-size: 1.8vh;
-  color: rgba(240, 244, 248, 0.88);
+  color: #444444;
   font-weight: 500;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .w-today-minmax {
@@ -1629,10 +1633,11 @@ body {
   align-items: center;
   gap: 1vh;
   padding: 2vh 2vw;
-  background: rgba(0, 150, 64, 0.08);
-  border: 1px solid rgba(0, 150, 64, 0.15);
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 1.5vh;
   align-self: flex-start;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .w-minmax-item {
@@ -1644,7 +1649,7 @@ body {
 
 .w-minmax-label {
   font-size: 1.4vh;
-  color: rgba(240, 244, 248, 0.55);
+  color: #999999;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
@@ -1656,8 +1661,8 @@ body {
   line-height: 1;
 }
 
-.w-minmax-val.w-max { color: #f0a040; }
-.w-minmax-val.w-min { color: #6dbce0; }
+.w-minmax-val.w-max { color: #d48020; }
+.w-minmax-val.w-min { color: #3086b0; }
 
 /* --- Stündlicher Verlauf --- */
 .w-hourly-section {
@@ -1665,7 +1670,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-top: 1px solid rgba(0, 150, 64, 0.15);
+  border-top: 1px solid #e0e0e0;
   padding-top: 1vh;
 }
 
@@ -1673,12 +1678,12 @@ body {
   display: flex;
   align-items: center;
   padding: 0.5vh 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .w-hourly-header > span {
   font-size: 1.3vh;
-  color: rgba(240, 244, 248, 0.45);
+  color: #999999;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1695,18 +1700,18 @@ body {
   display: flex;
   align-items: center;
   padding: 0.7vh 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .w-hour-row:nth-child(even) {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .w-hour-time {
   width: 8%;
   font-size: 1.8vh;
   font-weight: 600;
-  color: rgba(240, 244, 248, 0.7);
+  color: #666666;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1720,7 +1725,7 @@ body {
   width: 10%;
   font-size: 2vh;
   font-weight: 700;
-  color: #f0f4f8;
+  color: #2a2d32;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1735,7 +1740,7 @@ body {
 .w-hour-rain-bar {
   flex: 1;
   height: 1.2vh;
-  background: rgba(255, 255, 255, 0.06);
+  background: #e5e7eb;
   border-radius: 0.6vh;
   overflow: hidden;
 }
@@ -1748,7 +1753,7 @@ body {
 
 .w-hour-rain-pct {
   font-size: 1.5vh;
-  color: rgba(150, 200, 255, 0.8);
+  color: #3086b0;
   font-weight: 600;
   min-width: 3vw;
   font-variant-numeric: tabular-nums;
@@ -1757,7 +1762,7 @@ body {
 .w-hour-wind {
   width: 16%;
   font-size: 1.6vh;
-  color: rgba(240, 244, 248, 0.6);
+  color: #888888;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -1783,33 +1788,35 @@ body {
   align-items: center;
   gap: 1.2vh;
   padding: 2.5vh 1.5vw;
-  background: rgba(255, 255, 255, 0.045);
+  background: #ffffff;
   border-radius: 1.5vh;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #e0e0e0;
   transition: background 0.2s, border-color 0.2s;
   max-width: 17vw;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .w-fc-card.w-fc-today {
-  background: rgba(0, 150, 64, 0.12);
-  border-color: rgba(0, 150, 64, 0.3);
+  background: #f0faf4;
+  border-color: #009640;
+  border-width: 2px;
 }
 
 .w-fc-day-name {
   font-size: 2.2vh;
   font-weight: 700;
-  color: rgba(240, 244, 248, 0.88);
+  color: #333333;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .w-fc-today .w-fc-day-name {
-  color: #5fd87a;
+  color: #009640;
 }
 
 .w-fc-date {
   font-size: 1.4vh;
-  color: rgba(240, 244, 248, 0.45);
+  color: #999999;
   font-weight: 500;
   margin-top: -0.8vh;
 }
@@ -1821,7 +1828,7 @@ body {
 
 .w-fc-desc {
   font-size: 1.6vh;
-  color: rgba(240, 244, 248, 0.65);
+  color: #777777;
   text-align: center;
   min-height: 3.5vh;
 }
@@ -1835,18 +1842,18 @@ body {
 .w-fc-max {
   font-size: 3vh;
   font-weight: 800;
-  color: #f0f4f8;
+  color: #2a2d32;
 }
 
 .w-fc-sep {
   font-size: 2vh;
-  color: rgba(240, 244, 248, 0.35);
+  color: #cccccc;
 }
 
 .w-fc-min {
   font-size: 2.2vh;
   font-weight: 500;
-  color: rgba(240, 244, 248, 0.55);
+  color: #888888;
 }
 
 .w-fc-details {
@@ -1856,18 +1863,18 @@ body {
   gap: 0.4vh;
   width: 100%;
   padding-top: 1vh;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid #eeeeee;
 }
 
 .w-fc-detail {
   font-size: 1.5vh;
-  color: rgba(240, 244, 248, 0.7);
+  color: #666666;
   font-weight: 500;
 }
 
 .w-fc-sun {
   font-size: 1.3vh;
-  color: rgba(240, 244, 248, 0.4);
+  color: #aaaaaa;
   margin-top: 0.3vh;
 }
 
@@ -1887,8 +1894,9 @@ body {
   flex: 1;
   border-radius: 1.5vh;
   overflow: hidden;
-  border: 1px solid rgba(0, 150, 64, 0.2);
+  border: 1px solid #e0e0e0;
   min-height: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 /* Legacy weather selectors — no longer rendered */
