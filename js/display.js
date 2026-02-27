@@ -646,14 +646,16 @@ async function loadDisplaySettings() {
       return true;
     } else {
       console.log('Verwende Standard-Einstellungen (Backend nicht verfügbar)');
-      // Setze trotzdem Footer-Text mit Standardwerten
+      // Setze trotzdem Transitions und Footer-Text mit Standardwerten
+      updateTransitionsState();
       updateRefreshInfo();
       return false;
     }
   } catch (error) {
     console.log('Fehler beim Laden der Display-Einstellungen:', error);
     console.log('Verwende Standard-Einstellungen');
-    // Setze trotzdem Footer-Text mit Standardwerten
+    // Setze trotzdem Transitions und Footer-Text mit Standardwerten
+    updateTransitionsState();
     updateRefreshInfo();
     return false;
   }
@@ -2051,6 +2053,7 @@ async function fetchPosts() {
             content_type: post.contentType || post.content_type,
             display_duration: post.duration || post.display_duration || displaySettings.defaultDuration,
             media_url: mediaUrl,
+            blend_effect: post.blendEffect || post.blend_effect || 'fade',
             category_id: post.category?.id || post.categoryId || post.category_id,
             is_active: post.isActive !== false && post.is_active !== false,
           };
