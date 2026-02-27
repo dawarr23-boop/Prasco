@@ -9,6 +9,7 @@ import UserPermission from './UserPermission';
 import Setting from './Setting';
 import Display from './Display';
 import PostDisplay from './PostDisplay';
+import DeviceRegistration from './DeviceRegistration';
 
 // Define associations
 
@@ -179,7 +180,27 @@ PostDisplay.belongsTo(Display, {
   as: 'display',
 });
 
-export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting, Display, PostDisplay };
+// Organization -> DeviceRegistrations (1:N)
+Organization.hasMany(DeviceRegistration, {
+  foreignKey: 'organizationId',
+  as: 'deviceRegistrations',
+});
+DeviceRegistration.belongsTo(Organization, {
+  foreignKey: 'organizationId',
+  as: 'organization',
+});
+
+// Display -> DeviceRegistrations (1:N)
+Display.hasMany(DeviceRegistration, {
+  foreignKey: 'displayId',
+  as: 'deviceRegistrations',
+});
+DeviceRegistration.belongsTo(Display, {
+  foreignKey: 'displayId',
+  as: 'display',
+});
+
+export { User, Organization, Category, Media, Post, Permission, RolePermission, UserPermission, Setting, Display, PostDisplay, DeviceRegistration };
 
 export default {
   User,
@@ -193,4 +214,5 @@ export default {
   Setting,
   Display,
   PostDisplay,
+  DeviceRegistration,
 };
