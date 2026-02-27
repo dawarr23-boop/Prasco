@@ -71,15 +71,20 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
+        styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        connectSrc: ["'self'", 'https://api.rainviewer.com'],
         imgSrc: [
           "'self'",
           'data:',
+          'blob:',
           'https://www.prasco.net',
           'https://*.ytimg.com',
           'https://*.vimeocdn.com',
+          'https://*.basemaps.cartocdn.com',
+          'https://tilecache.rainviewer.com',
+          'https://*.tile.openstreetmap.org',
         ],
         mediaSrc: [
           "'self'",
