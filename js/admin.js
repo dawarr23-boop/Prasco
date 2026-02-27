@@ -3013,7 +3013,7 @@ async function handleCategoryFormSubmit(e) {
 // ============================================
 let displaysCache = [];
 let currentDisplayId = null;
-const MAX_LICENSED_DISPLAYS = 2;
+const MAX_LICENSED_DISPLAYS = 3;
 
 async function loadDisplays() {
   const displaysList = document.getElementById('displays-list');

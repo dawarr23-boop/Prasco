@@ -52,7 +52,7 @@ export const registerDevice = async (
     }
 
     // New device - check license limit
-    const MAX_LICENSED_DISPLAYS = 2;
+    const MAX_LICENSED_DISPLAYS = 3;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
