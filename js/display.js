@@ -1,9 +1,10 @@
-// Display JavaScript - Für das öffentliche Schwarze Brett
+// Display JavaScript - Für das öffentliche Schwarzes Brett
 // Simuliert API-Aufrufe mit Beispieldaten
 
 let posts = [];
 let currentIndex = 0;
 let autoRotateTimer = null;
+let rainRadarCleanup = null; // Cleanup-Funktion für Radar-Animation
 
 // Display-Identifikation
 let currentDisplayIdentifier = null;
@@ -482,13 +483,17 @@ async function renderWeatherWidget() {
       <div class="w-fc-grid">${forecastCardsHtml}</div>
     </div>`;
 
-    // ===== SCREEN 3: Regenradar =====
+    // ===== SCREEN 3: Regenradar (animiert via RainViewer) =====
     const screen3 = `<div class="w-screen w-screen-radar">
       <div class="w-radar-header">
         <span class="w-section-title">Regenradar ${locationName}</span>
       </div>
       <div class="w-radar-frame">
-        <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" loading="lazy" style="width:100%;height:100%;border:none;border-radius:1.5vh;"></iframe>
+        <div id="rainradar-map" data-lat="${lat}" data-lon="${lon}" style="width:100%;height:100%;border-radius:1.5vh;"></div>
+        <div class="radar-timeline">
+          <div class="radar-timeline-bar"><div class="radar-timeline-progress" id="radar-progress"></div></div>
+          <span class="radar-timestamp" id="radar-timestamp"></span>
+        </div>
       </div>
     </div>`;
 
@@ -497,6 +502,127 @@ async function renderWeatherWidget() {
     console.warn('Wetter-Widget Fehler:', e);
     return [];
   }
+}
+
+/**
+ * Regenradar-Animation initialisieren (RainViewer API + Leaflet)
+ * Wird aufgerufen wenn der Radar-Slide sichtbar wird.
+ */
+function initRainRadar() {
+  // Vorherige Animation aufräumen
+  if (rainRadarCleanup) {
+    rainRadarCleanup();
+    rainRadarCleanup = null;
+  }
+
+  const mapEl = document.getElementById('rainradar-map');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  const lat = parseFloat(mapEl.dataset.lat) || 51.76;
+  const lon = parseFloat(mapEl.dataset.lon) || 7.89;
+
+  // Leaflet-Karte erstellen
+  const map = L.map(mapEl, {
+    center: [lat, lon],
+    zoom: 8,
+    zoomControl: false,
+    attributionControl: false,
+    dragging: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    touchZoom: false,
+  });
+
+  // OpenStreetMap Basis-Karte (heller Stil)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+  }).addTo(map);
+
+  // Standort-Marker
+  L.circleMarker([lat, lon], {
+    radius: 6,
+    fillColor: '#009640',
+    color: '#fff',
+    weight: 2,
+    fillOpacity: 0.9,
+  }).addTo(map);
+
+  // RainViewer Radar-Daten laden und animieren
+  let animationTimer = null;
+  let radarLayers = [];
+  let currentFrame = 0;
+
+  fetch('https://api.rainviewer.com/public/weather-maps.json')
+    .then(r => r.json())
+    .then(data => {
+      const frames = [...(data.radar?.past || []), ...(data.radar?.nowcast || [])];
+      if (frames.length === 0) return;
+
+      // Radar-Layer für jeden Frame erstellen
+      radarLayers = frames.map(frame => {
+        const layer = L.tileLayer(
+          `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
+          { opacity: 0, maxZoom: 19, zIndex: 10 }
+        );
+        layer._radarTime = frame.time;
+        layer.addTo(map);
+        return layer;
+      });
+
+      const progressEl = document.getElementById('radar-progress');
+      const timestampEl = document.getElementById('radar-timestamp');
+
+      function showFrame(idx) {
+        radarLayers.forEach((layer, i) => {
+          layer.setOpacity(i === idx ? 0.6 : 0);
+        });
+
+        // Timeline aktualisieren
+        if (progressEl) {
+          const pct = ((idx + 1) / radarLayers.length) * 100;
+          progressEl.style.width = pct + '%';
+        }
+
+        // Zeitstempel anzeigen
+        if (timestampEl && radarLayers[idx]) {
+          const t = new Date(radarLayers[idx]._radarTime * 1000);
+          const hh = String(t.getHours()).padStart(2, '0');
+          const mm = String(t.getMinutes()).padStart(2, '0');
+          const isNowcast = idx >= (data.radar?.past?.length || 0);
+          timestampEl.textContent = `${hh}:${mm}${isNowcast ? ' (Vorhersage)' : ''}`;
+        }
+
+        currentFrame = idx;
+      }
+
+      // Erste Frame zeigen
+      showFrame(0);
+
+      // Animation starten: 700ms pro Frame, 2s Pause auf letztem Frame
+      function animate() {
+        const nextIdx = (currentFrame + 1) % radarLayers.length;
+        showFrame(nextIdx);
+
+        const isLast = nextIdx === radarLayers.length - 1;
+        animationTimer = setTimeout(animate, isLast ? 2000 : 700);
+      }
+
+      animationTimer = setTimeout(animate, 1000);
+    })
+    .catch(err => {
+      console.warn('RainViewer API Fehler:', err);
+      // Fallback: Windy-Iframe einbetten
+      mapEl.innerHTML = `<iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" style="width:100%;height:100%;border:none;border-radius:1.5vh;"></iframe>`;
+    });
+
+  // Cleanup-Funktion registrieren
+  rainRadarCleanup = () => {
+    clearTimeout(animationTimer);
+    radarLayers.forEach(l => map.removeLayer(l));
+    map.remove();
+  };
 }
 
 // Zeige Live-Daten-Widget als separate Slides (ÖPNV + Verkehr)
@@ -599,8 +725,18 @@ async function showLiveDataWidget() {
       </div>
     `;
 
+    // Regenradar initialisieren wenn Radar-Slide angezeigt wird
+    if (document.getElementById('rainradar-map')) {
+      setTimeout(() => initRainRadar(), 100);
+    }
+
     clearTimeout(autoRotateTimer);
     autoRotateTimer = setTimeout(() => {
+      // Radar-Animation aufräumen bevor nächster Slide kommt
+      if (rainRadarCleanup) {
+        rainRadarCleanup();
+        rainRadarCleanup = null;
+      }
       if (index + 1 < slides.length) {
         showSlide(index + 1);
       } else {
