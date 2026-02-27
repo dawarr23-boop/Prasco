@@ -130,6 +130,7 @@ let liveDataState = {
   lastInsertTime: 0,
   widgetTimer: null,
   isWidgetActive: false,
+  nextCategoryIdx: 0, // Zeiger auf nächste Kategorie in der Rotation
 };
 
 // Lade Live-Daten-Einstellungen vom Backend
@@ -232,20 +233,27 @@ function isLiveDataScheduled() {
   return currentMinutes >= startMinutes && currentMinutes <= endMinutes;
 }
 
-// Prüfe ob es Zeit ist, das Live-Daten-Widget einzublenden (alle X Minuten)
+// Gibt die aktiven Live-Daten-Kategorien zurück (in Rotationsreihenfolge)
+function getActiveLiveCategories() {
+  const cats = [];
+  if (liveDataState.transitSettings?.['transit.enabled'] === 'true') cats.push('transit');
+  if (liveDataState.trafficSettings?.['traffic.enabled'] === 'true') cats.push('traffic');
+  if (liveDataState.weatherSettings?.['weather.enabled'] === 'true') cats.push('weather');
+  if (liveDataState.newsSettings?.['news.enabled'] === 'true') cats.push('news');
+  return cats;
+}
+
+// Gibt die nächste fällige Kategorie zurück, oder null wenn noch nicht Zeit
 function shouldInsertLiveDataWidget() {
-  if (!isLiveDataScheduled()) return false;
-
-  const ts = liveDataState.transitSettings;
-  const tr = liveDataState.trafficSettings;
-  const intervalMin = parseInt(ts?.['transit.displayInterval'] || tr?.['traffic.displayInterval'] || '20', 10);
-  const intervalMs = intervalMin * 60 * 1000;
-
-  const now = Date.now();
-  if (now - liveDataState.lastInsertTime >= intervalMs) {
-    return true;
+  if (!isLiveDataScheduled()) return null;
+  const cats = getActiveLiveCategories();
+  if (cats.length === 0) return null;
+  // Jede Kategorie 2× pro Stunde: Interval = 60 / (2 × N) Minuten
+  const intervalMs = Math.round(30 / cats.length) * 60 * 1000;
+  if (Date.now() - liveDataState.lastInsertTime >= intervalMs) {
+    return cats[liveDataState.nextCategoryIdx % cats.length];
   }
-  return false;
+  return null;
 }
 
 // Erstelle Transit-Widget HTML (Vollbild-Slide)
@@ -793,14 +801,19 @@ async function renderNewsWidget() {
     return [];
   }
 }
-async function showLiveDataWidget() {
+async function showLiveDataWidget(categoryFilter) {
+  // Zeitstempel und Kategoriezeiger sofort vorrücken (verhindert Doppelauslösung)
   liveDataState.lastInsertTime = Date.now();
+  const cats = getActiveLiveCategories();
+  if (cats.length > 0) {
+    liveDataState.nextCategoryIdx = (liveDataState.nextCategoryIdx + 1) % cats.length;
+  }
   liveDataState.isWidgetActive = true;
 
   const container = document.getElementById('current-post');
   if (!container) return;
 
-  // Header-Kategorie auf Live-Daten setzen (gleicher Pill-Stil wie andere Kategorien)
+  // Header-Kategorie auf Live-Daten setzen
   const headerCategory = document.getElementById('header-category');
   if (headerCategory) {
     headerCategory.innerHTML = `<div style="background: #009640; color: white; padding: 0.34rem 0.67rem; border-radius: 11px; font-size: 0.49rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,150,64,0.25); letter-spacing: 0.02em;">◉ Live-Daten</div>`;
@@ -809,11 +822,17 @@ async function showLiveDataWidget() {
   container.className = 'post type-livedata';
   container.innerHTML = '<div class="live-widget-loading"><div class="spinner"></div><p>Lade Live-Daten...</p></div>';
 
+  // Nur die benötigte Kategorie laden (spart Anfragen, reduziert Wartezeit)
+  const showTransit  = !categoryFilter || categoryFilter === 'transit';
+  const showTraffic  = !categoryFilter || categoryFilter === 'traffic';
+  const showWeather  = !categoryFilter || categoryFilter === 'weather';
+  const showNews     = !categoryFilter || categoryFilter === 'news';
+
   const [transitHtml, trafficHtml, weatherSlides, newsSlides] = await Promise.all([
-    renderTransitWidget(),
-    renderTrafficWidget(),
-    renderWeatherWidget(),
-    renderNewsWidget(),
+    showTransit ? renderTransitWidget()  : Promise.resolve(''),
+    showTraffic ? renderTrafficWidget()  : Promise.resolve(''),
+    showWeather ? renderWeatherWidget()  : Promise.resolve([]),
+    showNews    ? renderNewsWidget()     : Promise.resolve([]),
   ]);
 
   if (!transitHtml && !trafficHtml && (!weatherSlides || weatherSlides.length === 0) && (!newsSlides || newsSlides.length === 0)) {
@@ -824,7 +843,8 @@ async function showLiveDataWidget() {
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  const intervalMin = liveDataState.transitSettings?.['transit.displayInterval'] || '20';
+  // Interval dynamisch: 2× pro Stunde pro Kategorie
+  const intervalMin = cats.length > 0 ? Math.round(30 / cats.length) : 20;
 
   // Sammle die Slides
   const slides = [];
@@ -2400,9 +2420,10 @@ async function init() {
   updateRefreshInfo();
 
   if (posts.length > 0) {
-    // Prüfe ob sofort Live-Daten angezeigt werden sollen
-    if (shouldInsertLiveDataWidget()) {
-      showLiveDataWidget();
+    // Prüfe ob sofort eine Live-Daten-Kategorie angezeigt werden soll
+    const startCategory = shouldInsertLiveDataWidget();
+    if (startCategory) {
+      showLiveDataWidget(startCategory);
     } else {
       displayCurrentPost();
     }
@@ -2802,9 +2823,10 @@ function nextPost() {
     return;
   }
 
-  // Prüfe ob Live-Daten-Widget eingeblendet werden soll (ab 14:00 bis 20:00, alle 20 Min)
-  if (shouldInsertLiveDataWidget()) {
-    showLiveDataWidget();
+  // Prüfe ob eine Live-Daten-Kategorie fällig ist
+  const liveCategory = shouldInsertLiveDataWidget();
+  if (liveCategory) {
+    showLiveDataWidget(liveCategory);
     return;
   }
   
