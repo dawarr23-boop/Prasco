@@ -42,7 +42,7 @@ class MainActivity : FragmentActivity() {
 
     companion object {
         /** Standard Server-URL — wird durch gespeicherte Einstellung überschrieben */
-        private const val DEFAULT_SERVER_URL = "http://192.168.1.100:3000"
+        private const val DEFAULT_SERVER_URL = "https://212.227.20.158"
         private const val PREFS_NAME = "prasco_tv_prefs"
         private const val PREF_SERVER_URL = "server_url"
 
