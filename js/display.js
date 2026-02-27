@@ -616,12 +616,20 @@ async function loadDisplaySettings() {
 // Aktualisiere Refresh-Info in der Fußzeile
 function updateRefreshInfo() {
   const refreshElement = document.getElementById('auto-refresh-info');
+  const nameElement = document.getElementById('display-name-info');
+  const nameSeparator = document.getElementById('display-name-separator');
   if (refreshElement) {
-    let text = `Auto-Refresh: ${displaySettings.refreshInterval} Min`;
+    refreshElement.textContent = `Auto-Refresh: ${displaySettings.refreshInterval} Min`;
+  }
+  if (nameElement && nameSeparator) {
     if (currentDisplayName) {
-      text += ` • ▢ ${currentDisplayName}`;
+      nameElement.textContent = `▢ ${currentDisplayName}`;
+      nameElement.style.display = '';
+      nameSeparator.style.display = '';
+    } else {
+      nameElement.style.display = 'none';
+      nameSeparator.style.display = 'none';
     }
-    refreshElement.textContent = text;
   }
 }
 
