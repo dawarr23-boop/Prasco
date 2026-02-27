@@ -3,6 +3,7 @@ package net.prasco.display.tv
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.net.http.SslError
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -211,6 +212,17 @@ class MainActivity : FragmentActivity() {
                 showConnectionError()
                 startReconnect()
             }
+        }
+
+        @SuppressLint("WebViewClientOnReceivedSslError")
+        override fun onReceivedSslError(
+            view: WebView?,
+            handler: SslErrorHandler?,
+            error: SslError?
+        ) {
+            // SSL-Zertifikat akzeptieren (Server nutzt IP-basierte URL,
+            // Zertifikat ist ggf. für Domainnamen ausgestellt)
+            handler?.proceed()
         }
     }
 

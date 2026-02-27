@@ -772,7 +772,7 @@ async function showDisplaySelection() {
       <div id="display-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
         <div style="text-align: center; color: #999;">Lade Displays...</div>
       </div>
-      <button onclick="selectDisplayAndReload(null)" style="
+      <button id="btn-show-all" style="
         background: #007bff;
         color: white;
         border: none;
@@ -786,6 +786,11 @@ async function showDisplaySelection() {
   `;
 
   document.body.appendChild(overlay);
+
+  // Event-Listener für "Alle anzeigen" Button (CSP-konform, kein inline onclick)
+  document.getElementById('btn-show-all').addEventListener('click', function() {
+    selectDisplayAndReload(null);
+  });
 
   // Lade verfügbare Displays (öffentlicher Endpoint, kein Auth nötig)
   try {
@@ -805,20 +810,35 @@ async function showDisplaySelection() {
         `;
       } else {
         displayList.innerHTML = activeDisplays.map(display => `
-          <div onclick="selectDisplayAndReload('${display.identifier}')" style="
+          <div class="display-select-card" data-identifier="${escapeHtml(display.identifier)}" style="
             background: #1a1a1a;
             border: 2px solid #333;
             border-radius: 12px;
             padding: 2rem 1.5rem;
             cursor: pointer;
             transition: all 0.3s;
-          " onmouseover="this.style.borderColor='#007bff'; this.style.transform='scale(1.05)';" onmouseout="this.style.borderColor='#333'; this.style.transform='scale(1)';">
+          ">
             <div style="font-size: 2rem; margin-bottom: 0.5rem;">▢</div>
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">${escapeHtml(display.name)}</h3>
             <p style="font-size: 0.9rem; color: #888; font-family: monospace;">${escapeHtml(display.identifier)}</p>
             ${display.description ? `<p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem;">${escapeHtml(display.description)}</p>` : ''}
           </div>
         `).join('');
+
+        // Event-Listener für Display-Karten (CSP-konform, kein inline onclick)
+        displayList.querySelectorAll('.display-select-card').forEach(card => {
+          card.addEventListener('click', function() {
+            selectDisplayAndReload(this.dataset.identifier);
+          });
+          card.addEventListener('mouseover', function() {
+            this.style.borderColor = '#007bff';
+            this.style.transform = 'scale(1.05)';
+          });
+          card.addEventListener('mouseout', function() {
+            this.style.borderColor = '#333';
+            this.style.transform = 'scale(1)';
+          });
+        });
       }
     }
   } catch (error) {
