@@ -1847,25 +1847,32 @@ body {
 
 .w-fc-temps {
   display: flex;
-  gap: 0.6vw;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3vh;
+  width: 100%;
+  padding: 0.8vh 0;
+  background: linear-gradient(135deg, #fff8f4 0%, #f4f8ff 100%);
+  border-radius: 1vh;
 }
 
 .w-fc-max {
-  font-size: 3vh;
-  font-weight: 800;
-  color: #2a2d32;
+  font-size: 4.8vh;
+  font-weight: 900;
+  color: #d94f00;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 3px rgba(217,79,0,0.15);
 }
 
 .w-fc-sep {
-  font-size: 2vh;
-  color: #cccccc;
+  display: none;
 }
 
 .w-fc-min {
-  font-size: 2.2vh;
-  font-weight: 500;
-  color: #888888;
+  font-size: 2.8vh;
+  font-weight: 700;
+  color: #2a7ac0;
 }
 
 .w-fc-details {

@@ -494,9 +494,8 @@ async function renderWeatherWidget() {
         <div class="w-fc-icon">${day.icon}</div>
         <div class="w-fc-desc">${day.description}</div>
         <div class="w-fc-temps">
-          <span class="w-fc-max">${day.tempMax}°</span>
-          <span class="w-fc-sep">/</span>
-          <span class="w-fc-min">${day.tempMin}°</span>
+          <span class="w-fc-max">▲ ${day.tempMax}°</span>
+          <span class="w-fc-min">▼ ${day.tempMin}°</span>
         </div>
         <div class="w-fc-details">
           <div class="w-fc-detail">🌧️ ${day.precipProbability}%</div>
