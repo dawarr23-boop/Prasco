@@ -1171,26 +1171,50 @@ body {
   flex-direction: column;
 }
 
+/* === ÖPNV Departure Board Header === */
+.departure-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1a237e;
+  color: white;
+  padding: 2vh 2vw;
+  font-size: 2.8vh;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.departure-station-name {
+  font-size: 3vh;
+}
+.departure-clock {
+  font-family: monospace;
+  font-size: 3vh;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
+}
+
 /* === ÖPNV Departure Table === */
 .live-departure-table {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  flex: 1;
 }
 
 .type-livedata .live-departure-table thead {
-  background: rgba(255, 255, 255, 0.06);
+  background: #283593;
 }
 
 .type-livedata .live-departure-table thead th {
   text-align: left;
   padding: 1.8vh 1vw;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 2.2vh;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 2vh;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
   background: transparent;
 }
 
@@ -1201,17 +1225,17 @@ body {
 
 /* Spaltenbreiten */
 .live-departure-table th:nth-child(1),
-.live-departure-table td:nth-child(1) { width: 12%; } /* Linie */
+.live-departure-table td:nth-child(1) { width: 11%; } /* Linie */
 .live-departure-table th:nth-child(2),
-.live-departure-table td:nth-child(2) { width: 40%; } /* Richtung */
+.live-departure-table td:nth-child(2) { width: 36%; } /* Richtung */
 .live-departure-table th:nth-child(3),
-.live-departure-table td:nth-child(3) { width: 10%; } /* Gleis */
+.live-departure-table td:nth-child(3) { width: 13%; } /* Abfahrt */
 .live-departure-table th:nth-child(4),
 .live-departure-table td:nth-child(4) { width: 12%; } /* in min */
 .live-departure-table th:nth-child(5),
-.live-departure-table td:nth-child(5) { width: 14%; } /* Abfahrt */
+.live-departure-table td:nth-child(5) { width: 10%; } /* Gleis */
 .live-departure-table th:nth-child(6),
-.live-departure-table td:nth-child(6) { width: 12%; } /* Delay */
+.live-departure-table td:nth-child(6) { width: 18%; } /* Status */
 
 .type-livedata .live-departure-table tbody .dep-row {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1268,7 +1292,7 @@ body {
 
 .dep-countdown {
   font-weight: 700;
-  font-size: 3.2vh;
+  font-size: 3vh;
   color: #a0d0f0;
   font-variant-numeric: tabular-nums;
 }
@@ -1280,13 +1304,32 @@ body {
   color: #c8d0da;
 }
 
-.dep-delay {
+/* Status Badges (wie in der Vorschau) */
+.dep-status {
   text-align: right;
+}
+.status-badge {
+  display: inline-block;
+  padding: 0.8vh 1.2vw;
+  border-radius: 2vh;
+  font-size: 2vh;
   font-weight: 700;
-  font-size: 2.4vh;
+  letter-spacing: 0.02em;
+}
+.status-badge.on-time {
+  background: rgba(46, 125, 50, 0.25);
+  color: #66d06a;
+}
+.status-badge.delayed {
+  background: rgba(230, 81, 0, 0.25);
+  color: #f0a040;
+}
+.status-badge.cancelled {
+  background: rgba(198, 40, 40, 0.25);
+  color: #e05555;
 }
 
-/* Kräftigere Status-Farben */
+/* Kräftigere Status-Farben (Legacy) */
 .dep-delay.on-time { color: #5fbf65; }
 .dep-delay.delayed { color: #e8a040; }
 .dep-delay.cancelled { color: #d05555; text-decoration: line-through; }

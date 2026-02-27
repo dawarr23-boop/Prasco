@@ -257,32 +257,37 @@ async function renderTransitWidget() {
 
     const rows = filteredDeps.slice(0, maxDep).map((dep, i) => {
       const when = dep.when ? new Date(dep.when) : null;
+      const planned = dep.plannedWhen ? new Date(dep.plannedWhen) : null;
       const now = new Date();
-      const timeStr = when ? when.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+      const timeStr = when ? when.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : (planned ? planned.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '--:--');
       // Minuten bis Abfahrt
       const minUntil = when ? Math.max(0, Math.round((when - now) / 60000)) : null;
       const minStr = minUntil !== null ? (minUntil === 0 ? 'jetzt' : `${minUntil} min`) : '';
       const delayMin = dep.delay ? Math.round(dep.delay / 60) : 0;
-      const delayClass = delayMin > 0 ? 'delayed' : (dep.cancelled ? 'cancelled' : 'on-time');
-      const delayStr = dep.cancelled ? 'Fällt aus' : (delayMin > 0 ? `+${delayMin}'` : '');
+      const delayClass = dep.cancelled ? 'cancelled' : (delayMin > 0 ? 'delayed' : 'on-time');
+      const statusText = dep.cancelled ? 'Ausfall' : (delayMin > 0 ? `+${delayMin} min` : 'pünktl.');
       const lineName = dep.line?.name || '?';
       const product = dep.line?.product || 'bus';
       const direction = dep.direction || '';
-      const platform = dep.platform ? `Gl. ${dep.platform}` : '';
+      const platform = dep.platform || dep.plannedPlatform || '';
 
-      return `<tr class="dep-row ${delayClass}">
+      return `<tr class="dep-row ${delayClass} ${dep.cancelled ? 'cancelled' : ''}">
         <td class="dep-line"><span class="line-badge line-${product}">${lineName}</span></td>
         <td class="dep-direction">${direction}</td>
-        <td class="dep-platform">${platform}</td>
-        <td class="dep-countdown">${minStr}</td>
         <td class="dep-time">${timeStr}</td>
-        <td class="dep-delay ${delayClass}">${delayStr}</td>
+        <td class="dep-countdown">${minStr}</td>
+        <td class="dep-platform">${platform}</td>
+        <td class="dep-status"><span class="status-badge ${delayClass}">${statusText}</span></td>
       </tr>`;
     }).join('');
 
     return `<div class="transit-fullscreen">
+      <div class="departure-board-header">
+        <span class="departure-station-name">${stationName}</span>
+        <span class="departure-clock">${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span>
+      </div>
       <table class="live-departure-table">
-        <thead><tr><th>Linie</th><th>Richtung</th><th>Gleis</th><th>in</th><th>Abfahrt</th><th></th></tr></thead>
+        <thead><tr><th>Linie</th><th>Richtung</th><th>Abfahrt</th><th>in</th><th>Gleis</th><th>Status</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
