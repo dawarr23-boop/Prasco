@@ -444,41 +444,46 @@ async function renderWeatherWidget() {
       </div>`;
     }).join('');
 
+    const hourlyChipsHtml = hourly.map(h => {
+      const icon = codeIcons[h.weatherCode] || '❓';
+      const rainPct = h.probability || 0;
+      const rainColor = rainPct > 60 ? '#3086b0' : rainPct > 30 ? '#64a4c8' : '#b0cfe0';
+      return `<div class="w-hour-chip">
+        <span class="w-chip-time">${h.time}</span>
+        <span class="w-chip-icon">${icon}</span>
+        <span class="w-chip-temp">${Math.round(h.temperature)}°</span>
+        <div class="w-chip-rain-bar"><div class="w-chip-rain-fill" style="height:${rainPct}%;background:${rainColor}"></div></div>
+        <span class="w-chip-rain" style="color:${rainColor}">${rainPct}%</span>
+        <span class="w-chip-wind">${h.windSpeed}</span>
+      </div>`;
+    }).join('');
+
     const screen1 = `<div class="w-screen w-screen-today">
-      <div class="w-today-top">
-        <div class="w-today-current">
-          <div class="w-today-icon-temp">
-            <span class="w-big-icon">${c.icon}</span>
-            <div class="w-big-temp-wrap">
-              <span class="w-big-temp">${c.temperature}°C</span>
-              <span class="w-big-desc">${c.description}</span>
-            </div>
-          </div>
-          <div class="w-today-location">${locationName}</div>
-          <div class="w-today-stats">
-            <div class="w-stat-pill">🌡️ Gefühlt ${c.feelsLike}°</div>
-            <div class="w-stat-pill">💧 ${c.humidity}%</div>
-            <div class="w-stat-pill">💨 ${c.windSpeed} km/h ${windDirText}</div>
-            <div class="w-stat-pill">🌧️ ${todayForecast ? todayForecast.precipProbability : 0}%</div>
-            <div class="w-stat-pill">☀️ ${sunrise} — ${sunset}</div>
-            <div class="w-stat-pill">📊 ${c.pressure} hPa</div>
+      <div class="w-today-hero">
+        <div class="w-hero-main">
+          <span class="w-big-icon">${c.icon}</span>
+          <div class="w-hero-temp-block">
+            <div class="w-big-temp">${c.temperature}<span class="w-big-unit">°C</span></div>
+            <div class="w-big-desc">${c.description}</div>
+            <div class="w-today-location">${locationName}</div>
           </div>
         </div>
-        ${todayForecast ? `<div class="w-today-minmax">
-          <div class="w-minmax-item"><span class="w-minmax-label">Max</span><span class="w-minmax-val w-max">${todayForecast.tempMax}°</span></div>
-          <div class="w-minmax-item"><span class="w-minmax-label">Min</span><span class="w-minmax-val w-min">${todayForecast.tempMin}°</span></div>
-        </div>` : ''}
+        <div class="w-hero-stats">
+          <div class="w-stat-card"><span class="w-sc-icon">🌡️</span><span class="w-sc-val">${c.feelsLike}°</span><span class="w-sc-lbl">Gefühlt</span></div>
+          <div class="w-stat-card"><span class="w-sc-icon">💧</span><span class="w-sc-val">${c.humidity}%</span><span class="w-sc-lbl">Luftfeuchte</span></div>
+          <div class="w-stat-card"><span class="w-sc-icon">💨</span><span class="w-sc-val">${c.windSpeed}</span><span class="w-sc-lbl">km/h ${windDirText}</span></div>
+          <div class="w-stat-card"><span class="w-sc-icon">🌧️</span><span class="w-sc-val">${todayForecast ? todayForecast.precipProbability : 0}%</span><span class="w-sc-lbl">Regenrisiko</span></div>
+          <div class="w-stat-card"><span class="w-sc-icon">📊</span><span class="w-sc-val">${c.pressure}</span><span class="w-sc-lbl">hPa</span></div>
+          <div class="w-stat-card"><span class="w-sc-icon">👁️</span><span class="w-sc-val">${c.uvIndex !== undefined ? c.uvIndex : '—'}</span><span class="w-sc-lbl">UV-Index</span></div>
+        </div>
+        <div class="w-hero-right">
+          ${todayForecast ? `<div class="w-hero-max">▲ ${todayForecast.tempMax}°</div><div class="w-hero-min">▼ ${todayForecast.tempMin}°</div>` : ''}
+          <div class="w-hero-sun"><span>🌅 ${sunrise}</span><span>🌇 ${sunset}</span></div>
+        </div>
       </div>
       <div class="w-hourly-section">
         <div class="w-section-title">Stündlicher Verlauf</div>
-        <div class="w-hourly-header">
-          <span class="w-hour-time">Zeit</span>
-          <span class="w-hour-icon"></span>
-          <span class="w-hour-temp">Temp</span>
-          <span class="w-hour-rain-wrap">Regen</span>
-          <span class="w-hour-wind">Wind</span>
-        </div>
-        <div class="w-hourly-list">${hourlyRowsHtml}</div>
+        <div class="w-hourly-chips">${hourlyChipsHtml}</div>
       </div>
     </div>`;
 
