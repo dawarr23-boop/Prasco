@@ -1,6 +1,5 @@
 import { createClient, HafasClient } from 'hafas-client';
 import { profile as nrwProfile } from 'hafas-client/p/db-busradar-nrw/index.js';
-import { profile as dbProfile } from 'hafas-client/p/db/index.js';
 import NodeCache from 'node-cache';
 import logger from '../utils/logger';
 
@@ -44,11 +43,13 @@ export interface TransitServiceConfig {
 
 class TransitService {
   private busClient: HafasClient;
-  private trainClient: HafasClient;
   private cache: NodeCache;
   private config: TransitServiceConfig;
 
-  // Station-ID Mapping: DB nutzt EVA-Nummern, db-busradar-nrw (Busse) nutzt andere IDs
+  // DB REST API Base-URL (Echtzeit-Daten für RE, RB, S-Bahn, National Express)
+  private readonly DB_REST_API = 'https://v6.db.transport.rest';
+
+  // Station-ID Mapping: db-busradar-nrw (Busse) nutzt andere IDs als DB (EVA-Nummern)
   private readonly TRAIN_STATION_MAP: Record<string, string> = {
     '9424069': '8000441', // Ahlen Bahnhof: busradar-ID -> DB EVA-ID
   };
@@ -56,8 +57,6 @@ class TransitService {
   constructor() {
     // Bus-Client: DB Busradar NRW (db-regio.hafas.de) - für Busse
     this.busClient = createClient(nrwProfile, 'prasco-transit-v1');
-    // Zug-Client: DB (Deutsche Bahn) - für RE, RB, S-Bahn, National Express
-    this.trainClient = createClient(dbProfile, 'prasco-transit-v1');
     
     // Standard-Konfiguration
     this.config = {
@@ -123,6 +122,45 @@ class TransitService {
   }
 
   /**
+   * Lade Zug-Abfahrten über DB REST API (v6.db.transport.rest)
+   * Liefert Echtzeit-Daten inkl. Verspätungen für RE, RB, S-Bahn, National Express
+   */
+  private async fetchTrainDepartures(stationId: string, limit: number, duration: number): Promise<any[]> {
+    const url = `${this.DB_REST_API}/stops/${stationId}/departures?duration=${duration}&results=${limit}&bus=false&taxi=false`;
+    
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'prasco-transit-v1' },
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!response.ok) {
+      throw new Error(`DB REST API HTTP ${response.status}`);
+    }
+
+    const data: any = await response.json();
+    const departures = data.departures || [];
+
+    // In HAFAS-kompatibles Format umwandeln
+    return departures.map((dep: any) => ({
+      tripId: dep.tripId || '',
+      line: {
+        id: dep.line?.id,
+        name: dep.line?.name || 'Unknown',
+        mode: dep.line?.mode || 'train',
+        product: dep.line?.product || 'regional',
+        productName: dep.line?.productName,
+      },
+      direction: dep.direction || 'Unknown',
+      when: dep.when,
+      plannedWhen: dep.plannedWhen,
+      delay: dep.delay,
+      platform: dep.platform,
+      plannedPlatform: dep.plannedPlatform,
+      cancelled: dep.cancelled || false,
+    }));
+  }
+
+  /**
    * Hole Abfahrten für eine Station
    */
   async getDepartures(
@@ -146,7 +184,7 @@ class TransitService {
 
       logger.info(`Lade Abfahrten für Station: ${stationId}`);
 
-      // Parallele Abfrage: Busse (db-busradar-nrw) + Züge (INSA)
+      // Parallele Abfrage: Busse (db-busradar-nrw HAFAS) + Züge (DB REST API mit Echtzeit)
       const trainStationId = this.TRAIN_STATION_MAP[stationId] || stationId;
       
       const [busResult, trainResult] = await Promise.allSettled([
@@ -154,26 +192,32 @@ class TransitService {
           duration: durationMinutes,
           results: limit,
         }),
-        this.trainClient.departures(trainStationId, {
-          duration: durationMinutes,
-          results: limit,
-        }),
+        this.fetchTrainDepartures(trainStationId, limit, durationMinutes),
       ]);
 
       const allDepartures: any[] = [];
       
-      if (busResult.status === 'fulfilled') {
-        allDepartures.push(...busResult.value.departures);
-        logger.info(`${busResult.value.departures.length} Bus-Abfahrten geladen`);
-      } else {
-        logger.warn('Bus-Abfahrten fehlgeschlagen:', busResult.reason?.message);
-      }
-      
+      // DB REST API hat Echtzeit → Priorität für Züge; Busradar für Busse
       if (trainResult.status === 'fulfilled') {
-        allDepartures.push(...trainResult.value.departures);
-        logger.info(`${trainResult.value.departures.length} Zug-Abfahrten geladen`);
+        allDepartures.push(...trainResult.value);
+        logger.info(`${trainResult.value.length} Zug-Abfahrten geladen (DB REST API mit Echtzeit)`);
       } else {
         logger.warn('Zug-Abfahrten fehlgeschlagen:', trainResult.reason?.message);
+      }
+
+      if (busResult.status === 'fulfilled') {
+        // Deduplizierung: Busradar-Einträge nur hinzufügen wenn nicht schon von DB REST vorhanden
+        const existingKeys = new Set(allDepartures.map((d: any) => 
+          `${(d.line?.name || '').toLowerCase()}:${d.plannedWhen}`
+        ));
+        const busOnlyDeps = busResult.value.departures.filter((d: any) => {
+          const key = `${(d.line?.name || '').toLowerCase()}:${d.plannedWhen}`;
+          return !existingKeys.has(key);
+        });
+        allDepartures.push(...busOnlyDeps);
+        logger.info(`${busOnlyDeps.length} Bus-Abfahrten hinzugefügt (${busResult.value.departures.length} total, nach Deduplizierung)`);
+      } else {
+        logger.warn('Bus-Abfahrten fehlgeschlagen:', busResult.reason?.message);
       }
 
       const formattedDepartures: Departure[] = allDepartures.map((dep: any) => ({
@@ -207,7 +251,7 @@ class TransitService {
         this.cache.set(cacheKey, formattedDepartures);
       }
 
-      logger.info(`${formattedDepartures.length} Abfahrten geladen für Station ${stationId} (Bus+Zug)`);
+      logger.info(`${formattedDepartures.length} Abfahrten geladen für Station ${stationId} (Bus+DB-REST)`);
       return formattedDepartures;
     } catch (error) {
       logger.error('Fehler beim Laden der Abfahrten:', error);
