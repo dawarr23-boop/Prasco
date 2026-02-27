@@ -10,10 +10,16 @@
 
 :root {
   /* PRASCO Primärfarben */
-  --prasco-red: #009640; /* PRASCO Logo Grün */
-  --prasco-dark-red: #007830; /* PRASCO Dunkelgrün */
+  --prasco-green: #009640; /* PRASCO Logo Grün */
+  --prasco-dark-green: #007830; /* PRASCO Dunkelgrün */
   --prasco-black: #58585a; /* PRASCO Logo Grau */
   --prasco-white: #ffffff;
+
+  /* Legacy-Aliases (Abwärtskompatibilität) */
+  --prasco-red: var(--prasco-green);
+  --prasco-dark-red: var(--prasco-dark-green);
+  --prasco-light: var(--prasco-gray-bg);
+  --prasco-red-light: rgba(0, 150, 64, 0.1);
 
   /* PRASCO Sekundärfarben */
   --prasco-gray-dark: #333333;
@@ -28,13 +34,22 @@
   --warning-color: #ffc107;
   --info-color: #0066cc;
 
+  /* Graustufen (für Live-Daten-Widgets) */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+
   /* Aliases für Kompatibilität */
-  --primary-color: var(--prasco-red);
+  --primary-color: var(--prasco-green);
   --secondary-color: var(--prasco-gray);
   --dark-color: var(--prasco-black);
   --light-color: var(--prasco-gray-bg);
+  --bg-color: var(--prasco-white);
   --white: var(--prasco-white);
   --text-color: var(--prasco-gray-dark);
+  --text-muted: var(--prasco-gray-light);
   --border-color: var(--prasco-border);
   --sidebar-width: 250px;
 
@@ -55,6 +70,7 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-full: 9999px;
 
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -137,8 +153,8 @@ body {
 
 .login-form input:focus {
   outline: none;
-  border-color: var(--prasco-red);
-  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+  border-color: var(--prasco-green);
+  box-shadow: 0 0 0 3px rgba(0, 150, 64, 0.15);
 }
 
 .checkbox-label {
@@ -556,8 +572,8 @@ body {
 .quick-actions {
   background: var(--white);
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .quick-actions h2 {
@@ -573,8 +589,8 @@ body {
 .form-container {
   background: var(--white);
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   margin-bottom: 2rem;
 }
 
@@ -612,8 +628,8 @@ body {
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: var(--prasco-red);
-  box-shadow: 0 0 0 3px rgba(227, 6, 19, 0.1);
+  border-color: var(--prasco-green);
+  box-shadow: 0 0 0 3px rgba(0, 150, 64, 0.15);
 }
 
 /* Form Validation Errors */
@@ -759,10 +775,10 @@ body {
 }
 
 .btn-primary:hover {
-  background: #d32f2f;
-  border-color: #d32f2f;
+  background: var(--prasco-dark-green);
+  border-color: var(--prasco-dark-green);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
 
 .btn-primary:active {
@@ -776,21 +792,21 @@ body {
 }
 
 .btn-secondary:hover {
-  background: var(--prasco-red);
+  background: var(--prasco-green);
   color: var(--white);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
 
 .btn-accent {
-  background: #009640;
+  background: var(--prasco-green);
   color: var(--white);
-  border-color: #009640;
+  border-color: var(--prasco-green);
 }
 
 .btn-accent:hover {
-  background: #007830;
-  border-color: #007830;
+  background: var(--prasco-dark-green);
+  border-color: var(--prasco-dark-green);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
@@ -835,8 +851,8 @@ body {
 .list-item {
   background: var(--white);
   padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1079,8 +1095,8 @@ body {
 .settings-form {
   background: var(--white);
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   max-width: 600px;
 }
 

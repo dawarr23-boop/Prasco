@@ -200,7 +200,7 @@
   position: absolute;
   top: 1rem;
   left: 1rem;
-  background: rgba(0, 150, 64, 0.9);
+  background: rgba(0, 150, 64, 0.9); /* --prasco-green mit Transparenz */
   color: #fff;
   padding: 0.5rem 0.75rem;
   border-radius: 8px;
@@ -220,7 +220,7 @@
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  background: rgba(0, 150, 64, 0.9);
+  background: rgba(0, 150, 64, 0.9); /* --prasco-green mit Transparenz */
   color: #fff;
   padding: 0.5rem 1rem;
   border-radius: 20px;
@@ -255,10 +255,16 @@
 
 :root {
   /* PRASCO Primärfarben */
-  --prasco-red: #e30613;
-  --prasco-dark-red: #bc0a30;
+  --prasco-green: #009640; /* PRASCO Logo Grün */
+  --prasco-dark-green: #007830; /* PRASCO Dunkelgrün */
   --prasco-black: #58585a; /* PRASCO Logo Grau */
   --prasco-white: #ffffff;
+
+  /* Legacy-Aliases (Abwärtskompatibilität) */
+  --prasco-red: var(--prasco-green);
+  --prasco-dark-red: var(--prasco-dark-green);
+  --prasco-light: var(--prasco-gray-bg);
+  --prasco-red-light: rgba(0, 150, 64, 0.1);
 
   /* PRASCO Sekundärfarben */
   --prasco-gray-dark: #333333;
@@ -267,21 +273,51 @@
   --prasco-gray-bg: #f5f5f5;
   --prasco-border: #e0e0e0;
 
+  /* Graustufen (für Widgets) */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+
   /* Aliases */
-  --primary-color: var(--prasco-red);
+  --primary-color: var(--prasco-green);
   --secondary-color: var(--prasco-gray);
   --dark-color: var(--prasco-black);
   --light-color: var(--prasco-gray-bg);
+  --bg-color: var(--prasco-white);
   --white: var(--prasco-white);
   --text-color: var(--prasco-gray-dark);
+  --text-muted: var(--prasco-gray-light);
+  --border-color: var(--prasco-border);
   --success-color: #28a745;
   --warning-color: #ffc107;
   --danger-color: #dc3545;
 
-  /* Typography */
+  /* Spacing System (8px Base) */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Typography - System-Schriftarten für Offline-Betrieb */
   --font-primary: 'Roboto', 'Segoe UI', sans-serif;
   --font-heading: 'Roboto Condensed', 'Arial Narrow', sans-serif;
   --font-mono: 'Courier New', monospace;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
 html {
@@ -313,7 +349,7 @@ body {
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border-bottom: 2px solid #58585a; /* Monochrom */
+  border-bottom: 2px solid var(--prasco-black); /* Monochrom */
   gap: 2rem;
   min-height: 51px;
   flex-shrink: 0;
@@ -323,7 +359,7 @@ body {
   font-size: 1.275rem;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #58585a;
+  color: var(--prasco-black);
   text-transform: uppercase;
   font-family: var(--font-heading);
 }
@@ -342,7 +378,7 @@ body {
   align-items: center;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #58585a;
+  color: var(--prasco-black);
   font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -351,8 +387,8 @@ body {
 .clock {
   font-size: 1.275rem;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
-  color: #58585a; /* PRASCO Logo Grau */
+  font-family: var(--font-heading);
+  color: var(--prasco-black);
   letter-spacing: 1px;
   text-shadow: none;
 }
@@ -419,7 +455,7 @@ body {
   line-height: 1.3;
   font-family: var(--font-heading);
   font-weight: 700;
-  border-left: 5px solid #58585a; /* Monochrom */
+  border-left: 5px solid var(--prasco-black); /* Monochrom */
   padding-left: 2rem;
   text-align: left;
   width: 100%;
@@ -540,7 +576,7 @@ body {
   color: var(--white);
   padding: 0.5rem 2rem;
   text-align: center;
-  border-top: 2px solid #58585a; /* Monochrom */
+  border-top: 2px solid var(--prasco-black); /* Monochrom */
   min-height: 40px;
   display: flex;
   align-items: center;
@@ -605,7 +641,7 @@ body {
   font-weight: 700;
   font-family: var(--font-heading);
   color: var(--white);
-  background: #58585a;
+  background: var(--prasco-black);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
