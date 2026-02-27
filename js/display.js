@@ -2898,7 +2898,6 @@ function applyBlendTransition(container, renderFn, blendEffect) {
 
   // Effekt aus Rotation wenn kein spezifischer angegeben
   const effect = (blendEffect && blendEffect !== '') ? blendEffect : getNextBlendEffect();
-  console.log(`🎬 Blend [${effect}] start`);
 
   // Direkt aus CSS bekannte Dauer (sync mit display.css)
   const OUT_MS = 450;
@@ -2911,7 +2910,38 @@ function applyBlendTransition(container, renderFn, blendEffect) {
   const outClass = `blend-${effect}-out`;
   const inClass  = `blend-${effect}-in`;
 
-  // OUT-Phase: nächsten Frame abwarten damit Browser die Klasse registriert
+  // Gemeinsame IN-Phase: nach OUT sofort opacity:0 sichern → renderFn → IN-Animation
+  function startIn() {
+    // Inline opacity:0 hält den Container unsichtbar zwischen OUT-Ende und IN-Start,
+    // damit kein Frame-Flash des neuen Inhalts sichtbar ist.
+    container.style.opacity = '0';
+    container.classList.remove('blend-transition-out', outClass);
+
+    renderFn();
+
+    // Zwei rAF sicherstellen dass Browser Layout + Paint abgeschlossen hat
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      container.style.opacity = '';   // CSS-Animation übernimmt ab jetzt
+      container.classList.add('blend-transition-in', inClass);
+
+      let inDone = false;
+      const inTimer = setTimeout(() => {
+        if (inDone) return;
+        inDone = true;
+        container.classList.remove('blend-transition-in', inClass);
+      }, IN_MS);
+
+      container.addEventListener('animationend', function onInEnd() {
+        if (inDone) return;
+        inDone = true;
+        clearTimeout(inTimer);
+        container.removeEventListener('animationend', onInEnd);
+        container.classList.remove('blend-transition-in', inClass);
+      }, { once: true });
+    }));
+  }
+
+  // OUT-Phase
   requestAnimationFrame(() => {
     container.classList.add('blend-transition-out', outClass);
 
@@ -2919,32 +2949,7 @@ function applyBlendTransition(container, renderFn, blendEffect) {
     const outTimer = setTimeout(() => {
       if (outDone) return;
       outDone = true;
-      container.classList.remove('blend-transition-out', outClass);
-      container.style.animation = '';
-
-      renderFn();
-
-      // IN-Phase: nächsten Frame abwarten
-      requestAnimationFrame(() => {
-        container.classList.add('blend-transition-in', inClass);
-
-        let inDone = false;
-        const inTimer = setTimeout(() => {
-          if (inDone) return;
-          inDone = true;
-          container.classList.remove('blend-transition-in', inClass);
-          console.log(`🎬 Blend [${effect}] done`);
-        }, IN_MS);
-
-        container.addEventListener('animationend', function onInEnd() {
-          if (inDone) return;
-          inDone = true;
-          clearTimeout(inTimer);
-          container.removeEventListener('animationend', onInEnd);
-          container.classList.remove('blend-transition-in', inClass);
-          console.log(`🎬 Blend [${effect}] done (animationend)`);
-        }, { once: true });
-      });
+      startIn();
     }, OUT_MS);
 
     container.addEventListener('animationend', function onOutEnd() {
@@ -2952,29 +2957,7 @@ function applyBlendTransition(container, renderFn, blendEffect) {
       outDone = true;
       clearTimeout(outTimer);
       container.removeEventListener('animationend', onOutEnd);
-      container.classList.remove('blend-transition-out', outClass);
-      container.style.animation = '';
-
-      renderFn();
-
-      requestAnimationFrame(() => {
-        container.classList.add('blend-transition-in', inClass);
-
-        let inDone = false;
-        const inTimer = setTimeout(() => {
-          if (inDone) return;
-          inDone = true;
-          container.classList.remove('blend-transition-in', inClass);
-        }, IN_MS);
-
-        container.addEventListener('animationend', function onInEnd() {
-          if (inDone) return;
-          inDone = true;
-          clearTimeout(inTimer);
-          container.removeEventListener('animationend', onInEnd);
-          container.classList.remove('blend-transition-in', inClass);
-        }, { once: true });
-      });
+      startIn();
     }, { once: true });
   });
 }
