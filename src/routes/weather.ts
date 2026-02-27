@@ -76,7 +76,7 @@ router.get('/current', async (req: Request, res: Response) => {
       throw new Error(`Open-Meteo API Fehler: ${response.status}`);
     }
 
-    const apiData = await response.json();
+    const apiData: any = await response.json();
 
     // Aktuelles Wetter aufbereiten
     const currentWeather = apiData.current;
@@ -163,7 +163,7 @@ router.get('/geocode', async (req: Request, res: Response) => {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Geocoding API Fehler: ${response.status}`);
 
-    const data = await response.json();
+    const data: any = await response.json();
     const results = (data.results || []).map((r: any) => ({
       name: r.name,
       country: r.country,
