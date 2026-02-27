@@ -235,19 +235,19 @@ const translations = {
     'form.previewMusic': 'Vorschau',
 
     // Content Types
-    'type.text': '📝 Text',
-    'type.image': '🖼️ Bild',
-    'type.video': '🎥 Video',
-    'type.html': '🌐 HTML',
-    'type.presentation': '📊 PowerPoint Präsentation',
-    'type.pdf': '📄 PDF Dokument',
-    'type.word': '📃 Word Dokument',
+    'type.text': 'Text',
+    'type.image': 'Bild',
+    'type.video': 'Video',
+    'type.html': 'HTML',
+    'type.presentation': 'PowerPoint Präsentation',
+    'type.pdf': 'PDF Dokument',
+    'type.word': 'Word Dokument',
 
     // Buttons
     'btn.save': 'Speichern',
     'btn.cancel': 'Abbrechen',
     'btn.newPost': '+ Neuer Beitrag',
-    'btn.deleteAll': '🗑️ Alle löschen',
+    'btn.deleteAll': '✕ Alle löschen',
     'btn.savePost': 'Beitrag speichern',
     'btn.saveCategory': 'Kategorie erstellen',
     'btn.saveUser': 'Benutzer speichern',
@@ -491,19 +491,19 @@ const translations = {
     'form.previewMusic': 'Preview',
 
     // Content Types
-    'type.text': '📝 Text',
-    'type.image': '🖼️ Image',
-    'type.video': '🎥 Video',
-    'type.html': '🌐 HTML',
-    'type.presentation': '📊 PowerPoint Presentation',
-    'type.pdf': '📄 PDF Document',
-    'type.word': '📃 Word Document',
+    'type.text': 'Text',
+    'type.image': 'Image',
+    'type.video': 'Video',
+    'type.html': 'HTML',
+    'type.presentation': 'PowerPoint Presentation',
+    'type.pdf': 'PDF Document',
+    'type.word': 'Word Document',
 
     // Buttons
     'btn.save': 'Save',
     'btn.cancel': 'Cancel',
     'btn.newPost': '+ New Post',
-    'btn.deleteAll': '🗑️ Delete All',
+    'btn.deleteAll': '✕ Delete All',
     'btn.savePost': 'Save Post',
     'btn.saveCategory': 'Create Category',
     'btn.saveUser': 'Save User',
@@ -749,19 +749,19 @@ const translations = {
     'form.previewMusic': 'Anteprima',
 
     // Content Types
-    'type.text': '📝 Testo',
-    'type.image': '🖼️ Immagine',
-    'type.video': '🎥 Video',
-    'type.html': '🌐 HTML',
-    'type.presentation': '📊 Presentazione PowerPoint',
-    'type.pdf': '📄 Documento PDF',
-    'type.word': '📃 Documento Word',
+    'type.text': 'Testo',
+    'type.image': 'Immagine',
+    'type.video': 'Video',
+    'type.html': 'HTML',
+    'type.presentation': 'Presentazione PowerPoint',
+    'type.pdf': 'Documento PDF',
+    'type.word': 'Documento Word',
 
     // Buttons
     'btn.save': 'Salva',
     'btn.cancel': 'Annulla',
     'btn.newPost': '+ Nuovo Articolo',
-    'btn.deleteAll': '🗑️ Elimina Tutti',
+    'btn.deleteAll': '✕ Elimina Tutti',
     'btn.savePost': 'Salva Articolo',
     'btn.saveCategory': 'Crea Categoria',
     'btn.saveUser': 'Salva Utente',
@@ -1570,14 +1570,14 @@ async function showPostContextMenu(e, postId) {
   menu.className = 'post-context-menu';
   menu.innerHTML = `
     <div class="ctx-header">${count} ${count === 1 ? 'Beitrag' : 'Beiträge'}</div>
-    <div class="ctx-item" data-ctx="delete">🗑️ Löschen</div>
+    <div class="ctx-item" data-ctx="delete">✕ Löschen</div>
     ${!allInactive ? `<div class="ctx-item" data-ctx="deactivate">⏸ Deaktivieren</div>` : ''}
     ${!allActive ? `<div class="ctx-item" data-ctx="activate">▶ Aktivieren</div>` : ''}
-    <div class="ctx-item" data-ctx="duplicate">📋 Duplizieren</div>
+    <div class="ctx-item" data-ctx="duplicate">□ Duplizieren</div>
     <div class="ctx-separator"></div>
-    <div class="ctx-header" style="margin-top:2px;">📺 Displays zuweisen</div>
-    <div class="ctx-item ctx-display-option ${selectedPosts.every(p => p.displayMode === 'all') ? 'ctx-checked' : ''}" data-ctx="display-all">🌐 Alle Displays</div>
-    ${displays.filter(d => d.isActive).map(d => `<div class="ctx-item ctx-display-option ${commonDisplayIds.has(d.id) ? 'ctx-checked' : ''}" data-ctx="display-specific" data-display-id="${d.id}">📺 ${escapeHtml(d.name)}</div>`).join('')}
+    <div class="ctx-header" style="margin-top:2px;">Displays zuweisen</div>
+    <div class="ctx-item ctx-display-option ${selectedPosts.every(p => p.displayMode === 'all') ? 'ctx-checked' : ''}" data-ctx="display-all">◻ Alle Displays</div>
+    ${displays.filter(d => d.isActive).map(d => `<div class="ctx-item ctx-display-option ${commonDisplayIds.has(d.id) ? 'ctx-checked' : ''}" data-ctx="display-specific" data-display-id="${d.id}">□ ${escapeHtml(d.name)}</div>`).join('')}
   `;
 
   // Positionierung
@@ -4754,12 +4754,12 @@ document.getElementById('deleteAllPostsBtn')?.addEventListener('click', async ()
     });
 
     if (response.success) {
-      showNotification(`✅ ${response.deletedCount} Beiträge wurden gelöscht`, 'success');
+      showNotification(`${response.deletedCount} Beiträge wurden gelöscht`, 'success');
       await loadPosts();
     }
   } catch (error) {
     console.error('Fehler beim Löschen aller Posts:', error);
-    showNotification('❌ Fehler beim Löschen der Beiträge', 'error');
+    showNotification('Fehler beim Löschen der Beiträge', 'error');
   }
 });
 
@@ -4817,7 +4817,7 @@ document.getElementById('switchSystemMode')?.addEventListener('click', async () 
   try {
     const accessToken = localStorage.getItem('accessToken');
     if (!accessToken) {
-      showNotification('❌ Nicht angemeldet. Bitte melden Sie sich erneut an.', 'error');
+      showNotification('Nicht angemeldet. Bitte melden Sie sich erneut an.', 'error');
       return;
     }
 
@@ -4860,12 +4860,12 @@ document.getElementById('switchSystemMode')?.addEventListener('click', async () 
     if (updateResponse.ok) {
       const result = await updateResponse.json();
       console.log('Settings update successful:', result);
-      showNotification(`✅ System-Modus auf "${modeText}" gesetzt`, 'success');
+      showNotification(`System-Modus auf "${modeText}" gesetzt`, 'success');
       await loadSystemMode(); // Status neu laden
       
       // Optional: Info über Neustart anzeigen
       if (selectedMode === 'hotspot') {
-        showNotification('ℹ️ Hotspot-Modus aktiviert. Neustart empfohlen für vollständige Aktivierung.', 'info');
+        showNotification('Hotspot-Modus aktiviert. Neustart empfohlen für vollständige Aktivierung.', 'info');
       }
     } else {
       let errorMessage = `HTTP ${updateResponse.status}`;

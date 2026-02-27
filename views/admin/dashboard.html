@@ -118,7 +118,7 @@
               <h2>Beiträge verwalten</h2>
               <div>
                 <button class="btn btn-success" id="showPostFormBtn">+ Neuer Beitrag</button>
-                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">🗑️ Alle löschen</button>
+                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">✕ Alle löschen</button>
               </div>
             </div>
 
@@ -149,13 +149,13 @@
                       </span>
                     </label>
                     <select id="post-type" name="content_type" required>
-                      <option value="text" data-translate="type.text">📝 Text</option>
-                      <option value="image" data-translate="type.image">🖼️ Bild</option>
-                      <option value="video" data-translate="type.video">🎥 Video</option>
-                      <option value="html" data-translate="type.html">🌐 HTML</option>
-                      <option value="presentation" data-translate="type.presentation">📊 PowerPoint Präsentation</option>
-                      <option value="pdf" data-translate="type.pdf">📄 PDF Dokument</option>
-                      <option value="word" data-translate="type.word">📃 Word Dokument</option>
+                      <option value="text" data-translate="type.text">Text</option>
+                      <option value="image" data-translate="type.image">Bild</option>
+                      <option value="video" data-translate="type.video">Video</option>
+                      <option value="html" data-translate="type.html">HTML</option>
+                      <option value="presentation" data-translate="type.presentation">PowerPoint Präsentation</option>
+                      <option value="pdf" data-translate="type.pdf">PDF Dokument</option>
+                      <option value="word" data-translate="type.word">Word Dokument</option>
                     </select>
                   </div>
                 </div>
@@ -170,7 +170,6 @@
                 <!-- Display-Auswahl -->
                 <div class="form-group">
                   <label style="font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
-                    <span style="font-size: 1.3rem;">📺</span>
                     <span>Display-Zuweisung</span>
                   </label>
                   
@@ -179,14 +178,14 @@
                     <label class="display-mode-card" for="display-mode-all" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
                       <input type="radio" name="display_mode" value="all" id="display-mode-all" checked style="width: 20px; height: 20px; accent-color: #007bff;" />
                       <div>
-                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">🌐 Alle Displays</div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">◻ Alle Displays</div>
                         <div style="font-size: 0.85rem; color: #6c757d;">Auf allen Displays anzeigen</div>
                       </div>
                     </label>
                     <label class="display-mode-card" for="display-mode-specific" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
                       <input type="radio" name="display_mode" value="specific" id="display-mode-specific" style="width: 20px; height: 20px; accent-color: #007bff;" />
                       <div>
-                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">🎯 Spezifische Displays</div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">◎ Spezifische Displays</div>
                         <div style="font-size: 0.85rem; color: #6c757d;">Nur bestimmte Displays</div>
                       </div>
                     </label>
@@ -270,7 +269,7 @@
                         <span class="ai-btn-icon">&#9986;</span> Kürzen
                       </button>
                       <button type="button" class="ai-btn ai-btn-translate" data-action="translate" title="Text übersetzen">
-                        <span class="ai-btn-icon">&#127760;</span> Übersetzen
+                        <span class="ai-btn-icon">⇄</span> Übersetzen
                         <select id="ai-target-language" class="ai-lang-select" onclick="event.stopPropagation()">
                           <option value="Deutsch">DE</option>
                           <option value="Englisch" selected>EN</option>
@@ -296,7 +295,7 @@
                   <!-- Option 1: Word/PDF Import (nur bei Text/HTML) -->
                   <div id="word-pdf-import" style="margin-bottom: 1rem;">
                     <button type="button" class="btn btn-secondary" id="import-document-btn" style="width: 100%; font-size: 0.95rem;" data-translate="form.importDocument">
-                      📄 Word/PDF importieren
+                      ↑ Word/PDF importieren
                     </button>
                     <small style="color: #666; display: block; margin-top: 0.5rem; text-align: center;" data-translate="form.importDocumentHint">
                       Importieren Sie .docx oder .pdf Dateien (max. 10MB)
@@ -307,7 +306,7 @@
                   <div id="file-upload-section" style="display: none;">
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                       <button type="button" class="btn btn-secondary" id="trigger-file-upload" style="font-size: 0.9rem; display: inline-block;" data-translate="form.uploadFile">
-                        📁 Datei hochladen
+                        ↑ Datei hochladen
                       </button>
                       <small style="color: #666; align-self: center;" data-translate="form.uploadFileHint">
                         Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)
@@ -654,13 +653,13 @@
             <div class="section-header">
               <h2>Display-Verwaltung</h2>
               <div style="display: flex; align-items: center; gap: 1rem;">
-                <span id="display-license-info" style="font-size: 0.85rem; color: #6c757d; background: #f0f1f3; padding: 0.4rem 0.8rem; border-radius: 6px;">📋 Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
+                <span id="display-license-info" style="font-size: 0.85rem; color: #6c757d; background: #f0f1f3; padding: 0.4rem 0.8rem; border-radius: 6px;">Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
                 <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
               </div>
             </div>
 
             <div id="display-license-warning" style="display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-              <strong>⚠️ Display-Lizenzlimit erreicht</strong>
+              <strong>! Display-Lizenzlimit erreicht</strong>
               <p style="margin: 0.5rem 0 0 0; color: #664d03;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" style="color: #0d6efd;">kontakt@it-westfalen.de</a>, um zusätzliche Lizenzen zu erwerben.</p>
             </div>
 
@@ -952,9 +951,9 @@
                   <div class="form-group">
                     <label>Meldungstypen anzeigen</label>
                     <div class="transport-filter-grid">
-                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span>⚠️ Verkehrswarnungen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span>🚧 Baustellen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span>🚫 Sperrungen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span>Verkehrswarnungen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span>Baustellen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span>Sperrungen</span></label>
                     </div>
                   </div>
 
@@ -1091,7 +1090,7 @@
               
               <div id="system-mode-status" class="system-mode-status">
                 <div class="mode-indicator">
-                  <span class="mode-icon">⏳</span>
+                  <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.25"/><path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round"/></svg></span>
                   <span class="mode-text">Status wird geladen...</span>
                 </div>
               </div>
@@ -1102,7 +1101,7 @@
                     <input type="radio" name="system-mode" value="normal" id="mode-normal">
                     <div class="mode-card">
                       <div class="mode-header">
-                        <span class="mode-icon">🌐</span>
+                        <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3a15 15 0 0 1 0 18"/><path d="M12 3a15 15 0 0 0 0 18"/></svg></span>
                         <h4>Normal-Modus</h4>
                       </div>
                       <ul class="mode-features">
@@ -1117,7 +1116,7 @@
                     <input type="radio" name="system-mode" value="hotspot" id="mode-hotspot">
                     <div class="mode-card">
                       <div class="mode-header">
-                        <span class="mode-icon">📶</span>
+                        <span class="mode-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24" aria-hidden="true"><path d="M2 9a14 14 0 0 1 20 0"/><path d="M5.5 12.5a9 9 0 0 1 13 0"/><path d="M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg></span>
                         <h4>Hotspot-Modus</h4>
                       </div>
                       <ul class="mode-features">
@@ -1138,7 +1137,7 @@
 
             <!-- Display-Einstellungen -->
             <div class="settings-card">
-              <h3><span class="settings-icon">&#9881;</span> Display-Einstellungen</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></span> Display-Einstellungen</h3>
               <div class="settings-form">
                 <div class="form-group">
                   <label for="refresh-interval">Auto-Refresh Intervall (Minuten)
@@ -1216,7 +1215,7 @@
 
             <!-- Globale Hintergrundmusik -->
             <div class="settings-card">
-              <h3><span class="settings-icon">&#9835;</span> Globale Hintergrundmusik</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M6 13V4l7-2v9"/><circle cx="4.5" cy="13" r="2"/><circle cx="11.5" cy="11" r="2"/></svg></span> Globale Hintergrundmusik</h3>
               <p class="settings-description">
                 Musik die über alle Beiträge hinweg abgespielt wird. Videos werden automatisch stumm
                 geschaltet.
@@ -1297,7 +1296,7 @@
 
             <!-- KI-Assistent Einstellungen -->
             <div class="settings-card">
-              <h3><span class="settings-icon">&#9670;</span> KI-Assistent</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 2l2 4h4l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4z"/></svg></span> KI-Assistent</h3>
               <p class="settings-description">
                 Nutzen Sie KI-Unterstützung beim Erstellen von Beiträgen: Texte generieren, verbessern, kürzen oder übersetzen. Verwendet OpenAI GPT-4o-mini.
               </p>
@@ -1592,7 +1591,7 @@
 
             <!-- Info / Über diese Anwendung -->
             <div class="settings-card">
-              <h3><span class="settings-icon">&#9432;</span> Über diese Anwendung</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="5" r="0.5" fill="currentColor" stroke="none"/></svg></span> Über diese Anwendung</h3>
               <div class="app-info-section">
                 <div class="app-info-logo">
                   <div class="app-logo-circle">
