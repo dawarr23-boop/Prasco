@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PRASCO Admin Dashboard - Digitales Schwarzes Brett</title>
-    <link rel="stylesheet" href="/css/admin.css?v=3.7" />
+    <link rel="stylesheet" href="/css/admin.css?v=3.8" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -56,7 +56,7 @@
               id="changePasswordBtn"
               title="Eigenes Passwort ändern"
             >
-              ▷
+              &#8942;
             </button>
             <span id="username">Admin</span>
             <span class="user-role-badge" id="userRoleBadge"></span>
@@ -107,7 +107,7 @@
                 data-i18n="dashboard.presentationMode"
                 title="Manuelle Navigation mit Pfeiltasten oder Mausklick"
               >
-                ▷ Vortragsmodus
+                Vortragsmodus
               </button>
             </div>
           </section>
@@ -118,7 +118,7 @@
               <h2>Beiträge verwalten</h2>
               <div>
                 <button class="btn btn-success" id="showPostFormBtn">+ Neuer Beitrag</button>
-                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">✕ Alle löschen</button>
+                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">Alle löschen</button>
               </div>
             </div>
 
@@ -169,76 +169,33 @@
 
                 <!-- Display-Auswahl -->
                 <div class="form-group">
-                  <label style="font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.05rem;">
-                    <span>Display-Zuweisung</span>
-                  </label>
-                  
-                  <!-- Modern Radio Button Cards -->
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
-                    <label class="display-mode-card" for="display-mode-all" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
-                      <input type="radio" name="display_mode" value="all" id="display-mode-all" checked style="width: 20px; height: 20px; accent-color: #007bff;" />
+                  <label class="form-group-label">Display-Zuweisung</label>
+
+                  <div class="display-mode-cards">
+                    <label class="display-mode-card" for="display-mode-all">
+                      <input type="radio" name="display_mode" value="all" id="display-mode-all" checked />
                       <div>
-                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">◻ Alle Displays</div>
-                        <div style="font-size: 0.85rem; color: #6c757d;">Auf allen Displays anzeigen</div>
+                        <div class="display-mode-card-label">Alle Displays</div>
+                        <div class="display-mode-card-hint">Auf allen Displays anzeigen</div>
                       </div>
                     </label>
-                    <label class="display-mode-card" for="display-mode-specific" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; background: white;">
-                      <input type="radio" name="display_mode" value="specific" id="display-mode-specific" style="width: 20px; height: 20px; accent-color: #007bff;" />
+                    <label class="display-mode-card" for="display-mode-specific">
+                      <input type="radio" name="display_mode" value="specific" id="display-mode-specific" />
                       <div>
-                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem;">◎ Spezifische Displays</div>
-                        <div style="font-size: 0.85rem; color: #6c757d;">Nur bestimmte Displays</div>
+                        <div class="display-mode-card-label">Spezifische Displays</div>
+                        <div class="display-mode-card-hint">Nur bestimmte Displays</div>
                       </div>
                     </label>
                   </div>
 
                   <!-- Display Selection Container -->
-                  <div id="display-selection-container" style="display: none; border: 2px solid #e3f2fd; border-radius: 8px; padding: 1.25rem; background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                      <span style="font-size: 1.1rem;">✓</span>
-                      <label style="font-weight: 600; color: #333; margin: 0;">Displays auswählen:</label>
-                    </div>
-                    <div id="displays-checkboxes" style="max-height: 240px; overflow-y: auto; padding-right: 0.5rem;">
-                      <p style="color: #6c757d; text-align: center; padding: 1rem;">Lade Displays...</p>
+                  <div id="display-selection-container" class="display-selection-box" style="display: none">
+                    <div class="display-selection-box-header">Displays auswählen:</div>
+                    <div id="displays-checkboxes">
+                      <p class="text-muted" style="text-align: center; padding: 1rem;">Lade Displays...</p>
                     </div>
                   </div>
                 </div>
-
-                <style>
-                  .display-mode-card:hover {
-                    border-color: #007bff !important;
-                    background: #f8f9ff !important;
-                    box-shadow: 0 2px 8px rgba(0,123,255,0.15) !important;
-                  }
-                  
-                  .display-mode-card:has(input:checked) {
-                    border-color: #007bff !important;
-                    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-                    box-shadow: 0 4px 12px rgba(0,123,255,0.2) !important;
-                  }
-                  
-                  .display-mode-card input[type="radio"] {
-                    cursor: pointer;
-                    flex-shrink: 0;
-                  }
-                  
-                  #displays-checkboxes::-webkit-scrollbar {
-                    width: 8px;
-                  }
-                  
-                  #displays-checkboxes::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 4px;
-                  }
-                  
-                  #displays-checkboxes::-webkit-scrollbar-thumb {
-                    background: #c1c1c1;
-                    border-radius: 4px;
-                  }
-                  
-                  #displays-checkboxes::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8;
-                  }
-                </style>
 
                 <div class="form-group">
                   <label for="post-content" data-translate="form.content">Inhalt
@@ -475,7 +432,7 @@
                         id="remove-music-btn"
                         style="margin-left: 0.5rem"
                       >
-                        ✕ Entfernen
+                        Entfernen
                       </button>
                       <button
                         type="button"
@@ -483,7 +440,7 @@
                         id="preview-music-btn"
                         style="margin-left: 0.25rem"
                       >
-                        ▶ Vorschau
+                        Vorschau
                       </button>
                     </small>
                   </div>
@@ -653,14 +610,14 @@
             <div class="section-header">
               <h2>Display-Verwaltung</h2>
               <div style="display: flex; align-items: center; gap: 1rem;">
-                <span id="display-license-info" style="font-size: 0.85rem; color: #6c757d; background: #f0f1f3; padding: 0.4rem 0.8rem; border-radius: 6px;">Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
+                <span id="display-license-info" class="license-info-badge">Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
                 <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
               </div>
             </div>
 
-            <div id="display-license-warning" style="display: none; background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
-              <strong>! Display-Lizenzlimit erreicht</strong>
-              <p style="margin: 0.5rem 0 0 0; color: #664d03;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" style="color: #0d6efd;">kontakt@it-westfalen.de</a>, um zusätzliche Lizenzen zu erwerben.</p>
+            <div id="display-license-warning" class="license-warning" style="display: none">
+              <strong>Display-Lizenzlimit erreicht</strong>
+              <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
             </div>
 
             <div id="display-form" class="form-container" style="display: none">
@@ -846,7 +803,7 @@
                         <small id="transit-station-id" class="text-muted"></small>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" id="transit-remove-station">✕</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="transit-remove-station">Entfernen</button>
                   </div>
 
                   <div class="form-row">
@@ -1011,7 +968,7 @@
                         <small id="weather-location-coords" class="text-muted"></small>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" id="weather-remove-location">✕</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="weather-remove-location">Entfernen</button>
                   </div>
 
                   <div class="form-group">
@@ -1271,7 +1228,7 @@
                   Musik-Einstellungen speichern
                 </button>
                 <button class="btn btn-secondary" id="testGlobalMusic" style="margin-left: 0.5rem">
-                  Test ▷
+                  Test
                 </button>
               </div>
             </div>
@@ -1578,10 +1535,10 @@
                 <!-- Aktionen -->
                 <div class="form-actions sso-actions">
                   <button type="submit" class="btn btn-primary" id="sso-save-btn">
-                    <span class="btn-icon">&#10003;</span> Konfiguration speichern
+                    Konfiguration speichern
                   </button>
                   <button type="button" class="btn btn-secondary" id="sso-test-btn">
-                    <span class="btn-icon">&#8635;</span> Verbindung testen
+                    Verbindung testen
                   </button>
                 </div>
 
@@ -1657,7 +1614,7 @@
     <div id="password-modal" class="modal" style="display: none">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>▷ Passwort ändern</h3>
+          <h3>Passwort ändern</h3>
           <button class="modal-close" id="closePasswordModal">&times;</button>
         </div>
         <form id="changePasswordForm">

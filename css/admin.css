@@ -92,7 +92,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--prasco-red) 0%, var(--prasco-dark-red) 100%);
+  background: var(--prasco-green);
 }
 
 .login-container {
@@ -419,17 +419,17 @@ body {
 }
 
 .user-role-badge.role-super_admin {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  background: #6f42c1;
   color: white;
 }
 
 .user-role-badge.role-admin {
-  background: linear-gradient(135deg, #4ecdc4, #3db9b0);
+  background: var(--prasco-green);
   color: white;
 }
 
 .user-role-badge.role-editor {
-  background: linear-gradient(135deg, #45b7d1, #3aa5bf);
+  background: var(--info-color);
   color: white;
 }
 
@@ -540,16 +540,15 @@ body {
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
 .stat-card.clickable:hover {
-  border-left-color: var(--prasco-dark-red);
+  border-left-color: var(--prasco-dark-green);
 }
 
 .stat-card.clickable:active {
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .stat-card h3 {
@@ -777,12 +776,10 @@ body {
 .btn-primary:hover {
   background: var(--prasco-dark-green);
   border-color: var(--prasco-dark-green);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  background: var(--prasco-dark-green);
 }
 
 .btn-secondary {
@@ -794,8 +791,6 @@ body {
 .btn-secondary:hover {
   background: var(--prasco-green);
   color: var(--white);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
 
 .btn-accent {
@@ -807,8 +802,6 @@ body {
 .btn-accent:hover {
   background: var(--prasco-dark-green);
   border-color: var(--prasco-dark-green);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.3);
 }
 
 .btn-success {
@@ -820,8 +813,6 @@ body {
 .btn-success:hover {
   background: #218838;
   border-color: #218838;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .btn-danger {
@@ -833,8 +824,6 @@ body {
 .btn-danger:hover {
   background: #c82333;
   border-color: #c82333;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 .btn-block {
@@ -860,7 +849,7 @@ body {
 
 .list-item.device-pending {
   border-left: 4px solid #ffaa00;
-  background: linear-gradient(90deg, rgba(255,170,0,0.05) 0%, var(--white) 15%);
+  background: #fffae6;
 }
 
 .list-item-content h3 {
@@ -888,12 +877,10 @@ body {
 .list-item-content.clickable:hover,
 .user-info-block.clickable:hover {
   background-color: rgba(0, 150, 64, 0.08);
-  transform: translateX(4px);
 }
 
 .list-item-content.clickable:active,
 .user-info-block.clickable:active {
-  transform: translateX(2px);
   background-color: rgba(0, 150, 64, 0.12);
 }
 
@@ -985,8 +972,8 @@ body {
 .drag-drop-hint {
   display: block;
   padding: 0.75rem 1rem;
-  background: linear-gradient(135deg, rgba(0, 150, 64, 0.1) 0%, rgba(0, 150, 64, 0.05) 100%);
-  border-left: 4px solid var(--prasco-red);
+  background: rgba(0, 150, 64, 0.07);
+  border-left: 4px solid var(--prasco-green);
   border-radius: var(--radius-sm);
   margin-bottom: 1rem;
   font-size: 0.875rem;
@@ -1012,13 +999,12 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1.25rem;
-  background: linear-gradient(135deg, #0078d7, #005a9e);
+  background: #0078d7;
   color: #fff;
   border-radius: 8px;
   margin-bottom: 0.75rem;
   animation: slideDown 0.25s ease;
   font-size: 0.95rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 #bulk-bar .btn {
@@ -1369,15 +1355,14 @@ body {
 .app-logo-circle {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  border-radius: 20px;
+  background: var(--prasco-green);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
   font-weight: 700;
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
 .app-info-details {
@@ -1441,9 +1426,9 @@ body {
 }
 
 .tech-badge:hover {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+  background: var(--prasco-gray-bg);
+  color: var(--prasco-gray-dark);
+  border-color: var(--prasco-border);
 }
 
 .app-links {
@@ -1466,9 +1451,9 @@ body {
 }
 
 .app-link:hover {
-  background: var(--primary-color);
-  color: white;
-  border-color: var(--primary-color);
+  background: var(--prasco-gray-bg);
+  color: var(--prasco-gray-dark);
+  border-color: var(--prasco-gray-light);
 }
 
 @media (max-width: 600px) {
@@ -1522,12 +1507,12 @@ body {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, var(--prasco-red-light, #f8e8e8) 0%, #fff 100%);
-  color: var(--prasco-red);
+  background: rgba(0, 150, 64, 0.08);
+  color: var(--prasco-green);
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
   font-weight: 400;
-  border: 1px solid rgba(185, 28, 28, 0.1);
+  border: 1px solid rgba(0, 150, 64, 0.15);
   flex-shrink: 0;
 }
 
@@ -1805,8 +1790,7 @@ body {
 }
 
 .mode-option:hover .mode-card {
-  border-color: var(--prasco-dark-red);
-  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.15);
+  border-color: var(--prasco-green);
 }
 
 .mode-header {
@@ -1879,7 +1863,7 @@ body {
   transition: background 0.15s;
 }
 .search-result-item:last-child { border-bottom: none; }
-.search-result-item:hover { background: #e8f5e9; }
+.search-result-item:hover { background: var(--prasco-gray-bg); }
 .result-info { flex: 1; }
 .result-info strong { display: block; font-size: 0.95rem; }
 .result-info small { color: var(--gray-500); }
@@ -2148,7 +2132,6 @@ body {
 .info-tooltip-btn:hover {
   color: #555;
   border-color: #555;
-  transform: scale(1.1);
 }
 
 .info-tooltip-content {
@@ -2230,7 +2213,130 @@ body {
 
 /* Helper */
 .text-error { color: #c62828; }
+.text-muted { color: var(--prasco-gray-light); }
 .live-preview-container { min-height: 60px; }
+
+/* ============================================
+   Display-Zuweisung (Post-Formular)
+   ============================================ */
+.display-mode-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.display-mode-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--prasco-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  background: var(--white);
+}
+
+.display-mode-card:hover {
+  border-color: var(--prasco-green);
+  background: var(--prasco-gray-bg);
+}
+
+.display-mode-card:has(input:checked) {
+  border-color: var(--prasco-green);
+  background: rgba(0, 150, 64, 0.06);
+}
+
+.display-mode-card input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--prasco-green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.display-mode-card-label {
+  font-weight: 600;
+  color: var(--prasco-gray-dark);
+  margin-bottom: 0.2rem;
+  font-size: 0.9rem;
+}
+
+.display-mode-card-hint {
+  font-size: 0.8rem;
+  color: var(--prasco-gray);
+}
+
+.display-selection-box {
+  border: 1px solid var(--prasco-border);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  background: var(--prasco-gray-bg);
+}
+
+.display-selection-box-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--prasco-gray-dark);
+  font-size: 0.9rem;
+}
+
+/* Lizenz-Warnung */
+.license-warning {
+  background: #fff9e6;
+  border: 1px solid #f0c040;
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: #664d03;
+  font-size: 0.9rem;
+}
+
+/* Lizenz-Info Badge */
+.license-info-badge {
+  font-size: 0.85rem;
+  color: var(--prasco-gray);
+  background: var(--prasco-gray-bg);
+  border: 1px solid var(--prasco-border);
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Upload Progress */
+.upload-progress-track {
+  background: var(--prasco-border);
+  border-radius: var(--radius-sm);
+  height: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.upload-progress-fill {
+  background: var(--prasco-green);
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+/* Hint text fuer Felder */
+.form-hint {
+  display: block;
+  color: var(--prasco-gray-light);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-weight: 400;
+}
+
+/* Inline-Link dezent */
+.inline-link {
+  color: var(--prasco-gray-dark);
+  text-decoration: underline;
+  text-decoration-color: var(--prasco-border);
+}
 
 /* ============================================
    KI-Assistent
