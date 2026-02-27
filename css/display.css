@@ -284,6 +284,11 @@
   --font-mono: 'Courier New', monospace;
 }
 
+html {
+  /* Dynamische Basis-Schriftgröße: skaliert zwischen 12px (bei 720px Breite) und 20px (bei 3840px) */
+  font-size: clamp(12px, calc(10px + 0.4vw + 0.3vh), 22px);
+}
+
 body {
   font-family: var(--font-primary);
   background: var(--prasco-gray-bg);
@@ -1586,243 +1591,171 @@ body {
 }
 
 /* ============================================
-   16:9 TV/Display Optimierungen
-   Optimiert für 1920x1080 (Full HD) und größer
+   Responsive Auflösungs-Anpassungen
+   Skaliert Inhalte für optimale Lesbarkeit
+   auf allen Endgeräten (720p bis 4K)
    ============================================ */
 
+/* --- Kleine Displays / Tablets (bis 1280px Breite, ~720p) --- */
+@media screen and (max-width: 1280px) {
+  .display-header {
+    padding: 0.5rem 1rem;
+    min-height: 40px;
+    gap: 1rem;
+  }
+  .logo-image { max-height: 28px; }
+  .header-category { font-size: 0.9rem; }
+  .clock { font-size: 1rem; }
+
+  .display-main { padding: 1rem; }
+  .post { padding: 1.5rem 2rem; border-radius: 10px; }
+  .post h1 { font-size: 1.8rem; margin-bottom: 1rem; padding-left: 1rem; border-left-width: 3px; }
+  .post p, .post div { font-size: 1.1rem; line-height: 1.6; }
+  .post img, .post video, .post iframe { max-height: 50vh; }
+
+  .display-footer { padding: 0.4rem 1rem; }
+  .footer-info { font-size: 0.75rem; }
+  .post-indicator { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+
+  /* Live-Daten compact */
+  .live-widget-header { padding: 1vh 2vw; gap: 1.5vw; }
+  .live-indicator { font-size: 1.6vh; }
+  .live-title { font-size: 2.5vh; }
+  .live-time { font-size: 1.8vh; }
+  .live-widget-content { padding: 1vh 2vw; }
+  .live-widget-footer { padding: 1vh 2vw; font-size: 1.5vh; }
+
+  /* ÖPNV */
+  .departure-board-header { padding: 1.2vh 1.5vw; font-size: 2vh; }
+  .departure-station-name { font-size: 2.2vh; }
+  .departure-clock { font-size: 2.2vh; }
+  .type-livedata .live-departure-table thead th { font-size: 1.5vh; padding: 1vh 0.8vw; }
+  .type-livedata .dep-row td { padding: 1.2vh 0.8vw; }
+  .line-badge { font-size: 1.8vh; padding: 0.5vh 0.8vw; min-width: 3vw; }
+  .dep-direction { font-size: 2vh; }
+  .dep-countdown { font-size: 2.2vh; }
+  .dep-time { font-size: 2vh; }
+  .dep-platform { font-size: 1.8vh; }
+  .status-badge { font-size: 1.5vh; padding: 0.5vh 0.8vw; }
+
+  /* Verkehrslage */
+  .traffic-row { padding: 1.5vh 1.5vw; }
+  .traffic-icon { font-size: 2.5vh; }
+  .traffic-title { font-size: 2vh; }
+  .traffic-subtitle { font-size: 1.5vh; }
+
+  /* Wetter */
+  .weather-icon-large { font-size: 8vh; }
+  .weather-temp { font-size: 7vh; }
+  .weather-desc { font-size: 2vh; }
+  .weather-detail-icon { font-size: 2vh; }
+  .weather-detail-label { font-size: 1.3vh; }
+  .weather-detail-value { font-size: 1.8vh; }
+  .forecast-icon { font-size: 3.5vh; }
+  .forecast-weekday { font-size: 1.5vh; }
+  .forecast-max { font-size: 2vh; }
+  .forecast-min { font-size: 1.6vh; }
+}
+
+/* --- Small Height (720p Höhe) --- */
+@media screen and (max-height: 800px) {
+  .live-widget-header { padding: 1vh 2vw; }
+  .live-title { font-size: 2.8vh; }
+  .live-widget-content { padding: 1vh 2vw; }
+  .departure-board-header { padding: 1.2vh 1.5vw; }
+  .type-livedata .dep-row td { padding: 1.2vh 0.8vw; }
+  .line-badge { font-size: 2vh; padding: 0.5vh 0.8vw; }
+  .dep-direction { font-size: 2.2vh; }
+  .dep-countdown { font-size: 2.5vh; }
+  .status-badge { font-size: 1.6vh; padding: 0.5vh 0.8vw; }
+  .weather-icon-large { font-size: 9vh; }
+  .weather-temp { font-size: 8vh; }
+  .weather-details { padding: 1.5vh 1.5vw; }
+  .weather-forecast-day { padding: 1vh 1vw; }
+}
+
+/* --- Full HD (1920x1080) --- */
 @media screen and (min-width: 1920px) {
-  /* Header Optimierung für große Displays */
   .display-header {
     padding: 1.5rem 3rem;
     min-height: 80px;
     gap: 3rem;
   }
+  .logo { font-size: 1.7rem; }
+  .logo-image { max-height: 51px; }
+  .header-category { font-size: 1.5rem; letter-spacing: 1px; }
+  .clock { font-size: 1.7rem; letter-spacing: 1.5px; }
 
-  .logo {
-    font-size: 1.7rem;
-  }
+  .display-main { padding: 3.5rem; }
+  .post-container { max-width: 1800px; }
+  .post { padding: 5rem 6rem; border-radius: 20px; }
+  .post h1 { font-size: 4.5rem; margin-bottom: 3rem; padding-left: 2.5rem; border-left-width: 6px; }
+  .post p, .post div { font-size: 2rem; line-height: 2; max-width: 1600px; }
+  .post img, .post video { max-height: 70vh; border-radius: 16px; }
+  .post iframe { width: 1600px; max-height: 70vh; border-radius: 16px; }
 
-  .logo-image {
-    max-height: 51px;
-  }
+  .display-footer { padding: 0.75rem 3rem; min-height: 50px; }
+  .footer-info { font-size: 1.1rem; gap: 1.5rem; }
+  .post-indicator { bottom: 2rem; right: 3rem; font-size: 1.2rem; padding: 0.6rem 1.2rem; }
+  .category-badge { top: 3rem; left: 3rem; padding: 0.75rem 2rem; font-size: 1.4rem; }
 
-  .header-category {
-    font-size: 1.5rem;
-    letter-spacing: 1px;
-  }
+  .presentation-controls { bottom: 3rem; padding: 1rem 2rem; gap: 1rem; }
+  .pres-btn { width: 60px; height: 60px; font-size: 1.5rem; }
+  .pres-info { padding: 0 1.5rem; }
+  .pres-mode-label { font-size: 0.8rem; letter-spacing: 2.5px; }
+  .pres-counter { font-size: 1.4rem; }
 
-  .clock {
-    font-size: 1.7rem;
-    letter-spacing: 1.5px;
-  }
+  .live-widget-header { padding: 2.5vh 3vw; }
+  .post table th { padding: 1.5rem; font-size: 1.8rem; }
+  .post table td { padding: 1.2rem 1.5rem; font-size: 1.6rem; }
 
-  /* Main Content Optimierung */
-  .display-main {
-    padding: 3.5rem;
-  }
-
-  .post-container {
-    max-width: 1800px;
-  }
-
-  .post {
-    padding: 5rem 6rem;
-    border-radius: 20px;
-  }
-
-  /* Schriftgrößen für bessere Lesbarkeit aus der Entfernung */
-  .post h1 {
-    font-size: 4.5rem;
-    margin-bottom: 3rem;
-    padding-left: 2.5rem;
-    border-left-width: 6px;
-  }
-
-  .post p,
-  .post div {
-    font-size: 2rem;
-    line-height: 2;
-    max-width: 1600px;
-  }
-
-  .post img,
-  .post video {
-    max-height: 70vh;
-    border-radius: 16px;
-  }
-
-  .post iframe {
-    width: 1600px;
-    max-height: 70vh;
-    border-radius: 16px;
-  }
-
-  /* Footer Optimierung */
-  .display-footer {
-    padding: 0.75rem 3rem;
-    min-height: 50px;
-  }
-
-  .footer-info {
-    font-size: 1.1rem;
-    gap: 1.5rem;
-  }
-
-  /* Post Indicator größer */
-  .post-indicator {
-    bottom: 2rem;
-    right: 3rem;
-    font-size: 1.2rem;
-    padding: 0.6rem 1.2rem;
-  }
-
-  /* Category Badge größer */
-  .category-badge {
-    top: 3rem;
-    left: 3rem;
-    padding: 0.75rem 2rem;
-    font-size: 1.4rem;
-  }
-
-  /* Vortragsmodus Controls größer */
-  .presentation-controls {
-    bottom: 3rem;
-    padding: 1rem 2rem;
-    gap: 1rem;
-  }
-
-  .pres-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
-  }
-
-  .pres-info {
-    padding: 0 1.5rem;
-  }
-
-  .pres-mode-label {
-    font-size: 0.8rem;
-    letter-spacing: 2.5px;
-  }
-
-  .pres-counter {
-    font-size: 1.4rem;
-  }
-
-  /* Live Widget - nutzt bereits vh/vw, minimale Anpassungen */
-  .live-widget-header {
-    padding: 2.5vh 3vw;
-  }
-
-  /* Tabellen größer */
-  .post table th {
-    padding: 1.5rem;
-    font-size: 1.8rem;
-  }
-
-  .post table td {
-    padding: 1.2rem 1.5rem;
-    font-size: 1.6rem;
-  }
-
-  /* Video Container Optimierung */
-  .video-fullscreen-container {
-    border-radius: 20px;
-  }
-
-  .video-header {
-    padding: 1.5rem 3rem;
-    min-height: 70px;
-  }
-
-  .video-title {
-    font-size: 1.8rem;
-  }
-
-  .video-footer {
-    padding: 0.75rem 3rem;
-    min-height: 50px;
-  }
-
-  /* Indikatoren größer */
-  .video-muted-indicator,
-  .offline-mode-indicator {
-    font-size: 1.5rem;
-    top: 1.5rem;
-    padding: 0.75rem 1.25rem;
-    border-radius: 12px;
-  }
-
-  .global-music-indicator {
-    bottom: 1.5rem;
-    left: 1.5rem;
-    font-size: 1.2rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 25px;
-  }
+  .video-fullscreen-container { border-radius: 20px; }
+  .video-header { padding: 1.5rem 3rem; min-height: 70px; }
+  .video-title { font-size: 1.8rem; }
+  .video-footer { padding: 0.75rem 3rem; min-height: 50px; }
+  .video-muted-indicator, .offline-mode-indicator { font-size: 1.5rem; top: 1.5rem; padding: 0.75rem 1.25rem; border-radius: 12px; }
+  .global-music-indicator { bottom: 1.5rem; left: 1.5rem; font-size: 1.2rem; padding: 0.75rem 1.5rem; border-radius: 25px; }
 }
 
-/* Noch größere Displays (4K: 3840x2160) */
+/* --- Große Full-HD+ Displays (2560px+) --- */
+@media screen and (min-width: 2560px) {
+  .live-widget-header { padding: 2vh 2.5vw; }
+  .live-title { font-size: 3.2vh; }
+  .departure-board-header { padding: 2.5vh 2vw; font-size: 2.8vh; }
+  .departure-station-name { font-size: 3.2vh; }
+  .departure-clock { font-size: 3.2vh; }
+  .type-livedata .live-departure-table thead th { font-size: 2.2vh; padding: 2vh 1.2vw; }
+  .type-livedata .dep-row td { padding: 2.5vh 1.2vw; }
+  .line-badge { font-size: 2.8vh; padding: 1vh 1.5vw; }
+  .dep-direction { font-size: 3vh; }
+  .dep-countdown { font-size: 3.5vh; }
+  .dep-time { font-size: 3vh; }
+  .status-badge { font-size: 2.2vh; padding: 1vh 1.5vw; }
+
+  .weather-icon-large { font-size: 14vh; }
+  .weather-temp { font-size: 12vh; }
+  .weather-desc { font-size: 3.5vh; }
+  .weather-detail-icon { font-size: 3.5vh; }
+  .weather-detail-value { font-size: 3vh; }
+  .forecast-icon { font-size: 6vh; }
+  .forecast-max { font-size: 3.2vh; }
+  .forecast-min { font-size: 2.6vh; }
+}
+
+/* --- 4K Displays (3840x2160) --- */
 @media screen and (min-width: 3840px) {
-  .display-header {
-    padding: 2rem 4rem;
-    min-height: 100px;
-  }
+  .display-header { padding: 2rem 4rem; min-height: 100px; }
+  .logo { font-size: 2.5rem; }
+  .logo-image { max-height: 80px; }
+  .header-category { font-size: 2rem; }
+  .clock { font-size: 2.5rem; }
 
-  .logo {
-    font-size: 2.5rem;
-  }
-
-  .logo-image {
-    max-height: 80px;
-  }
-
-  .header-category {
-    font-size: 2rem;
-  }
-
-  .clock {
-    font-size: 2.5rem;
-  }
-
-  .display-main {
-    padding: 4rem;
-  }
-
-  .post {
-    padding: 6rem 8rem;
-  }
-
-  .post h1 {
-    font-size: 6rem;
-    margin-bottom: 4rem;
-    padding-left: 3rem;
-    border-left-width: 8px;
-  }
-
-  .post p,
-  .post div {
-    font-size: 2.5rem;
-    line-height: 2.1;
-  }
-
-  .post table th {
-    padding: 2rem;
-    font-size: 2.2rem;
-  }
-
-  .post table td {
-    padding: 1.5rem 2rem;
-    font-size: 2rem;
-  }
-
-  .display-footer {
-    padding: 1rem 4rem;
-    min-height: 60px;
-  }
-
-  .footer-info {
-    font-size: 1.3rem;
-  }
+  .display-main { padding: 4rem; }
+  .post { padding: 6rem 8rem; }
+  .post h1 { font-size: 6rem; margin-bottom: 4rem; padding-left: 3rem; border-left-width: 8px; }
+  .post p, .post div { font-size: 2.5rem; line-height: 2.1; }
+  .post table th { padding: 2rem; font-size: 2.2rem; }
+  .post table td { padding: 1.5rem 2rem; font-size: 2rem; }
+  .display-footer { padding: 1rem 4rem; min-height: 60px; }
+  .footer-info { font-size: 1.3rem; }
 }
