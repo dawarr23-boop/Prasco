@@ -2084,7 +2084,7 @@ async function displayCurrentPost() {
     case 'text':
       html = `
                 ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
-                <div>${post.content || ''}</div>
+                <div>${(post.content || '').replace(/\n/g, '<br>')}</div>
             `;
       break;
 
