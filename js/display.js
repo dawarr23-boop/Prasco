@@ -2302,6 +2302,7 @@ async function displayCurrentPost() {
               autoplay 
               loop 
               playsinline
+              preload="auto"
               ${shouldMuteVideo ? 'muted' : ''}>
             </video>
             ${shouldMuteVideo ? '<div class="video-muted-indicator" title="Video stumm - Hintergrundmusik aktiv">🔇</div>' : ''}
@@ -2351,6 +2352,7 @@ async function displayCurrentPost() {
               autoplay 
               loop 
               playsinline
+              preload="auto"
               ${shouldMuteVideo ? 'muted' : ''}>
             </video>
           </div>`;

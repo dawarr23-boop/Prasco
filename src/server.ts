@@ -240,6 +240,11 @@ const staticOptions = {
     if (path.match(/\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
+    // Video-Dateien: Cache + Accept-Ranges für schnelles Streaming
+    if (path.match(/\.(mp4|webm|ogg|mov)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Accept-Ranges', 'bytes');
+    }
   },
 };
 
