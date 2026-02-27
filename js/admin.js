@@ -1432,6 +1432,7 @@ let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bear
 let bulkSelectedIds = new Set();
 let bulkSelectionMode = false;
 let longPressTimer = null;
+let suppressNextClick = false;
 const LONG_PRESS_MS = 500;
 
 function toggleBulkSelect(postId) {
@@ -1446,6 +1447,7 @@ function toggleBulkSelect(postId) {
 
 function enterBulkSelection(postId) {
   bulkSelectionMode = true;
+  suppressNextClick = true;
   bulkSelectedIds.clear();
   bulkSelectedIds.add(postId);
   updateBulkSelectionUI();
@@ -4300,6 +4302,7 @@ window.addEventListener('load', async () => {
 
       // Im Selektionsmodus: Klick toggelt Auswahl
       if (bulkSelectionMode && listItem && postId) {
+        if (suppressNextClick) { suppressNextClick = false; return; }
         e.preventDefault();
         e.stopPropagation();
         toggleBulkSelect(postId);
