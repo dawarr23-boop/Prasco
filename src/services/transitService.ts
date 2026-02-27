@@ -1,6 +1,6 @@
 import { createClient, HafasClient } from 'hafas-client';
 import { profile as nrwProfile } from 'hafas-client/p/db-busradar-nrw/index.js';
-import { profile as insaProfile } from 'hafas-client/p/insa/index.js';
+import { profile as dbProfile } from 'hafas-client/p/db/index.js';
 import NodeCache from 'node-cache';
 import logger from '../utils/logger';
 
@@ -48,16 +48,16 @@ class TransitService {
   private cache: NodeCache;
   private config: TransitServiceConfig;
 
-  // Station-ID Mapping: INSA (Züge) nutzt EVA-Nummern, db-busradar-nrw (Busse) nutzt andere IDs
+  // Station-ID Mapping: DB nutzt EVA-Nummern, db-busradar-nrw (Busse) nutzt andere IDs
   private readonly TRAIN_STATION_MAP: Record<string, string> = {
-    '9424069': '8000441', // Ahlen Bahnhof: busradar-ID -> INSA EVA-ID
+    '9424069': '8000441', // Ahlen Bahnhof: busradar-ID -> DB EVA-ID
   };
 
   constructor() {
     // Bus-Client: DB Busradar NRW (db-regio.hafas.de) - für Busse
     this.busClient = createClient(nrwProfile, 'prasco-transit-v1');
-    // Zug-Client: INSA (reiseauskunft.insa.de) - für RE, RB, S-Bahn
-    this.trainClient = createClient(insaProfile, 'prasco-transit-v1');
+    // Zug-Client: DB (Deutsche Bahn) - für RE, RB, S-Bahn, National Express
+    this.trainClient = createClient(dbProfile, 'prasco-transit-v1');
     
     // Standard-Konfiguration
     this.config = {
