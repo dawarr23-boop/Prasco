@@ -89,6 +89,7 @@ export const registerDevice = async (
       identifier: uniqueIdentifier,
       description: `Automatisch registriert: ${deviceModel || 'Unbekanntes Gerät'}`,
       isActive: true,
+      organizationId: 1, // Standard-Organisation
       serialNumber,
       macAddress: macAddress || null,
       deviceToken,
