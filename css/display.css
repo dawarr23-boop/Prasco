@@ -430,6 +430,10 @@ body {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   max-height: 100%;
+  /* GPU-Compositing-Layer: verhindert Ruckeln bei CSS-Animationen auf Android TV */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Sanftes Einblenden beim ersten Laden – NUR wenn kein Blend-Effekt aktiv */
@@ -1022,12 +1026,14 @@ body {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
   animation-duration: 0.55s;
+  will-change: transform, opacity;
 }
 
 .blend-transition-out {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
   animation-duration: 0.45s;
+  will-change: transform, opacity;
 }
 
 /* transitions-enabled überschreibt nichts mehr – bleibt für fadeIn-Guard */

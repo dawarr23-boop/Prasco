@@ -1,11 +1,15 @@
 package net.prasco.display.tv
 
 import android.annotation.SuppressLint
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.Process
 import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.webkit.*
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentActivity
 
 /**
@@ -43,6 +47,9 @@ class MainActivity : FragmentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Rendering-Thread auf höchste Display-Priorität setzen
+        Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY)
         
         // TV Fullscreen-Modus
         setupTVFullscreen()
@@ -91,6 +98,17 @@ class MainActivity : FragmentActivity() {
         webView.webViewClient = PrascoWebViewClient()
         webView.webChromeClient = WebChromeClient()
         
+        // Schwarzer Hintergrund – verhindert weißes Aufblitzen zwischen Animationen
+        webView.setBackgroundColor(Color.BLACK)
+        
+        // Hardware-Layer für GPU-Compositing (CSS-Animationen laufen auf GPU)
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        
+        // Renderer-Priorität: WICHTIG bleibt auch im Hintergrund aktiv
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, true)
+        }
+        
         // WebView Einstellungen
         val settings = webView.settings
         
@@ -104,7 +122,7 @@ class MainActivity : FragmentActivity() {
         // Media ohne User-Geste abspielen
         settings.mediaPlaybackRequiresUserGesture = false
         
-        // Cache-Modus
+        // Cache: Netzwerk bevorzugen, Cache als Fallback (weniger Ladezeit)
         settings.cacheMode = WebSettings.LOAD_DEFAULT
         
         // File Access
@@ -117,11 +135,16 @@ class MainActivity : FragmentActivity() {
         settings.builtInZoomControls = false
         settings.displayZoomControls = false
         
-        // Hardware-Beschleunigung für Videos
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        // Korrekter initialer Zoom für TV (100% = kein Zoom)
+        settings.initialScale = 100
         
-        // Rendering-Optimierung
+        // Rendering-Priorität maximieren
+        @Suppress("DEPRECATION")
         settings.setRenderPriority(WebSettings.RenderPriority.HIGH)
+        
+        // Sanftes Scrollen (hilft auch bei Animationen)
+        @Suppress("DEPRECATION")
+        settings.setEnableSmoothTransition(true)
     }
 
     /**
