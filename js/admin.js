@@ -1749,9 +1749,9 @@ async function loadPosts() {
                 <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
                   ${post.category ? `<span style="background: ${post.category.color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${post.category.icon || ''} ${post.category.name}</span>` : ''}
                   ${post.displayMode === 'all' 
-                    ? '<span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">📺 Alle Displays</span>' 
+                    ? '<span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Alle Displays</span>' 
                     : post.displays && post.displays.length > 0
-                      ? post.displays.map(d => `<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">📺 ${escapeHtml(d.name)}</span>`).join('')
+                      ? post.displays.map(d => `<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${escapeHtml(d.name)}</span>`).join('')
                       : '<span style="background: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">⚠ Keine Displays</span>'
                   }
                 </div>
@@ -3095,7 +3095,7 @@ async function loadDisplays() {
         <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
             <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Klicken zum Bearbeiten">
                 <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
-                <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">🔗 ${escapeHtml(display.identifier)}</p>
+                <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
                 ${deviceInfo}
                 <p style="font-size: 0.8em; margin-top: 0.4rem;">
@@ -3103,7 +3103,7 @@ async function loadDisplays() {
                   ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
                 </p>
                 <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
-                  📺 Display-URL: <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                  Display-URL: <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
                 </p>
             </div>
             <div class="list-item-actions">
@@ -5963,7 +5963,7 @@ async function searchWeatherLocation() {
            data-name="${loc.name}" 
            style="padding: 0.75rem; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.1s;"
            onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''">
-        <strong>📍 ${loc.name}</strong>
+        <strong>▸ ${loc.name}</strong>
         <small style="color: #666; margin-left: 0.5rem;">${loc.admin1 || ''}, ${loc.country || ''} (${loc.latitude.toFixed(2)}, ${loc.longitude.toFixed(2)})</small>
       </div>
     `).join('');
