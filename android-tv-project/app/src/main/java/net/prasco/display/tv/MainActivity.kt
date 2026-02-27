@@ -8,8 +8,10 @@ import android.net.http.SslError
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.GestureDetector
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.webkit.*
@@ -67,6 +69,9 @@ class MainActivity : FragmentActivity() {
     private var reconnectRunnable: Runnable? = null
     private var statusPollRunnable: Runnable? = null
     private var heartbeatRunnable: Runnable? = null
+    private lateinit var gestureDetector: GestureDetector
+    private var lastOkPressTime = 0L
+    private val DOUBLE_PRESS_INTERVAL = 500L // ms
 
     // ============================================
     // Lifecycle
@@ -84,6 +89,22 @@ class MainActivity : FragmentActivity() {
 
         // WebView erstellen
         webView = WebView(this)
+
+        // Doppelklick/Doppeltap für Reload
+        gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                if (registrationManager.isAuthorized()) {
+                    webView.reload()
+                    Toast.makeText(this@MainActivity, "Seite wird neu geladen...", Toast.LENGTH_SHORT).show()
+                }
+                return true
+            }
+        })
+
+        webView.setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+            false
+        }
 
         // WebView konfigurieren
         setupWebView()
@@ -678,6 +699,17 @@ class MainActivity : FragmentActivity() {
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_DPAD_CENTER -> {
+                val now = System.currentTimeMillis()
+                if (now - lastOkPressTime < DOUBLE_PRESS_INTERVAL) {
+                    // Doppelklick OK → Reload
+                    lastOkPressTime = 0L
+                    if (registrationManager.isAuthorized()) {
+                        webView.reload()
+                        Toast.makeText(this, "Seite wird neu geladen...", Toast.LENGTH_SHORT).show()
+                    }
+                    return true
+                }
+                lastOkPressTime = now
                 injectKeyEvent(keyCode)
                 return true
             }
