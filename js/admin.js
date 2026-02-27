@@ -6042,4 +6042,200 @@ if (mediaUrlInput && durationInput && postTypeInput) {
 }
 
 
+// ============================================
+// KI-Assistent
+// ============================================
+let aiEnabled = false;
+
+async function loadAISettings() {
+  try {
+    const enabledSetting = await apiRequest('/settings/ai_enabled');
+    aiEnabled = enabledSetting?.data?.value === 'true';
+    
+    const checkbox = document.getElementById('ai-enabled');
+    const configDiv = document.getElementById('ai-config');
+    if (checkbox) checkbox.checked = aiEnabled;
+    if (configDiv) configDiv.style.display = aiEnabled ? 'block' : 'none';
+
+    // API-Key (nur Platzhalter anzeigen wenn vorhanden)
+    if (aiEnabled) {
+      const keySetting = await apiRequest('/settings/ai_openai_api_key');
+      const keyInput = document.getElementById('ai-api-key');
+      const statusDiv = document.getElementById('ai-key-status');
+      if (keySetting?.data?.value && keyInput) {
+        keyInput.placeholder = 'sk-...••••••• (gespeichert)';
+        if (statusDiv) statusDiv.innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
+      }
+    }
+
+    // AI toolbar im Post-Form anzeigen/verstecken
+    updateAIToolbarVisibility();
+  } catch (e) {
+    console.warn('AI-Einstellungen konnten nicht geladen werden:', e);
+  }
+}
+
+function updateAIToolbarVisibility() {
+  const toolbar = document.getElementById('ai-assistant');
+  if (!toolbar) return;
+  const contentType = document.getElementById('post-type')?.value;
+  // AI nur bei text und html anzeigen
+  const showAI = aiEnabled && (contentType === 'text' || contentType === 'html');
+  toolbar.style.display = showAI ? 'block' : 'none';
+}
+
+async function handleAIAction(action) {
+  const textarea = document.getElementById('post-content');
+  const statusDiv = document.getElementById('ai-status');
+  const statusText = document.getElementById('ai-status-text');
+  if (!textarea || !statusDiv || !statusText) return;
+
+  const text = textarea.value.trim();
+  
+  if (!text) {
+    if (action === 'generate') {
+      showNotification('Bitte Stichworte oder eine Beschreibung eingeben.', 'warning');
+    } else {
+      showNotification('Kein Text vorhanden. Bitte erst Text eingeben.', 'warning');
+    }
+    return;
+  }
+
+  // Status anzeigen
+  const actionLabels = {
+    generate: 'KI generiert Text...',
+    improve: 'KI verbessert Text...',
+    shorten: 'KI kürzt Text...',
+    translate: 'KI übersetzt...'
+  };
+
+  statusDiv.style.display = 'flex';
+  statusDiv.className = 'ai-status';
+  statusText.textContent = actionLabels[action] || 'KI arbeitet...';
+
+  // Buttons deaktivieren
+  const buttons = document.querySelectorAll('.ai-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  try {
+    const body = { action, text };
+    if (action === 'translate') {
+      body.targetLanguage = document.getElementById('ai-target-language')?.value || 'Englisch';
+    }
+
+    const response = await apiRequest('/ai/generate', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    if (response?.result) {
+      // Vorherigen Text sichern für Undo
+      textarea.dataset.previousContent = textarea.value;
+      textarea.value = response.result;
+      
+      statusDiv.className = 'ai-status ai-success';
+      statusText.textContent = '✓ Fertig' + (response.tokensUsed ? ` (${response.tokensUsed} Tokens)` : '');
+      
+      // Status nach 3s ausblenden
+      setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+    } else {
+      throw new Error(response?.error || 'Keine Antwort erhalten');
+    }
+  } catch (error) {
+    const msg = error.message || error.error || 'Unbekannter Fehler';
+    statusDiv.className = 'ai-status ai-error';
+    statusText.textContent = '✗ ' + msg;
+    setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+  } finally {
+    buttons.forEach(b => b.disabled = false);
+  }
+}
+
+async function saveAISettings() {
+  try {
+    const enabled = document.getElementById('ai-enabled')?.checked || false;
+    const apiKeyInput = document.getElementById('ai-api-key');
+    const apiKey = apiKeyInput?.value?.trim();
+
+    // Enabled-Setting speichern
+    await apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify({
+        key: 'ai_enabled',
+        value: String(enabled),
+        type: 'boolean',
+        category: 'ai',
+        description: 'KI-Assistent aktiviert',
+      }),
+    });
+
+    // API-Key nur speichern wenn eingegeben (nicht den Platzhalter)
+    if (apiKey && apiKey.startsWith('sk-')) {
+      await apiRequest('/settings', {
+        method: 'PUT',
+        body: JSON.stringify({
+          key: 'ai_openai_api_key',
+          value: apiKey,
+          type: 'string',
+          category: 'ai',
+          description: 'OpenAI API Key',
+        }),
+      });
+      // Input leeren und Platzhalter aktualisieren
+      apiKeyInput.value = '';
+      apiKeyInput.placeholder = 'sk-...••••••• (gespeichert)';
+      document.getElementById('ai-key-status').innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
+    }
+
+    aiEnabled = enabled;
+    updateAIToolbarVisibility();
+    showNotification('KI-Einstellungen gespeichert', 'success');
+  } catch (error) {
+    showNotification('Fehler beim Speichern: ' + (error.message || error), 'error');
+  }
+}
+
+function initAIEventListeners() {
+  // Toggle AI config anzeigen
+  const aiCheckbox = document.getElementById('ai-enabled');
+  if (aiCheckbox) {
+    aiCheckbox.addEventListener('change', () => {
+      const configDiv = document.getElementById('ai-config');
+      if (configDiv) configDiv.style.display = aiCheckbox.checked ? 'block' : 'none';
+    });
+  }
+
+  // Save button
+  document.getElementById('saveAISettings')?.addEventListener('click', saveAISettings);
+
+  // AI action buttons (delegiert)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ai-btn');
+    if (!btn || btn.disabled) return;
+    const action = btn.dataset.action;
+    if (action) handleAIAction(action);
+  });
+
+  // Content type change → toolbar visibility aktualisieren
+  const postType = document.getElementById('post-type');
+  if (postType) {
+    postType.addEventListener('change', () => updateAIToolbarVisibility());
+  }
+}
+
+// AI settings laden beim Settings-Section-Besuch
+let aiSettingsLoaded = false;
+document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
+  if (!aiSettingsLoaded) {
+    setTimeout(loadAISettings, 150);
+    aiSettingsLoaded = true;
+  }
+});
+
+// Init on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  initAIEventListeners();
+  // Initial AI status laden (für Post-Form)
+  loadAISettings();
+});
 

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PRASCO Admin Dashboard - Digitales Schwarzes Brett</title>
-    <link rel="stylesheet" href="/css/admin.css?v=3.2" />
+    <link rel="stylesheet" href="/css/admin.css?v=3.3" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -257,6 +257,37 @@
                     </span>
                   </label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
+                  <!-- KI-Assistent -->
+                  <div id="ai-assistant" class="ai-assistant" style="display: none;">
+                    <div class="ai-toolbar">
+                      <button type="button" class="ai-btn" data-action="generate" title="Text aus Stichworten generieren">
+                        <span class="ai-btn-icon">&#9998;</span> Generieren
+                      </button>
+                      <button type="button" class="ai-btn" data-action="improve" title="Bestehenden Text verbessern">
+                        <span class="ai-btn-icon">&#10038;</span> Verbessern
+                      </button>
+                      <button type="button" class="ai-btn" data-action="shorten" title="Text kürzen">
+                        <span class="ai-btn-icon">&#9986;</span> Kürzen
+                      </button>
+                      <button type="button" class="ai-btn ai-btn-translate" data-action="translate" title="Text übersetzen">
+                        <span class="ai-btn-icon">&#127760;</span> Übersetzen
+                        <select id="ai-target-language" class="ai-lang-select" onclick="event.stopPropagation()">
+                          <option value="Deutsch">DE</option>
+                          <option value="Englisch" selected>EN</option>
+                          <option value="Französisch">FR</option>
+                          <option value="Spanisch">ES</option>
+                          <option value="Italienisch">IT</option>
+                          <option value="Türkisch">TR</option>
+                          <option value="Polnisch">PL</option>
+                          <option value="Arabisch">AR</option>
+                        </select>
+                      </button>
+                    </div>
+                    <div id="ai-status" class="ai-status" style="display: none;">
+                      <span class="ai-spinner"></span>
+                      <span id="ai-status-text">KI denkt nach...</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="form-group" id="upload-section" style="display: none;">
@@ -1240,6 +1271,33 @@
               </div>
             </div>
 
+            <!-- KI-Assistent Einstellungen -->
+            <div class="settings-card">
+              <h3><span class="settings-icon">&#9670;</span> KI-Assistent</h3>
+              <p class="settings-description">
+                Nutzen Sie KI-Unterstützung beim Erstellen von Beiträgen: Texte generieren, verbessern, kürzen oder übersetzen. Verwendet OpenAI GPT-4o-mini.
+              </p>
+              <div class="settings-form">
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="ai-enabled" />
+                    <span>KI-Assistent aktivieren</span>
+                  </label>
+                </div>
+                <div id="ai-config" style="display: none;">
+                  <div class="form-group">
+                    <label for="ai-api-key">OpenAI API-Key</label>
+                    <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off" />
+                    <small style="color: #666;">Erhältlich unter <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #58585a;">platform.openai.com/api-keys</a></small>
+                  </div>
+                  <div id="ai-key-status" style="margin-bottom: 1rem;"></div>
+                </div>
+                <button class="btn btn-primary" id="saveAISettings">
+                  Einstellungen speichern
+                </button>
+              </div>
+            </div>
+
             <!-- SSO Einstellungen (nur für Super-Admin) -->
             <div id="sso-settings-section" class="settings-card" style="display: none">
               <h3>
@@ -1610,6 +1668,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=3.1"></script>
+    <script src="/js/admin.js?v=3.2"></script>
   </body>
 </html>
