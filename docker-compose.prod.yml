@@ -22,6 +22,7 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-refresh-secret}
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_pw_here}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@prasco.net}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
       DB_TIMETABLES_CLIENT_ID: ${DB_TIMETABLES_CLIENT_ID:-3650a67fa72275b1b7265168bbd3cf50}
@@ -34,6 +35,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1500M
+        reservations:
+          memory: 256M
     healthcheck:
       test:
         [
@@ -58,6 +66,11 @@ services:
       POSTGRES_DB: bulletin_board
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -68,9 +81,14 @@ services:
     image: redis:7-alpine
     container_name: prasco-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_pw_here}
     volumes:
       - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
