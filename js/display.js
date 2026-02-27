@@ -46,6 +46,8 @@ let displaySettings = {
   defaultDuration: 60, // Standard: 60 Sekunden
   blendEffectsEnabled: true, // Standard: Blend-Effekte aktiviert
   transitionsExternalOnly: false, // Standard: Transitions auf allen Displays
+  liveDataIntervalMinutes: 5, // Standard: Live-Daten alle 5 Minuten
+  liveDataSlideDuration: 20, // Standard: 20 Sekunden pro Live-Slide
 };
 
 // Prüfe ob dieses Display extern ist (nicht localhost)
@@ -260,8 +262,8 @@ function shouldInsertLiveDataWidget() {
   if (!isLiveDataScheduled()) return null;
   const cats = getActiveLiveCategories();
   if (cats.length === 0) return null;
-  // Jede Kategorie 2× pro Stunde: Interval = 60 / (2 × N) Minuten
-  const intervalMs = Math.round(30 / cats.length) * 60 * 1000;
+  // Jede Kategorie im konfigurierten Interval einstreuen
+  const intervalMs = displaySettings.liveDataIntervalMinutes * 60 * 1000;
   if (Date.now() - liveDataState.lastInsertTime >= intervalMs) {
     return cats[liveDataState.nextCategoryIdx % cats.length];
   }
@@ -855,8 +857,8 @@ async function showLiveDataWidget(categoryFilter) {
 
   const now = new Date();
   const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  // Interval dynamisch: 2× pro Stunde pro Kategorie
-  const intervalMin = cats.length > 0 ? Math.round(30 / cats.length) : 20;
+  // Interval aus Einstellungen
+  const intervalMin = displaySettings.liveDataIntervalMinutes;
 
   // Sammle die Slides
   const slides = [];
@@ -958,7 +960,7 @@ async function showLiveDataWidget(categoryFilter) {
         liveDataState.isWidgetActive = false;
         nextPost(); // nextPost() übernimmt eigenen Blend-Übergang
       }
-    }, 30000);
+    }, displaySettings.liveDataSlideDuration * 1000);
   }
 
   // Erster Slide direkt zeigen (Blend wird beim Eintritt via nextPost() gemacht)
@@ -988,6 +990,12 @@ async function loadDisplaySettings() {
       }
       if (settings['display.transitionsExternalOnly'] !== undefined) {
         displaySettings.transitionsExternalOnly = (settings['display.transitionsExternalOnly'] === 'true' || settings['display.transitionsExternalOnly'] === true);
+      }
+      if (settings['display.liveDataIntervalMinutes'] !== undefined) {
+        displaySettings.liveDataIntervalMinutes = parseInt(settings['display.liveDataIntervalMinutes']) || 5;
+      }
+      if (settings['display.liveDataSlideDuration'] !== undefined) {
+        displaySettings.liveDataSlideDuration = parseInt(settings['display.liveDataSlideDuration']) || 20;
       }
       
       console.log('Display-Einstellungen geladen:', displaySettings);

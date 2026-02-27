@@ -4331,13 +4331,17 @@ window.addEventListener('load', async () => {
       const defaultDuration = document.getElementById('default-duration');
       const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
       const transitionsExternalOnly = document.getElementById('transitions-external-only');
+      const liveDataInterval = document.getElementById('live-data-interval');
+      const liveDataSlideDuration = document.getElementById('live-data-slide-duration');
       
       if (refreshInterval && defaultDuration && blendEffectsEnabled && transitionsExternalOnly) {
         const settingsArray = [
           { key: 'display.refreshInterval', value: parseInt(refreshInterval.value) || 5 },
           { key: 'display.defaultDuration', value: parseInt(defaultDuration.value) || 10 },
           { key: 'display.blendEffectsEnabled', value: blendEffectsEnabled.checked ? 'true' : 'false' },
-          { key: 'display.transitionsExternalOnly', value: transitionsExternalOnly.checked ? 'true' : 'false' }
+          { key: 'display.transitionsExternalOnly', value: transitionsExternalOnly.checked ? 'true' : 'false' },
+          { key: 'display.liveDataIntervalMinutes', value: parseInt(liveDataInterval?.value) || 5 },
+          { key: 'display.liveDataSlideDuration', value: parseInt(liveDataSlideDuration?.value) || 20 }
         ];
         
         console.log('💾 Speichere Display-Einstellungen (Array):', settingsArray);
@@ -4406,7 +4410,9 @@ window.addEventListener('load', async () => {
           refreshInterval: data['display.refreshInterval'],
           defaultDuration: data['display.defaultDuration'],
           blendEffectsEnabled: data['display.blendEffectsEnabled'],
-          transitionsExternalOnly: data['display.transitionsExternalOnly']
+          transitionsExternalOnly: data['display.transitionsExternalOnly'],
+          liveDataIntervalMinutes: data['display.liveDataIntervalMinutes'],
+          liveDataSlideDuration: data['display.liveDataSlideDuration']
         };
       } else {
         // Fallback zu localStorage
@@ -4433,6 +4439,14 @@ window.addEventListener('load', async () => {
       }
       if (transitionsExternalOnly && settings.transitionsExternalOnly !== undefined) {
         transitionsExternalOnly.checked = (settings.transitionsExternalOnly === 'true' || settings.transitionsExternalOnly === true);
+      }
+      const liveDataIntervalEl = document.getElementById('live-data-interval');
+      const liveDataSlideDurationEl = document.getElementById('live-data-slide-duration');
+      if (liveDataIntervalEl && settings.liveDataIntervalMinutes) {
+        liveDataIntervalEl.value = settings.liveDataIntervalMinutes;
+      }
+      if (liveDataSlideDurationEl && settings.liveDataSlideDuration) {
+        liveDataSlideDurationEl.value = settings.liveDataSlideDuration;
       }
     } catch (error) {
       console.error('Fehler beim Laden der Display-Einstellungen:', error);

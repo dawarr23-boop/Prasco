@@ -1184,6 +1184,30 @@
                   </small>
                 </div>
 
+                <div class="form-group">
+                  <label for="live-data-interval">Live-Daten Intervall (Minuten)
+                    <span class="info-tooltip-wrapper">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        Wie häufig Live-Daten (ÖPNV, Wetter, Nachrichten) zwischen den Beiträgen eingeblendet werden. Empfohlen: <strong>5 Minuten</strong>.
+                      </div>
+                    </span>
+                  </label>
+                  <input type="number" id="live-data-interval" value="5" min="1" max="60" />
+                </div>
+
+                <div class="form-group">
+                  <label for="live-data-slide-duration">Live-Daten Slide-Dauer (Sekunden)
+                    <span class="info-tooltip-wrapper">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        Wie lange jeder Live-Daten-Slide angezeigt wird (ÖPNV, Wetter, Nachrichten). Empfohlen: <strong>20 Sekunden</strong>.
+                      </div>
+                    </span>
+                  </label>
+                  <input type="number" id="live-data-slide-duration" value="20" min="5" max="120" />
+                </div>
+
                 <button class="btn btn-primary" id="saveDisplaySettings">
                   Einstellungen speichern
                 </button>
