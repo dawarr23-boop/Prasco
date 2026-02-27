@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PRASCO Admin Dashboard - Digitales Schwarzes Brett</title>
-    <link rel="stylesheet" href="/css/admin.css?v=2.9" />
+    <link rel="stylesheet" href="/css/admin.css?v=3.0" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -131,7 +131,23 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="post-type" data-translate="form.type">Typ *</label>
+                    <label for="post-type" data-translate="form.type">Typ *
+                      <span class="info-tooltip-wrapper tooltip-below">
+                        <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                        <div class="info-tooltip-content">
+                          <strong>Beitragstypen:</strong>
+                          <ul>
+                            <li><strong>Text</strong> – Einfache Textnachricht (Zeilenumbrüche werden übernommen)</li>
+                            <li><strong>Bild</strong> – Bild-Upload (JPG, PNG, GIF, WebP)</li>
+                            <li><strong>Video</strong> – Video-Datei oder YouTube/Vimeo-URL</li>
+                            <li><strong>HTML</strong> – Freie HTML-Gestaltung mit CSS</li>
+                            <li><strong>PowerPoint</strong> – PPTX wird als Folien angezeigt</li>
+                            <li><strong>PDF</strong> – PDF-Dokument seitenweise</li>
+                            <li><strong>Word</strong> – DOCX wird konvertiert</li>
+                          </ul>
+                        </div>
+                      </span>
+                    </label>
                     <select id="post-type" name="content_type" required>
                       <option value="text" data-translate="type.text">📝 Text</option>
                       <option value="image" data-translate="type.image">🖼️ Bild</option>
@@ -226,7 +242,20 @@
                 </style>
 
                 <div class="form-group">
-                  <label for="post-content" data-translate="form.content">Inhalt</label>
+                  <label for="post-content" data-translate="form.content">Inhalt
+                    <span class="info-tooltip-wrapper">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        <strong>Textformatierung:</strong>
+                        <ul>
+                          <li><code>Enter</code> = Nächste Zeile / Absatz</li>
+                          <li>Bei Typ <strong>Text</strong>: Einfacher Text ohne HTML. Zeilenumbrüche werden automatisch übernommen.</li>
+                          <li>Bei Typ <strong>HTML</strong>: Sie können HTML-Tags verwenden, z.B. <code>&lt;br&gt;</code> für Zeilenumbruch, <code>&lt;b&gt;</code> für fett, <code>&lt;i&gt;</code> für kursiv.</li>
+                          <li>Bilder/Videos: Hier die Beschreibung eintragen. Die Mediendatei wird separat hochgeladen.</li>
+                        </ul>
+                      </div>
+                    </span>
+                  </label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
                 </div>
 
@@ -298,7 +327,14 @@
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="display-duration" data-translate="form.displayDuration">Anzeigedauer (Sek.)</label>
+                    <label for="display-duration" data-translate="form.displayDuration">Anzeigedauer (Sek.)
+                      <span class="info-tooltip-wrapper">
+                        <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                        <div class="info-tooltip-content">
+                          Wie lange dieser Beitrag auf dem Display angezeigt wird, bevor zum nächsten gewechselt wird. Standard: 60 Sekunden. Bei Videos wird automatisch die Videolänge verwendet.
+                        </div>
+                      </span>
+                    </label>
                     <input
                       type="number"
                       id="display-duration"
@@ -309,7 +345,14 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="priority" data-translate="form.priority">Priorität (0-100)</label>
+                    <label for="priority" data-translate="form.priority">Priorität (0-100)
+                      <span class="info-tooltip-wrapper">
+                        <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                        <div class="info-tooltip-content">
+                          Bestimmt die Reihenfolge der Beiträge. <strong>Höhere Zahlen = häufiger angezeigt</strong>. Beiträge mit Priorität 0 werden normal rotiert. Wert 100 = höchste Priorität.
+                        </div>
+                      </span>
+                    </label>
                     <input type="number" id="priority" name="priority" value="0" min="0" max="100" />
                   </div>
 
@@ -343,7 +386,14 @@
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="start-date" data-translate="form.startDate">Start-Datum</label>
+                    <label for="start-date" data-translate="form.startDate">Start-Datum
+                      <span class="info-tooltip-wrapper">
+                        <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                        <div class="info-tooltip-content">
+                          <strong>Zeitsteuerung:</strong> Beitrag wird erst ab diesem Datum/Uhrzeit auf dem Display angezeigt. Leer lassen = sofort sichtbar. Zusammen mit End-Datum können Sie zeitlich begrenzte Beiträge planen.
+                        </div>
+                      </span>
+                    </label>
                     <input type="datetime-local" id="start-date" name="start_date" />
                   </div>
 
@@ -592,7 +642,14 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="display-identifier">Identifier *</label>
+                  <label for="display-identifier">Identifier *
+                    <span class="info-tooltip-wrapper tooltip-below">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        Eindeutiger technischer Name für die Display-URL. Wird in der Adressleiste verwendet: <code>/display/mein-display</code>. Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche.
+                      </div>
+                    </span>
+                  </label>
                   <input 
                     type="text" 
                     id="display-identifier" 
@@ -1053,12 +1110,26 @@
               <h3><span class="settings-icon">&#9881;</span> Display-Einstellungen</h3>
               <div class="settings-form">
                 <div class="form-group">
-                  <label for="refresh-interval">Auto-Refresh Intervall (Minuten)</label>
+                  <label for="refresh-interval">Auto-Refresh Intervall (Minuten)
+                    <span class="info-tooltip-wrapper">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        Wie oft das Display neue Beiträge vom Server abruft. Niedrigere Werte = schnellere Aktualisierung, aber mehr Netzwerkverkehr. Empfohlen: <strong>5 Minuten</strong>.
+                      </div>
+                    </span>
+                  </label>
                   <input type="number" id="refresh-interval" value="5" min="1" />
                 </div>
 
                 <div class="form-group">
-                  <label for="default-duration">Standard Anzeigedauer (Sekunden)</label>
+                  <label for="default-duration">Standard Anzeigedauer (Sekunden)
+                    <span class="info-tooltip-wrapper">
+                      <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                      <div class="info-tooltip-content">
+                        Fallback-Anzeigedauer für Beiträge, bei denen keine individuelle Dauer eingestellt ist. Gilt für alle Displays.
+                      </div>
+                    </span>
+                  </label>
                   <input type="number" id="default-duration" value="10" min="1" />
                 </div>
 
@@ -1539,6 +1610,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=2.9"></script>
+    <script src="/js/admin.js?v=3.0"></script>
   </body>
 </html>

@@ -5005,6 +5005,39 @@ document.addEventListener('DOMContentLoaded', () => {
       if (card) card.classList.toggle('checked', e.target.checked);
     }
   });
+
+  // ============================================
+  // Info-Tooltip (ⓘ) Toggle-Logik
+  // ============================================
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.info-tooltip-btn');
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const wrapper = btn.closest('.info-tooltip-wrapper');
+      const wasActive = wrapper.classList.contains('active');
+      // Alle anderen schließen
+      document.querySelectorAll('.info-tooltip-wrapper.active').forEach(w => w.classList.remove('active'));
+      if (!wasActive) {
+        wrapper.classList.add('active');
+        // Prüfe ob Tooltip oben aus dem Viewport ragt
+        const content = wrapper.querySelector('.info-tooltip-content');
+        if (content) {
+          requestAnimationFrame(() => {
+            const rect = content.getBoundingClientRect();
+            if (rect.top < 8) {
+              wrapper.classList.add('tooltip-below');
+            }
+          });
+        }
+      }
+      return;
+    }
+    // Klick außerhalb → alle schließen
+    if (!e.target.closest('.info-tooltip-content')) {
+      document.querySelectorAll('.info-tooltip-wrapper.active').forEach(w => w.classList.remove('active'));
+    }
+  });
 });
 
 console.log('Admin Dashboard geladen (API-Modus)');
