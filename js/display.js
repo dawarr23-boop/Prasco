@@ -95,6 +95,7 @@ let globalMusicSettings = {
 let liveDataState = {
   transitSettings: null,
   trafficSettings: null,
+  weatherSettings: null,
   lastInsertTime: 0,
   widgetTimer: null,
   isWidgetActive: false,
@@ -103,13 +104,13 @@ let liveDataState = {
 // Lade Live-Daten-Einstellungen vom Backend
 async function loadLiveDataDisplaySettings() {
   try {
-    const [transitRes, trafficRes] = await Promise.all([
+    const [transitRes, trafficRes, weatherRes] = await Promise.all([
       fetch('/api/settings?category=transit'),
       fetch('/api/settings?category=traffic'),
+      fetch('/api/settings?category=weather'),
     ]);
     if (transitRes.ok) {
       const data = await transitRes.json();
-      // API gibt flaches Objekt zurück: { "transit.enabled": "true", ... }
       if (data && typeof data === 'object') {
         const s = {};
         Object.entries(data).forEach(([key, value]) => { s[key] = String(value); });
@@ -124,6 +125,14 @@ async function loadLiveDataDisplaySettings() {
         liveDataState.trafficSettings = s;
       }
     }
+    if (weatherRes.ok) {
+      const data = await weatherRes.json();
+      if (data && typeof data === 'object') {
+        const s = {};
+        Object.entries(data).forEach(([key, value]) => { s[key] = String(value); });
+        liveDataState.weatherSettings = s;
+      }
+    }
   } catch (e) {
     console.warn('Live-Daten-Einstellungen nicht ladbar:', e);
   }
@@ -133,16 +142,14 @@ async function loadLiveDataDisplaySettings() {
 function isLiveDataScheduled() {
   const ts = liveDataState.transitSettings;
   const tr = liveDataState.trafficSettings;
-  if (!ts && !tr) return false;
+  const ws = liveDataState.weatherSettings;
+  if (!ts && !tr && !ws) return false;
 
-  // Per-Display Einstellung prüfen: Wenn das aktuelle Display Transit/Traffic deaktiviert hat
-  const displayAllowsTransit = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : true;
-  const displayAllowsTraffic = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : true;
-
-  // Prüfe ob Display in der displayIds-Liste der Settings enthalten ist
+  // Per-Display Einstellung prüfen
   const currentDisplayId = currentDisplayInfo ? String(currentDisplayInfo.id) : null;
   let transitDisplayAllowed = false;
   let trafficDisplayAllowed = false;
+  let weatherEnabled = false;
   if (currentDisplayId) {
     if (ts?.['transit.displayIds']) {
       const transitIds = ts['transit.displayIds'].split(',').map(id => id.trim()).filter(id => id);
@@ -152,20 +159,28 @@ function isLiveDataScheduled() {
       const trafficIds = tr['traffic.displayIds'].split(',').map(id => id.trim()).filter(id => id);
       trafficDisplayAllowed = trafficIds.includes(currentDisplayId);
     }
+    // Wetter: wenn enabled und Display in der Liste
+    if (ws?.['weather.enabled'] === 'true') {
+      if (ws['weather.displayIds']) {
+        const weatherIds = ws['weather.displayIds'].split(',').map(id => id.trim()).filter(id => id);
+        weatherEnabled = weatherIds.includes(currentDisplayId);
+      } else {
+        weatherEnabled = true; // Wenn keine Display-Einschränkung, auf allen anzeigen
+      }
+    }
   } else {
-    // Kein Display ausgewählt (z.B. kein Identifier) → Fallback auf per-Display Flags
     transitDisplayAllowed = currentDisplayInfo ? currentDisplayInfo.showTransitData !== false : false;
     trafficDisplayAllowed = currentDisplayInfo ? currentDisplayInfo.showTrafficData !== false : false;
+    weatherEnabled = ws?.['weather.enabled'] === 'true';
   }
 
   const transitEnabled = ts?.['transit.enabled'] === 'true' && transitDisplayAllowed;
   const trafficEnabled = tr?.['traffic.enabled'] === 'true' && trafficDisplayAllowed;
-  if (!transitEnabled && !trafficEnabled) return false;
+  if (!transitEnabled && !trafficEnabled && !weatherEnabled) return false;
 
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Lies Zeitplan aus Settings (Default: ganztägig 00:00 - 23:59)
   const startStr = ts?.['transit.scheduleStart'] || tr?.['traffic.scheduleStart'] || '00:00';
   const endStr = ts?.['transit.scheduleEnd'] || tr?.['traffic.scheduleEnd'] || '23:59';
 
@@ -349,6 +364,97 @@ async function renderTrafficWidget() {
   }
 }
 
+// Erstelle Wetter-Widget HTML (Vollbild-Slide)
+async function renderWeatherWidget() {
+  const ws = liveDataState.weatherSettings;
+  if (!ws || ws['weather.enabled'] !== 'true') return '';
+
+  const lat = ws['weather.latitude'];
+  const lon = ws['weather.longitude'];
+  const locationName = ws['weather.locationName'] || 'Standort';
+
+  if (!lat || !lon) return '';
+
+  try {
+    const response = await fetch(`/api/weather/current?lat=${lat}&lon=${lon}&name=${encodeURIComponent(locationName)}`);
+    if (!response.ok) return '';
+    const data = await response.json();
+    if (!data.success || !data.data) return '';
+
+    const w = data.data;
+    const c = w.current;
+    const showForecast = ws['weather.showForecast'] !== 'false';
+    const forecastDays = parseInt(ws['weather.forecastDays'] || '5', 10);
+
+    // Windrichtung als Text
+    const windDirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+    const windDirText = windDirs[Math.round(c.windDirection / 45) % 8] || '';
+
+    // Aktuelles Wetter
+    let html = `<div class="weather-fullscreen">
+      <div class="weather-current">
+        <div class="weather-main">
+          <span class="weather-icon-large">${c.icon}</span>
+          <div class="weather-temp-block">
+            <span class="weather-temp">${c.temperature}°C</span>
+            <span class="weather-desc">${c.description}</span>
+          </div>
+        </div>
+        <div class="weather-details">
+          <div class="weather-detail-item">
+            <span class="weather-detail-icon">🌡️</span>
+            <span class="weather-detail-label">Gefühlt</span>
+            <span class="weather-detail-value">${c.feelsLike}°C</span>
+          </div>
+          <div class="weather-detail-item">
+            <span class="weather-detail-icon">💧</span>
+            <span class="weather-detail-label">Luftfeuchte</span>
+            <span class="weather-detail-value">${c.humidity}%</span>
+          </div>
+          <div class="weather-detail-item">
+            <span class="weather-detail-icon">💨</span>
+            <span class="weather-detail-label">Wind</span>
+            <span class="weather-detail-value">${c.windSpeed} km/h ${windDirText}</span>
+          </div>
+          <div class="weather-detail-item">
+            <span class="weather-detail-icon">🔽</span>
+            <span class="weather-detail-label">Luftdruck</span>
+            <span class="weather-detail-value">${c.pressure} hPa</span>
+          </div>
+          ${c.uvIndex !== undefined ? `<div class="weather-detail-item">
+            <span class="weather-detail-icon">☀️</span>
+            <span class="weather-detail-label">UV-Index</span>
+            <span class="weather-detail-value">${c.uvIndex}</span>
+          </div>` : ''}
+        </div>
+      </div>`;
+
+    // Vorhersage
+    if (showForecast && w.forecast && w.forecast.length > 0) {
+      const days = w.forecast.slice(0, forecastDays);
+      html += `<div class="weather-forecast">
+        ${days.map((day, i) => `
+          <div class="weather-forecast-day ${i === 0 ? 'today' : ''}">
+            <span class="forecast-weekday">${i === 0 ? 'Heute' : day.weekday}</span>
+            <span class="forecast-icon">${day.icon}</span>
+            <span class="forecast-temps">
+              <span class="forecast-max">${day.tempMax}°</span>
+              <span class="forecast-min">${day.tempMin}°</span>
+            </span>
+            <span class="forecast-rain">${day.precipProbability}% 💧</span>
+          </div>
+        `).join('')}
+      </div>`;
+    }
+
+    html += '</div>';
+    return html;
+  } catch (e) {
+    console.warn('Wetter-Widget Fehler:', e);
+    return '';
+  }
+}
+
 // Zeige Live-Daten-Widget als separate Slides (ÖPNV + Verkehr)
 async function showLiveDataWidget() {
   liveDataState.lastInsertTime = Date.now();
@@ -366,12 +472,13 @@ async function showLiveDataWidget() {
   container.className = 'post type-livedata';
   container.innerHTML = '<div class="live-widget-loading"><div class="spinner"></div><p>Lade Live-Daten...</p></div>';
 
-  const [transitHtml, trafficHtml] = await Promise.all([
+  const [transitHtml, trafficHtml, weatherHtml] = await Promise.all([
     renderTransitWidget(),
     renderTrafficWidget(),
+    renderWeatherWidget(),
   ]);
 
-  if (!transitHtml && !trafficHtml) {
+  if (!transitHtml && !trafficHtml && !weatherHtml) {
     liveDataState.isWidgetActive = false;
     nextPost();
     return;
@@ -401,6 +508,17 @@ async function showLiveDataWidget() {
       icon: '🛣️',
       title: `Verkehrslage ${highways}`,
       content: trafficHtml,
+      timeStr,
+      intervalMin,
+    });
+  }
+
+  if (weatherHtml) {
+    const locationName = liveDataState.weatherSettings?.['weather.locationName'] || 'Wetter';
+    slides.push({
+      icon: '🌤️',
+      title: `Wetter ${locationName}`,
+      content: weatherHtml,
       timeStr,
       intervalMin,
     });

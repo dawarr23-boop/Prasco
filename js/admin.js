@@ -4971,6 +4971,8 @@ async function loadLiveDataSettings() {
   await loadTransitSettings();
   // Lade Traffic-Einstellungen
   await loadTrafficSettings();
+  // Lade Wetter-Einstellungen
+  await loadWeatherSettings();
   // Lade Autobahn-Liste
   await loadHighwayList();
   // Lade Cache-Stats
@@ -4984,7 +4986,7 @@ async function loadLiveDataSettings() {
 
 function populateLiveDataDisplays() {
   const displays = displaysCache || [];
-  const containers = ['transit-display-checkboxes', 'traffic-display-checkboxes'];
+  const containers = ['transit-display-checkboxes', 'traffic-display-checkboxes', 'weather-display-checkboxes'];
   containers.forEach(containerId => {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -4992,7 +4994,7 @@ function populateLiveDataDisplays() {
       container.innerHTML = '<p class="text-muted">Keine Displays vorhanden</p>';
       return;
     }
-    const prefix = containerId.startsWith('transit') ? 'transit' : 'traffic';
+    const prefix = containerId.startsWith('transit') ? 'transit' : (containerId.startsWith('weather') ? 'weather' : 'traffic');
     container.innerHTML = displays.map(d => `
       <label class="checkbox-label">
         <input type="checkbox" id="${prefix}-display-${d.id}" data-display-id="${d.id}" checked />
@@ -5115,6 +5117,49 @@ function initLiveDataEventListeners() {
       }
     });
   }
+
+  // Weather toggle
+  const weatherEnabled = document.getElementById('weather-enabled');
+  if (weatherEnabled) {
+    weatherEnabled.addEventListener('change', () => {
+      const config = document.getElementById('weather-config');
+      if (config) config.style.display = weatherEnabled.checked ? 'block' : 'none';
+    });
+  }
+
+  // Weather location search
+  const weatherSearchBtn = document.getElementById('weather-search-btn');
+  const weatherSearchInput = document.getElementById('weather-location-search');
+  if (weatherSearchBtn) {
+    weatherSearchBtn.addEventListener('click', () => searchWeatherLocation());
+  }
+  if (weatherSearchInput) {
+    weatherSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); searchWeatherLocation(); }
+    });
+  }
+
+  // Remove weather location
+  document.getElementById('weather-remove-location')?.addEventListener('click', () => {
+    document.getElementById('weather-selected-location').style.display = 'none';
+    document.getElementById('weather-location-name').textContent = '–';
+    document.getElementById('weather-location-coords').textContent = '';
+  });
+
+  // Weather save & preview
+  document.getElementById('saveWeatherSettings')?.addEventListener('click', saveWeatherSettings);
+  document.getElementById('previewWeatherData')?.addEventListener('click', previewWeatherData);
+
+  // Weather cache clear
+  document.getElementById('clearWeatherCache')?.addEventListener('click', async () => {
+    try {
+      await apiRequest('/weather/cache/clear', { method: 'POST' });
+      showNotification('Wetter-Cache geleert', 'success');
+      loadCacheStats();
+    } catch (e) {
+      showNotification('Fehler beim Leeren des Cache', 'error');
+    }
+  });
 }
 
 async function searchTransitStations() {
@@ -5582,16 +5627,236 @@ async function previewTrafficData() {
   }
 }
 
+// ============================================
+// Wetter-Einstellungen
+// ============================================
+
+async function loadWeatherSettings() {
+  try {
+    const response = await fetch('/api/settings?category=weather', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+    if (!response.ok) return;
+    const settings = await response.json();
+
+    const enabled = settings['weather.enabled'] === 'true' || settings['weather.enabled'] === true;
+    const enabledCheckbox = document.getElementById('weather-enabled');
+    if (enabledCheckbox) enabledCheckbox.checked = enabled;
+
+    const config = document.getElementById('weather-config');
+    if (config) config.style.display = enabled ? 'block' : 'none';
+
+    // Location
+    const lat = settings['weather.latitude'];
+    const lon = settings['weather.longitude'];
+    const name = settings['weather.locationName'];
+    if (lat && lon && name) {
+      const card = document.getElementById('weather-selected-location');
+      if (card) {
+        card.style.display = 'flex';
+        card.dataset.latitude = lat;
+        card.dataset.longitude = lon;
+      }
+      const nameEl = document.getElementById('weather-location-name');
+      if (nameEl) nameEl.textContent = name;
+      const coordsEl = document.getElementById('weather-location-coords');
+      if (coordsEl) coordsEl.textContent = `${lat}, ${lon}`;
+    }
+
+    // Forecast settings
+    const showForecast = document.getElementById('weather-show-forecast');
+    if (showForecast) showForecast.checked = settings['weather.showForecast'] !== 'false' && settings['weather.showForecast'] !== false;
+
+    const forecastDays = document.getElementById('weather-forecast-days');
+    if (forecastDays && settings['weather.forecastDays']) forecastDays.value = settings['weather.forecastDays'];
+
+    // Display checkboxes
+    if (settings['weather.displayIds']) {
+      const selectedIds = String(settings['weather.displayIds']).split(',').map(id => id.trim());
+      document.querySelectorAll('#weather-display-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = selectedIds.includes(cb.dataset.displayId);
+      });
+    }
+  } catch (error) {
+    console.warn('Wetter-Einstellungen konnten nicht geladen werden:', error);
+  }
+}
+
+async function saveWeatherSettings() {
+  const locationCard = document.getElementById('weather-selected-location');
+  const lat = locationCard?.dataset?.latitude || '';
+  const lon = locationCard?.dataset?.longitude || '';
+  const name = document.getElementById('weather-location-name')?.textContent || '';
+
+  const settings = {
+    'weather.enabled': document.getElementById('weather-enabled')?.checked ? 'true' : 'false',
+    'weather.latitude': lat,
+    'weather.longitude': lon,
+    'weather.locationName': name,
+    'weather.showForecast': document.getElementById('weather-show-forecast')?.checked ? 'true' : 'false',
+    'weather.forecastDays': document.getElementById('weather-forecast-days')?.value || '5',
+  };
+
+  // Ausgewählte Displays
+  const displayCheckboxes = document.querySelectorAll('#weather-display-checkboxes input[type="checkbox"]:checked');
+  settings['weather.displayIds'] = Array.from(displayCheckboxes).map(cb => cb.dataset.displayId).join(',');
+
+  try {
+    const response = await fetch('/api/settings/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({ settings })
+    });
+
+    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    showNotification('Wetter-Einstellungen gespeichert!', 'success');
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    showNotification('Fehler beim Speichern der Wetter-Einstellungen', 'error');
+  }
+}
+
+async function searchWeatherLocation() {
+  const input = document.getElementById('weather-location-search');
+  const query = input?.value?.trim();
+  if (!query || query.length < 2) {
+    showNotification('Bitte mindestens 2 Zeichen eingeben', 'warning');
+    return;
+  }
+
+  const resultsContainer = document.getElementById('weather-search-results');
+  resultsContainer.style.display = 'block';
+  resultsContainer.innerHTML = '<p class="text-muted">Suche...</p>';
+
+  try {
+    const data = await apiRequest(`/weather/geocode?q=${encodeURIComponent(query)}`);
+    if (!data.success || !data.data || data.data.length === 0) {
+      resultsContainer.innerHTML = '<p class="text-muted">Keine Orte gefunden.</p>';
+      return;
+    }
+
+    resultsContainer.innerHTML = data.data.map(loc => `
+      <div class="search-result-item" 
+           data-lat="${loc.latitude}" data-lon="${loc.longitude}" 
+           data-name="${loc.name}" 
+           style="padding: 0.75rem; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.1s;"
+           onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''">
+        <strong>📍 ${loc.name}</strong>
+        <small style="color: #666; margin-left: 0.5rem;">${loc.admin1 || ''}, ${loc.country || ''} (${loc.latitude.toFixed(2)}, ${loc.longitude.toFixed(2)})</small>
+      </div>
+    `).join('');
+
+    // Click handler
+    resultsContainer.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const lat = item.dataset.lat;
+        const lon = item.dataset.lon;
+        const name = item.dataset.name;
+
+        const card = document.getElementById('weather-selected-location');
+        card.style.display = 'flex';
+        card.dataset.latitude = lat;
+        card.dataset.longitude = lon;
+
+        document.getElementById('weather-location-name').textContent = name;
+        document.getElementById('weather-location-coords').textContent = `${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)}`;
+
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+      });
+    });
+  } catch (error) {
+    resultsContainer.innerHTML = `<p class="text-error">Fehler: ${error.message}</p>`;
+  }
+}
+
+async function previewWeatherData() {
+  const locationCard = document.getElementById('weather-selected-location');
+  const lat = locationCard?.dataset?.latitude;
+  const lon = locationCard?.dataset?.longitude;
+
+  if (!lat || !lon) {
+    showNotification('Bitte zuerst einen Ort auswählen', 'warning');
+    return;
+  }
+
+  const previewCard = document.getElementById('weather-preview-card');
+  const previewContent = document.getElementById('weather-preview-content');
+  previewCard.style.display = 'block';
+  previewContent.innerHTML = '<p class="text-muted">Lade Wetterdaten...</p>';
+
+  const name = document.getElementById('weather-location-name')?.textContent || 'Standort';
+  const forecastDays = document.getElementById('weather-forecast-days')?.value || 5;
+
+  try {
+    const data = await apiRequest(`/weather/current?lat=${lat}&lon=${lon}&name=${encodeURIComponent(name)}`);
+
+    if (!data.success || !data.data) {
+      previewContent.innerHTML = '<p class="text-muted">Keine Wetterdaten verfügbar.</p>';
+      return;
+    }
+
+    const w = data.data;
+    const c = w.current;
+    const windDirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+    const windDir = windDirs[Math.round(c.windDirection / 45) % 8] || '';
+
+    let html = `
+      <div style="padding: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <span style="font-size: 3rem;">${c.icon}</span>
+          <div>
+            <div style="font-size: 2rem; font-weight: 800;">${c.temperature}°C</div>
+            <div style="color: #666;">${c.description} · Gefühlt ${c.feelsLike}°C</div>
+          </div>
+          <div style="margin-left: auto; text-align: right; color: #666; font-size: 0.9rem;">
+            <div>💧 ${c.humidity}% · 💨 ${c.windSpeed} km/h ${windDir}</div>
+            <div>🔽 ${c.pressure} hPa · ☀️ UV ${c.uvIndex}</div>
+          </div>
+        </div>
+    `;
+
+    if (w.forecast && w.forecast.length > 0) {
+      html += `<div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">`;
+      w.forecast.slice(0, forecastDays).forEach((day, i) => {
+        html += `
+          <div style="flex: 1; min-width: 100px; background: ${i === 0 ? '#e8f0fe' : '#f8f9fa'}; border-radius: 8px; padding: 0.75rem; text-align: center;">
+            <div style="font-weight: 700;">${i === 0 ? 'Heute' : day.weekday}</div>
+            <div style="font-size: 1.8rem; margin: 0.3rem 0;">${day.icon}</div>
+            <div><strong>${day.tempMax}°</strong> <span style="color: #999;">${day.tempMin}°</span></div>
+            <div style="font-size: 0.8rem; color: #666;">💧 ${day.precipProbability}%</div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+    }
+
+    html += `</div>`;
+    previewContent.innerHTML = html;
+  } catch (error) {
+    previewContent.innerHTML = `<p class="text-error">Fehler: ${error.message || 'Konnte Wetterdaten nicht laden'}</p>`;
+    console.error('Weather preview error:', error);
+  }
+}
+
 async function loadCacheStats() {
   try {
-    const transitData = await apiRequest('/transit/cache/stats');
-    const trafficData = await apiRequest('/traffic/cache/stats');
+    const [transitData, trafficData, weatherData] = await Promise.all([
+      apiRequest('/transit/cache/stats'),
+      apiRequest('/traffic/cache/stats'),
+      apiRequest('/weather/cache/stats').catch(() => ({ data: { entries: 0 } })),
+    ]);
     
     const transitCount = document.getElementById('transit-cache-count');
     const trafficCount = document.getElementById('traffic-cache-count');
+    const weatherCount = document.getElementById('weather-cache-count');
     
     if (transitCount) transitCount.textContent = `${transitData?.data?.keys || 0} Einträge`;
     if (trafficCount) trafficCount.textContent = `${trafficData?.data?.keys || 0} Einträge`;
+    if (weatherCount) weatherCount.textContent = `${weatherData?.data?.entries || 0} Einträge`;
   } catch (error) {
     console.warn('Cache-Stats konnten nicht geladen werden:', error);
   }

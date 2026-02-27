@@ -49,6 +49,7 @@ import youtubeRoutes from './routes/youtube';
 import displayRoutes from './routes/displays';
 import transitRoutes from './routes/transit';
 import trafficRoutes from './routes/traffic';
+import weatherRoutes from './routes/weather';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -304,6 +305,7 @@ app.use('/api/youtube', youtubeRoutes);
 app.use('/api/displays', displayRoutes);
 app.use('/api/transit', transitRoutes);
 app.use('/api/traffic', trafficRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {
