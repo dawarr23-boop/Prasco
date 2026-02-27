@@ -268,7 +268,7 @@ class TransitService {
           id: (stop.line || '').toLowerCase(),
           name: stop.line || 'Unknown',
           mode: 'train',
-          product: stop.category === 'NX' ? 'nationalExpress' : 'regional',
+          product: this.lineNameToProduct(stop.line || ''),
           productName: stop.category || 'RE',
         },
         direction: stop.dpPath?.split('|').pop() || 'Unknown',
@@ -382,6 +382,20 @@ class TransitService {
     const hour = parseInt(timeStr.slice(6, 8));
     const minute = parseInt(timeStr.slice(8, 10));
     return new Date(year, month, day, hour, minute);
+  }
+
+  /**
+   * Produkt-Typ anhand des Liniennamens bestimmen (Präfix-basiert).
+   * Unabhängig vom Betreiber / Operator-Kategorie.
+   */
+  private lineNameToProduct(lineName: string): string {
+    const n = lineName.toUpperCase();
+    if (n.startsWith('ICE') || n.startsWith('IC') || n.startsWith('EC') || n.startsWith('TGV')) return 'national-express';
+    if (n.startsWith('RE') || n.startsWith('IRE')) return 'regional-express';
+    if (n.startsWith('RB'))                        return 'regional';
+    if (n.startsWith('S'))                         return 'suburban';
+    if (n.startsWith('U'))                         return 'subway';
+    return 'regional'; // Fallback für unbekannte Zuglinien
   }
 
   /**

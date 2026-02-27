@@ -6,6 +6,35 @@ let currentIndex = 0;
 let autoRotateTimer = null;
 let rainRadarCleanup = null; // Cleanup-Funktion für Radar-Animation
 
+/**
+ * Normalisiert HAFAS/DB Produkt-Strings auf CSS-kompatible Klassen-Namen.
+ * Verschiedene Datenquellen (INSA, DB Timetables, db.transport.rest) liefern
+ * unterschiedliche Schreibweisen — diese Funktion vereinheitlicht sie.
+ */
+function normalizeTransitProduct(product, lineName) {
+  const name = (lineName || '').toUpperCase();
+  const prod = (product || '').toLowerCase();
+
+  // Nach Linienname normalisieren (zuverlässiger als Produkt-String)
+  if (name.startsWith('RE') || name.startsWith('IRE')) return 'regional-express';
+  if (name.startsWith('RB'))                            return 'regional';
+  if (name.startsWith('S'))                             return 'suburban';
+  if (name.startsWith('U'))                             return 'subway';
+  if (name.startsWith('ICE') || name.startsWith('IC') || name.startsWith('EC') || name.startsWith('TGV')) return 'national-express';
+
+  // Fallback: Produkt-String normalisieren
+  if (prod === 'nationalexpress' || prod === 'national-express') return 'national-express';
+  if (prod === 'regional-exp' || prod === 'regionalexp' || prod === 'regional-express') return 'regional-express';
+  if (prod === 'regional') return 'regional';
+  if (prod === 'suburban' || prod === 'sbahn') return 'suburban';
+  if (prod === 'subway' || prod === 'ubahn') return 'subway';
+  if (prod === 'tram' || prod === 'strassenbahn') return 'tram';
+  if (prod === 'ferry' || prod === 'faehre') return 'ferry';
+  if (prod === 'bus' || prod === 'stadtbus' || prod === 'nachtbus') return 'bus';
+
+  return product || 'bus';
+}
+
 // Display-Identifikation
 let currentDisplayIdentifier = null;
 let currentDisplayName = null;
@@ -268,7 +297,7 @@ async function renderTransitWidget() {
       const delayClass = dep.cancelled ? 'cancelled' : (delayMin > 0 ? 'delayed' : 'on-time');
       const statusText = dep.cancelled ? 'Ausfall' : (delayMin > 0 ? `+${delayMin} min` : 'pünktl.');
       const lineName = dep.line?.name || '?';
-      const product = dep.line?.product || 'bus';
+      const product = normalizeTransitProduct(dep.line?.product, lineName);
       const direction = dep.direction || '';
       const platform = dep.platform || dep.plannedPlatform || '';
 

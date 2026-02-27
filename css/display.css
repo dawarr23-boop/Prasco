@@ -1337,8 +1337,11 @@ body {
 .line-suburban { background: #009640; }
 .line-subway { background: #2f5890; }
 .line-tram { background: #8a3e3e; }
-.line-national, .line-national-express { background: #58585a; }
+.line-national, .line-national-express, .line-nationalExpress { background: #58585a; }
 .line-ferry { background: #2e6a72; }
+/* Varianten-Fallbacks für unterschiedliche Datenquellen */
+.line-regional-exp { background: #356aa0; }
+.line-regionalExp { background: #356aa0; }
 
 .dep-direction {
   color: #333333;
