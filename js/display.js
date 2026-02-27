@@ -471,7 +471,7 @@ async function showLiveDataWidget() {
   // Header-Kategorie auf Live-Daten setzen (gleicher Pill-Stil wie andere Kategorien)
   const headerCategory = document.getElementById('header-category');
   if (headerCategory) {
-    headerCategory.innerHTML = `<div style="background: #2a5080; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">🚉 Live-Daten</div>`;
+    headerCategory.innerHTML = `<div style="background: #58585a; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">◉ Live-Daten</div>`;
   }
 
   container.className = 'post type-livedata';
@@ -499,7 +499,7 @@ async function showLiveDataWidget() {
   if (transitHtml) {
     const stationName = liveDataState.transitSettings?.['transit.stationName'] || 'ÖPNV';
     slides.push({
-      icon: '🚉',
+      icon: '◉',
       title: `Abfahrten ${stationName}`,
       content: transitHtml,
       timeStr,
@@ -510,7 +510,7 @@ async function showLiveDataWidget() {
   if (trafficHtml) {
     const highways = (liveDataState.trafficSettings?.['traffic.highways'] || '').split(',').filter(Boolean).join(', ');
     slides.push({
-      icon: '🛣️',
+      icon: '◇',
       title: `Verkehrslage ${highways}`,
       content: trafficHtml,
       timeStr,
@@ -521,7 +521,7 @@ async function showLiveDataWidget() {
   if (weatherHtml) {
     const locationName = liveDataState.weatherSettings?.['weather.locationName'] || 'Wetter';
     slides.push({
-      icon: '🌤️',
+      icon: '○',
       title: `Wetter ${locationName}`,
       content: weatherHtml,
       timeStr,
@@ -619,7 +619,7 @@ function updateRefreshInfo() {
   if (refreshElement) {
     let text = `Auto-Refresh: ${displaySettings.refreshInterval} Min`;
     if (currentDisplayName) {
-      text += ` • 📺 ${currentDisplayName}`;
+      text += ` • ▢ ${currentDisplayName}`;
     }
     refreshElement.textContent = text;
   }
@@ -711,7 +711,7 @@ async function showDisplaySelection() {
 
   overlay.innerHTML = `
     <div style="max-width: 800px; width: 90%; text-align: center;">
-      <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">📺 Display auswählen</h1>
+      <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">▢ Display auswählen</h1>
       <p style="font-size: 1.2rem; margin-bottom: 2rem; color: #ccc;">Wählen Sie ein Display aus oder zeigen Sie alle Inhalte an</p>
       <div id="display-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
         <div style="text-align: center; color: #999;">Lade Displays...</div>
@@ -757,7 +757,7 @@ async function showDisplaySelection() {
             cursor: pointer;
             transition: all 0.3s;
           " onmouseover="this.style.borderColor='#007bff'; this.style.transform='scale(1.05)';" onmouseout="this.style.borderColor='#333'; this.style.transform='scale(1)';">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📺</div>
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">▢</div>
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">${escapeHtml(display.name)}</h3>
             <p style="font-size: 0.9rem; color: #888; font-family: monospace;">${escapeHtml(display.identifier)}</p>
             ${display.description ? `<p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem;">${escapeHtml(display.description)}</p>` : ''}
@@ -1093,7 +1093,7 @@ function restoreHeaderFooter() {
 const mockPosts = [
   {
     id: 1,
-    title: '📺 Digitaler Infoscreen',
+    title: '▢ Digitaler Infoscreen',
     content: `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 3rem; border-radius: 20px; color: white; text-align: center;">
 <div style="font-size: 3em; margin-bottom: 1rem;">👋</div>
 <div style="font-size: 2em; font-weight: bold; margin-bottom: 1rem;">Willkommen!</div>
@@ -1110,7 +1110,7 @@ const mockPosts = [
   },
   {
     id: 2,
-    title: '🌤️ Wetter & Vorhersage',
+    title: '○ Wetter & Vorhersage',
     content: `<div style="font-size: 1.15em;">
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
   <div style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); padding: 2rem; border-radius: 15px; color: white;">
@@ -1148,7 +1148,7 @@ const mockPosts = [
   },
   {
     id: 3,
-    title: '🚊 ÖPNV Live-Abfahrten',
+    title: '◉ ÖPNV Live-Abfahrten',
     content: `<div style="font-size: 1.1em;">
 <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 1.5rem; border-radius: 15px; color: white; margin-bottom: 1.5rem; text-align: center;">
   <div style="font-size: 1.8em; font-weight: bold;">🚉 Hauptbahnhof</div>
@@ -1205,7 +1205,7 @@ const mockPosts = [
   },
   {
     id: 4,
-    title: '🚗 Verkehrslage Live',
+    title: '◇ Verkehrslage Live',
     content: `<div style="font-size: 1.1em;">
 <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 1.5rem; border-radius: 15px; color: #333; margin-bottom: 1.5rem; text-align: center; font-weight: bold; font-size: 1.5em;">
   🛣️ Autobahn-Verkehrsinformation
@@ -2839,7 +2839,7 @@ function updateHeaderCategory(categoryId) {
     return;
   }
 
-  headerCategory.innerHTML = `<div style="background: ${category.color}; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);\">${category.icon || '🏷️'} ${escapeHtml(category.name)}</div>`;
+  headerCategory.innerHTML = `<div style="background: #58585a; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">◆ ${escapeHtml(category.name)}</div>`;
 }
 
 // PDF Dokument rendern
