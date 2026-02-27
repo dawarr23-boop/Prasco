@@ -69,7 +69,7 @@ router.get('/current', async (req: Request, res: Response) => {
     }
 
     // Open-Meteo API (kostenlos, kein API-Key nötig)
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&hourly=precipitation_probability,precipitation&timezone=Europe%2FBerlin&forecast_days=7`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index,precipitation&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,precipitation,wind_speed_10m&timezone=Europe%2FBerlin&forecast_days=7`;
 
     const response = await fetch(url);
     if (!response.ok) {
@@ -125,6 +125,10 @@ router.get('/current', async (req: Request, res: Response) => {
           time: t.split('T')[1].substring(0, 5),
           probability: apiData.hourly.precipitation_probability[startIndex + i] || 0,
           precipitation: apiData.hourly.precipitation[startIndex + i] || 0,
+          temperature: Math.round(apiData.hourly.temperature_2m[startIndex + i] * 10) / 10,
+          feelsLike: Math.round(apiData.hourly.apparent_temperature[startIndex + i] * 10) / 10,
+          weatherCode: apiData.hourly.weather_code[startIndex + i],
+          windSpeed: Math.round(apiData.hourly.wind_speed_10m[startIndex + i]),
         }));
       })(),
     };

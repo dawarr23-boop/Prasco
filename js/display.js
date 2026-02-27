@@ -369,140 +369,133 @@ async function renderTrafficWidget() {
   }
 }
 
-// Erstelle Wetter-Widget HTML (Vollbild-Slide) — Redesign mit Regenwahrscheinlichkeit + Radar
+// Erstelle Wetter-Widget HTML — 3 Screens: Heute+Stündlich, 5-Tage, Regenradar
 async function renderWeatherWidget() {
   const ws = liveDataState.weatherSettings;
-  if (!ws || ws['weather.enabled'] !== 'true') return '';
+  if (!ws || ws['weather.enabled'] !== 'true') return [];
 
   const lat = ws['weather.latitude'];
   const lon = ws['weather.longitude'];
   const locationName = ws['weather.locationName'] || 'Standort';
 
-  if (!lat || !lon) return '';
+  if (!lat || !lon) return [];
 
   try {
     const response = await fetch(`/api/weather/current?lat=${lat}&lon=${lon}&name=${encodeURIComponent(locationName)}`);
-    if (!response.ok) return '';
+    if (!response.ok) return [];
     const data = await response.json();
-    if (!data.success || !data.data) return '';
+    if (!data.success || !data.data) return [];
 
     const w = data.data;
     const c = w.current;
-    const forecastDays = parseInt(ws['weather.forecastDays'] || '5', 10);
+
+    // Wetter-Code → Icon Mapping für stündliche Anzeige
+    const codeIcons = {0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌧️',56:'🌧️',57:'🌧️',61:'🌧️',63:'🌧️',65:'🌧️',66:'❄️🌧️',67:'❄️🌧️',71:'🌨️',73:'🌨️',75:'❄️',77:'❄️',80:'🌦️',81:'🌧️',82:'⛈️',85:'🌨️',86:'❄️',95:'⛈️',96:'⛈️',99:'⛈️'};
 
     // Windrichtung als Text
     const windDirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
     const windDirText = windDirs[Math.round(c.windDirection / 45) % 8] || '';
 
-    // Regenwahrscheinlichkeit heute
     const todayForecast = w.forecast?.[0];
-    const rainProb = todayForecast ? todayForecast.precipProbability : 0;
-    const rainAmount = todayForecast ? todayForecast.precipitation : 0;
+    const sunrise = todayForecast?.sunrise ? todayForecast.sunrise.split('T')[1]?.substring(0, 5) : '--:--';
+    const sunset = todayForecast?.sunset ? todayForecast.sunset.split('T')[1]?.substring(0, 5) : '--:--';
 
-    // Stündliche Regen-Balken (nächste 12h für kompakte Darstellung)
-    const hourlyRain = (w.hourlyRain || []).slice(0, 12);
-    const maxProb = Math.max(...hourlyRain.map(h => h.probability), 10);
-
-    let hourlyBarsHtml = '';
-    if (hourlyRain.length > 0) {
-      hourlyBarsHtml = `<div class="weather-rain-chart">
-        <div class="rain-chart-title">Regenwahrscheinlichkeit nächste 12h</div>
-        <div class="rain-chart-bars">
-          ${hourlyRain.map(h => {
-            const pct = Math.round((h.probability / maxProb) * 100);
-            const barColor = h.probability > 60 ? 'rgba(100,180,255,0.9)' : h.probability > 30 ? 'rgba(100,180,255,0.6)' : 'rgba(100,180,255,0.3)';
-            return `<div class="rain-bar-col">
-              <div class="rain-bar-value">${h.probability}%</div>
-              <div class="rain-bar-track"><div class="rain-bar-fill" style="height:${pct}%;background:${barColor}"></div></div>
-              <div class="rain-bar-time">${h.time}</div>
-            </div>`;
-          }).join('')}
-        </div>
+    // ===== SCREEN 1: Aktuelles Wetter + Stündlicher Verlauf =====
+    const hourly = (w.hourlyRain || []).slice(0, 12);
+    const hourlyRowsHtml = hourly.map(h => {
+      const icon = codeIcons[h.weatherCode] || '❓';
+      const rainBar = h.probability > 0 ? `<div class="w-hour-rain-bar"><div class="w-hour-rain-fill" style="width:${h.probability}%;background:${h.probability > 60 ? 'rgba(100,180,255,0.9)' : h.probability > 30 ? 'rgba(100,180,255,0.6)' : 'rgba(100,180,255,0.35)'}"></div></div>` : '<div class="w-hour-rain-bar"><div class="w-hour-rain-fill" style="width:0%"></div></div>';
+      return `<div class="w-hour-row">
+        <span class="w-hour-time">${h.time}</span>
+        <span class="w-hour-icon">${icon}</span>
+        <span class="w-hour-temp">${Math.round(h.temperature)}°</span>
+        <span class="w-hour-rain-wrap">${rainBar}<span class="w-hour-rain-pct">${h.probability}%</span></span>
+        <span class="w-hour-wind">${h.windSpeed} km/h</span>
       </div>`;
-    }
+    }).join('');
 
-    // Aktuelles Wetter — links
-    let html = `<div class="weather-fullscreen weather-redesign">
-      <div class="weather-top">
-        <div class="weather-current-compact">
-          <div class="weather-main">
-            <span class="weather-icon-large">${c.icon}</span>
-            <div class="weather-temp-block">
-              <span class="weather-temp">${c.temperature}°C</span>
-              <span class="weather-desc">${c.description}</span>
-              <span class="weather-location">${locationName}</span>
+    const screen1 = `<div class="w-screen w-screen-today">
+      <div class="w-today-top">
+        <div class="w-today-current">
+          <div class="w-today-icon-temp">
+            <span class="w-big-icon">${c.icon}</span>
+            <div class="w-big-temp-wrap">
+              <span class="w-big-temp">${c.temperature}°C</span>
+              <span class="w-big-desc">${c.description}</span>
             </div>
           </div>
-          <div class="weather-key-stats">
-            <div class="weather-stat">
-              <span class="weather-stat-icon">🌧️</span>
-              <div class="weather-stat-text">
-                <span class="weather-stat-value">${rainProb}%</span>
-                <span class="weather-stat-label">Regenwahrsch.</span>
-              </div>
-            </div>
-            <div class="weather-stat">
-              <span class="weather-stat-icon">💧</span>
-              <div class="weather-stat-text">
-                <span class="weather-stat-value">${rainAmount} mm</span>
-                <span class="weather-stat-label">Niederschlag</span>
-              </div>
-            </div>
-            <div class="weather-stat">
-              <span class="weather-stat-icon">🌡️</span>
-              <div class="weather-stat-text">
-                <span class="weather-stat-value">${c.feelsLike}°C</span>
-                <span class="weather-stat-label">Gefühlt</span>
-              </div>
-            </div>
-            <div class="weather-stat">
-              <span class="weather-stat-icon">💨</span>
-              <div class="weather-stat-text">
-                <span class="weather-stat-value">${c.windSpeed} km/h</span>
-                <span class="weather-stat-label">Wind ${windDirText}</span>
-              </div>
-            </div>
-            <div class="weather-stat">
-              <span class="weather-stat-icon">💧</span>
-              <div class="weather-stat-text">
-                <span class="weather-stat-value">${c.humidity}%</span>
-                <span class="weather-stat-label">Luftfeuchte</span>
-              </div>
-            </div>
+          <div class="w-today-location">${locationName}</div>
+          <div class="w-today-stats">
+            <div class="w-stat-pill">🌡️ Gefühlt ${c.feelsLike}°</div>
+            <div class="w-stat-pill">💧 ${c.humidity}%</div>
+            <div class="w-stat-pill">💨 ${c.windSpeed} km/h ${windDirText}</div>
+            <div class="w-stat-pill">🌧️ ${todayForecast ? todayForecast.precipProbability : 0}%</div>
+            <div class="w-stat-pill">☀️ ${sunrise} — ${sunset}</div>
+            <div class="w-stat-pill">📊 ${c.pressure} hPa</div>
           </div>
         </div>
-
-        <div class="weather-radar-container">
-          <div class="weather-radar-title">Regenradar ${locationName}</div>
-          <iframe class="weather-radar-iframe" src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" loading="lazy"></iframe>
-        </div>
+        ${todayForecast ? `<div class="w-today-minmax">
+          <div class="w-minmax-item"><span class="w-minmax-label">Max</span><span class="w-minmax-val w-max">${todayForecast.tempMax}°</span></div>
+          <div class="w-minmax-item"><span class="w-minmax-label">Min</span><span class="w-minmax-val w-min">${todayForecast.tempMin}°</span></div>
+        </div>` : ''}
       </div>
-
-      ${hourlyBarsHtml}
-
-      <div class="weather-forecast-5day">
-        ${w.forecast ? w.forecast.slice(0, forecastDays).map((day, i) => `
-          <div class="weather-forecast-day ${i === 0 ? 'today' : ''}">
-            <span class="forecast-weekday">${i === 0 ? 'Heute' : day.weekday}</span>
-            <span class="forecast-icon">${day.icon}</span>
-            <span class="forecast-temps">
-              <span class="forecast-max">${day.tempMax}°</span>
-              <span class="forecast-min">${day.tempMin}°</span>
-            </span>
-            <span class="forecast-rain-detail">
-              <span class="forecast-rain-icon">🌧️</span>
-              <span class="forecast-rain-pct">${day.precipProbability}%</span>
-            </span>
-            <span class="forecast-precip">${day.precipitation > 0 ? day.precipitation + ' mm' : '—'}</span>
-          </div>
-        `).join('') : ''}
+      <div class="w-hourly-section">
+        <div class="w-section-title">Stündlicher Verlauf</div>
+        <div class="w-hourly-header">
+          <span class="w-hour-time">Zeit</span>
+          <span class="w-hour-icon"></span>
+          <span class="w-hour-temp">Temp</span>
+          <span class="w-hour-rain-wrap">Regen</span>
+          <span class="w-hour-wind">Wind</span>
+        </div>
+        <div class="w-hourly-list">${hourlyRowsHtml}</div>
       </div>
     </div>`;
 
-    return html;
+    // ===== SCREEN 2: 5-Tage-Vorhersage =====
+    const forecastDays = w.forecast ? w.forecast.slice(0, 5) : [];
+    const forecastCardsHtml = forecastDays.map((day, i) => {
+      const isToday = i === 0;
+      const dayName = isToday ? 'Heute' : day.weekday;
+      const dateStr = new Date(day.date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+      return `<div class="w-fc-card${isToday ? ' w-fc-today' : ''}">
+        <div class="w-fc-day-name">${dayName}</div>
+        <div class="w-fc-date">${dateStr}</div>
+        <div class="w-fc-icon">${day.icon}</div>
+        <div class="w-fc-desc">${day.description}</div>
+        <div class="w-fc-temps">
+          <span class="w-fc-max">${day.tempMax}°</span>
+          <span class="w-fc-sep">/</span>
+          <span class="w-fc-min">${day.tempMin}°</span>
+        </div>
+        <div class="w-fc-details">
+          <div class="w-fc-detail">🌧️ ${day.precipProbability}%</div>
+          <div class="w-fc-detail">💧 ${day.precipitation > 0 ? day.precipitation + ' mm' : '—'}</div>
+          <div class="w-fc-detail">💨 ${day.windMax} km/h</div>
+        </div>
+        <div class="w-fc-sun">☀️ ${day.sunrise ? day.sunrise.split('T')[1]?.substring(0, 5) : ''} — ${day.sunset ? day.sunset.split('T')[1]?.substring(0, 5) : ''}</div>
+      </div>`;
+    }).join('');
+
+    const screen2 = `<div class="w-screen w-screen-forecast">
+      <div class="w-section-title" style="text-align:center;margin-bottom:2vh;">5-Tage-Vorhersage ${locationName}</div>
+      <div class="w-fc-grid">${forecastCardsHtml}</div>
+    </div>`;
+
+    // ===== SCREEN 3: Regenradar =====
+    const screen3 = `<div class="w-screen w-screen-radar">
+      <div class="w-radar-header">
+        <span class="w-section-title">Regenradar ${locationName}</span>
+      </div>
+      <div class="w-radar-frame">
+        <iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" loading="lazy" style="width:100%;height:100%;border:none;border-radius:1.5vh;"></iframe>
+      </div>
+    </div>`;
+
+    return [screen1, screen2, screen3];
   } catch (e) {
     console.warn('Wetter-Widget Fehler:', e);
-    return '';
+    return [];
   }
 }
 
@@ -517,19 +510,19 @@ async function showLiveDataWidget() {
   // Header-Kategorie auf Live-Daten setzen (gleicher Pill-Stil wie andere Kategorien)
   const headerCategory = document.getElementById('header-category');
   if (headerCategory) {
-    headerCategory.innerHTML = `<div style="background: #58585a; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">◉ Live-Daten</div>`;
+    headerCategory.innerHTML = `<div style="background: #009640; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,150,64,0.25); letter-spacing: 0.02em;">◉ Live-Daten</div>`;
   }
 
   container.className = 'post type-livedata';
   container.innerHTML = '<div class="live-widget-loading"><div class="spinner"></div><p>Lade Live-Daten...</p></div>';
 
-  const [transitHtml, trafficHtml, weatherHtml] = await Promise.all([
+  const [transitHtml, trafficHtml, weatherSlides] = await Promise.all([
     renderTransitWidget(),
     renderTrafficWidget(),
     renderWeatherWidget(),
   ]);
 
-  if (!transitHtml && !trafficHtml && !weatherHtml) {
+  if (!transitHtml && !trafficHtml && (!weatherSlides || weatherSlides.length === 0)) {
     liveDataState.isWidgetActive = false;
     nextPost();
     return;
@@ -564,14 +557,18 @@ async function showLiveDataWidget() {
     });
   }
 
-  if (weatherHtml) {
+  // Wetter: 3 separate Slides
+  if (weatherSlides && weatherSlides.length > 0) {
     const locationName = liveDataState.weatherSettings?.['weather.locationName'] || 'Wetter';
-    slides.push({
-      icon: '○',
-      title: `Wetter ${locationName}`,
-      content: weatherHtml,
-      timeStr,
-      intervalMin,
+    const weatherTitles = [`Wetter Heute — ${locationName}`, `5-Tage-Vorhersage — ${locationName}`, `Regenradar — ${locationName}`];
+    weatherSlides.forEach((html, i) => {
+      slides.push({
+        icon: '○',
+        title: weatherTitles[i] || `Wetter ${locationName}`,
+        content: html,
+        timeStr,
+        intervalMin,
+      });
     });
   }
 
@@ -583,15 +580,18 @@ async function showLiveDataWidget() {
     container.innerHTML = `
       <div class="live-data-widget">
         <div class="live-widget-header">
-          <span class="live-indicator">● LIVE</span>
-          <span class="live-title">${slide.icon} ${slide.title}</span>
-          <span class="live-time">Stand: ${slide.timeStr}</span>
+          <div class="live-header-left">
+            <span class="live-indicator">● LIVE</span>
+            <span class="live-title">${slide.title}</span>
+          </div>
+          <span class="live-time">${slide.timeStr} Uhr</span>
         </div>
         <div class="live-widget-content">
           ${slide.content}
         </div>
         <div class="live-widget-footer">
-          <span>${slides.length > 1 ? `Seite ${index + 1} von ${slides.length} · ` : ''}Nächste Aktualisierung in ${slide.intervalMin} Minuten</span>
+          ${slides.length > 1 ? `<span class="live-footer-pages">${Array.from({length: slides.length}, (_, j) => `<span class="live-page-dot${j === index ? ' active' : ''}"></span>`).join('')}</span>` : ''}
+          <span class="live-footer-info">Aktualisierung alle ${slide.intervalMin} Min.</span>
         </div>
       </div>
     `;
