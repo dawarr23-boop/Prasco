@@ -38,7 +38,7 @@ export const getSettings = async (req: Request, res: Response) => {
     cacheService.set(cacheKey, settingsObj, 600);
 
     res.json(settingsObj);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching settings:', error);
     res.status(500).json({ error: 'Fehler beim Laden der Einstellungen' });
   }
@@ -65,7 +65,7 @@ export const getSetting = async (req: Request, res: Response): Promise<void> => 
       category: setting.category,
       description: setting.description,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching setting:', error);
     res.status(500).json({ error: 'Fehler beim Laden der Einstellung' });
   }
@@ -126,7 +126,7 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
       key: setting.key,
       value: setting.getParsedValue(),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error setting value:', error);
     res.status(500).json({ error: 'Fehler beim Speichern der Einstellung' });
   }
@@ -223,7 +223,7 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
       message: 'Einstellungen gespeichert',
       settings: results,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error setting bulk values:', error);
     res.status(500).json({ error: 'Fehler beim Speichern der Einstellungen' });
   }
@@ -247,7 +247,7 @@ export const deleteSetting = async (req: Request, res: Response): Promise<void> 
     cacheService.delByPrefix('settings:');
 
     res.json({ message: 'Einstellung gelöscht' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting setting:', error);
     res.status(500).json({ error: 'Fehler beim Löschen der Einstellung' });
   }

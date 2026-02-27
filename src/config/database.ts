@@ -66,9 +66,10 @@ export const initializeDatabaseSchema = async (): Promise<void> => {
         // Bei Berechtigungsfehlern bedeutet das meist dass Tabellen bereits existieren
         await sequelize.sync({ force: false, alter: false });
         logger.info('✅ Datenbank-Schema bereit');
-    } catch (error: any) {
+    } catch (error: unknown) {
         // Wenn der Fehler "permission denied" ist, existieren die Tabellen bereits
-        if (error?.original?.code === '42501') {
+        const dbError = error as { original?: { code?: string } };
+        if (dbError?.original?.code === '42501') {
             logger.info('✅ Datenbank-Schema bereits vorhanden');
         } else {
             logger.error('❌ Fehler bei Schema-Initialisierung:', error);

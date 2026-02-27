@@ -50,7 +50,7 @@ export async function getSSOStatus(_req: Request, res: Response) {
         errors: config.enabled ? validation.errors : [],
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('SSO Status Fehler:', error);
     res.status(500).json({
       success: false,
@@ -115,7 +115,7 @@ export async function initiateSSOLogin(_req: Request, res: Response): Promise<vo
 
     // Redirect zur Azure AD Login-Seite
     res.redirect(authUrl);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('SSO Login Initiierung Fehler:', error);
     res.redirect('/admin?error=sso_init_failed');
   }
@@ -287,7 +287,7 @@ export async function handleSSOCallback(req: Request, res: Response) {
     // Redirect mit Token zum Frontend
     // Das Frontend speichert den Token und leitet zum Dashboard weiter
     res.redirect(`/admin/sso-callback.html?token=${accessToken}&refreshToken=${refreshToken}`);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('SSO Callback Fehler:', error);
     res.redirect('/admin?error=sso_callback_failed');
   }
@@ -426,11 +426,12 @@ export async function handleLDAPLogin(req: Request, res: Response): Promise<void
         },
       },
     });
-  } catch (error: any) {
-    logger.error('LDAP Login Fehler:', error);
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error('LDAP Login Fehler:', err);
     res.status(500).json({
       success: false,
-      error: { message: 'LDAP-Authentifizierung fehlgeschlagen: ' + error.message },
+      error: { message: 'LDAP-Authentifizierung fehlgeschlagen: ' + err.message },
     });
   }
 }
@@ -451,7 +452,7 @@ export async function handleSSOLogout(_req: Request, res: Response) {
     const logoutUri = `https://login.microsoftonline.com/${config.azureAD.tenantId}/oauth2/v2.0/logout?post_logout_redirect_uri=${encodeURIComponent(config.azureAD.postLogoutRedirectUri)}`;
 
     res.redirect(logoutUri);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('SSO Logout Fehler:', error);
     res.redirect('/admin');
   }

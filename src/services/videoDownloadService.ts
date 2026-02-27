@@ -125,11 +125,11 @@ export class VideoDownloadService {
         success: true,
         localPath,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Video download failed:', error);
       return {
         success: false,
-        error: error.message || 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -234,7 +234,7 @@ export class VideoDownloadService {
       });
 
       logger.info(`[Video Download] ✅ Successfully processed post ${postId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(`[Video Download] ❌ Error processing post ${postId}:`, error);
       throw error;
     }

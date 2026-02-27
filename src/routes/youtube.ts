@@ -155,7 +155,7 @@ router.post(
           videoId,
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Fehler beim Abrufen der Video-Dauer:', error);
       
       // Return a default duration instead of crashing

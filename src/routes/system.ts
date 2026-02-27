@@ -84,12 +84,12 @@ router.get('/mode', authenticate, requirePermission('settings.read'), async (_re
         },
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('System mode error:', error);
     res.status(500).json({
       success: false,
       error: 'Fehler beim Abrufen des System-Modus',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 });
@@ -211,12 +211,12 @@ router.post('/mode', authenticate, requirePermission('settings.write'), async (r
         message: 'Hotspot-Modus aktiviert. SSID: PRASCO-Display, IP: 192.168.4.1',
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('System mode switch error:', error);
     res.status(500).json({
       success: false,
       error: 'Fehler beim Wechseln des Modus',
-      details: error.message,
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 });

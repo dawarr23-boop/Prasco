@@ -181,7 +181,7 @@ User.init(
     },
     // SSO Fields
     ssoProvider: {
-      type: DataTypes.ENUM('azure_ad', 'adfs', 'local'),
+      type: DataTypes.ENUM('azure_ad', 'ldap', 'adfs', 'local'),
       allowNull: true,
       defaultValue: null,
       field: 'sso_provider',

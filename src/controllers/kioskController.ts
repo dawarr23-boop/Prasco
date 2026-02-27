@@ -19,12 +19,13 @@ async function killChromium(): Promise<void> {
   try {
     await execAsync('pkill -f chromium', { timeout: EXEC_TIMEOUT });
     logger.info('Chromium processes killed');
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { code?: number; message?: string };
     // Exit code 1 means no process found - this is OK
-    if (error.code === 1) {
+    if (err.code === 1) {
       logger.debug('No Chromium process to kill');
     } else {
-      logger.warn('Error killing Chromium:', error.message);
+      logger.warn('Error killing Chromium:', err.message);
     }
   }
 }
@@ -68,7 +69,7 @@ async function startChromium(url: string): Promise<void> {
 
   try {
     await execAsync(command, { timeout: EXEC_TIMEOUT });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Failed to start Chromium:', error);
     throw new AppError('Fehler beim Starten von Chromium', 500);
   }
