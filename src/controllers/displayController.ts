@@ -172,7 +172,7 @@ export const createDisplay = async (
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
-        `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter info@prasco.de, um weitere Display-Lizenzen zu erwerben.`,
+        `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter kontakt@it-westfalen.de, um weitere Display-Lizenzen zu erwerben.`,
         403
       );
     }

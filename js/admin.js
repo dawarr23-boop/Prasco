@@ -3166,7 +3166,7 @@ function updateDisplayLicenseInfo() {
 function showDisplayForm() {
   // License-Check: Wenn Limit erreicht, Warnung anzeigen
   if (displaysCache.length >= MAX_LICENSED_DISPLAYS) {
-    showNotification(`Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Kontaktieren Sie info@prasco.de für weitere Lizenzen.`, 'warning');
+    showNotification(`Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.`, 'warning');
     return;
   }
 
@@ -3313,7 +3313,7 @@ async function handleDisplayFormSubmit(e) {
   } catch (error) {
     const msg = error.message || 'Unbekannter Fehler';
     if (msg.includes('Lizenzlimit') || msg.includes('lizenz') || error.status === 403) {
-      showNotification('Display-Lizenzlimit erreicht. Kontaktieren Sie info@prasco.de für weitere Lizenzen.', 'warning');
+      showNotification('Display-Lizenzlimit erreicht. Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.', 'warning');
       updateDisplayLicenseInfo();
     } else {
       showNotification('Fehler beim Speichern: ' + msg, 'error');
