@@ -510,7 +510,7 @@ async function showLiveDataWidget() {
   // Header-Kategorie auf Live-Daten setzen (gleicher Pill-Stil wie andere Kategorien)
   const headerCategory = document.getElementById('header-category');
   if (headerCategory) {
-    headerCategory.innerHTML = `<div style="background: #009640; color: white; padding: 0.48rem 0.96rem; border-radius: 16px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,150,64,0.25); letter-spacing: 0.02em;">◉ Live-Daten</div>`;
+    headerCategory.innerHTML = `<div style="background: #009640; color: white; padding: 0.34rem 0.67rem; border-radius: 11px; font-size: 0.49rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,150,64,0.25); letter-spacing: 0.02em;">◉ Live-Daten</div>`;
   }
 
   container.className = 'post type-livedata';
