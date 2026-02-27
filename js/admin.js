@@ -4319,6 +4319,20 @@ window.addEventListener('load', async () => {
       else if (action === 'delete' && actionPostId) deletePost(actionPostId);
     });
 
+    // Doppelklick startet Selektionsmodus (Alternative zu Long-Press)
+    postsList.addEventListener('dblclick', (e) => {
+      if (e.target.closest('.drag-handle') || e.target.closest('.list-item-actions')) return;
+      const listItem = e.target.closest('.list-item[data-post-id]');
+      if (!listItem) return;
+      const postId = parseInt(listItem.dataset.postId);
+
+      if (!bulkSelectionMode) {
+        e.preventDefault();
+        e.stopPropagation();
+        enterBulkSelection(postId);
+      }
+    });
+
     // Long-Press für Selektionsmodus
     postsList.addEventListener('pointerdown', (e) => {
       if (e.button !== 0) return; // Nur linke Maustaste
