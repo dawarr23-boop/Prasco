@@ -4,6 +4,7 @@ import { validate } from '../middleware/validator';
 import { authenticate } from '../middleware/auth';
 import { requirePermission, requireSuperAdmin } from '../middleware/permissions';
 import * as displayController from '../controllers/displayController';
+import * as deviceController from '../controllers/deviceController';
 
 const router = Router();
 
@@ -95,6 +96,30 @@ router.delete(
   requirePermission('displays.delete'),
   [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
   displayController.deleteDisplay
+);
+
+// POST /api/displays/:id/authorize - Authorize a pending device (Superadmin only)
+router.post(
+  '/:id/authorize',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.authorizeDevice
+);
+
+// POST /api/displays/:id/reject - Reject a pending device (Superadmin only)
+router.post(
+  '/:id/reject',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.rejectDevice
+);
+
+// POST /api/displays/:id/revoke - Revoke device authorization (Superadmin only)
+router.post(
+  '/:id/revoke',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.revokeDevice
 );
 
 export default router;

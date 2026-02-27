@@ -10,6 +10,16 @@ interface DisplayAttributes {
   showTransitData: boolean;
   showTrafficData: boolean;
   organizationId?: number;
+  // Device Authorization
+  serialNumber?: string;
+  macAddress?: string;
+  deviceToken?: string;
+  authorizationStatus: 'pending' | 'authorized' | 'rejected' | 'revoked';
+  deviceModel?: string;
+  deviceOsVersion?: string;
+  appVersion?: string;
+  lastSeenAt?: Date;
+  registeredAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -17,7 +27,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -32,6 +42,16 @@ class Display
   public showTransitData!: boolean;
   public showTrafficData!: boolean;
   public organizationId?: number;
+  // Device Authorization
+  public serialNumber?: string;
+  public macAddress?: string;
+  public deviceToken?: string;
+  public authorizationStatus!: 'pending' | 'authorized' | 'rejected' | 'revoked';
+  public deviceModel?: string;
+  public deviceOsVersion?: string;
+  public appVersion?: string;
+  public lastSeenAt?: Date;
+  public registeredAt?: Date;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -88,6 +108,55 @@ Display.init(
         key: 'id',
       },
     },
+    // Device Authorization Fields
+    serialNumber: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      unique: true,
+      field: 'serial_number',
+    },
+    macAddress: {
+      type: DataTypes.STRING(17),
+      allowNull: true,
+      field: 'mac_address',
+    },
+    deviceToken: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      unique: true,
+      field: 'device_token',
+    },
+    authorizationStatus: {
+      type: DataTypes.ENUM('pending', 'authorized', 'rejected', 'revoked'),
+      allowNull: false,
+      defaultValue: 'authorized',
+      field: 'authorization_status',
+    },
+    deviceModel: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: 'device_model',
+    },
+    deviceOsVersion: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      field: 'device_os_version',
+    },
+    appVersion: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      field: 'app_version',
+    },
+    lastSeenAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'last_seen_at',
+    },
+    registeredAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'registered_at',
+    },
   },
   {
     sequelize,
@@ -97,6 +166,17 @@ Display.init(
       {
         unique: true,
         fields: ['identifier'],
+      },
+      {
+        unique: true,
+        fields: ['serial_number'],
+      },
+      {
+        unique: true,
+        fields: ['device_token'],
+      },
+      {
+        fields: ['authorization_status'],
       },
     ],
   }

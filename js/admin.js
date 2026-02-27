@@ -3031,12 +3031,60 @@ async function loadDisplays() {
 
     displaysList.innerHTML = displaysCache
       .map(
-        (display) => `
-        <div class="list-item" data-display-id="${display.id}">
+        (display) => {
+          const isDevice = !!display.serialNumber;
+          const authStatus = display.authorizationStatus || 'authorized';
+          
+          // Status-Badge
+          let statusBadge = '';
+          if (isDevice) {
+            const statusColors = {
+              pending: '#ffaa00',
+              authorized: '#28a745',
+              rejected: '#dc3545',
+              revoked: '#ff8800'
+            };
+            const statusLabels = {
+              pending: '⏳ Ausstehend',
+              authorized: '✅ Autorisiert',
+              rejected: '🚫 Abgelehnt',
+              revoked: '🔒 Widerrufen'
+            };
+            statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
+          }
+          
+          // Device-Info
+          let deviceInfo = '';
+          if (isDevice) {
+            deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
+              📱 ${escapeHtml(display.deviceModel || 'Unbekanntes Gerät')} | SN: ${escapeHtml(display.serialNumber)}
+              ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
+              ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
+              ${display.lastSeenAt ? ` | Zuletzt gesehen: ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
+            </p>`;
+          }
+          
+          // Auth-Action-Buttons
+          let authActions = '';
+          if (isDevice) {
+            if (authStatus === 'pending') {
+              authActions = `
+                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="Gerät autorisieren">✅ Autorisieren</button>
+                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="Gerät ablehnen">🚫 Ablehnen</button>`;
+            } else if (authStatus === 'authorized') {
+              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="Autorisierung widerrufen">🔒 Widerrufen</button>`;
+            } else if (authStatus === 'rejected' || authStatus === 'revoked') {
+              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="Gerät autorisieren">✅ Autorisieren</button>`;
+            }
+          }
+          
+          return `
+        <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
             <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Klicken zum Bearbeiten">
-                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}</h3>
+                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
                 <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">🔗 ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
+                ${deviceInfo}
                 <p style="font-size: 0.8em; margin-top: 0.4rem;">
                   ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
                   ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
@@ -3046,6 +3094,7 @@ async function loadDisplays() {
                 </p>
             </div>
             <div class="list-item-actions">
+                ${authActions}
                 <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="Display öffnen">
                   ▷ Öffnen
                 </button>
@@ -3053,7 +3102,8 @@ async function loadDisplays() {
                 <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">Löschen</button>
             </div>
         </div>
-      `
+      `;
+        }
       )
       .join('');
   } catch (error) {
@@ -3174,6 +3224,43 @@ async function deleteDisplay(id) {
     showNotification('Display erfolgreich gelöscht!', 'success');
   } catch (error) {
     showNotification('Fehler beim Löschen: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// Device Authorization (Geräte-Autorisierung)
+// ============================================
+
+async function authorizeDevice(displayId) {
+  if (!confirm('Dieses Gerät autorisieren? Es erhält Zugriff auf die Display-Inhalte.')) return;
+  try {
+    await apiRequest(`/displays/${displayId}/authorize`, { method: 'POST' });
+    await loadDisplays();
+    showNotification('Gerät erfolgreich autorisiert!', 'success');
+  } catch (error) {
+    showNotification('Fehler bei Autorisierung: ' + error.message, 'error');
+  }
+}
+
+async function rejectDevice(displayId) {
+  if (!confirm('Dieses Gerät ablehnen? Es kann keine Inhalte anzeigen.')) return;
+  try {
+    await apiRequest(`/displays/${displayId}/reject`, { method: 'POST' });
+    await loadDisplays();
+    showNotification('Gerät wurde abgelehnt.', 'warning');
+  } catch (error) {
+    showNotification('Fehler beim Ablehnen: ' + error.message, 'error');
+  }
+}
+
+async function revokeDevice(displayId) {
+  if (!confirm('Autorisierung widerrufen? Das Gerät verliert sofort den Zugriff.')) return;
+  try {
+    await apiRequest(`/displays/${displayId}/revoke`, { method: 'POST' });
+    await loadDisplays();
+    showNotification('Autorisierung widerrufen.', 'warning');
+  } catch (error) {
+    showNotification('Fehler beim Widerrufen: ' + error.message, 'error');
   }
 }
 
@@ -4532,6 +4619,12 @@ window.addEventListener('load', async () => {
       } else if (action === 'open-display') {
         const url = actionElement.dataset.displayUrl;
         if (url) window.open(url, '_blank');
+      } else if (action === 'authorize-device' && displayId) {
+        authorizeDevice(displayId);
+      } else if (action === 'reject-device' && displayId) {
+        rejectDevice(displayId);
+      } else if (action === 'revoke-device' && displayId) {
+        revokeDevice(displayId);
       }
     });
   }

@@ -3,6 +3,7 @@ package net.prasco.display.tv
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.Typeface
 import android.net.http.SslError
 import android.os.Bundle
 import android.os.Handler
@@ -15,17 +16,20 @@ import android.webkit.*
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentActivity
+import kotlin.concurrent.thread
 
 /**
- * PRASCO Display TV - Android TV Client App v2.0
+ * PRASCO Display TV - Android TV Client App v2.1
  *
  * Vollwertige Android TV Client-Software für das PRASCO Digital Signage System.
  *
  * Features:
+ * - Automatische Geräteregistrierung & Autorisierung
  * - TV Fullscreen Kiosk-Modus (Immersive Sticky)
  * - Fernbedienungs-Navigation (D-Pad → JavaScript Events)
  * - Automatischer Reconnect bei Verbindungsverlust
@@ -39,6 +43,7 @@ class MainActivity : FragmentActivity() {
 
     private lateinit var webView: WebView
     private lateinit var prefs: SharedPreferences
+    private lateinit var registrationManager: DeviceRegistrationManager
     private val handler = Handler(Looper.getMainLooper())
 
     companion object {
@@ -60,6 +65,8 @@ class MainActivity : FragmentActivity() {
     private var secretKeyPresses = 0
     private var isConnectionError = false
     private var reconnectRunnable: Runnable? = null
+    private var statusPollRunnable: Runnable? = null
+    private var heartbeatRunnable: Runnable? = null
 
     // ============================================
     // Lifecycle
@@ -70,25 +77,19 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        registrationManager = DeviceRegistrationManager(this)
 
         // TV Fullscreen-Modus
         setupTVFullscreen()
 
         // WebView erstellen
         webView = WebView(this)
-        setContentView(webView)
 
         // WebView konfigurieren
         setupWebView()
 
-        // Server-URL laden und öffnen
-        val serverUrl = getServerUrl()
-        webView.loadUrl(serverUrl)
-
-        // Auto-Reload starten (falls konfiguriert)
-        if (AUTO_RELOAD_INTERVAL > 0) {
-            scheduleAutoReload()
-        }
+        // Geräteregistrierung starten
+        startDeviceRegistration()
     }
 
     override fun onResume() {
@@ -104,6 +105,8 @@ class MainActivity : FragmentActivity() {
 
     override fun onDestroy() {
         stopReconnect()
+        stopStatusPolling()
+        stopHeartbeat()
         handler.removeCallbacksAndMessages(null)
         webView.destroy()
         super.onDestroy()
@@ -114,6 +117,392 @@ class MainActivity : FragmentActivity() {
         if (hasFocus) {
             setupTVFullscreen()
         }
+    }
+
+    // ============================================
+    // Device Registration Flow
+    // ============================================
+
+    /**
+     * Geräteregistrierung starten:
+     * 1. Server-URL prüfen → ggf. Einstellungen zeigen
+     * 2. Bei Server registrieren → Token erhalten
+     * 3. Status prüfen → pending/authorized/rejected
+     * 4. Bei "authorized" → Display laden
+     * 5. Bei "pending" → Wartebildschirm zeigen, Status pollen
+     */
+    private fun startDeviceRegistration() {
+        val serverUrl = getServerUrl()
+
+        // Registrierungsbildschirm zeigen
+        showRegistrationScreen("Verbinde mit PRASCO Server...")
+
+        thread {
+            val result = registrationManager.registerDevice(serverUrl)
+
+            handler.post {
+                if (result.success) {
+                    handleAuthStatus(result.status, result.displayIdentifier)
+                } else {
+                    showRegistrationScreen(
+                        "Registrierung fehlgeschlagen\n\n${result.error ?: "Unbekannter Fehler"}\n\n" +
+                        "Server: $serverUrl\n\nAutomatischer Retry in 15 Sekunden..."
+                    )
+                    // Retry nach 15 Sekunden
+                    handler.postDelayed({ startDeviceRegistration() }, RECONNECT_INTERVAL)
+                }
+            }
+        }
+    }
+
+    /**
+     * Autorisierungsstatus verarbeiten
+     */
+    private fun handleAuthStatus(status: String, displayIdentifier: String?) {
+        when (status) {
+            "authorized" -> {
+                // Gerät autorisiert → Display laden
+                loadAuthorizedDisplay(displayIdentifier)
+            }
+            "pending" -> {
+                // Warten auf Admin-Freigabe
+                showPendingScreen()
+                startStatusPolling()
+            }
+            "rejected" -> {
+                showRejectedScreen()
+            }
+            "revoked" -> {
+                showRevokedScreen()
+            }
+            else -> {
+                showRegistrationScreen("Unbekannter Status: $status")
+            }
+        }
+    }
+
+    /**
+     * Autorisiertes Display laden
+     */
+    private fun loadAuthorizedDisplay(displayIdentifier: String?) {
+        stopStatusPolling()
+        startHeartbeat()
+
+        val serverUrl = getServerUrl()
+        val url = if (displayIdentifier != null && displayIdentifier.isNotEmpty()) {
+            "$serverUrl/display/$displayIdentifier"
+        } else {
+            serverUrl
+        }
+
+        setContentView(webView)
+        webView.loadUrl(url)
+
+        // Auto-Reload starten (falls konfiguriert)
+        if (AUTO_RELOAD_INTERVAL > 0) {
+            scheduleAutoReload()
+        }
+    }
+
+    // ============================================
+    // Status-Bildschirme
+    // ============================================
+
+    @SuppressLint("SetTextI18n")
+    private fun showRegistrationScreen(message: String) {
+        val layout = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#1a1a1a"))
+        }
+
+        val innerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(64, 64, 64, 64)
+        }
+
+        val logo = TextView(this).apply {
+            text = "PRASCO"
+            setTextColor(Color.parseColor("#4a9eff"))
+            textSize = 36f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 32)
+        }
+
+        val progress = ProgressBar(this).apply {
+            setPadding(0, 0, 0, 24)
+        }
+
+        val messageView = TextView(this).apply {
+            text = message
+            setTextColor(Color.WHITE)
+            textSize = 18f
+            gravity = Gravity.CENTER
+            setPadding(0, 24, 0, 0)
+        }
+
+        innerLayout.addView(logo)
+        innerLayout.addView(progress)
+        innerLayout.addView(messageView)
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER }
+
+        layout.addView(innerLayout, params)
+        setContentView(layout)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun showPendingScreen() {
+        val layout = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#1a1a1a"))
+        }
+
+        val innerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(64, 64, 64, 64)
+        }
+
+        val logo = TextView(this).apply {
+            text = "PRASCO"
+            setTextColor(Color.parseColor("#4a9eff"))
+            textSize = 36f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 32)
+        }
+
+        val icon = TextView(this).apply {
+            text = "⏳"
+            textSize = 48f
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 24)
+        }
+
+        val title = TextView(this).apply {
+            text = "Autorisierung ausstehend"
+            setTextColor(Color.parseColor("#ffaa00"))
+            textSize = 24f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        }
+
+        val serial = DeviceIdentifier.getSerialNumber(this@MainActivity)
+        val model = DeviceIdentifier.getDeviceModel()
+
+        val details = TextView(this).apply {
+            text = "Dieses Gerät wurde beim Server registriert.\n\n" +
+                    "Bitte autorisieren Sie das Gerät im Admin-Panel:\n\n" +
+                    "Modell: $model\n" +
+                    "Seriennummer: $serial\n\n" +
+                    "Server: ${getServerUrl()}"
+            setTextColor(Color.parseColor("#cccccc"))
+            textSize = 16f
+            gravity = Gravity.CENTER
+        }
+
+        val progress = ProgressBar(this).apply {
+            setPadding(0, 32, 0, 0)
+        }
+
+        innerLayout.addView(logo)
+        innerLayout.addView(icon)
+        innerLayout.addView(title)
+        innerLayout.addView(details)
+        innerLayout.addView(progress)
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER }
+
+        layout.addView(innerLayout, params)
+        setContentView(layout)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun showRejectedScreen() {
+        val layout = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#1a1a1a"))
+        }
+
+        val innerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(64, 64, 64, 64)
+        }
+
+        val logo = TextView(this).apply {
+            text = "PRASCO"
+            setTextColor(Color.parseColor("#4a9eff"))
+            textSize = 36f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 32)
+        }
+
+        val icon = TextView(this).apply {
+            text = "🚫"
+            textSize = 48f
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 24)
+        }
+
+        val title = TextView(this).apply {
+            text = "Gerät abgelehnt"
+            setTextColor(Color.parseColor("#ff4444"))
+            textSize = 24f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        }
+
+        val details = TextView(this).apply {
+            text = "Dieses Gerät wurde vom Administrator abgelehnt.\n\n" +
+                    "Bitte kontaktieren Sie den Systemadministrator."
+            setTextColor(Color.parseColor("#cccccc"))
+            textSize = 16f
+            gravity = Gravity.CENTER
+        }
+
+        innerLayout.addView(logo)
+        innerLayout.addView(icon)
+        innerLayout.addView(title)
+        innerLayout.addView(details)
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER }
+
+        layout.addView(innerLayout, params)
+        setContentView(layout)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun showRevokedScreen() {
+        val layout = FrameLayout(this).apply {
+            setBackgroundColor(Color.parseColor("#1a1a1a"))
+        }
+
+        val innerLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(64, 64, 64, 64)
+        }
+
+        val logo = TextView(this).apply {
+            text = "PRASCO"
+            setTextColor(Color.parseColor("#4a9eff"))
+            textSize = 36f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 32)
+        }
+
+        val icon = TextView(this).apply {
+            text = "🔒"
+            textSize = 48f
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 24)
+        }
+
+        val title = TextView(this).apply {
+            text = "Autorisierung widerrufen"
+            setTextColor(Color.parseColor("#ff8800"))
+            textSize = 24f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        }
+
+        val details = TextView(this).apply {
+            text = "Die Autorisierung für dieses Gerät wurde widerrufen.\n\n" +
+                    "Bitte kontaktieren Sie den Systemadministrator."
+            setTextColor(Color.parseColor("#cccccc"))
+            textSize = 16f
+            gravity = Gravity.CENTER
+        }
+
+        innerLayout.addView(logo)
+        innerLayout.addView(icon)
+        innerLayout.addView(title)
+        innerLayout.addView(details)
+
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER }
+
+        layout.addView(innerLayout, params)
+        setContentView(layout)
+    }
+
+    // ============================================
+    // Status Polling (für Pending-Status)
+    // ============================================
+
+    private fun startStatusPolling() {
+        stopStatusPolling()
+        statusPollRunnable = object : Runnable {
+            override fun run() {
+                thread {
+                    val status = registrationManager.checkStatus(getServerUrl())
+                    handler.post {
+                        if (status != null && status != "pending") {
+                            handleAuthStatus(status, registrationManager.getDisplayIdentifier())
+                        } else {
+                            // Weiter pollen
+                            statusPollRunnable?.let {
+                                handler.postDelayed(it, DeviceRegistrationManager.STATUS_POLL_INTERVAL)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        handler.postDelayed(statusPollRunnable!!, DeviceRegistrationManager.STATUS_POLL_INTERVAL)
+    }
+
+    private fun stopStatusPolling() {
+        statusPollRunnable?.let { handler.removeCallbacks(it) }
+        statusPollRunnable = null
+    }
+
+    // ============================================
+    // Heartbeat (für autorisierte Geräte)
+    // ============================================
+
+    private fun startHeartbeat() {
+        stopHeartbeat()
+        heartbeatRunnable = object : Runnable {
+            override fun run() {
+                thread {
+                    registrationManager.sendHeartbeat(getServerUrl())
+                    // Prüfen ob Autorisierung widerrufen wurde
+                    val status = registrationManager.getAuthStatus()
+                    handler.post {
+                        if (status == "revoked" || status == "rejected") {
+                            handleAuthStatus(status, null)
+                        } else {
+                            heartbeatRunnable?.let {
+                                handler.postDelayed(it, DeviceRegistrationManager.HEARTBEAT_INTERVAL)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        handler.postDelayed(heartbeatRunnable!!, DeviceRegistrationManager.HEARTBEAT_INTERVAL)
+    }
+
+    private fun stopHeartbeat() {
+        heartbeatRunnable?.let { handler.removeCallbacks(it) }
+        heartbeatRunnable = null
     }
 
     // ============================================
@@ -259,7 +648,13 @@ class MainActivity : FragmentActivity() {
             override fun run() {
                 // WebView wiederherstellen und erneut laden
                 setContentView(webView)
-                webView.loadUrl(getServerUrl())
+                val identifier = registrationManager.getDisplayIdentifier()
+                val url = if (identifier != null && identifier.isNotEmpty()) {
+                    "${getServerUrl()}/display/$identifier"
+                } else {
+                    getServerUrl()
+                }
+                webView.loadUrl(url)
                 handler.postDelayed(this, RECONNECT_INTERVAL)
             }
         }
@@ -354,9 +749,10 @@ class MainActivity : FragmentActivity() {
     }
 
     /**
-     * Einstellungs-Dialog: Server-URL konfigurieren
+     * Einstellungs-Dialog: Server-URL konfigurieren + Geräte-Info
      * Aufruf: 5x Menu-Taste auf der Fernbedienung
      */
+    @SuppressLint("SetTextI18n")
     private fun openSettings() {
         val currentUrl = getServerUrl()
 
@@ -377,12 +773,21 @@ class MainActivity : FragmentActivity() {
             setHintTextColor(Color.GRAY)
             textSize = 18f
             isSingleLine = true
-            hint = "http://192.168.1.100:3000"
+            hint = "https://212.227.20.158"
             setSelection(text.length)
         }
 
+        val serial = DeviceIdentifier.getSerialNumber(this)
+        val model = DeviceIdentifier.getDeviceModel()
+        val authStatus = registrationManager.getAuthStatus()
+        val displayId = registrationManager.getDisplayIdentifier() ?: "—"
+
         val info = TextView(this).apply {
-            text = "App Version: 2.0.0 | Menu × 5 = Einstellungen"
+            text = "App Version: 2.1.0 | Menu × 5 = Einstellungen\n" +
+                    "Gerät: $model\n" +
+                    "Seriennummer: $serial\n" +
+                    "Autorisierung: $authStatus\n" +
+                    "Display: $displayId"
             setTextColor(Color.GRAY)
             textSize = 12f
             setPadding(0, 16, 0, 0)
@@ -395,16 +800,21 @@ class MainActivity : FragmentActivity() {
         AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog)
             .setTitle("PRASCO TV Einstellungen")
             .setView(layout)
-            .setPositiveButton("Speichern & Neu laden") { _, _ ->
+            .setPositiveButton("Speichern & Registrieren") { _, _ ->
                 val newUrl = input.text.toString().trim()
                 if (newUrl.isNotEmpty()) {
                     saveServerUrl(newUrl)
-                    webView.loadUrl(newUrl)
-                    Toast.makeText(this, "Server-URL gespeichert: $newUrl", Toast.LENGTH_LONG).show()
+                    registrationManager.clearRegistration()
+                    startDeviceRegistration()
+                    Toast.makeText(this, "Server-URL gespeichert: $newUrl — Registrierung gestartet", Toast.LENGTH_LONG).show()
                 }
             }
             .setNeutralButton("Seite neu laden") { _, _ ->
-                webView.reload()
+                if (registrationManager.isAuthorized()) {
+                    loadAuthorizedDisplay(registrationManager.getDisplayIdentifier())
+                } else {
+                    startDeviceRegistration()
+                }
             }
             .setNegativeButton("Abbrechen", null)
             .show()
