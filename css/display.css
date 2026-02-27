@@ -1017,28 +1017,20 @@ body {
   }
 }
 
-/* Blend effect classes - Nur aktiv wenn transitions-enabled */
-/* Standardmäßig keine Animationen (ressourcenschonend für Raspberry Pi) */
+/* Blend effect classes - immer aktiv, Dauer wird per JS gesteuert */
 .blend-transition-in {
-  animation-duration: 0s;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
-}
-
-.blend-transition-out {
-  animation-duration: 0s;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  animation-fill-mode: both;
-}
-
-/* Aktiviere Animationen nur wenn transitions-enabled gesetzt ist */
-.transitions-enabled .blend-transition-in {
   animation-duration: 0.55s;
 }
 
-.transitions-enabled .blend-transition-out {
+.blend-transition-out {
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: both;
   animation-duration: 0.45s;
 }
+
+/* transitions-enabled überschreibt nichts mehr – bleibt für fadeIn-Guard */
 
 .blend-fade-in { animation-name: blendFadeIn; }
 .blend-fade-out { animation-name: blendFadeOut; }
