@@ -5112,7 +5112,7 @@ window.addEventListener('load', async () => {
     card.addEventListener('click', () => {
       const targetSection = card.dataset.target;
       if (targetSection) {
-        showSection(targetSection.replace('-section', ''));
+        navigateTo(targetSection.replace('-section', ''));
       }
     });
   });
