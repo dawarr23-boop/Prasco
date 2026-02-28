@@ -768,28 +768,28 @@
 
           <!-- Live-Daten Section -->
           <section id="livedata-section" class="section">
-            <h2>Live-Daten (ÖPNV, Verkehr & Wetter)</h2>
+            <h2 data-translate="liveData.sectionTitle">Live-Daten (ÖPNV, Verkehr & Wetter)</h2>
 
             <!-- Transit / ÖPNV Konfiguration -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="9" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="11" x2="4" y2="14"/><line x1="11" y1="11" x2="12" y2="14"/></svg></span> ÖPNV-Abfahrten</h3>
-              <p class="settings-description">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="9" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="11" x2="4" y2="14"/><line x1="11" y1="11" x2="12" y2="14"/></svg></span> <span data-translate="liveData.transit.title">ÖPNV-Abfahrten</span></h3>
+              <p class="settings-description" data-translate="liveData.transit.description">
                 Konfigurieren Sie die Anzeige von Live-Abfahrtszeiten für Busse und Bahnen in Ihrer Nähe.
               </p>
               <div class="settings-form">
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="transit-enabled" />
-                    <span>ÖPNV-Abfahrten auf Display anzeigen</span>
+                    <span data-translate="liveData.transit.enable">ÖPNV-Abfahrten auf Display anzeigen</span>
                   </label>
                 </div>
 
                 <div id="transit-config" style="display: none">
                   <div class="form-group">
-                    <label for="transit-station-search">Station suchen</label>
+                    <label for="transit-station-search" data-translate="liveData.transit.stationSearch">Station suchen</label>
                     <div class="search-input-group">
-                      <input type="text" id="transit-station-search" placeholder="z.B. Hamburg Hbf, Berlin Alexanderplatz..." />
-                      <button type="button" class="btn btn-secondary btn-sm" id="transit-search-btn">Suchen</button>
+                      <input type="text" id="transit-station-search" placeholder="z.B. Hamburg Hbf, Berlin Alexanderplatz..." data-translate-placeholder="liveData.transit.stationPlaceholder" />
+                      <button type="button" class="btn btn-secondary btn-sm" id="transit-search-btn" data-translate="common.search">Suchen</button>
                     </div>
                   </div>
 
@@ -803,78 +803,78 @@
                         <small id="transit-station-id" class="text-muted"></small>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" id="transit-remove-station">Entfernen</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="transit-remove-station" data-translate="liveData.transit.remove">Entfernen</button>
                   </div>
 
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="transit-max-departures">Maximale Abfahrten</label>
+                      <label for="transit-max-departures" data-translate="liveData.transit.maxDepartures">Maximale Abfahrten</label>
                       <input type="number" id="transit-max-departures" value="10" min="3" max="30" />
                     </div>
                     <div class="form-group">
-                      <label for="transit-duration">Zeitfenster (Minuten)</label>
+                      <label for="transit-duration" data-translate="liveData.transit.timeWindow">Zeitfenster (Minuten)</label>
                       <input type="number" id="transit-duration" value="60" min="10" max="180" />
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label for="transit-refresh-interval">Aktualisierungsintervall (Sekunden)</label>
+                    <label for="transit-refresh-interval" data-translate="liveData.transit.refreshInterval">Aktualisierungsintervall (Sekunden)</label>
                     <input type="number" id="transit-refresh-interval" value="30" min="10" max="300" />
                   </div>
 
                   <div class="form-group">
-                    <label>Verkehrsmittel filtern</label>
+                    <label data-translate="liveData.transit.filterTitle">Verkehrsmittel filtern</label>
                     <div class="transport-filter-grid">
-                      <label class="checkbox-label"><input type="checkbox" id="filter-bus" checked /><span>Bus</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-suburban" checked /><span>S-Bahn</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-subway" checked /><span>U-Bahn</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-tram" checked /><span>Tram</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-regional" checked /><span>Regionalzug</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-national" checked /><span>Fernzug</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-ferry" /><span>Fähre</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-bus" checked /><span data-translate="liveData.transit.bus">Bus</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-suburban" checked /><span data-translate="liveData.transit.suburban">S-Bahn</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-subway" checked /><span data-translate="liveData.transit.subway">U-Bahn</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-tram" checked /><span data-translate="liveData.transit.tram">Tram</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-regional" checked /><span data-translate="liveData.transit.regional">Regionalzug</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-national" checked /><span data-translate="liveData.transit.national">Fernzug</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="filter-ferry" /><span data-translate="liveData.transit.ferry">Fähre</span></label>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label>Auf welchen Displays anzeigen?</label>
+                    <label data-translate="liveData.displayAssignment">Auf welchen Displays anzeigen?</label>
                     <div id="transit-display-checkboxes" class="transport-filter-grid">
-                      <p class="text-muted">Lade Displays...</p>
+                      <p class="text-muted" data-translate="liveData.loadingDisplays">Lade Displays...</p>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveTransitSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewTransitData" style="margin-left: 0.5rem">Vorschau</button>
+                <button class="btn btn-primary" id="saveTransitSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewTransitData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
             <!-- Live-Vorschau ÖPNV -->
             <div id="transit-preview-card" class="settings-card" style="display: none">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> ÖPNV-Vorschau</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.transit.previewTitle">ÖPNV-Vorschau</span></h3>
               <div id="transit-preview-content" class="live-preview-container">
-                <p class="text-muted">Klicken Sie auf "Vorschau" um Live-Abfahrten zu laden.</p>
+                <p class="text-muted" data-translate="liveData.transit.previewHint">Klicken Sie auf "Vorschau" um Live-Abfahrten zu laden.</p>
               </div>
             </div>
 
             <!-- Verkehr / Autobahn Konfiguration -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M4 14L6 2M10 2L12 14"/><line x1="8" y1="4" x2="8" y2="6"/><line x1="8" y1="8" x2="8" y2="10"/></svg></span> Autobahn-Verkehrslage</h3>
-              <p class="settings-description">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M4 14L6 2M10 2L12 14"/><line x1="8" y1="4" x2="8" y2="6"/><line x1="8" y1="8" x2="8" y2="10"/></svg></span> <span data-translate="liveData.traffic.title">Autobahn-Verkehrslage</span></h3>
+              <p class="settings-description" data-translate="liveData.traffic.description">
                 Zeigen Sie Staumeldungen, Baustellen und Verkehrswarnungen für ausgewählte Autobahnen an.
               </p>
               <div class="settings-form">
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="traffic-enabled" />
-                    <span>Verkehrslage auf Display anzeigen</span>
+                    <span data-translate="liveData.traffic.enable">Verkehrslage auf Display anzeigen</span>
                   </label>
                 </div>
 
                 <div id="traffic-config" style="display: none">
                   <div class="form-group">
-                    <label for="traffic-location-preset">Standort-Vorauswahl</label>
+                    <label for="traffic-location-preset" data-translate="liveData.traffic.locationPreset">Standort-Vorauswahl</label>
                     <select id="traffic-location-preset">
-                      <option value="">— Manuell auswählen —</option>
+                      <option value="" data-translate="liveData.traffic.manualSelect">— Manuell auswählen —</option>
                       <option value="ahlen" selected>Ahlen (A1, A2, A43, A44)</option>
                       <option value="muenster">Münster (A1, A2, A43)</option>
                       <option value="dortmund">Dortmund (A1, A2, A40, A44, A45)</option>
@@ -883,12 +883,12 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="traffic-highway-select">Autobahnen auswählen</label>
+                    <label for="traffic-highway-select" data-translate="liveData.traffic.highwaySelect">Autobahnen auswählen</label>
                     <div class="highway-select-wrapper">
                       <select id="traffic-highway-select" multiple size="6">
                         <option value="loading" disabled>Lade Autobahnen...</option>
                       </select>
-                      <small>Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl oder nutzen Sie die Standort-Vorauswahl</small>
+                      <small data-translate="liveData.traffic.multiSelectHint">Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl oder nutzen Sie die Standort-Vorauswahl</small>
                     </div>
                   </div>
 
@@ -896,65 +896,65 @@
 
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="traffic-refresh-interval">Aktualisierung (Minuten)</label>
+                      <label for="traffic-refresh-interval" data-translate="liveData.traffic.refreshInterval">Aktualisierung (Minuten)</label>
                       <input type="number" id="traffic-refresh-interval" value="5" min="1" max="60" />
                     </div>
                     <div class="form-group">
-                      <label for="traffic-max-warnings">Max. Meldungen pro Autobahn</label>
+                      <label for="traffic-max-warnings" data-translate="liveData.traffic.maxWarnings">Max. Meldungen pro Autobahn</label>
                       <input type="number" id="traffic-max-warnings" value="5" min="1" max="20" />
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label>Meldungstypen anzeigen</label>
+                    <label data-translate="liveData.traffic.reportTypes">Meldungstypen anzeigen</label>
                     <div class="transport-filter-grid">
-                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span>Verkehrswarnungen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span>Baustellen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span>Sperrungen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span data-translate="liveData.traffic.warnings">Verkehrswarnungen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span data-translate="liveData.traffic.roadworks">Baustellen</span></label>
+                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span data-translate="liveData.traffic.closures">Sperrungen</span></label>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label>Auf welchen Displays anzeigen?</label>
+                    <label data-translate="liveData.displayAssignment">Auf welchen Displays anzeigen?</label>
                     <div id="traffic-display-checkboxes" class="transport-filter-grid">
-                      <p class="text-muted">Lade Displays...</p>
+                      <p class="text-muted" data-translate="liveData.loadingDisplays">Lade Displays...</p>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveTrafficSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewTrafficData" style="margin-left: 0.5rem">Vorschau</button>
+                <button class="btn btn-primary" id="saveTrafficSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewTrafficData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
             <!-- Live-Vorschau Verkehr -->
             <div id="traffic-preview-card" class="settings-card" style="display: none">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> Verkehrs-Vorschau</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.traffic.previewTitle">Verkehrs-Vorschau</span></h3>
               <div id="traffic-preview-content" class="live-preview-container">
-                <p class="text-muted">Klicken Sie auf "Vorschau" um Verkehrsdaten zu laden.</p>
+                <p class="text-muted" data-translate="liveData.traffic.previewHint">Klicken Sie auf "Vorschau" um Verkehrsdaten zu laden.</p>
               </div>
             </div>
 
             <!-- Wetter Konfiguration -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="7" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="2" y1="7" x2="4" y2="7"/><line x1="12" y1="7" x2="14" y2="7"/><line x1="3.5" y1="3.5" x2="5" y2="5"/><line x1="11" y1="9" x2="12.5" y2="10.5"/></svg></span> Wetter & Vorhersage</h3>
-              <p class="settings-description">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="7" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="2" y1="7" x2="4" y2="7"/><line x1="12" y1="7" x2="14" y2="7"/><line x1="3.5" y1="3.5" x2="5" y2="5"/><line x1="11" y1="9" x2="12.5" y2="10.5"/></svg></span> <span data-translate="liveData.weather.title">Wetter & Vorhersage</span></h3>
+              <p class="settings-description" data-translate="liveData.weather.description">
                 Zeigen Sie aktuelles Wetter und eine mehrtägige Vorhersage auf Ihrem Display an. Daten von Open-Meteo (kostenlos, kein API-Key nötig).
               </p>
               <div class="settings-form">
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="weather-enabled" />
-                    <span>Wetter auf Display anzeigen</span>
+                    <span data-translate="liveData.weather.enable">Wetter auf Display anzeigen</span>
                   </label>
                 </div>
 
                 <div id="weather-config" style="display: none">
                   <div class="form-group">
-                    <label for="weather-location-search">Ort suchen</label>
+                    <label for="weather-location-search" data-translate="liveData.weather.locationSearch">Ort suchen</label>
                     <div class="search-input-group">
-                      <input type="text" id="weather-location-search" placeholder="z.B. Ahlen, Münster, Berlin..." />
-                      <button type="button" class="btn btn-secondary btn-sm" id="weather-search-btn">Suchen</button>
+                      <input type="text" id="weather-location-search" placeholder="z.B. Ahlen, Münster, Berlin..." data-translate-placeholder="liveData.weather.locationPlaceholder" />
+                      <button type="button" class="btn btn-secondary btn-sm" id="weather-search-btn" data-translate="common.search">Suchen</button>
                     </div>
                   </div>
 
@@ -968,68 +968,68 @@
                         <small id="weather-location-coords" class="text-muted"></small>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" id="weather-remove-location">Entfernen</button>
+                    <button type="button" class="btn btn-sm btn-danger" id="weather-remove-location" data-translate="liveData.weather.remove">Entfernen</button>
                   </div>
 
                   <div class="form-group">
                     <label class="checkbox-label">
                       <input type="checkbox" id="weather-show-forecast" checked />
-                      <span>Vorhersage anzeigen</span>
+                      <span data-translate="liveData.weather.showForecast">Vorhersage anzeigen</span>
                     </label>
                   </div>
 
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="weather-forecast-days">Vorhersage-Tage</label>
+                      <label for="weather-forecast-days" data-translate="liveData.weather.forecastDays">Vorhersage-Tage</label>
                       <input type="number" id="weather-forecast-days" value="5" min="1" max="7" />
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label>Auf welchen Displays anzeigen?</label>
+                    <label data-translate="liveData.displayAssignment">Auf welchen Displays anzeigen?</label>
                     <div id="weather-display-checkboxes" class="transport-filter-grid">
-                      <p class="text-muted">Lade Displays...</p>
+                      <p class="text-muted" data-translate="liveData.loadingDisplays">Lade Displays...</p>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveWeatherSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewWeatherData" style="margin-left: 0.5rem">Vorschau</button>
+                <button class="btn btn-primary" id="saveWeatherSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewWeatherData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
             <!-- Wetter-Vorschau -->
             <div id="weather-preview-card" class="settings-card" style="display: none">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> Wetter-Vorschau</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.weather.previewTitle">Wetter-Vorschau</span></h3>
               <div id="weather-preview-content" class="live-preview-container">
-                <p class="text-muted">Klicken Sie auf "Vorschau" um Wetterdaten zu laden.</p>
+                <p class="text-muted" data-translate="liveData.weather.previewHint">Klicken Sie auf "Vorschau" um Wetterdaten zu laden.</p>
               </div>
             </div>
 
             <!-- Cache Management -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><polyline points="2,4 14,4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9"/></svg></span> Cache-Verwaltung</h3>
-              <p class="settings-description">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><polyline points="2,4 14,4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9"/></svg></span> <span data-translate="liveData.cache.title">Cache-Verwaltung</span></h3>
+              <p class="settings-description" data-translate="liveData.cache.description">
                 Leeren Sie den Cache für ÖPNV-, Verkehrs- und Wetterdaten, um aktuelle Daten zu erzwingen.
               </p>
               <div class="settings-form">
                 <div class="cache-stats" id="cache-stats">
                   <div class="cache-stat-item">
-                    <span class="cache-label">ÖPNV-Cache:</span>
+                    <span class="cache-label" data-translate="liveData.cache.transit">ÖPNV-Cache:</span>
                     <span id="transit-cache-count" class="cache-value">–</span>
                   </div>
                   <div class="cache-stat-item">
-                    <span class="cache-label">Verkehr-Cache:</span>
+                    <span class="cache-label" data-translate="liveData.cache.traffic">Verkehr-Cache:</span>
                     <span id="traffic-cache-count" class="cache-value">–</span>
                   </div>
                   <div class="cache-stat-item">
-                    <span class="cache-label">Wetter-Cache:</span>
+                    <span class="cache-label" data-translate="liveData.cache.weather">Wetter-Cache:</span>
                     <span id="weather-cache-count" class="cache-value">–</span>
                   </div>
                 </div>
-                <button class="btn btn-secondary" id="clearTransitCache">ÖPNV-Cache leeren</button>
-                <button class="btn btn-secondary" id="clearTrafficCache" style="margin-left: 0.5rem">Verkehr-Cache leeren</button>
-                <button class="btn btn-secondary" id="clearWeatherCache" style="margin-left: 0.5rem">Wetter-Cache leeren</button>
+                <button class="btn btn-secondary" id="clearTransitCache" data-translate="liveData.cache.clearTransit">ÖPNV-Cache leeren</button>
+                <button class="btn btn-secondary" id="clearTrafficCache" style="margin-left: 0.5rem" data-translate="liveData.cache.clearTraffic">Verkehr-Cache leeren</button>
+                <button class="btn btn-secondary" id="clearWeatherCache" style="margin-left: 0.5rem" data-translate="liveData.cache.clearWeather">Wetter-Cache leeren</button>
               </div>
             </div>
           </section>
@@ -1123,9 +1123,9 @@
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="blend-effects-enabled" />
-                    <span>Übergangseffekte aktivieren</span>
+                    <span data-translate="settings.blendEffectsEnable">Übergangseffekte aktivieren</span>
                   </label>
-                  <small style="color: #666; display: block; margin-top: 0.25rem">
+                  <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.blendEffectsHint">
                     Aktiviert animierte Übergänge zwischen Beiträgen (Fade, Slide, Zoom)
                   </small>
                 </div>
@@ -1133,18 +1133,18 @@
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="transitions-external-only" />
-                    <span>Übergangseffekte nur auf externen Displays</span>
+                    <span data-translate="settings.transitionsExternalOnly">Übergangseffekte nur auf externen Displays</span>
                   </label>
-                  <small style="color: #666; display: block; margin-top: 0.25rem">
+                  <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.transitionsExternalOnlyHint">
                     Spart Ressourcen: Raspberry Pi zeigt Posts ohne Animationen, externe Bildschirme mit Effekten
                   </small>
                 </div>
 
                 <div class="form-group">
-                  <label for="live-data-interval">Live-Daten Intervall (Minuten)
+                  <label for="live-data-interval" data-translate="settings.liveDataInterval">Live-Daten Intervall (Minuten)
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
-                      <div class="info-tooltip-content">
+                      <div class="info-tooltip-content" data-translate="settings.liveDataIntervalTooltip">
                         Wie häufig Live-Daten (ÖPNV, Wetter, Nachrichten) zwischen den Beiträgen eingeblendet werden. Empfohlen: <strong>5 Minuten</strong>.
                       </div>
                     </span>
@@ -1153,10 +1153,10 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="live-data-slide-duration">Live-Daten Slide-Dauer (Sekunden)
+                  <label for="live-data-slide-duration" data-translate="settings.liveDataSlideDuration">Live-Daten Slide-Dauer (Sekunden)
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
-                      <div class="info-tooltip-content">
+                      <div class="info-tooltip-content" data-translate="settings.liveDataSlideDurationTooltip">
                         Wie lange jeder Live-Daten-Slide angezeigt wird (ÖPNV, Wetter, Nachrichten). Empfohlen: <strong>20 Sekunden</strong>.
                       </div>
                     </span>
@@ -1253,20 +1253,20 @@
 
             <!-- KI-Assistent Einstellungen -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 2l2 4h4l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4z"/></svg></span> KI-Assistent</h3>
-              <p class="settings-description">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 2l2 4h4l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4z"/></svg></span> <span data-translate="settings.ai">KI-Assistent</span></h3>
+              <p class="settings-description" data-translate="settings.aiDescription">
                 Nutzen Sie KI-Unterstützung beim Erstellen von Beiträgen: Texte generieren, verbessern, kürzen oder übersetzen. Verwendet OpenAI GPT-4o-mini.
               </p>
               <div class="settings-form">
                 <div class="form-group">
                   <label class="checkbox-label">
                     <input type="checkbox" id="ai-enabled" />
-                    <span>KI-Assistent aktivieren</span>
+                    <span data-translate="settings.aiEnable">KI-Assistent aktivieren</span>
                   </label>
                 </div>
                 <div id="ai-config" style="display: none;">
                   <div class="form-group">
-                    <label for="ai-api-key">OpenAI API-Key</label>
+                    <label for="ai-api-key" data-translate="settings.aiApiKey">OpenAI API-Key</label>
                     <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off" />
                     <small style="color: #666;">Erhältlich unter <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #58585a;">platform.openai.com/api-keys</a></small>
                   </div>
@@ -1648,6 +1648,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=3.6"></script>
+    <script src="/js/admin.js?v=3.7"></script>
   </body>
 </html>
