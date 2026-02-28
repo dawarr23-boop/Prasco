@@ -6,6 +6,7 @@ import { logger } from '../utils/logger';
 import * as presentationService from '../services/presentationService';
 import { cacheService } from '../utils/cache';
 import { videoDownloadService } from '../services/videoDownloadService';
+import { deleteMediaFiles } from '../services/mediaService';
 
 /**
  * Get all posts with pagination, filtering, and sorting
@@ -574,7 +575,9 @@ export const deletePost = async (
   try {
     const { id } = req.params;
 
-    const post = await Post.findByPk(id);
+    const post = await Post.findByPk(id, {
+      include: [{ model: Media, as: 'media' }],
+    });
 
     if (!post) {
       throw new AppError('Post nicht gefunden', 404);
@@ -583,6 +586,30 @@ export const deletePost = async (
     // Check organization access
     if (req.user?.organizationId && post.organizationId !== req.user.organizationId) {
       throw new AppError('Keine Berechtigung für diesen Post', 403);
+    }
+
+    // Datei-Cleanup: hochgeladene Medien löschen
+    if (post.mediaId) {
+      const media = await Media.findByPk(post.mediaId);
+      if (media) {
+        try {
+          await deleteMediaFiles(media.filename, !!media.thumbnailUrl);
+          await media.destroy();
+          logger.info(`Media-Datei gelöscht: ${media.filename}`);
+        } catch (err) {
+          logger.warn(`Media-Datei konnte nicht gelöscht werden: ${media.filename}`, err);
+        }
+      }
+    }
+
+    // Datei-Cleanup: heruntergeladene YouTube-Videos löschen
+    if (post.backgroundMusicUrl && post.backgroundMusicUrl.startsWith('/uploads/')) {
+      try {
+        await videoDownloadService.deleteVideo(post.backgroundMusicUrl);
+        logger.info(`Offline-Video gelöscht: ${post.backgroundMusicUrl}`);
+      } catch (err) {
+        logger.warn(`Offline-Video konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+      }
     }
 
     await post.destroy();
@@ -710,6 +737,31 @@ export const deleteAllPosts = async (
     // Organization filter
     if (req.user?.organizationId) {
       where.organizationId = req.user.organizationId;
+    }
+
+    // Alle Posts mit zugehörigen Medien laden für Datei-Cleanup
+    const posts = await Post.findAll({ where });
+
+    // Dateien bereinigen
+    for (const post of posts) {
+      if (post.mediaId) {
+        const media = await Media.findByPk(post.mediaId);
+        if (media) {
+          try {
+            await deleteMediaFiles(media.filename, !!media.thumbnailUrl);
+            await media.destroy();
+          } catch (err) {
+            logger.warn(`Media-Datei konnte nicht gelöscht werden: ${media.filename}`, err);
+          }
+        }
+      }
+      if (post.backgroundMusicUrl && post.backgroundMusicUrl.startsWith('/uploads/')) {
+        try {
+          await videoDownloadService.deleteVideo(post.backgroundMusicUrl);
+        } catch (err) {
+          logger.warn(`Offline-Video konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+        }
+      }
     }
 
     const deletedCount = await Post.destroy({ where });
