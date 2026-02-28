@@ -2919,9 +2919,15 @@ async function applyBlendTransition(container, renderFn, blendEffect) {
     // Await renderFn so async content (presentations) is ready before IN starts
     await renderFn();
 
+    // Direkt nach renderFn (synchron, kein Render-Frame dazwischen) blend-in-progress
+    // setzen damit das CSS-fadeIn nicht durch container.className='post' ausgelöst wird.
+    // Das verhindert den transform:translateY-Konflikt der den Ruck verursacht.
+    container.classList.add('blend-in-progress');
+
     // Zwei rAF sicherstellen dass Browser Layout + Paint abgeschlossen hat
     requestAnimationFrame(() => requestAnimationFrame(() => {
       container.style.opacity = '';   // CSS-Animation übernimmt ab jetzt
+      container.classList.remove('blend-in-progress');
       container.classList.add('blend-transition-in', inClass);
 
       let inDone = false;
