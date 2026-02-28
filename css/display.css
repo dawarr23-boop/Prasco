@@ -784,6 +784,11 @@ body {
   position: static;
   width: 100vw;
   height: 100vh;
+  /* WICHTIG: transform entfernen, damit position:fixed im video-fullscreen-container
+     wieder viewport-relativ ist (CSS-Spec: transform erstellt neuen Containing Block) */
+  transform: none !important;
+  backface-visibility: unset !important;
+  -webkit-backface-visibility: unset !important;
 }
 
 /* Responsive Anpassungen für verschiedene Bildschirmgrößen */
