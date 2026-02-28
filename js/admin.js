@@ -6114,20 +6114,32 @@ async function loadTrafficSettings() {
   }
 }
 
+const FALLBACK_HIGHWAYS = [
+  'A1','A2','A3','A4','A5','A6','A7','A8','A9','A10',
+  'A11','A12','A13','A14','A15','A17','A19','A20','A21','A23',
+  'A24','A25','A27','A28','A29','A30','A31','A33','A36','A37',
+  'A38','A39','A40','A42','A43','A44','A45','A46','A48','A49',
+  'A52','A57','A59','A60','A61','A62','A63','A64','A65','A66',
+  'A67','A70','A71','A72','A73','A81','A92','A93','A94','A95','A96','A98','A99',
+];
+
 async function loadHighwayList() {
   const select = document.getElementById('traffic-highway-select');
   if (!select) return;
 
   try {
     const data = await apiRequest('/traffic/roads');
-    if (data.success && data.data.length > 0) {
-      select.innerHTML = data.data.map(road => 
-        `<option value="${road}">${road}</option>`
-      ).join('');
-    }
+    const roads = data && data.success && Array.isArray(data.data) && data.data.length > 0
+      ? data.data
+      : FALLBACK_HIGHWAYS;
+    select.innerHTML = roads.map(road =>
+      `<option value="${road.trim()}">${road.trim()}</option>`
+    ).join('');
   } catch (error) {
-    select.innerHTML = '<option value="" disabled>Fehler beim Laden</option>';
-    console.error('Highway list error:', error);
+    console.warn('Highway API nicht erreichbar, verwende Fallback-Liste:', error);
+    select.innerHTML = FALLBACK_HIGHWAYS.map(road =>
+      `<option value="${road}">${road}</option>`
+    ).join('');
   }
 }
 
