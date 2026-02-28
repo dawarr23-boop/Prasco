@@ -21,10 +21,10 @@ Object.values(UPLOAD_PATHS).forEach((dir) => {
 
 // File size limits (in bytes)
 export const FILE_SIZE_LIMITS = {
-  IMAGE: 10 * 1024 * 1024, // 10 MB
-  VIDEO: 100 * 1024 * 1024, // 100 MB
-  DOCUMENT: 5 * 1024 * 1024, // 5 MB
-  PRESENTATION: 50 * 1024 * 1024, // 50 MB für PowerPoint
+  IMAGE: 50 * 1024 * 1024,           // 50 MB
+  VIDEO: 2 * 1024 * 1024 * 1024,    // 2 GB
+  DOCUMENT: 20 * 1024 * 1024,       // 20 MB
+  PRESENTATION: 200 * 1024 * 1024,  // 200 MB
 };
 
 // Allowed MIME types

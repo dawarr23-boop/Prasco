@@ -224,8 +224,8 @@ app.use(compression({
     return compression.filter(req, res);
   },
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Input Sanitization - Protect against NoSQL injection
 // Erlauben von Punkten in Keys für Settings-API

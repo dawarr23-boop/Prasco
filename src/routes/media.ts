@@ -21,7 +21,7 @@ router.use(authenticate);
  *     description: |
  *       Lädt eine Bilddatei hoch und generiert automatisch ein Thumbnail (300x300px).
  *       Unterstützte Formate: JPEG, PNG, GIF, WebP, SVG.
- *       Max Größe: 10MB für Bilder, 100MB für Videos.
+ *       Max Größe: 50MB für Bilder, 2GB für Videos.
  *       Rate Limit: 10 Uploads pro Stunde.
  *       Erfordert 'media.upload' Permission (Editor).
  *     requestBody:

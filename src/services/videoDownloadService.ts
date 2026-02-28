@@ -18,7 +18,7 @@ interface VideoDownloadResult {
  */
 export class VideoDownloadService {
   private readonly UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'videos');
-  private readonly MAX_VIDEO_SIZE = '500M'; // Max video size
+  private readonly MAX_VIDEO_SIZE = '2G'; // Max video size
   private readonly TIMEOUT = 300000; // 5 minutes timeout
 
   constructor() {
