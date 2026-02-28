@@ -21,6 +21,7 @@ interface PostAttributes {
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
   blendEffect?: string;
+  soundEnabled?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -42,6 +43,7 @@ interface PostCreationAttributes
     | 'backgroundMusicUrl'
     | 'backgroundMusicVolume'
     | 'blendEffect'
+    | 'soundEnabled'
     | 'createdAt'
     | 'updatedAt'
   > {}
@@ -66,6 +68,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
   public blendEffect?: string;
+  public soundEnabled?: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -199,6 +202,12 @@ Post.init(
       type: DataTypes.STRING(50),
       allowNull: true,
       comment: 'Transition blend effect (fade, slide-left, slide-right, zoom-in, zoom-out, etc.)',
+    },
+    soundEnabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: true,
+      comment: 'Whether sound/audio is enabled for this post (video posts)',
     },
   },
   {

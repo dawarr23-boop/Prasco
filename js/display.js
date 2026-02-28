@@ -2668,7 +2668,8 @@ async function displayCurrentPost() {
       // Prüfe ob Video stumm geschaltet werden soll (globale Musik aktiv)
       loadGlobalMusicSettings();
       const shouldMuteVideo =
-        globalMusicSettings.enabled && globalMusicSettings.muteVideos && globalMusicSettings.url;
+        post.soundEnabled === false ||
+        (globalMusicSettings.enabled && globalMusicSettings.muteVideos && globalMusicSettings.url);
       const muteParam = shouldMuteVideo ? '1' : '0';
 
       // Video-URL aus verschiedenen Quellen

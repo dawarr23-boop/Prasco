@@ -92,6 +92,7 @@ export const getActivePosts = async (
         'backgroundMusicUrl',
         'backgroundMusicVolume',
         'blendEffect',
+        'soundEnabled',
         'createdAt',
       ],
     });
@@ -154,6 +155,7 @@ export const getPostById = async (
         'viewCount',
         'backgroundMusicUrl',
         'backgroundMusicVolume',
+        'soundEnabled',
         'createdAt',
       ],
     });

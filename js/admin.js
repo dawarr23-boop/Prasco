@@ -238,6 +238,7 @@ const translations = {
     'form.blendEffectZoomIn': 'Zoom In (Hineinzoomen)',
     'form.blendEffectZoomOut': 'Zoom Out (Herauszoomen)',
     'form.blendEffectHint': 'Wählen Sie einen Übergangseffekt zum nächsten Beitrag',
+    'form.soundEnabled': 'Sound aktiviert',
     'form.startDate': 'Start-Datum',
     'form.endDate': 'End-Datum',
     'form.backgroundMusicSection': 'Hintergrundmusik (optional)',
@@ -629,6 +630,7 @@ const translations = {
     'form.blendEffectZoomIn': 'Zoom In',
     'form.blendEffectZoomOut': 'Zoom Out',
     'form.blendEffectHint': 'Choose a transition effect to the next post',
+    'form.soundEnabled': 'Sound enabled',
     'form.startDate': 'Start Date',
     'form.endDate': 'End Date',
     'form.backgroundMusicSection': 'Background Music (optional)',
@@ -1022,6 +1024,7 @@ const translations = {
     'form.blendEffectZoomIn': 'Zoom Avanti',
     'form.blendEffectZoomOut': 'Zoom Indietro',
     'form.blendEffectHint': 'Scegli un effetto di transizione al prossimo articolo',
+    'form.soundEnabled': 'Audio abilitato',
     'form.startDate': 'Data Inizio',
     'form.endDate': 'Data Fine',
     'form.backgroundMusicSection': 'Musica di Sottofondo (opzionale)',
@@ -2300,6 +2303,8 @@ async function showPostForm() {
   const showTitleCheckbox = document.getElementById('show-title');
   if (isActiveCheckbox) isActiveCheckbox.checked = true;
   if (showTitleCheckbox) showTitleCheckbox.checked = true;
+  const soundEnabledCheckbox = document.getElementById('sound-enabled');
+  if (soundEnabledCheckbox) soundEnabledCheckbox.checked = true;
 
   // Standard-Startdatum auf jetzt setzen (lokale Zeit für datetime-local Input)
   const now = new Date();
@@ -2574,6 +2579,11 @@ async function editPost(id) {
   const showTitleCheckbox = document.querySelector('input[name="show_title"]');
   if (showTitleCheckbox) {
     showTitleCheckbox.checked = post.showTitle === true;
+  }
+
+  const soundEnabledCheckbox = document.getElementById('sound-enabled');
+  if (soundEnabledCheckbox) {
+    soundEnabledCheckbox.checked = post.soundEnabled !== false;
   }
 
   const categorySelect = document.getElementById('post-category');
@@ -3033,6 +3043,7 @@ async function handlePostFormSubmit(e) {
     endDate: formData.get('end_date') ? new Date(formData.get('end_date')).toISOString() : null,
     isActive: document.getElementById('is-active')?.checked ?? true,
     showTitle: showTitleValue,
+    soundEnabled: document.getElementById('sound-enabled')?.checked ?? true,
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
     blendEffect: formData.get('blend_effect') || null,
