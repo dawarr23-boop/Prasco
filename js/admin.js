@@ -5530,6 +5530,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Auto-set display duration from video file length
+  if (mediaFileInput) {
+    mediaFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('video/')) {
+        const videoEl = document.createElement('video');
+        videoEl.preload = 'metadata';
+        const objectUrl = URL.createObjectURL(file);
+        videoEl.src = objectUrl;
+        videoEl.addEventListener('loadedmetadata', () => {
+          const durationField = document.getElementById('display-duration');
+          if (durationField && videoEl.duration && isFinite(videoEl.duration)) {
+            durationField.value = Math.ceil(videoEl.duration);
+          }
+          URL.revokeObjectURL(objectUrl);
+        });
+      }
+    });
+  }
+
   // Update upload section visibility on page load
   const postTypeSelect = document.getElementById('post-type');
   if (postTypeSelect) {
