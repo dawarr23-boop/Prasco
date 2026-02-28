@@ -15,6 +15,7 @@ const translations = {
     'nav.settings': 'Einstellungen',
     'nav.logout': 'Abmelden',
     'nav.liveData': 'Live-Daten',
+    'nav.displays': 'Displays',
 
     // Dashboard
     'dashboard.activePosts': 'Aktive Beiträge',
@@ -333,6 +334,68 @@ const translations = {
     'liveData.cache.clearTransit': 'ÖPNV-Cache leeren',
     'liveData.cache.clearTraffic': 'Verkehr-Cache leeren',
     'liveData.cache.clearWeather': 'Wetter-Cache leeren',
+
+    // Displays
+    'displays.title': 'Display-Verwaltung',
+    'displays.newDisplay': '+ Neues Display',
+    'displays.licensed': '/ 2 lizenziert',
+    'displays.licenseWarning': 'Display-Lizenzlimit erreicht',
+    'displays.licenseWarningText': 'Ihre aktuelle Lizenz umfasst {max} Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter',
+    'displays.licenseLimit': 'Lizenzlimit erreicht',
+    'displays.loading': 'Lade Displays...',
+    'displays.empty': 'Noch keine Displays registriert. Erstellen Sie das erste Display!',
+    'displays.formTitleNew': '+ Neues Display',
+    'displays.formTitleEdit': 'Display bearbeiten',
+    'displays.name': 'Display-Name *',
+    'displays.namePlaceholder': 'z.B. Empfangsbereich',
+    'displays.identifier': 'Identifier *',
+    'displays.identifierTooltip': 'Eindeutiger technischer Name für die Display-URL. Wird in der Adressleiste verwendet: /display/mein-display. Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche.',
+    'displays.identifierPlaceholder': 'z.B. empfangsbereich-1',
+    'displays.identifierHint': 'Eindeutiger Identifier für die Display-URL (nur a-z, 0-9, -, _)',
+    'displays.description': 'Beschreibung',
+    'displays.descriptionPlaceholder': 'Optionale Beschreibung oder Standort des Displays',
+    'displays.isActive': 'Display ist aktiv',
+    'displays.isActiveHint': 'Inaktive Displays erhalten keine Beiträge',
+    'displays.liveDataTitle': 'Live-Daten auf diesem Display',
+    'displays.showTransitData': 'ÖPNV-Abfahrten anzeigen',
+    'displays.showTrafficData': 'Autobahn-Verkehr anzeigen',
+    'displays.liveDataHint': 'Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden',
+    'displays.create': 'Display erstellen',
+    'displays.saveChanges': 'Änderungen speichern',
+    'displays.open': '▷ Öffnen',
+    'displays.edit': 'Bearbeiten',
+    'displays.delete': 'Löschen',
+    'displays.clickToEdit': 'Klicken zum Bearbeiten',
+    'displays.url': 'Display-URL:',
+    'displays.confirmDelete': 'Display wirklich löschen? Zugewiesene Beiträge werden nicht gelöscht.',
+    'displays.successDeleted': 'Display erfolgreich gelöscht!',
+    'displays.successCreated': 'Display erfolgreich erstellt!',
+    'displays.successUpdated': 'Display erfolgreich aktualisiert!',
+    'displays.errorLoading': 'Fehler beim Laden:',
+    'displays.errorSaving': 'Fehler beim Speichern:',
+    'displays.errorDeleting': 'Fehler beim Löschen:',
+    'displays.unknownDevice': 'Unbekanntes Gerät',
+    'displays.lastSeen': 'Zuletzt gesehen:',
+    'displays.statusPending': '⏳ Ausstehend',
+    'displays.statusAuthorized': '✅ Autorisiert',
+    'displays.statusRejected': '🚫 Abgelehnt',
+    'displays.statusRevoked': '🔒 Widerrufen',
+    'displays.authorize': '✅ Autorisieren',
+    'displays.reject': '🚫 Ablehnen',
+    'displays.revoke': '🔒 Widerrufen',
+    'displays.confirmAuthorize': 'Dieses Gerät autorisieren? Es erhält Zugriff auf die Display-Inhalte.',
+    'displays.confirmReject': 'Dieses Gerät ablehnen? Es kann keine Inhalte anzeigen.',
+    'displays.confirmRevoke': 'Autorisierung widerrufen? Das Gerät verliert sofort den Zugriff.',
+    'displays.successAuthorized': 'Gerät erfolgreich autorisiert!',
+    'displays.successRejected': 'Gerät wurde abgelehnt.',
+    'displays.successRevoked': 'Autorisierung widerrufen.',
+    'displays.noDisplaysAvailable': 'Keine Displays verfügbar. Erstellen Sie zuerst Displays in der Display-Verwaltung.',
+    'displays.assignmentLabel': 'Display-Zuweisung',
+    'displays.modeAll': 'Alle Displays',
+    'displays.modeAllHint': 'Auf allen Displays anzeigen',
+    'displays.modeSpecific': 'Spezifische Displays',
+    'displays.modeSpecificHint': 'Nur bestimmte Displays',
+    'displays.selectDisplays': 'Displays auswählen:',
   },
 
   en: {
@@ -345,6 +408,7 @@ const translations = {
     'nav.settings': 'Settings',
     'nav.logout': 'Logout',
     'nav.liveData': 'Live Data',
+    'nav.displays': 'Displays',
 
     // Dashboard
     'dashboard.activePosts': 'Active Posts',
@@ -661,6 +725,68 @@ const translations = {
     'liveData.cache.clearTransit': 'Clear transit cache',
     'liveData.cache.clearTraffic': 'Clear traffic cache',
     'liveData.cache.clearWeather': 'Clear weather cache',
+
+    // Displays
+    'displays.title': 'Display Management',
+    'displays.newDisplay': '+ New Display',
+    'displays.licensed': '/ 2 licensed',
+    'displays.licenseWarning': 'Display license limit reached',
+    'displays.licenseWarningText': 'Your current license includes {max} displays. To add more displays, please contact sales at',
+    'displays.licenseLimit': 'License limit reached',
+    'displays.loading': 'Loading displays...',
+    'displays.empty': 'No displays registered yet. Create the first display!',
+    'displays.formTitleNew': '+ New Display',
+    'displays.formTitleEdit': 'Edit Display',
+    'displays.name': 'Display Name *',
+    'displays.namePlaceholder': 'e.g. Reception area',
+    'displays.identifier': 'Identifier *',
+    'displays.identifierTooltip': 'Unique technical name for the display URL. Used in the address bar: /display/my-display. Allowed: letters, numbers, hyphens, underscores.',
+    'displays.identifierPlaceholder': 'e.g. reception-area-1',
+    'displays.identifierHint': 'Unique identifier for the display URL (only a-z, 0-9, -, _)',
+    'displays.description': 'Description',
+    'displays.descriptionPlaceholder': 'Optional description or location of the display',
+    'displays.isActive': 'Display is active',
+    'displays.isActiveHint': 'Inactive displays receive no posts',
+    'displays.liveDataTitle': 'Live Data on this Display',
+    'displays.showTransitData': 'Show transit departures',
+    'displays.showTrafficData': 'Show highway traffic',
+    'displays.liveDataHint': 'Controls whether live data widgets are shown on this display',
+    'displays.create': 'Create Display',
+    'displays.saveChanges': 'Save Changes',
+    'displays.open': '▷ Open',
+    'displays.edit': 'Edit',
+    'displays.delete': 'Delete',
+    'displays.clickToEdit': 'Click to edit',
+    'displays.url': 'Display URL:',
+    'displays.confirmDelete': 'Really delete this display? Assigned posts will not be deleted.',
+    'displays.successDeleted': 'Display deleted successfully!',
+    'displays.successCreated': 'Display created successfully!',
+    'displays.successUpdated': 'Display updated successfully!',
+    'displays.errorLoading': 'Error loading:',
+    'displays.errorSaving': 'Error saving:',
+    'displays.errorDeleting': 'Error deleting:',
+    'displays.unknownDevice': 'Unknown device',
+    'displays.lastSeen': 'Last seen:',
+    'displays.statusPending': '⏳ Pending',
+    'displays.statusAuthorized': '✅ Authorized',
+    'displays.statusRejected': '🚫 Rejected',
+    'displays.statusRevoked': '🔒 Revoked',
+    'displays.authorize': '✅ Authorize',
+    'displays.reject': '🚫 Reject',
+    'displays.revoke': '🔒 Revoke',
+    'displays.confirmAuthorize': 'Authorize this device? It will get access to the display content.',
+    'displays.confirmReject': 'Reject this device? It cannot display any content.',
+    'displays.confirmRevoke': 'Revoke authorization? The device loses access immediately.',
+    'displays.successAuthorized': 'Device authorized successfully!',
+    'displays.successRejected': 'Device was rejected.',
+    'displays.successRevoked': 'Authorization revoked.',
+    'displays.noDisplaysAvailable': 'No displays available. Create displays first in Display Management.',
+    'displays.assignmentLabel': 'Display Assignment',
+    'displays.modeAll': 'All Displays',
+    'displays.modeAllHint': 'Show on all displays',
+    'displays.modeSpecific': 'Specific Displays',
+    'displays.modeSpecificHint': 'Only certain displays',
+    'displays.selectDisplays': 'Select displays:',
   },
 
   it: {
@@ -673,6 +799,7 @@ const translations = {
     'nav.settings': 'Impostazioni',
     'nav.logout': 'Esci',
     'nav.liveData': 'Dati in Diretta',
+    'nav.displays': 'Display',
 
     // Dashboard
     'dashboard.activePosts': 'Articoli Attivi',
@@ -991,6 +1118,68 @@ const translations = {
     'liveData.cache.clearTransit': 'Svuota cache trasporto',
     'liveData.cache.clearTraffic': 'Svuota cache traffico',
     'liveData.cache.clearWeather': 'Svuota cache meteo',
+
+    // Displays
+    'displays.title': 'Gestione Display',
+    'displays.newDisplay': '+ Nuovo Display',
+    'displays.licensed': '/ 2 con licenza',
+    'displays.licenseWarning': 'Limite licenza display raggiunto',
+    'displays.licenseWarningText': 'La licenza attuale comprende {max} display. Per aggiungere altri display, contattare il reparto vendite a',
+    'displays.licenseLimit': 'Limite licenza raggiunto',
+    'displays.loading': 'Caricamento display...',
+    'displays.empty': 'Nessun display registrato. Crea il primo display!',
+    'displays.formTitleNew': '+ Nuovo Display',
+    'displays.formTitleEdit': 'Modifica Display',
+    'displays.name': 'Nome Display *',
+    'displays.namePlaceholder': 'es. Area Reception',
+    'displays.identifier': 'Identificatore *',
+    'displays.identifierTooltip': "Nome tecnico univoco per l'URL del display. Usato nella barra degli indirizzi: /display/mio-display. Consentiti: lettere, numeri, trattini, underscore.",
+    'displays.identifierPlaceholder': 'es. reception-1',
+    'displays.identifierHint': "Identificatore univoco per l'URL del display (solo a-z, 0-9, -, _)",
+    'displays.description': 'Descrizione',
+    'displays.descriptionPlaceholder': 'Descrizione opzionale o posizione del display',
+    'displays.isActive': 'Display attivo',
+    'displays.isActiveHint': 'I display inattivi non ricevono articoli',
+    'displays.liveDataTitle': 'Dati in Diretta su questo Display',
+    'displays.showTransitData': 'Mostra partenze trasporto',
+    'displays.showTrafficData': 'Mostra traffico autostradale',
+    'displays.liveDataHint': 'Controlla se i widget di dati in diretta vengono mostrati su questo display',
+    'displays.create': 'Crea Display',
+    'displays.saveChanges': 'Salva Modifiche',
+    'displays.open': '▷ Apri',
+    'displays.edit': 'Modifica',
+    'displays.delete': 'Elimina',
+    'displays.clickToEdit': 'Clicca per modificare',
+    'displays.url': 'URL Display:',
+    'displays.confirmDelete': 'Eliminare davvero questo display? Gli articoli assegnati non verranno eliminati.',
+    'displays.successDeleted': 'Display eliminato con successo!',
+    'displays.successCreated': 'Display creato con successo!',
+    'displays.successUpdated': 'Display aggiornato con successo!',
+    'displays.errorLoading': 'Errore nel caricamento:',
+    'displays.errorSaving': 'Errore nel salvataggio:',
+    'displays.errorDeleting': "Errore nell'eliminazione:",
+    'displays.unknownDevice': 'Dispositivo sconosciuto',
+    'displays.lastSeen': 'Ultima connessione:',
+    'displays.statusPending': '⏳ In attesa',
+    'displays.statusAuthorized': '✅ Autorizzato',
+    'displays.statusRejected': '🚫 Rifiutato',
+    'displays.statusRevoked': '🔒 Revocato',
+    'displays.authorize': '✅ Autorizza',
+    'displays.reject': '🚫 Rifiuta',
+    'displays.revoke': '🔒 Revoca',
+    'displays.confirmAuthorize': 'Autorizzare questo dispositivo? Avrà accesso ai contenuti del display.',
+    'displays.confirmReject': 'Rifiutare questo dispositivo? Non può mostrare contenuti.',
+    'displays.confirmRevoke': 'Revocare l’autorizzazione? Il dispositivo perde subito l’accesso.',
+    'displays.successAuthorized': 'Dispositivo autorizzato con successo!',
+    'displays.successRejected': 'Dispositivo rifiutato.',
+    'displays.successRevoked': 'Autorizzazione revocata.',
+    'displays.noDisplaysAvailable': 'Nessun display disponibile. Creare prima i display nella Gestione Display.',
+    'displays.assignmentLabel': 'Assegnazione Display',
+    'displays.modeAll': 'Tutti i Display',
+    'displays.modeAllHint': 'Mostra su tutti i display',
+    'displays.modeSpecific': 'Display Specifici',
+    'displays.modeSpecificHint': 'Solo determinati display',
+    'displays.selectDisplays': 'Seleziona display:',
   },
 };
 
@@ -1097,6 +1286,7 @@ function applyTranslations() {
     users: { key: 'nav.users', icon: '◎' },
     settings: { key: 'nav.settings', icon: '⚙' },
     livedata: { key: 'nav.liveData', icon: '◉' },
+    displays: { key: 'nav.displays', icon: '▢' },
   };
 
   document.querySelectorAll('.sidebar-menu a').forEach((link) => {
@@ -1123,6 +1313,7 @@ function applyTranslations() {
     'users-section': 'users.title',
     'settings-section': 'settings.title',
     'livedata-section': 'nav.liveData',
+    'displays-section': 'displays.title',
   };
 
   Object.entries(sectionTitles).forEach(([sectionId, key]) => {
@@ -1601,6 +1792,7 @@ function navigateTo(section) {
       users: 'users.title',
       media: 'nav.media',
       livedata: 'nav.liveData',
+      displays: 'displays.title',
       settings: 'settings.title',
     };
     document.getElementById('page-title').textContent = titles[section] ? t(titles[section]) : section;
@@ -2164,7 +2356,7 @@ async function loadDisplayCheckboxes(selectedDisplayIds = []) {
     }
 
     if (displays.length === 0) {
-      container.innerHTML = '<p style="color: #dc3545; text-align: center; font-size: 0.9em;">Keine Displays verfügbar. Erstellen Sie zuerst Displays in der Display-Verwaltung.</p>';
+      container.innerHTML = '<p style="color: #dc3545; text-align: center; font-size: 0.9em;">' + t('displays.noDisplaysAvailable') + '</p>';
       return;
     }
 
@@ -3248,7 +3440,7 @@ let displaysAutoRefreshInterval = null;
 
 async function loadDisplays() {
   const displaysList = document.getElementById('displays-list');
-  displaysList.innerHTML = '<p style="text-align:center; color: #6c757d;">Lade Displays...</p>';
+  displaysList.innerHTML = '<p style="text-align:center; color: #6c757d;">' + t('displays.loading') + '</p>';
 
   try {
     const response = await apiRequest('/displays');
@@ -3256,7 +3448,7 @@ async function loadDisplays() {
 
     if (displaysCache.length === 0) {
       displaysList.innerHTML =
-        '<p style="text-align:center; color: #6c757d;">Noch keine Displays registriert. Erstellen Sie das erste Display!</p>';
+        '<p style="text-align:center; color: #6c757d;">' + t('displays.empty') + '</p>';
       return;
     }
 
@@ -3276,10 +3468,10 @@ async function loadDisplays() {
               revoked: '#ff8800'
             };
             const statusLabels = {
-              pending: '⏳ Ausstehend',
-              authorized: '✅ Autorisiert',
-              rejected: '🚫 Abgelehnt',
-              revoked: '🔒 Widerrufen'
+              pending: t('displays.statusPending'),
+              authorized: t('displays.statusAuthorized'),
+              rejected: t('displays.statusRejected'),
+              revoked: t('displays.statusRevoked')
             };
             statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
           }
@@ -3288,10 +3480,10 @@ async function loadDisplays() {
           let deviceInfo = '';
           if (isDevice) {
             deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
-              📱 ${escapeHtml(display.deviceModel || 'Unbekanntes Gerät')} | SN: ${escapeHtml(display.serialNumber)}
+              📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
               ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
               ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
-              ${display.lastSeenAt ? ` | Zuletzt gesehen: ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
+              ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
             </p>`;
           }
           
@@ -3300,18 +3492,18 @@ async function loadDisplays() {
           if (isDevice) {
             if (authStatus === 'pending') {
               authActions = `
-                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="Gerät autorisieren">✅ Autorisieren</button>
-                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="Gerät ablehnen">🚫 Ablehnen</button>`;
+                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
+                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
             } else if (authStatus === 'authorized') {
-              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="Autorisierung widerrufen">🔒 Widerrufen</button>`;
+              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
             } else if (authStatus === 'rejected' || authStatus === 'revoked') {
-              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="Gerät autorisieren">✅ Autorisieren</button>`;
+              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
             }
           }
           
           return `
         <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
-            <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Klicken zum Bearbeiten">
+            <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
                 <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
                 <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
@@ -3321,16 +3513,16 @@ async function loadDisplays() {
                   ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
                 </p>
                 <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
-                  Display-URL: <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                  ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
                 </p>
             </div>
             <div class="list-item-actions">
                 ${authActions}
-                <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="Display öffnen">
-                  ▷ Öffnen
+                <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="${t('displays.open')}">
+                  ${t('displays.open')}
                 </button>
-                <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">Bearbeiten</button>
-                <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">Löschen</button>
+                <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
+                <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
             </div>
         </div>
       `;
@@ -3338,7 +3530,7 @@ async function loadDisplays() {
       )
       .join('');
   } catch (error) {
-    displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">Fehler beim Laden: ${error.message}</p>`;
+    displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">${t('displays.errorLoading')} ${error.message}</p>`;
   }
 
   // License info aktualisieren
@@ -3384,7 +3576,7 @@ function updateDisplayLicenseInfo() {
 function showDisplayForm() {
   // License-Check: Wenn Limit erreicht, Warnung anzeigen
   if (displaysCache.length >= MAX_LICENSED_DISPLAYS) {
-    showNotification(`Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.`, 'warning');
+    showNotification(`${t('displays.licenseWarning')} (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.`, 'warning');
     return;
   }
 
@@ -3393,11 +3585,11 @@ function showDisplayForm() {
 
   // Formular-Titel aktualisieren
   const formTitle = document.querySelector('#display-form h2');
-  if (formTitle) formTitle.textContent = '+ Neues Display';
+  if (formTitle) formTitle.textContent = t('displays.formTitleNew');
 
   // Submit-Button aktualisieren
   const submitBtn = document.querySelector('#displayForm button[type="submit"]');
-  if (submitBtn) submitBtn.textContent = 'Display erstellen';
+  if (submitBtn) submitBtn.textContent = t('displays.create');
 
   // Live-Daten Checkboxen auf Standard setzen
   document.getElementById('display-showTransitData').checked = true;
@@ -3425,11 +3617,11 @@ async function editDisplay(id) {
 
   // Formular-Titel aktualisieren
   const formTitle = document.querySelector('#display-form h2');
-  if (formTitle) formTitle.textContent = 'Display bearbeiten';
+  if (formTitle) formTitle.textContent = t('displays.formTitleEdit');
 
   // Submit-Button aktualisieren
   const submitBtn = document.querySelector('#displayForm button[type="submit"]');
-  if (submitBtn) submitBtn.textContent = 'Änderungen speichern';
+  if (submitBtn) submitBtn.textContent = t('displays.saveChanges');
 
   // Formular-Felder füllen
   document.getElementById('display-name').value = display.name || '';
@@ -3444,7 +3636,7 @@ async function editDisplay(id) {
 }
 
 async function deleteDisplay(id) {
-  if (!confirm('Display wirklich löschen? Zugewiesene Beiträge werden nicht gelöscht.')) {
+  if (!confirm(t('displays.confirmDelete'))) {
     return;
   }
 
@@ -3452,9 +3644,9 @@ async function deleteDisplay(id) {
     await apiRequest(`/displays/${id}`, { method: 'DELETE' });
     await loadDisplays();
     await updateDashboardStats();
-    showNotification('Display erfolgreich gelöscht!', 'success');
+    showNotification(t('displays.successDeleted'), 'success');
   } catch (error) {
-    showNotification('Fehler beim Löschen: ' + error.message, 'error');
+    showNotification(t('displays.errorDeleting') + ' ' + error.message, 'error');
   }
 }
 
@@ -3463,33 +3655,33 @@ async function deleteDisplay(id) {
 // ============================================
 
 async function authorizeDevice(displayId) {
-  if (!confirm('Dieses Gerät autorisieren? Es erhält Zugriff auf die Display-Inhalte.')) return;
+  if (!confirm(t('displays.confirmAuthorize'))) return;
   try {
     await apiRequest(`/displays/${displayId}/authorize`, { method: 'POST' });
     await loadDisplays();
-    showNotification('Gerät erfolgreich autorisiert!', 'success');
+    showNotification(t('displays.successAuthorized'), 'success');
   } catch (error) {
     showNotification('Fehler bei Autorisierung: ' + error.message, 'error');
   }
 }
 
 async function rejectDevice(displayId) {
-  if (!confirm('Dieses Gerät ablehnen? Es kann keine Inhalte anzeigen.')) return;
+  if (!confirm(t('displays.confirmReject'))) return;
   try {
     await apiRequest(`/displays/${displayId}/reject`, { method: 'POST' });
     await loadDisplays();
-    showNotification('Gerät wurde abgelehnt.', 'warning');
+    showNotification(t('displays.successRejected'), 'warning');
   } catch (error) {
     showNotification('Fehler beim Ablehnen: ' + error.message, 'error');
   }
 }
 
 async function revokeDevice(displayId) {
-  if (!confirm('Autorisierung widerrufen? Das Gerät verliert sofort den Zugriff.')) return;
+  if (!confirm(t('displays.confirmRevoke'))) return;
   try {
     await apiRequest(`/displays/${displayId}/revoke`, { method: 'POST' });
     await loadDisplays();
-    showNotification('Autorisierung widerrufen.', 'warning');
+    showNotification(t('displays.successRevoked'), 'warning');
   } catch (error) {
     showNotification('Fehler beim Widerrufen: ' + error.message, 'error');
   }
@@ -3515,14 +3707,14 @@ async function handleDisplayFormSubmit(e) {
         method: 'PUT',
         body: JSON.stringify(displayData),
       });
-      showNotification('Display erfolgreich aktualisiert!', 'success');
+      showNotification(t('displays.successUpdated'), 'success');
     } else {
       // Create
       await apiRequest('/displays', {
         method: 'POST',
         body: JSON.stringify(displayData),
       });
-      showNotification('Display erfolgreich erstellt!', 'success');
+      showNotification(t('displays.successCreated'), 'success');
     }
 
     hideDisplayForm();
@@ -3531,10 +3723,10 @@ async function handleDisplayFormSubmit(e) {
   } catch (error) {
     const msg = error.message || 'Unbekannter Fehler';
     if (msg.includes('Lizenzlimit') || msg.includes('lizenz') || error.status === 403) {
-      showNotification('Display-Lizenzlimit erreicht. Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.', 'warning');
+      showNotification(t('displays.licenseWarning') + '. Kontaktieren Sie kontakt@it-westfalen.de für weitere Lizenzen.', 'warning');
       updateDisplayLicenseInfo();
     } else {
-      showNotification('Fehler beim Speichern: ' + msg, 'error');
+      showNotification(t('displays.errorSaving') + ' ' + msg, 'error');
     }
   }
 }

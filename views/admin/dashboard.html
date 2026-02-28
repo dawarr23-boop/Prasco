@@ -80,8 +80,8 @@
                 <p class="stat-number" id="total-categories">0</p>
               </div>
               <div class="stat-card clickable" data-target="displays-section">
-                <h3>Displays</h3>
-                <p class="stat-number"><span id="total-displays">0</span> <span style="font-size: 0.5em; color: #6c757d; font-weight: 400;">/ 2 lizenziert</span></p>
+                <h3 data-translate="nav.displays">Displays</h3>
+                <p class="stat-number"><span id="total-displays">0</span> <span style="font-size: 0.5em; color: #6c757d; font-weight: 400;" data-translate="displays.licensed">/ 2 lizenziert</span></p>
               </div>
               <div class="stat-card clickable" data-target="media-section">
                 <h3 data-i18n="dashboard.media">Medien</h3>
@@ -169,30 +169,30 @@
 
                 <!-- Display-Auswahl -->
                 <div class="form-group">
-                  <label class="form-group-label">Display-Zuweisung</label>
+                  <label class="form-group-label" data-translate="displays.assignmentLabel">Display-Zuweisung</label>
 
                   <div class="display-mode-cards">
                     <label class="display-mode-card" for="display-mode-all">
                       <input type="radio" name="display_mode" value="all" id="display-mode-all" checked />
                       <div>
-                        <div class="display-mode-card-label">Alle Displays</div>
-                        <div class="display-mode-card-hint">Auf allen Displays anzeigen</div>
+                        <div class="display-mode-card-label" data-translate="displays.modeAll">Alle Displays</div>
+                        <div class="display-mode-card-hint" data-translate="displays.modeAllHint">Auf allen Displays anzeigen</div>
                       </div>
                     </label>
                     <label class="display-mode-card" for="display-mode-specific">
                       <input type="radio" name="display_mode" value="specific" id="display-mode-specific" />
                       <div>
-                        <div class="display-mode-card-label">Spezifische Displays</div>
-                        <div class="display-mode-card-hint">Nur bestimmte Displays</div>
+                        <div class="display-mode-card-label" data-translate="displays.modeSpecific">Spezifische Displays</div>
+                        <div class="display-mode-card-hint" data-translate="displays.modeSpecificHint">Nur bestimmte Displays</div>
                       </div>
                     </label>
                   </div>
 
                   <!-- Display Selection Container -->
                   <div id="display-selection-container" class="display-selection-box" style="display: none">
-                    <div class="display-selection-box-header">Displays auswählen:</div>
+                    <div class="display-selection-box-header" data-translate="displays.selectDisplays">Displays auswählen:</div>
                     <div id="displays-checkboxes">
-                      <p class="text-muted" style="text-align: center; padding: 1rem;">Lade Displays...</p>
+                      <p class="text-muted" style="text-align: center; padding: 1rem;" data-translate="liveData.loadingDisplays">Lade Displays...</p>
                     </div>
                   </div>
                 </div>
@@ -608,15 +608,15 @@
           <!-- Displays Section -->
           <section id="displays-section" class="section">
             <div class="section-header">
-              <h2>Display-Verwaltung</h2>
+              <h2 data-translate="displays.title">Display-Verwaltung</h2>
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <span id="display-license-info" class="license-info-badge">Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
-                <button class="btn btn-primary" id="showDisplayFormBtn">+ Neues Display</button>
+                <button class="btn btn-primary" id="showDisplayFormBtn" data-translate="displays.newDisplay">+ Neues Display</button>
               </div>
             </div>
 
             <div id="display-license-warning" class="license-warning" style="display: none">
-              <strong>Display-Lizenzlimit erreicht</strong>
+              <strong data-translate="displays.licenseWarning">Display-Lizenzlimit erreicht</strong>
               <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
             </div>
 
@@ -624,15 +624,15 @@
               <h2>+ Neues Display</h2>
               <form id="displayForm">
                 <div class="form-group">
-                  <label for="display-name">Display-Name *</label>
-                  <input type="text" id="display-name" name="name" required placeholder="z.B. Empfangsbereich" />
+                  <label for="display-name" data-translate="displays.name">Display-Name *</label>
+                  <input type="text" id="display-name" name="name" required placeholder="z.B. Empfangsbereich" data-translate-placeholder="displays.namePlaceholder" />
                 </div>
 
                 <div class="form-group">
-                  <label for="display-identifier">Identifier *
+                  <label for="display-identifier" data-translate="displays.identifier">Identifier *
                     <span class="info-tooltip-wrapper tooltip-below">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
-                      <div class="info-tooltip-content">
+                      <div class="info-tooltip-content" data-translate="displays.identifierTooltip">
                         Eindeutiger technischer Name für die Display-URL. Wird in der Adressleiste verwendet: <code>/display/mein-display</code>. Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche.
                       </div>
                     </span>
@@ -645,46 +645,48 @@
                     pattern="[a-zA-Z0-9_-]+"
                     placeholder="z.B. empfangsbereich-1" 
                     title="Nur Buchstaben, Zahlen, Bindestriche und Unterstriche"
+                    data-translate-placeholder="displays.identifierPlaceholder"
                   />
-                  <small style="color: #6c757d;">Eindeutiger Identifier für die Display-URL (nur a-z, 0-9, -, _)</small>
+                  <small style="color: #6c757d;" data-translate="displays.identifierHint">Eindeutiger Identifier für die Display-URL (nur a-z, 0-9, -, _)</small>
                 </div>
 
                 <div class="form-group">
-                  <label for="display-description">Beschreibung</label>
+                  <label for="display-description" data-translate="displays.description">Beschreibung</label>
                   <textarea 
                     id="display-description" 
                     name="description" 
                     rows="3"
                     placeholder="Optionale Beschreibung oder Standort des Displays"
+                    data-translate-placeholder="displays.descriptionPlaceholder"
                   ></textarea>
                 </div>
 
                 <div class="form-group">
                   <label>
                     <input type="checkbox" id="display-isActive" name="isActive" checked />
-                    Display ist aktiv
+                    <span data-translate="displays.isActive">Display ist aktiv</span>
                   </label>
-                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Inaktive Displays erhalten keine Beiträge</small>
+                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.isActiveHint">Inaktive Displays erhalten keine Beiträge</small>
                 </div>
 
                 <div class="form-group">
-                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Live-Daten auf diesem Display</label>
+                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-translate="displays.liveDataTitle">Live-Daten auf diesem Display</label>
                   <div style="display: flex; gap: 2rem; margin-top: 0.25rem;">
                     <label>
                       <input type="checkbox" id="display-showTransitData" name="showTransitData" checked />
-                      ÖPNV-Abfahrten anzeigen
+                      <span data-translate="displays.showTransitData">ÖPNV-Abfahrten anzeigen</span>
                     </label>
                     <label>
                       <input type="checkbox" id="display-showTrafficData" name="showTrafficData" checked />
-                      Autobahn-Verkehr anzeigen
+                      <span data-translate="displays.showTrafficData">Autobahn-Verkehr anzeigen</span>
                     </label>
                   </div>
-                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;">Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden</small>
+                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.liveDataHint">Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden</small>
                 </div>
 
                 <div class="form-actions">
-                  <button type="submit" class="btn btn-primary">Display erstellen</button>
-                  <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn">
+                  <button type="submit" class="btn btn-primary" data-translate="displays.create">Display erstellen</button>
+                  <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn" data-translate="btn.cancel">
                     Abbrechen
                   </button>
                 </div>
@@ -1648,6 +1650,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=3.7"></script>
+    <script src="/js/admin.js?v=3.8"></script>
   </body>
 </html>
