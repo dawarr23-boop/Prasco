@@ -346,7 +346,6 @@ async function renderTransitWidget() {
     return `<div class="transit-fullscreen">
       <div class="departure-board-header">
         <span class="departure-station-name">${stationName}</span>
-        <span class="departure-clock">${new Date().toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'})}</span>
       </div>
       <table class="live-departure-table">
         <thead><tr><th>Linie</th><th>Richtung</th><th>Abfahrt</th><th>in</th><th>Gleis</th><th>Status</th></tr></thead>
@@ -929,7 +928,6 @@ async function showLiveDataWidget(categoryFilter) {
             <span class="live-indicator">● LIVE</span>
             <span class="live-title">${slide.title}</span>
           </div>
-          <span class="live-time">${slide.timeStr} Uhr</span>
         </div>
         <div class="live-widget-content">
           ${slide.content}
