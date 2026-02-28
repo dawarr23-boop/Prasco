@@ -6610,7 +6610,13 @@ let aiEnabled = false;
 
 async function loadAISettings() {
   try {
-    const enabledSetting = await apiRequest('/settings/ai_enabled');
+    // Gracefully handle 404 if ai_enabled key doesn't exist in DB yet
+    let enabledSetting = null;
+    try {
+      enabledSetting = await apiRequest('/settings/ai_enabled');
+    } catch (e) {
+      // Key not yet seeded in DB – treat as disabled
+    }
     aiEnabled = enabledSetting?.data?.value === 'true';
     
     const checkbox = document.getElementById('ai-enabled');
@@ -6620,12 +6626,16 @@ async function loadAISettings() {
 
     // API-Key (nur Platzhalter anzeigen wenn vorhanden)
     if (aiEnabled) {
-      const keySetting = await apiRequest('/settings/ai_openai_api_key');
-      const keyInput = document.getElementById('ai-api-key');
-      const statusDiv = document.getElementById('ai-key-status');
-      if (keySetting?.data?.value && keyInput) {
-        keyInput.placeholder = 'sk-...••••••• (gespeichert)';
-        if (statusDiv) statusDiv.innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
+      try {
+        const keySetting = await apiRequest('/settings/ai_openai_api_key');
+        const keyInput = document.getElementById('ai-api-key');
+        const statusDiv = document.getElementById('ai-key-status');
+        if (keySetting?.data?.value && keyInput) {
+          keyInput.placeholder = 'sk-...••••••• (gespeichert)';
+          if (statusDiv) statusDiv.innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
+        }
+      } catch (e) {
+        // API-Key setting not found in DB yet
       }
     }
 
