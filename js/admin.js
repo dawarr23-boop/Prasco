@@ -4755,6 +4755,7 @@ window.addEventListener('load', async () => {
       const transitionsExternalOnly = document.getElementById('transitions-external-only');
       const liveDataInterval = document.getElementById('live-data-interval');
       const liveDataSlideDuration = document.getElementById('live-data-slide-duration');
+      const showPostCounter = document.getElementById('show-post-counter');
       
       if (refreshInterval && defaultDuration && blendEffectsEnabled && transitionsExternalOnly) {
         const settingsArray = [
@@ -4763,7 +4764,8 @@ window.addEventListener('load', async () => {
           { key: 'display.blendEffectsEnabled', value: blendEffectsEnabled.checked ? 'true' : 'false' },
           { key: 'display.transitionsExternalOnly', value: transitionsExternalOnly.checked ? 'true' : 'false' },
           { key: 'display.liveDataIntervalMinutes', value: parseInt(liveDataInterval?.value) || 5 },
-          { key: 'display.liveDataSlideDuration', value: parseInt(liveDataSlideDuration?.value) || 20 }
+          { key: 'display.liveDataSlideDuration', value: parseInt(liveDataSlideDuration?.value) || 20 },
+          { key: 'display.showPostCounter', value: showPostCounter ? (showPostCounter.checked ? 'true' : 'false') : 'true' }
         ];
         
         console.log('💾 Speichere Display-Einstellungen (Array):', settingsArray);
@@ -4834,7 +4836,8 @@ window.addEventListener('load', async () => {
           blendEffectsEnabled: data['display.blendEffectsEnabled'],
           transitionsExternalOnly: data['display.transitionsExternalOnly'],
           liveDataIntervalMinutes: data['display.liveDataIntervalMinutes'],
-          liveDataSlideDuration: data['display.liveDataSlideDuration']
+          liveDataSlideDuration: data['display.liveDataSlideDuration'],
+          showPostCounter: data['display.showPostCounter']
         };
       } else {
         // Fallback zu localStorage
@@ -4861,6 +4864,10 @@ window.addEventListener('load', async () => {
       }
       if (transitionsExternalOnly && settings.transitionsExternalOnly !== undefined) {
         transitionsExternalOnly.checked = (settings.transitionsExternalOnly === 'true' || settings.transitionsExternalOnly === true);
+      }
+      const showPostCounterEl = document.getElementById('show-post-counter');
+      if (showPostCounterEl && settings.showPostCounter !== undefined) {
+        showPostCounterEl.checked = (settings.showPostCounter === 'true' || settings.showPostCounter === true);
       }
       const liveDataIntervalEl = document.getElementById('live-data-interval');
       const liveDataSlideDurationEl = document.getElementById('live-data-slide-duration');
@@ -4894,6 +4901,10 @@ window.addEventListener('load', async () => {
           }
           if (transitionsExternalOnly && settings.transitionsExternalOnly !== undefined) {
             transitionsExternalOnly.checked = (settings.transitionsExternalOnly === 'true' || settings.transitionsExternalOnly === true);
+          }
+          const showPostCounterFb = document.getElementById('show-post-counter');
+          if (showPostCounterFb && settings.showPostCounter !== undefined) {
+            showPostCounterFb.checked = (settings.showPostCounter === 'true' || settings.showPostCounter === true);
           }
         }
       } catch (fallbackError) {

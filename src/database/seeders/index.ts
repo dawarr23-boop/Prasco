@@ -102,6 +102,17 @@ export const seedDatabase = async (): Promise<void> => {
           description: 'Standard Anzeigedauer pro Post in Sekunden',
         },
       });
+
+      await Setting.findOrCreate({
+        where: { key: 'display.showPostCounter' },
+        defaults: {
+          key: 'display.showPostCounter',
+          value: 'true',
+          type: 'boolean',
+          category: 'display',
+          description: 'Beitragsnummerierung (x / y) auf dem Display anzeigen',
+        },
+      });
       logger.info('✅ Display-Settings erstellt');
     } catch (settingsError) {
       logger.error('❌ Fehler beim Settings-Seeding:', settingsError);

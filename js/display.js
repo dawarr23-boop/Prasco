@@ -48,6 +48,7 @@ let displaySettings = {
   transitionsExternalOnly: false, // Standard: Transitions auf allen Displays
   liveDataIntervalMinutes: 5, // Standard: Live-Daten alle 5 Minuten
   liveDataSlideDuration: 20, // Standard: 20 Sekunden pro Live-Slide
+  showPostCounter: true, // Standard: Beitragsnummerierung anzeigen
 };
 
 // Prüfe ob dieses Display extern ist (nicht localhost)
@@ -1024,6 +1025,9 @@ async function loadDisplaySettings() {
       }
       if (settings['display.liveDataSlideDuration'] !== undefined) {
         displaySettings.liveDataSlideDuration = parseInt(settings['display.liveDataSlideDuration']) || 20;
+      }
+      if (settings['display.showPostCounter'] !== undefined) {
+        displaySettings.showPostCounter = (settings['display.showPostCounter'] === 'true' || settings['display.showPostCounter'] === true);
       }
       
       console.log('Display-Einstellungen geladen:', displaySettings);
@@ -3023,7 +3027,14 @@ function displayCurrentPostWithBlend(blendEffect) {
 // Post-Counter aktualisieren
 function updatePostCounter() {
   const counterElement = document.getElementById('post-counter');
-  if (counterElement && posts.length > 0) {
+  if (!counterElement) return;
+  const indicator = counterElement.parentElement;
+  if (!displaySettings.showPostCounter) {
+    if (indicator) indicator.style.display = 'none';
+    return;
+  }
+  if (indicator) indicator.style.display = '';
+  if (posts.length > 0) {
     counterElement.textContent = `${currentIndex + 1} / ${posts.length}`;
   }
 }
