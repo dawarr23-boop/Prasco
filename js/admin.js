@@ -5609,7 +5609,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-console.log('Admin Dashboard geladen (API-Modus)');
+
 
 // ============================================
 // Live-Daten (ÖPNV & Verkehr) Management

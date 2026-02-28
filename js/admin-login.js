@@ -159,5 +159,4 @@ async function checkSSOStatus() {
   }
 }
 
-console.log('Admin Login geladen');
-console.log('Login-Credentials: admin@prasco.net / admin123 oder editor@prasco.net / editor123');
+
