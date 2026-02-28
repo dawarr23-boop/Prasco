@@ -2886,7 +2886,7 @@ function previousPost() {
  * @param {Function}    renderFn   - Funktion die den neuen Inhalt rendert (sync oder async start)
  * @param {string}      [blendEffect] - Effektname (z.B. 'fade'). Fallback: getNextBlendEffect()
  */
-function applyBlendTransition(container, renderFn, blendEffect) {
+async function applyBlendTransition(container, renderFn, blendEffect) {
   if (!container) { renderFn(); return; }
 
   // Wenn Blend-Effekte komplett deaktiviert: direkt rendern
@@ -2902,7 +2902,7 @@ function applyBlendTransition(container, renderFn, blendEffect) {
   const OUT_MS = 450;
   const IN_MS  = 550;
 
-  // Inline-Stil und alte Blend-Klassen bereinigen
+  // Inline-Stil und alte Blend-Klassen bereinigen (inkl. blend-done)
   container.style.animation = '';
   container.className = container.className.split(' ').filter(c => !c.startsWith('blend-')).join(' ');
 
@@ -2910,13 +2910,14 @@ function applyBlendTransition(container, renderFn, blendEffect) {
   const inClass  = `blend-${effect}-in`;
 
   // Gemeinsame IN-Phase: nach OUT sofort opacity:0 sichern → renderFn → IN-Animation
-  function startIn() {
+  async function startIn() {
     // Inline opacity:0 hält den Container unsichtbar zwischen OUT-Ende und IN-Start,
     // damit kein Frame-Flash des neuen Inhalts sichtbar ist.
     container.style.opacity = '0';
     container.classList.remove('blend-transition-out', outClass);
 
-    renderFn();
+    // Await renderFn so async content (presentations) is ready before IN starts
+    await renderFn();
 
     // Zwei rAF sicherstellen dass Browser Layout + Paint abgeschlossen hat
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -2928,6 +2929,8 @@ function applyBlendTransition(container, renderFn, blendEffect) {
         if (inDone) return;
         inDone = true;
         container.classList.remove('blend-transition-in', inClass);
+        // blend-done verhindert erneutes fadeIn-Trigger nach Blend-Ende
+        container.classList.add('blend-done');
       }, IN_MS);
 
       container.addEventListener('animationend', function onInEnd() {
@@ -2936,6 +2939,8 @@ function applyBlendTransition(container, renderFn, blendEffect) {
         clearTimeout(inTimer);
         container.removeEventListener('animationend', onInEnd);
         container.classList.remove('blend-transition-in', inClass);
+        // blend-done verhindert erneutes fadeIn-Trigger nach Blend-Ende
+        container.classList.add('blend-done');
       }, { once: true });
     }));
   }
