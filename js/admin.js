@@ -1797,6 +1797,7 @@ function navigateTo(section) {
       livedata: 'nav.liveData',
       displays: 'displays.title',
       settings: 'settings.title',
+      hilfe: 'Hilfe & Dokumentation',
     };
     document.getElementById('page-title').textContent = titles[section] ? t(titles[section]) : section;
 

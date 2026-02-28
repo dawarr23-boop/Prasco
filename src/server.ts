@@ -282,6 +282,10 @@ app.get('/admin/dashboard', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../views/admin/dashboard.html'));
 });
 
+app.get('/admin/handbuch', (_req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../views/admin/handbuch.html'));
+});
+
 // Swagger API Documentation
 app.use(
   '/api/docs',
