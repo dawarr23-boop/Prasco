@@ -2844,7 +2844,7 @@ async function displayCurrentPost() {
   }
 
   // Update Post Counter
-  document.getElementById('post-counter').textContent = `${currentIndex + 1} / ${posts.length}`;
+  updatePostCounter();
 
   // Hintergrundmusik starten/stoppen (auch bei Videos wenn globale Musik aktiv)
   playBackgroundMusic(post);
