@@ -1903,6 +1903,26 @@ body {
 }
 .station-icon { font-size: 1.5rem; }
 
+/* Live-Daten 2×2 Grid */
+.livedata-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.livedata-grid #transit-preview-card,
+.livedata-grid #traffic-preview-card,
+.livedata-grid #weather-preview-card {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1100px) {
+  .livedata-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Transport Filter Grid */
 .transport-filter-grid {
   display: grid;
