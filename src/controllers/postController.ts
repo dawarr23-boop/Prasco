@@ -634,13 +634,13 @@ export const deletePost = async (
       }
     }
 
-    // Datei-Cleanup: heruntergeladene YouTube-Videos löschen
+    // Datei-Cleanup: Hintergrundmusik löschen
     if (post.backgroundMusicUrl && post.backgroundMusicUrl.startsWith('/uploads/')) {
       try {
-        await videoDownloadService.deleteVideo(post.backgroundMusicUrl);
-        logger.info(`Offline-Video gelöscht: ${post.backgroundMusicUrl}`);
+        await deleteMediaFiles(path.basename(post.backgroundMusicUrl), false);
+        logger.info(`Hintergrundmusik gelöscht: ${post.backgroundMusicUrl}`);
       } catch (err) {
-        logger.warn(`Offline-Video konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+        logger.warn(`Hintergrundmusik konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
       }
     }
 
@@ -799,9 +799,9 @@ export const deleteAllPosts = async (
       }
       if (post.backgroundMusicUrl && post.backgroundMusicUrl.startsWith('/uploads/')) {
         try {
-          await videoDownloadService.deleteVideo(post.backgroundMusicUrl);
+          await deleteMediaFiles(path.basename(post.backgroundMusicUrl), false);
         } catch (err) {
-          logger.warn(`Offline-Video konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+          logger.warn(`Hintergrundmusik konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
         }
       }
       if (post.contentType === 'presentation' && post.content) {
