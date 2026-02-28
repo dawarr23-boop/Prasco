@@ -1037,9 +1037,6 @@ async function loadDisplaySettings() {
       
       // Aktualisiere Fußzeile
       updateRefreshInfo();
-
-      // Beitragsnummerierung sofort anwenden
-      applyPostCounterVisibility();
       
       return true;
     } else {
@@ -1047,7 +1044,6 @@ async function loadDisplaySettings() {
       // Setze trotzdem Transitions und Footer-Text mit Standardwerten
       updateTransitionsState();
       updateRefreshInfo();
-      applyPostCounterVisibility();
       return false;
     }
   } catch (error) {
@@ -1056,7 +1052,6 @@ async function loadDisplaySettings() {
     // Setze trotzdem Transitions und Footer-Text mit Standardwerten
     updateTransitionsState();
     updateRefreshInfo();
-    applyPostCounterVisibility();
     return false;
   }
 }
@@ -3029,23 +3024,16 @@ function displayCurrentPostWithBlend(blendEffect) {
   }, blendEffect);
 }
 
-// Sichtbarkeit des Post-Counters anwenden (ohne Posts-Abhängigkeit)
-function applyPostCounterVisibility() {
-  const indicator = document.querySelector('.post-indicator');
-  if (!indicator) return;
-  if (!displaySettings.showPostCounter) {
-    indicator.classList.add('hidden');
-  } else {
-    indicator.classList.remove('hidden');
-  }
-}
-
 // Post-Counter aktualisieren
 function updatePostCounter() {
   const counterElement = document.getElementById('post-counter');
   if (!counterElement) return;
-  applyPostCounterVisibility();
-  if (!displaySettings.showPostCounter) return;
+  const indicator = counterElement.parentElement;
+  if (!displaySettings.showPostCounter) {
+    if (indicator) indicator.style.display = 'none';
+    return;
+  }
+  if (indicator) indicator.style.display = '';
   if (posts.length > 0) {
     counterElement.textContent = `${currentIndex + 1} / ${posts.length}`;
   }
