@@ -50,6 +50,10 @@ export const ALLOWED_MIME_TYPES = {
     'audio/x-m4a',
     'audio/aac',
     'audio/flac',
+    'audio/x-ms-wma',  // .wma
+    'audio/aiff',      // .aiff
+    'audio/x-aiff',    // .aiff (alternative)
+    'audio/opus',      // .opus
   ],
 };
 
@@ -169,7 +173,7 @@ export const uploadMultiple = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: FILE_SIZE_LIMITS.IMAGE,
+    fileSize: FILE_SIZE_LIMITS.VIDEO, // Use largest limit to support all file types
     files: 10, // Max 10 files
   },
 });
