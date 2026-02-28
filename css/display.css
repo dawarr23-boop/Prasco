@@ -1228,9 +1228,16 @@ body {
 .transit-fullscreen,
 .traffic-fullscreen {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Transit/Traffic-Slides: live-widget-content-Padding entfernen */
+.live-data-widget.slide-transit .live-widget-content,
+.live-data-widget.slide-traffic .live-widget-content {
+  padding: 0;
 }
 
 /* === ÖPNV Departure Board Header (Corporate Green) === */
@@ -1543,13 +1550,19 @@ body {
 /* --- Gemeinsame Screen-Basis --- */
 .w-screen {
   width: 100%;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding: 2vh 3vw;
   gap: 2vh;
   overflow: hidden;
   font-family: var(--font-primary, 'Roboto', 'Segoe UI', sans-serif);
+}
+
+/* Wetter-Slides: live-widget-content-Padding entfernen, .w-screen bringt eigenes */
+.live-data-widget.slide-weather .live-widget-content {
+  padding: 0;
 }
 
 .w-section-title {

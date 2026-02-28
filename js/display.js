@@ -897,6 +897,7 @@ async function showLiveDataWidget(categoryFilter) {
         content: html,
         timeStr,
         intervalMin,
+        type: 'weather',
       });
     });
   }
