@@ -574,6 +574,10 @@ body {
   opacity: 1;
 }
 
+.post-indicator.hidden {
+  display: none !important;
+}
+
 /* Footer */
 .display-footer {
   background: rgba(88, 88, 90, 0.95);
