@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import path from 'path';
 import { Post, Category, User, Media, Display } from '../models';
 import { AppError } from '../middleware/errorHandler';
 import { Op } from 'sequelize';
@@ -459,6 +460,37 @@ export const updatePost = async (
       throw new AppError('Keine Berechtigung für diesen Post', 403);
     }
 
+    // Datei-Cleanup: altes Medium löschen wenn es durch ein neues ersetzt wird
+    if (mediaId !== undefined && mediaId !== post.mediaId && post.mediaId) {
+      const oldMedia = await Media.findByPk(post.mediaId);
+      if (oldMedia) {
+        try {
+          await deleteMediaFiles(oldMedia.filename, !!oldMedia.thumbnailUrl);
+          await oldMedia.destroy();
+          logger.info(`Altes Medium beim Update gelöscht: ${oldMedia.filename}`);
+        } catch (err) {
+          logger.warn(`Altes Medium konnte nicht gelöscht werden: ${oldMedia.filename}`, err);
+        }
+      }
+    }
+
+    // Datei-Cleanup: alte Hintergrundmusik löschen wenn ersetzt oder entfernt
+    if (
+      backgroundMusicUrl !== undefined &&
+      backgroundMusicUrl !== post.backgroundMusicUrl &&
+      post.backgroundMusicUrl?.startsWith('/uploads/')
+    ) {
+      try {
+        await deleteMediaFiles(
+          path.basename(post.backgroundMusicUrl),
+          false
+        );
+        logger.info(`Alte Hintergrundmusik beim Update gelöscht: ${post.backgroundMusicUrl}`);
+      } catch (err) {
+        logger.warn(`Alte Hintergrundmusik konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+      }
+    }
+
     // Validate category if changing
     if (categoryId !== undefined && categoryId !== post.categoryId) {
       if (categoryId !== null) {
@@ -612,6 +644,16 @@ export const deletePost = async (
       }
     }
 
+    // Datei-Cleanup: Präsentations-Ordner löschen
+    if (post.contentType === 'presentation' && post.content) {
+      try {
+        presentationService.deletePresentation(post.content);
+        logger.info(`Präsentation gelöscht: ${post.content}`);
+      } catch (err) {
+        logger.warn(`Präsentation konnte nicht gelöscht werden: ${post.content}`, err);
+      }
+    }
+
     await post.destroy();
 
     // Cache invalidieren
@@ -760,6 +802,13 @@ export const deleteAllPosts = async (
           await videoDownloadService.deleteVideo(post.backgroundMusicUrl);
         } catch (err) {
           logger.warn(`Offline-Video konnte nicht gelöscht werden: ${post.backgroundMusicUrl}`, err);
+        }
+      }
+      if (post.contentType === 'presentation' && post.content) {
+        try {
+          presentationService.deletePresentation(post.content);
+        } catch (err) {
+          logger.warn(`Präsentation konnte nicht gelöscht werden: ${post.content}`, err);
         }
       }
     }
