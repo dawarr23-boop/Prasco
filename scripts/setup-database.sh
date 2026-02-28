@@ -1,104 +1,121 @@
 #!/bin/bash
-###############################################################################
-# PRASCO Database Setup Script
-# Erstellt und konfiguriert die PostgreSQL Datenbank mit korrekten Berechtigungen
-###############################################################################
+################################################################################
+# PRASCO Datenbank-Setup (Erstinstallation auf dem Server)
+#
+# Verwendung: ./scripts/setup-database.sh
+#
+# Was passiert:
+#   1. PostgreSQL-Passwort setzen
+#   2. Datenbank erstellen (oder vorhandene behalten / loeschen)
+#   3. Berechtigungen setzen
+#   4. TypeScript-Sourcen kompilieren (npm run build)
+#   5. SQL-Migrationen ausfuehren (node scripts/migrate.js)
+#   6. Seed-Daten einspielen (node scripts/seed.js)
+################################################################################
 
-set -e  # Exit on error
+set -e
 
-# Farben für Output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Farben
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; NC='\033[0m'
 
-echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║   PRASCO Database Setup                ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
+log_ok()   { echo -e "${GREEN}OK  $1${NC}"; }
+log_warn() { echo -e "${YELLOW}WARN  $1${NC}"; }
+log_info() { echo -e "${CYAN}->  $1${NC}"; }
+log_err()  { echo -e "${RED}ERR  $1${NC}"; }
+
+echo ""
+echo "PRASCO Datenbank-Setup"
+echo "======================"
 echo ""
 
-# Lade .env wenn vorhanden
+# Wechsle in Projekt-Root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+# Lade .env
 if [ -f .env ]; then
-    echo -e "${YELLOW}→ Lade .env Konfiguration${NC}"
-    export $(grep -v '^#' .env | xargs)
+    log_info "Lade .env Konfiguration"
+    set -o allexport; source .env; set +o allexport
 fi
 
-# Setze Defaults falls nicht in .env
-DB_NAME=${DB_NAME:-prasco}
-DB_USER=${DB_USER:-postgres}
-DB_PASSWORD=${DB_PASSWORD:-postgres}
+DB_NAME="${DB_NAME:-prasco}"
+DB_USER="${DB_USER:-postgres}"
+DB_PASSWORD="${DB_PASSWORD:-postgres}"
+DB_HOST="${DB_HOST:-localhost}"
+DB_PORT="${DB_PORT:-5432}"
+DB_DIALECT="${DB_DIALECT:-postgres}"
 
-echo -e "${YELLOW}→ Datenbank: ${DB_NAME}${NC}"
-echo -e "${YELLOW}→ User: ${DB_USER}${NC}"
+log_info "Datenbank : $DB_NAME"
+log_info "User      : $DB_USER"
+log_info "Host      : $DB_HOST:$DB_PORT"
+log_info "Dialekt   : $DB_DIALECT"
 echo ""
 
-# Schritt 1: Postgres User Passwort setzen
-echo -e "${YELLOW}[1/6] Setze PostgreSQL User Passwort...${NC}"
-sudo -u postgres psql -c "ALTER USER ${DB_USER} PASSWORD '${DB_PASSWORD}';" 2>/dev/null || true
-echo -e "${GREEN}✓ Passwort gesetzt${NC}"
+# SQLite: vereinfachter Flow
+if [ "$DB_DIALECT" = "sqlite" ]; then
+    echo "SQLite-Modus - ueberspringe PostgreSQL-Setup."
+    npm run build && log_ok "Build abgeschlossen"
+    echo "(Migrationen werden uebersprungen - SQLite nutzt sequelize.sync)"
+    node scripts/seed.js && log_ok "Seeding abgeschlossen"
+    echo ""; log_ok "Setup abgeschlossen!"; exit 0
+fi
 
-# Schritt 2: Prüfe ob Datenbank existiert, wenn ja - bestätige Löschung
-echo -e "${YELLOW}[2/6] Prüfe Datenbank...${NC}"
-if sudo -u postgres psql -lqt | cut -d \| -f 1 | grep -qw ${DB_NAME}; then
-    echo -e "${RED}⚠ Datenbank '${DB_NAME}' existiert bereits!${NC}"
-    read -p "Möchten Sie die Datenbank löschen und neu erstellen? (yes/no): " -r
-    if [[ $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
-        echo -e "${YELLOW}→ Lösche existierende Datenbank...${NC}"
-        sudo -u postgres psql -c "DROP DATABASE IF EXISTS ${DB_NAME};" 2>/dev/null || true
-        echo -e "${GREEN}✓ Datenbank gelöscht${NC}"
+# [1/6] Passwort
+echo "[1/6] Setze PostgreSQL Benutzerpasswort..."
+sudo -u postgres psql -c "ALTER USER ${DB_USER} PASSWORD '${DB_PASSWORD}';" 2>/dev/null \
+    && log_ok "Passwort gesetzt" || log_warn "Passwort nicht gesetzt (fehlende sudo-Rechte?)"
+
+# [2/6] Datenbank anlegen
+echo ""
+echo "[2/6] Pruefe Datenbank '${DB_NAME}'..."
+if sudo -u postgres psql -lqt 2>/dev/null | cut -d'|' -f1 | tr -d ' ' | grep -qx "$DB_NAME"; then
+    log_warn "Datenbank '${DB_NAME}' existiert bereits."
+    read -r -p "  Loeschen und neu erstellen? (yes/no): " REPLY
+    if [[ "$REPLY" =~ ^[Yy][Ee][Ss]$ ]]; then
+        sudo -u postgres psql -c "DROP DATABASE IF EXISTS ${DB_NAME};" 2>/dev/null
+        sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};" 2>/dev/null
+        log_ok "Datenbank neu erstellt"
     else
-        echo -e "${YELLOW}→ Behalte existierende Datenbank${NC}"
+        log_info "Behalte vorhandene Datenbank"
     fi
+else
+    sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};" 2>/dev/null \
+        && log_ok "Datenbank '${DB_NAME}' erstellt" \
+        || log_warn "Datenbank konnte nicht angelegt werden (existiert mglw. bereits)"
 fi
 
-# Schritt 3: Erstelle Datenbank
-echo -e "${YELLOW}[3/6] Erstelle Datenbank...${NC}"
-sudo -u postgres psql -c "CREATE DATABASE ${DB_NAME};" 2>/dev/null || {
-    echo -e "${YELLOW}→ Datenbank existiert bereits${NC}"
-}
-echo -e "${GREEN}✓ Datenbank vorhanden${NC}"
-
-# Schritt 4: Setze Berechtigungen
-echo -e "${YELLOW}[4/6] Setze Berechtigungen...${NC}"
-sudo -u postgres psql -d prasco -c "GRANT ALL PRIVILEGES ON DATABASE prasco TO postgres;" 2>/dev/null || true
-sudo -u postgres psql -d prasco -c "GRANT ALL PRIVILEGES ON SCHEMA public TO postgres;" 2>/dev/null || true
-sudo -u postgres psql -d prasco -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres;" 2>/dev/null || true
-sudo -u postgres psql -d prasco -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres;" 2>/dev/null || true
-sudo -u postgres psql -d prasco -c "ALTER SCHEMA public OWNER TO postgres;" 2>/dev/null || true
-echo -e "${GREEN}✓ Berechtigungen gesetzt${NC}"
-
-# Schritt 5: Erstelle Tabellen via sync
-echo -e "${YELLOW}[5/6] Erstelle Datenbank-Tabellen...${NC}"
-node scripts/sync-all-tables.js || {
-    echo -e "${RED}✗ Fehler beim Erstellen der Tabellen${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Tabellen erstellt${NC}"
-
-# Schritt 6: Führe Seeding aus
-echo -e "${YELLOW}[6/6] Führe Daten-Seeding aus...${NC}"
-npm run db:seed || {
-    echo -e "${RED}✗ Fehler beim Seeding${NC}"
-    exit 1
-}
-echo -e "${GREEN}✓ Seeding abgeschlossen${NC}"
-
-# Zusammenfassung
+# [3/6] Berechtigungen
 echo ""
-echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║   ✓ Setup erfolgreich abgeschlossen   ║${NC}"
-echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "${YELLOW}Datenbank-Details:${NC}"
-echo -e "  • Datenbank: ${DB_NAME}"
-echo -e "  • User: ${DB_USER}"
-echo -e "  • Host: ${DB_HOST:-localhost}"
-echo -e "  • Port: ${DB_PORT:-5432}"
-echo ""
+echo "[3/6] Setze Datenbankberechtigungen..."
+sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO ${DB_USER};" 2>/dev/null || true
+sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL PRIVILEGES ON SCHEMA public TO ${DB_USER};" 2>/dev/null || true
+sudo -u postgres psql -d "$DB_NAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES    TO ${DB_USER};" 2>/dev/null || true
+sudo -u postgres psql -d "$DB_NAME" -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${DB_USER};" 2>/dev/null || true
+sudo -u postgres psql -d "$DB_NAME" -c "ALTER SCHEMA public OWNER TO ${DB_USER};" 2>/dev/null || true
+log_ok "Berechtigungen gesetzt"
 
-# Zeige erstellte Tabellen
-echo -e "${YELLOW}Erstellte Tabellen:${NC}"
-sudo -u postgres psql -d ${DB_NAME} -c '\dt' | grep -v "^$" || true
+# [4/6] Build
+echo ""
+echo "[4/6] Kompiliere TypeScript..."
+npm run build && log_ok "Build erfolgreich" || { log_err "Build fehlgeschlagen"; exit 1; }
+
+# [5/6] Migrationen
+echo ""
+echo "[5/6] Fuehre SQL-Migrationen aus..."
+node scripts/migrate.js && log_ok "Migrationen abgeschlossen" || { log_err "Migrationen fehlgeschlagen"; exit 1; }
+
+# [6/6] Seeding
+echo ""
+echo "[6/6] Fuehre Seeding aus..."
+node scripts/seed.js && log_ok "Seeding abgeschlossen" || { log_err "Seeding fehlgeschlagen"; exit 1; }
 
 echo ""
-echo -e "${GREEN}Sie können den Server jetzt starten mit: pm2 restart prasco${NC}"
+echo "Setup erfolgreich abgeschlossen!"
+echo ""
+echo "Zugaenge:"
+echo "  superadmin@prasco.net  /  superadmin123"
+echo "  admin@prasco.net       /  admin123"
+echo "  editor@prasco.net      /  editor123"
+echo ""
+echo "Server starten: pm2 restart prasco  oder  docker compose up -d"
+echo ""

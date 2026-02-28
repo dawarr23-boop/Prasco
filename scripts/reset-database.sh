@@ -50,15 +50,12 @@ sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
 # 4. Führe die Seeds aus
 echo "🌱 Führe Database Seeds aus..."
 cd "$(dirname "$0")/.."
-npm run db:seed
-
-echo ""
-echo "✅ Datenbank erfolgreich zurückgesetzt!"
+node scripts/seed.js
 echo ""
 echo "📝 Standard-Benutzer:"
 echo "   Superadmin: superadmin@prasco.net / superadmin123"
-echo "   Admin: admin@prasco.de / admin123"
-echo "   Editor: editor@prasco.de / editor123"
+echo "   Admin: admin@prasco.net / admin123"
+   echo "   Editor: editor@prasco.net / editor123"
 echo ""
 
 # 5. Starte die Anwendung neu

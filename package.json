@@ -23,8 +23,12 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
-    "db:seed": "ts-node src/database/seeders/index.ts",
+    "db:seed": "node scripts/seed.js",
     "db:seed-examples": "ts-node src/database/seeders/htmlExamples.ts",
+    "db:migrate": "node scripts/migrate.js",
+    "db:migrate:status": "node scripts/migrate.js --status",
+    "db:setup": "npm run build && node scripts/migrate.js && node scripts/seed.js",
+    "db:reset": "node scripts/reset.js",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f"
