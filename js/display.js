@@ -547,10 +547,27 @@ async function renderWeatherWidget() {
       <div class="w-fc-grid">${forecastCardsHtml}</div>
     </div>`;
 
-    // ===== SCREEN 3: Regenradar (animiert via RainViewer) =====
+    // ===== SCREEN 3: Niederschlagsvorhersage — nächste 2 Stunden =====
+    // Stündliche Niederschlagsdaten für die nächsten 2 Stunden (aus Open-Meteo)
+    const next2h = (w.hourlyRain || []).slice(0, 2);
+    const precipBarsHtml = next2h.map(h => {
+      const pct = h.probability || 0;
+      const mm  = h.precipitation || 0;
+      const color = pct > 60 ? '#2e8fd4' : pct > 30 ? '#64b0d8' : '#a8d0e8';
+      const icon  = codeIcons[h.weatherCode] || '🌧️';
+      return `<div class="w-precip-bar-col">
+        <span class="w-precip-time">${h.time}</span>
+        <span class="w-precip-icon">${icon}</span>
+        <div class="w-precip-bar-wrap"><div class="w-precip-bar-fill" style="height:${pct}%;background:${color}"></div></div>
+        <span class="w-precip-pct" style="color:${color}">${pct}%</span>
+        ${mm > 0 ? `<span class="w-precip-mm">${mm.toFixed(1)} mm</span>` : '<span class="w-precip-mm">&mdash;</span>'}
+      </div>`;
+    }).join('');
+
     const screen3 = `<div class="w-screen w-screen-radar">
       <div class="w-radar-header">
-        <span class="w-section-title">Regenradar ${locationName}</span>
+        <span class="w-section-title">Niederschlagsvorhersage — nächste 2 Stunden</span>
+        <div class="w-precip-bars">${precipBarsHtml}</div>
       </div>
       <div class="w-radar-frame">
         <div id="rainradar-map" data-lat="${lat}" data-lon="${lon}" style="width:100%;height:100%;border-radius:1.5vh;"></div>
@@ -621,8 +638,14 @@ function initRainRadar() {
   fetch('https://api.rainviewer.com/public/weather-maps.json')
     .then(r => r.json())
     .then(data => {
-      const frames = [...(data.radar?.past || []), ...(data.radar?.nowcast || [])];
+      // Nur Nowcast-Frames (Vorhersage), keine vergangenen Radardaten
+      const nowcast = data.radar?.nowcast || [];
+      // Falls keine Nowcast-Daten: letzten Past-Frame als Ausgangspunkt nehmen
+      const past = data.radar?.past || [];
+      const anchor = past.length > 0 ? [past[past.length - 1]] : [];
+      const frames = [...anchor, ...nowcast];
       if (frames.length === 0) return;
+      const nowcastOffset = anchor.length; // Index ab dem Frames Vorhersage sind
 
       // Radar-Layer für jeden Frame erstellen
       radarLayers = frames.map(frame => {
@@ -654,8 +677,14 @@ function initRainRadar() {
           const t = new Date(radarLayers[idx]._radarTime * 1000);
           const hh = String(t.getHours()).padStart(2, '0');
           const mm = String(t.getMinutes()).padStart(2, '0');
-          const isNowcast = idx >= (data.radar?.past?.length || 0);
-          timestampEl.textContent = `${hh}:${mm}${isNowcast ? ' (Vorhersage)' : ''}`;
+          const isForecast = idx >= nowcastOffset;
+          const nowMs = Date.now();
+          const frameMs = radarLayers[idx]._radarTime * 1000;
+          const diffMin = Math.round((frameMs - nowMs) / 60000);
+          const relStr = isForecast
+            ? (diffMin >= 0 ? `+${diffMin} Min.` : `${diffMin} Min.`)
+            : 'Aktuell';
+          timestampEl.textContent = `${hh}:${mm}  ${isForecast ? '⟶ ' + relStr : relStr}`;
         }
 
         currentFrame = idx;
