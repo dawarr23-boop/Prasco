@@ -5656,10 +5656,13 @@ function populateLiveDataDisplays() {
     }
     const prefix = containerId.startsWith('transit') ? 'transit' : (containerId.startsWith('weather') ? 'weather' : 'traffic');
     container.innerHTML = displays.map(d => `
-      <label class="checkbox-label">
-        <input type="checkbox" id="${prefix}-display-${d.id}" data-display-id="${d.id}" checked />
+      <div class="checkbox-label">
+        <div class="toggle-switch">
+          <input type="checkbox" class="toggle-input" id="${prefix}-display-${d.id}" data-display-id="${d.id}" checked />
+          <label class="toggle-label" for="${prefix}-display-${d.id}"><span class="toggle-slider"></span></label>
+        </div>
         <span>🖥️ ${escapeHtml(d.name)}</span>
-      </label>
+      </div>
     `).join('');
   });
 }

@@ -301,10 +301,13 @@
                     
                     <!-- Offline-Download Option (nur für externe Videos) -->
                     <div id="offline-download-section" style="margin-top: 1rem; display: none;">
-                      <label class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input type="checkbox" id="download-video-offline" />
+                      <div class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="toggle-switch">
+                          <input type="checkbox" class="toggle-input" id="download-video-offline" />
+                          <label class="toggle-label" for="download-video-offline"><span class="toggle-slider"></span></label>
+                        </div>
                         <span data-translate="form.offlineDownload">📥 Video offline verfügbar machen</span>
-                      </label>
+                      </div>
                       <small style="color: #666; display: block; margin-top: 0.25rem; margin-left: 1.5rem;" data-translate="form.offlineDownloadHint">
                         Lädt das Video automatisch herunter für bessere Performance und Offline-Nutzung
                       </small>
@@ -673,24 +676,33 @@
                 </div>
 
                 <div class="form-group">
-                  <label>
-                    <input type="checkbox" id="display-isActive" name="isActive" checked />
-                    <span data-translate="displays.isActive">Display ist aktiv</span>
-                  </label>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="display-isActive" name="isActive" checked />
+                      <label class="toggle-label" for="display-isActive"><span class="toggle-slider"></span></label>
+                    </div>
+                    <label for="display-isActive" style="cursor: pointer;" data-translate="displays.isActive">Display ist aktiv</label>
+                  </div>
                   <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.isActiveHint">Inaktive Displays erhalten keine Beiträge</small>
                 </div>
 
                 <div class="form-group">
                   <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-translate="displays.liveDataTitle">Live-Daten auf diesem Display</label>
                   <div style="display: flex; gap: 2rem; margin-top: 0.25rem;">
-                    <label>
-                      <input type="checkbox" id="display-showTransitData" name="showTransitData" checked />
-                      <span data-translate="displays.showTransitData">ÖPNV-Abfahrten anzeigen</span>
-                    </label>
-                    <label>
-                      <input type="checkbox" id="display-showTrafficData" name="showTrafficData" checked />
-                      <span data-translate="displays.showTrafficData">Autobahn-Verkehr anzeigen</span>
-                    </label>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="display-showTransitData" name="showTransitData" checked />
+                        <label class="toggle-label" for="display-showTransitData"><span class="toggle-slider"></span></label>
+                      </div>
+                      <label for="display-showTransitData" style="cursor: pointer;" data-translate="displays.showTransitData">ÖPNV-Abfahrten anzeigen</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="display-showTrafficData" name="showTrafficData" checked />
+                        <label class="toggle-label" for="display-showTrafficData"><span class="toggle-slider"></span></label>
+                      </div>
+                      <label for="display-showTrafficData" style="cursor: pointer;" data-translate="displays.showTrafficData">Autobahn-Verkehr anzeigen</label>
+                    </div>
                   </div>
                   <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.liveDataHint">Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden</small>
                 </div>
@@ -791,10 +803,13 @@
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="transit-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="transit-enabled" />
+                      <label class="toggle-label" for="transit-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="liveData.transit.enable">ÖPNV-Abfahrten auf Display anzeigen</span>
-                  </label>
+                  </div>
                 </div>
 
                 <div id="transit-config" style="display: none">
@@ -838,13 +853,13 @@
                   <div class="form-group">
                     <label data-translate="liveData.transit.filterTitle">Verkehrsmittel filtern</label>
                     <div class="transport-filter-grid">
-                      <label class="checkbox-label"><input type="checkbox" id="filter-bus" checked /><span data-translate="liveData.transit.bus">Bus</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-suburban" checked /><span data-translate="liveData.transit.suburban">S-Bahn</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-subway" checked /><span data-translate="liveData.transit.subway">U-Bahn</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-tram" checked /><span data-translate="liveData.transit.tram">Tram</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-regional" checked /><span data-translate="liveData.transit.regional">Regionalzug</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-national" checked /><span data-translate="liveData.transit.national">Fernzug</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="filter-ferry" /><span data-translate="liveData.transit.ferry">Fähre</span></label>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-bus" checked /><label class="toggle-label" for="filter-bus"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.bus">Bus</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-suburban" checked /><label class="toggle-label" for="filter-suburban"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.suburban">S-Bahn</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-subway" checked /><label class="toggle-label" for="filter-subway"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.subway">U-Bahn</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-tram" checked /><label class="toggle-label" for="filter-tram"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.tram">Tram</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-regional" checked /><label class="toggle-label" for="filter-regional"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.regional">Regionalzug</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-national" checked /><label class="toggle-label" for="filter-national"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.national">Fernzug</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-ferry" /><label class="toggle-label" for="filter-ferry"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.ferry">Fähre</span></div>
                     </div>
                   </div>
 
@@ -877,10 +892,13 @@
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="traffic-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="traffic-enabled" />
+                      <label class="toggle-label" for="traffic-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="liveData.traffic.enable">Verkehrslage auf Display anzeigen</span>
-                  </label>
+                  </div>
                 </div>
 
                 <div id="traffic-config" style="display: none">
@@ -921,9 +939,9 @@
                   <div class="form-group">
                     <label data-translate="liveData.traffic.reportTypes">Meldungstypen anzeigen</label>
                     <div class="transport-filter-grid">
-                      <label class="checkbox-label"><input type="checkbox" id="show-warnings" checked /><span data-translate="liveData.traffic.warnings">Verkehrswarnungen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-roadworks" checked /><span data-translate="liveData.traffic.roadworks">Baustellen</span></label>
-                      <label class="checkbox-label"><input type="checkbox" id="show-closures" checked /><span data-translate="liveData.traffic.closures">Sperrungen</span></label>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="show-warnings" checked /><label class="toggle-label" for="show-warnings"><span class="toggle-slider"></span></label></div><span data-translate="liveData.traffic.warnings">Verkehrswarnungen</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="show-roadworks" checked /><label class="toggle-label" for="show-roadworks"><span class="toggle-slider"></span></label></div><span data-translate="liveData.traffic.roadworks">Baustellen</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="show-closures" checked /><label class="toggle-label" for="show-closures"><span class="toggle-slider"></span></label></div><span data-translate="liveData.traffic.closures">Sperrungen</span></div>
                     </div>
                   </div>
 
@@ -956,10 +974,13 @@
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="weather-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="weather-enabled" />
+                      <label class="toggle-label" for="weather-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="liveData.weather.enable">Wetter auf Display anzeigen</span>
-                  </label>
+                  </div>
                 </div>
 
                 <div id="weather-config" style="display: none">
@@ -985,10 +1006,13 @@
                   </div>
 
                   <div class="form-group">
-                    <label class="checkbox-label">
-                      <input type="checkbox" id="weather-show-forecast" checked />
+                    <div class="checkbox-label">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="weather-show-forecast" checked />
+                        <label class="toggle-label" for="weather-show-forecast"><span class="toggle-slider"></span></label>
+                      </div>
                       <span data-translate="liveData.weather.showForecast">Vorhersage anzeigen</span>
-                    </label>
+                    </div>
                   </div>
 
                   <div class="form-row">
@@ -1134,20 +1158,26 @@
                 </div>
 
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="blend-effects-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="blend-effects-enabled" />
+                      <label class="toggle-label" for="blend-effects-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="settings.blendEffectsEnable">Übergangseffekte aktivieren</span>
-                  </label>
+                  </div>
                   <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.blendEffectsHint">
                     Aktiviert animierte Übergänge zwischen Beiträgen (Fade, Slide, Zoom)
                   </small>
                 </div>
 
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="transitions-external-only" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="transitions-external-only" />
+                      <label class="toggle-label" for="transitions-external-only"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="settings.transitionsExternalOnly">Übergangseffekte nur auf externen Displays</span>
-                  </label>
+                  </div>
                   <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.transitionsExternalOnlyHint">
                     Spart Ressourcen: Raspberry Pi zeigt Posts ohne Animationen, externe Bildschirme mit Effekten
                   </small>
@@ -1192,10 +1222,13 @@
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="global-music-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="global-music-enabled" />
+                      <label class="toggle-label" for="global-music-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span>Globale Hintergrundmusik aktivieren</span>
-                  </label>
+                  </div>
                 </div>
 
                 <div id="global-music-config" style="display: none">
@@ -1221,10 +1254,13 @@
                   </div>
 
                   <div class="form-group">
-                    <label class="checkbox-label">
-                      <input type="checkbox" id="global-music-mute-videos" checked />
+                    <div class="checkbox-label">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="global-music-mute-videos" checked />
+                        <label class="toggle-label" for="global-music-mute-videos"><span class="toggle-slider"></span></label>
+                      </div>
                       <span>Videos automatisch stumm schalten</span>
-                    </label>
+                    </div>
                   </div>
 
                   <div class="form-group">
@@ -1272,10 +1308,13 @@
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="ai-enabled" />
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="ai-enabled" />
+                      <label class="toggle-label" for="ai-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span data-translate="settings.aiEnable">KI-Assistent aktivieren</span>
-                  </label>
+                  </div>
                 </div>
                 <div id="ai-config" style="display: none;">
                   <div class="form-group">
@@ -1315,10 +1354,13 @@
               <form id="sso-config-form" class="settings-form">
                 <!-- SSO aktivieren -->
                 <div class="form-group">
-                  <label class="checkbox-label sso-toggle">
-                    <input type="checkbox" id="sso-enabled" name="enabled" />
+                  <div class="checkbox-label sso-toggle">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="sso-enabled" name="enabled" />
+                      <label class="toggle-label" for="sso-enabled"><span class="toggle-slider"></span></label>
+                    </div>
                     <span>SSO aktivieren</span>
-                  </label>
+                  </div>
                 </div>
 
                 <div id="sso-config-details" class="sso-config-details" style="display: none">
@@ -1500,13 +1542,16 @@
                     </div>
 
                     <div class="form-group">
-                      <label class="checkbox-label">
-                        <input type="checkbox" id="ldap-tls-reject" name="ldapTlsReject" />
-                        <span
-                          >Selbstsignierte Zertifikate ablehnen (für Produktionsumgebungen
-                          empfohlen)</span
-                        >
-                      </label>
+                      <div class="checkbox-label">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="ldap-tls-reject" name="ldapTlsReject" />
+                        <label class="toggle-label" for="ldap-tls-reject"><span class="toggle-slider"></span></label>
+                      </div>
+                      <span
+                        >Selbstsignierte Zertifikate ablehnen (für Produktionsumgebungen
+                        empfohlen)</span
+                      >
+                    </div>
                     </div>
                   </div>
 
@@ -1516,10 +1561,13 @@
                   <h4>Benutzer-Einstellungen</h4>
 
                   <div class="form-group">
-                    <label class="checkbox-label">
-                      <input type="checkbox" id="sso-auto-create" name="autoCreateUsers" checked />
-                      <span>Benutzer automatisch erstellen bei erstem SSO-Login</span>
-                    </label>
+                    <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="sso-auto-create" name="autoCreateUsers" checked />
+                      <label class="toggle-label" for="sso-auto-create"><span class="toggle-slider"></span></label>
+                    </div>
+                    <span>Benutzer automatisch erstellen bei erstem SSO-Login</span>
+                  </div>
                   </div>
 
                   <div class="form-row">
