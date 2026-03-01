@@ -1086,6 +1086,24 @@
           <section id="settings-section" class="section">
             <h2>Einstellungen</h2>
 
+            <!-- Spracheinstellungen -->
+            <div class="settings-card">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="2" y1="8" x2="14" y2="8"/><path d="M8 2a9 4.5 0 0 1 0 12"/><path d="M8 2a9 4.5 0 0 0 0 12"/></svg></span> Spracheinstellungen</h3>
+              <div class="settings-form">
+                <div class="form-group">
+                  <label for="app-language">Sprache / Language / Lingua</label>
+                  <select id="app-language">
+                    <option value="de" data-flag="🇩🇪">🇩🇪 Deutsch</option>
+                    <option value="en" data-flag="🇬🇧">🇬🇧 English</option>
+                    <option value="it" data-flag="🇮🇹">🇮🇹 Italiano</option>
+                  </select>
+                  <small id="language-hint"
+                    >Die Sprache wird für die gesamte Benutzeroberfläche verwendet.</small
+                  >
+                </div>
+              </div>
+            </div>
+
             <!-- System-Modus (Raspberry Pi) — ausgeblendet, da Server nicht auf Pi läuft -->
             <div class="settings-card" id="system-mode-card" style="display: none;">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="2"/><path d="M5 11a4.5 4.5 0 0 1 0-6"/><path d="M11 11a4.5 4.5 0 0 0 0-6"/><line x1="8" y1="10" x2="8" y2="14"/></svg></span> System-Modus</h3>
@@ -1303,24 +1321,6 @@
                 <button class="btn btn-secondary" id="testGlobalMusic" style="margin-left: 0.5rem">
                   Test
                 </button>
-              </div>
-            </div>
-
-            <!-- Spracheinstellungen -->
-            <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="2" y1="8" x2="14" y2="8"/><path d="M8 2a9 4.5 0 0 1 0 12"/><path d="M8 2a9 4.5 0 0 0 0 12"/></svg></span> Spracheinstellungen</h3>
-              <div class="settings-form">
-                <div class="form-group">
-                  <label for="app-language">Sprache / Language / Lingua</label>
-                  <select id="app-language">
-                    <option value="de" data-flag="🇩🇪">🇩🇪 Deutsch</option>
-                    <option value="en" data-flag="🇬🇧">🇬🇧 English</option>
-                    <option value="it" data-flag="🇮🇹">🇮🇹 Italiano</option>
-                  </select>
-                  <small id="language-hint"
-                    >Die Sprache wird für die gesamte Benutzeroberfläche verwendet.</small
-                  >
-                </div>
               </div>
             </div>
 
