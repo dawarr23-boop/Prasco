@@ -2307,14 +2307,9 @@ async function showPostForm() {
   const soundEnabledCheckbox = document.getElementById('sound-enabled');
   if (soundEnabledCheckbox) soundEnabledCheckbox.checked = true;
 
-  // Standard-Startdatum auf jetzt setzen (lokale Zeit für datetime-local Input)
-  const now = new Date();
-  document.getElementById('start-date').value = formatDateTimeLocal(now);
-  
-  // Enddatum auf Startdatum + 7 Tage setzen
-  const endDate = new Date(now);
-  endDate.setDate(endDate.getDate() + 7);
-  document.getElementById('end-date').value = formatDateTimeLocal(endDate);
+  // Start- und Enddatum leer lassen (kein Vorschlag)
+  document.getElementById('start-date').value = '';
+  document.getElementById('end-date').value = '';
 
   // Display-Auswahl auf "alle" zurücksetzen
   document.getElementById('display-mode-all').checked = true;
