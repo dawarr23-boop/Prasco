@@ -135,7 +135,7 @@ const translations = {
     'settings.aiApiKey': 'OpenAI API-Key',
 
     // App Info
-    'appInfo.title': 'Digitales Schwarzes Brett für Unternehmen und Organisationen',
+    'appInfo.title': 'Signature Screen für Unternehmen und Organisationen',
     'appInfo.version': 'Version',
     'appInfo.developer': 'Entwickler',
     'appInfo.license': 'Lizenz',
@@ -550,7 +550,7 @@ const translations = {
     'settings.aiApiKey': 'OpenAI API Key',
 
     // App Info
-    'appInfo.title': 'Digital Bulletin Board for Companies and Organizations',
+    'appInfo.title': 'Signature Screen for Companies and Organizations',
     'appInfo.version': 'Version',
     'appInfo.developer': 'Developer',
     'appInfo.license': 'License',
@@ -963,7 +963,7 @@ const translations = {
     'settings.aiApiKey': 'Chiave API OpenAI',
 
     // App Info
-    'appInfo.title': 'Bacheca Digitale per Aziende e Organizzazioni',
+    'appInfo.title': 'Signature Screen per Aziende e Organizzazioni',
     'appInfo.version': 'Versione',
     'appInfo.developer': 'Sviluppatore',
     'appInfo.license': 'Licenza',
