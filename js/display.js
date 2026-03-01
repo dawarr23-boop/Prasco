@@ -1139,17 +1139,44 @@ async function buildLiveTickerParts() {
 // Aktualisiere Ticker / Laufschrift basierend auf Display-Info
 async function updateTicker() {
   const bar = document.getElementById('ticker-bar');
-  const textEl = document.getElementById('ticker-text');
-  const cloneEl = document.getElementById('ticker-text-clone');
-  if (!bar || !textEl) return;
+  const track = document.getElementById('ticker-track');
+  if (!bar || !track) return;
+
   const text = await buildLiveTickerParts();
-  if (text) {
-    textEl.textContent = text;
-    if (cloneEl) cloneEl.textContent = text;
-    bar.style.display = '';
-  } else {
+  if (!text) {
     bar.style.display = 'none';
+    return;
   }
+
+  bar.style.display = '';
+
+  // Echte Span-Breite messen damit genug Kopien für Full-Screen-Scrolling vorhanden sind
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute;top:-9999px;left:-9999px;white-space:nowrap;visibility:hidden;font-size:0.88rem;padding:0 5vw;font-family:var(--font-primary);letter-spacing:0.03em;';
+  probe.textContent = text;
+  document.body.appendChild(probe);
+  const spanW = probe.getBoundingClientRect().width || (window.innerWidth * 0.9);
+  document.body.removeChild(probe);
+
+  const screenW = window.innerWidth || 1920;
+  // Genug Kopien damit Track ≥ 2 × Bildschirmbreite (für -50%-Animation nahtlos)
+  let copies = Math.max(2, Math.ceil((screenW * 2.2) / spanW));
+  if (copies % 2 !== 0) copies++; // muss gerade Anzahl sein
+
+  // Animation stoppen, Inhalt neu befüllen, Animation neu starten
+  track.style.animation = 'none';
+  track.innerHTML = '';
+  for (let i = 0; i < copies; i++) {
+    const s = document.createElement('span');
+    s.textContent = text;
+    track.appendChild(s);
+  }
+  track.offsetHeight; // Reflow erzwingen damit Animation neu beginnt
+
+  // Scrollgeschwindigkeit konstant ~100 px/s (halbe Track-Breite wird animiert)
+  const halfTrackW = (spanW * copies) / 2;
+  const duration = Math.max(12, Math.round(halfTrackW / 100));
+  track.style.animation = `ticker-scroll ${duration}s linear infinite`;
 }
 
 let tickerLiveInterval = null;
