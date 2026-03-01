@@ -5,687 +5,1021 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>IT-Westfalen Signature Screen - Administrationshandbuch</title>
 <style>
-  :root {
-    --red: #c0392b;
-    --dark: #1a1a1a;
-    --mid: #444;
-    --light: #f5f5f5;
-    --border: #ddd;
-    --accent: #2980b9;
-    --green: #27ae60;
-    --font: 'Segoe UI', system-ui, sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); color: var(--dark); background: #fff; font-size: 15px; line-height: 1.65; }
-
-  .back-bar { background: var(--dark); padding: 10px 60px; display: flex; align-items: center; gap: 16px; }
-  .back-bar a { color: #aaa; text-decoration: none; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; transition: color 0.15s; }
-  .back-bar a:hover { color: #fff; }
-
-  .cover { background: var(--dark); color: #fff; padding: 60px 60px 70px; }
-  .cover .logo { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; }
-  .cover .logo span { color: var(--red); }
-  .cover .subtitle { font-size: 1.15rem; color: #aaa; margin-top: 8px; }
-  .cover .meta { margin-top: 30px; font-size: 0.85rem; color: #666; }
-
-  .toc { padding: 40px 60px; background: var(--light); }
-  .toc h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--mid); margin-bottom: 20px; }
-  .toc > ol { padding-left: 1.4em; }
-  .toc ol.sub { padding-left: 1.8em; margin-top: 4px; font-size: 0.91rem; }
-  .toc li { margin: 5px 0; }
-  .toc a { color: var(--accent); text-decoration: none; }
-  .toc a:hover { text-decoration: underline; }
-
-  .chapter { padding: 50px 60px; border-bottom: 1px solid var(--border); }
-  .chapter:last-child { border-bottom: none; }
-  .chapter-title { font-size: 1.6rem; font-weight: 700; color: var(--red); margin-bottom: 6px; display: flex; align-items: center; gap: 12px; }
-  .chapter-num { font-size: 1rem; font-weight: 400; color: #999; }
-  .chapter p { margin: 14px 0; color: var(--mid); max-width: 820px; }
-  .chapter h3 { font-size: 1.15rem; margin: 32px 0 10px; color: var(--dark); border-bottom: 2px solid var(--border); padding-bottom: 4px; }
-  .chapter h4 { font-size: 1rem; margin: 20px 0 8px; color: var(--mid); font-weight: 600; }
-  .chapter ul, .chapter ol { padding-left: 1.4em; margin: 8px 0 16px; color: var(--mid); }
-  .chapter li { margin: 5px 0; }
-
-  /* Numbered step list */
-  .steps { counter-reset: step; list-style: none; padding-left: 0; margin: 12px 0 20px; }
-  .steps li { counter-increment: step; display: flex; gap: 14px; margin: 10px 0; align-items: flex-start; }
-  .steps li::before { content: counter(step); background: var(--red); color: #fff; border-radius: 50%; min-width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-
-  /* Field list (definition list style) */
-  .field-list { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 14px 0; }
-  .field-list .fl-row { display: grid; grid-template-columns: 220px 1fr; border-bottom: 1px solid var(--border); }
-  .field-list .fl-row:last-child { border-bottom: none; }
-  .field-list .fl-key { background: var(--light); padding: 9px 14px; font-weight: 600; font-size: 0.88rem; color: var(--dark); }
-  .field-list .fl-val { padding: 9px 14px; font-size: 0.88rem; color: var(--mid); }
-  .field-list .fl-req { color: var(--red); font-size: 0.75rem; font-weight: 700; margin-left: 4px; }
-
-  .screenshot-block { margin: 24px 0; }
-  .screenshot-block img { max-width: 100%; border: 1px solid var(--border); border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: block; }
-  .screenshot-block .caption { font-size: 0.82rem; color: #777; margin-top: 6px; text-align: center; font-style: italic; }
-  .screenshot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0; }
-
-  .tip { background: #e8f4fd; border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 0.9rem; color: #1a4a6e; }
-  .warning { background: #fef9e7; border-left: 4px solid #f39c12; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 0.9rem; color: #7d5a00; }
-  .success { background: #eafaf1; border-left: 4px solid var(--green); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 0.9rem; color: #145a32; }
-  .danger { background: #fdedec; border-left: 4px solid var(--red); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 0.9rem; color: #7b241c; }
-
-  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.92rem; }
-  th { background: var(--dark); color: #fff; padding: 9px 12px; text-align: left; }
-  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:hover td { background: var(--light); }
-
-  code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 0.87rem; }
-  pre { background: #1e1e1e; color: #d4d4d4; padding: 14px 18px; border-radius: 6px; font-family: 'Cascadia Code', Consolas, monospace; font-size: 0.85rem; overflow-x: auto; margin: 14px 0; line-height: 1.55; }
-
-  @media print {
-    .back-bar { display: none; }
-    .chapter { page-break-inside: avoid; }
-    a { color: inherit; text-decoration: none; }
-  }
+  :root { --red:#c0392b;--dark:#1a1a1a;--mid:#444;--light:#f5f5f5;--border:#ddd;--accent:#2980b9;--green:#27ae60;--font:'Segoe UI',system-ui,sans-serif; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--dark);background:#fff;font-size:15px;line-height:1.65}
+  .back-bar{background:var(--dark);padding:10px 60px;display:flex;align-items:center;justify-content:space-between}
+  .back-bar a{color:#aaa;text-decoration:none;font-size:.88rem;transition:color .15s}
+  .back-bar a:hover{color:#fff}
+  .lang-switcher{display:flex;gap:8px}
+  .lang-btn{background:rgba(255,255,255,.1);border:none;color:#aaa;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:.82rem;transition:all .15s}
+  .lang-btn:hover,.lang-btn.active{background:var(--red);color:#fff}
+  .cover{background:var(--dark);color:#fff;padding:60px 60px 70px}
+  .cover .logo{font-size:2.8rem;font-weight:800;letter-spacing:-1px}.cover .logo span{color:var(--red)}
+  .cover .subtitle{font-size:1.15rem;color:#aaa;margin-top:8px}
+  .cover .meta{margin-top:30px;font-size:.85rem;color:#666}
+  .toc{padding:40px 60px;background:var(--light)}
+  .toc h2{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;color:var(--mid);margin-bottom:20px}
+  .toc>ol{padding-left:1.4em}.toc ol.sub{padding-left:1.8em;margin-top:4px;font-size:.91rem}
+  .toc li{margin:5px 0}.toc a{color:var(--accent);text-decoration:none}.toc a:hover{text-decoration:underline}
+  .chapter{padding:50px 60px;border-bottom:1px solid var(--border)}.chapter:last-child{border-bottom:none}
+  .chapter-title{font-size:1.6rem;font-weight:700;color:var(--red);margin-bottom:6px;display:flex;align-items:center;gap:12px}
+  .chapter-num{font-size:1rem;font-weight:400;color:#999}
+  .chapter p{margin:14px 0;color:var(--mid);max-width:820px}
+  .chapter h3{font-size:1.15rem;margin:32px 0 10px;color:var(--dark);border-bottom:2px solid var(--border);padding-bottom:4px}
+  .chapter h4{font-size:1rem;margin:20px 0 8px;color:var(--mid);font-weight:600}
+  .chapter ul,.chapter ol{padding-left:1.4em;margin:8px 0 16px;color:var(--mid)}.chapter li{margin:5px 0}
+  .steps{counter-reset:step;list-style:none;padding-left:0;margin:12px 0 20px}
+  .steps li{counter-increment:step;display:flex;gap:14px;margin:10px 0;align-items:flex-start}
+  .steps li::before{content:counter(step);background:var(--red);color:#fff;border-radius:50%;min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:1px}
+  .field-list{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin:14px 0}
+  .field-list .fl-row{display:grid;grid-template-columns:220px 1fr;border-bottom:1px solid var(--border)}
+  .field-list .fl-row:last-child{border-bottom:none}
+  .field-list .fl-key{background:var(--light);padding:9px 14px;font-weight:600;font-size:.88rem;color:var(--dark)}
+  .field-list .fl-val{padding:9px 14px;font-size:.88rem;color:var(--mid)}
+  .field-list .fl-req{color:var(--red);font-size:.75rem;font-weight:700;margin-left:4px}
+  .screenshot-block{margin:24px 0}
+  .screenshot-block img{max-width:100%;border:1px solid var(--border);border-radius:6px;box-shadow:0 2px 12px rgba(0,0,0,.08);display:block}
+  .screenshot-block .caption{font-size:.82rem;color:#777;margin-top:6px;text-align:center;font-style:italic}
+  .screenshot-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:24px 0}
+  .tip{background:#e8f4fd;border-left:4px solid var(--accent);padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;font-size:.9rem;color:#1a4a6e}
+  .warning{background:#fef9e7;border-left:4px solid #f39c12;padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;font-size:.9rem;color:#7d5a00}
+  .success{background:#eafaf1;border-left:4px solid var(--green);padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;font-size:.9rem;color:#145a32}
+  .danger{background:#fdedec;border-left:4px solid var(--red);padding:12px 16px;border-radius:0 6px 6px 0;margin:16px 0;font-size:.9rem;color:#7b241c}
+  table{border-collapse:collapse;width:100%;margin:16px 0;font-size:.92rem}
+  th{background:var(--dark);color:#fff;padding:9px 12px;text-align:left}
+  td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+  tr:hover td{background:var(--light)}
+  code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-family:'Cascadia Code',Consolas,monospace;font-size:.87rem}
+  pre{background:#1e1e1e;color:#d4d4d4;padding:14px 18px;border-radius:6px;font-family:'Cascadia Code',Consolas,monospace;font-size:.85rem;overflow-x:auto;margin:14px 0;line-height:1.55}
+  @media print{.back-bar{display:none}.chapter{page-break-inside:avoid}a{color:inherit;text-decoration:none}}
+  @media(max-width:768px){.cover,.chapter,.toc{padding:30px 20px}.screenshot-row{grid-template-columns:1fr}.field-list .fl-row{grid-template-columns:1fr}.back-bar{padding:10px 20px}}
 </style>
 </head>
 <body>
 
 <div class="back-bar">
-  <a href="/admin/dashboard">&#8592; Zurück zum Admin-Panel</a>
+  <a href="/admin/dashboard">&#8592; <span data-t="nav_back">Zurück zum Admin-Panel</span></a>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('de')">DE</button>
+    <button class="lang-btn" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('it')">IT</button>
+  </div>
 </div>
 
 <div class="cover">
   <div class="logo">IT-<span>Westfalen</span></div>
-  <div class="subtitle">Signature Screen &nbsp; Administrationshandbuch</div>
-  <div class="meta">Version 2.2 &nbsp;&nbsp; Februar 2026 &nbsp;&nbsp; Intern</div>
+  <div class="subtitle"><span data-t="cover_subtitle">Signature Screen &nbsp; Administrationshandbuch</span></div>
+  <div class="meta"><span data-t="cover_meta">Version 2.2 &nbsp;&nbsp; Februar 2026 &nbsp;&nbsp; Intern</span></div>
 </div>
 
-<!-- TOC -->
 <div class="toc" id="toc">
-  <h2>Inhaltsverzeichnis</h2>
+  <h2 data-t="toc_title">Inhaltsverzeichnis</h2>
   <ol>
-    <li><a href="#ch-login">Anmeldung</a>
+    <li><a href="#ch-login" data-t="toc_1">Anmeldung</a>
       <ol class="sub">
-        <li><a href="#ch-login-step">Schritt-für-Schritt</a></li>
-        <li><a href="#ch-login-roles">Rollen &amp; Berechtigungen</a></li>
-        <li><a href="#ch-login-pw">Passwort ändern / zurücksetzen</a></li>
+        <li><a href="#ch-login-step" data-t="toc_1_1">Schritt-für-Schritt</a></li>
+        <li><a href="#ch-login-roles" data-t="toc_1_2">Rollen &amp; Berechtigungen</a></li>
+        <li><a href="#ch-login-pw" data-t="toc_1_3">Passwort ändern / zurücksetzen</a></li>
       </ol>
     </li>
-    <li><a href="#ch-dashboard">Dashboard  Übersicht</a>
+    <li><a href="#ch-dashboard" data-t="toc_2">Dashboard  Übersicht</a>
       <ol class="sub">
-        <li><a href="#ch-dashboard-tiles">Statistik-Kacheln</a></li>
-        <li><a href="#ch-dashboard-nav">Navigation</a></li>
+        <li><a href="#ch-dashboard-tiles" data-t="toc_2_1">Statistik-Kacheln</a></li>
+        <li><a href="#ch-dashboard-nav" data-t="toc_2_2">Navigation</a></li>
       </ol>
     </li>
-    <li><a href="#ch-posts">Beiträge verwalten</a>
+    <li><a href="#ch-posts" data-t="toc_3">Beiträge verwalten</a>
       <ol class="sub">
-        <li><a href="#ch-posts-types">Beitrags-Typen</a></li>
-        <li><a href="#ch-posts-create">Beitrag erstellen</a></li>
-        <li><a href="#ch-posts-fields">Felder im Detail</a></li>
-        <li><a href="#ch-posts-schedule">Zeitsteuerung</a></li>
-        <li><a href="#ch-posts-ai">KI-Unterstützung</a></li>
+        <li><a href="#ch-posts-types" data-t="toc_3_1">Beitrags-Typen</a></li>
+        <li><a href="#ch-posts-create" data-t="toc_3_2">Beitrag erstellen</a></li>
+        <li><a href="#ch-posts-fields" data-t="toc_3_3">Felder im Detail</a></li>
+        <li><a href="#ch-posts-schedule" data-t="toc_3_4">Zeitsteuerung</a></li>
+        <li><a href="#ch-posts-ai" data-t="toc_3_5">KI-Unterstützung</a></li>
       </ol>
     </li>
-    <li><a href="#ch-categories">Kategorien</a></li>
-    <li><a href="#ch-displays">Displays</a>
+    <li><a href="#ch-categories" data-t="toc_4">Kategorien</a></li>
+    <li><a href="#ch-displays" data-t="toc_5">Displays</a>
       <ol class="sub">
-        <li><a href="#ch-displays-create">Display anlegen</a></li>
-        <li><a href="#ch-displays-url">Display-URL &amp; Kiosk-Modus</a></li>
+        <li><a href="#ch-displays-create" data-t="toc_5_1">Display anlegen</a></li>
+        <li><a href="#ch-displays-url" data-t="toc_5_2">Display-URL &amp; Kiosk-Modus</a></li>
       </ol>
     </li>
-    <li><a href="#ch-users">Benutzer &amp; Rollen</a>
+    <li><a href="#ch-users" data-t="toc_6">Benutzer &amp; Rollen</a>
       <ol class="sub">
-        <li><a href="#ch-users-create">Benutzer anlegen</a></li>
-        <li><a href="#ch-users-matrix">Berechtigungsmatrix</a></li>
+        <li><a href="#ch-users-create" data-t="toc_6_1">Benutzer anlegen</a></li>
+        <li><a href="#ch-users-matrix" data-t="toc_6_2">Berechtigungsmatrix</a></li>
       </ol>
     </li>
-    <li><a href="#ch-livedata">Live-Daten</a>
+    <li><a href="#ch-livedata" data-t="toc_7">Live-Daten</a>
       <ol class="sub">
-        <li><a href="#ch-livedata-opnv">ÖPNV-Abfahrten</a></li>
-        <li><a href="#ch-livedata-traffic">Autobahn-Verkehrslage</a></li>
-        <li><a href="#ch-livedata-weather">Wetter &amp; Vorhersage</a></li>
-        <li><a href="#ch-livedata-news">Nachrichten-Feed</a></li>
-        <li><a href="#ch-livedata-cache">Cache-Verwaltung</a></li>
+        <li><a href="#ch-livedata-opnv" data-t="toc_7_1">ÖPNV-Abfahrten</a></li>
+        <li><a href="#ch-livedata-traffic" data-t="toc_7_2">Autobahn-Verkehrslage</a></li>
+        <li><a href="#ch-livedata-weather" data-t="toc_7_3">Wetter &amp; Vorhersage</a></li>
+        <li><a href="#ch-livedata-news" data-t="toc_7_4">Nachrichten-Feed</a></li>
+        <li><a href="#ch-livedata-cache" data-t="toc_7_5">Cache-Verwaltung</a></li>
       </ol>
     </li>
-    <li><a href="#ch-settings">Systemeinstellungen</a>
+    <li><a href="#ch-settings" data-t="toc_8">Systemeinstellungen</a>
       <ol class="sub">
-        <li><a href="#ch-settings-display">Anzeigeoptionen</a></li>
-        <li><a href="#ch-settings-music">Hintergrundmusik</a></li>
-        <li><a href="#ch-settings-ai">KI-Assistent</a></li>
-        <li><a href="#ch-settings-sso">SSO / LDAP</a></li>
+        <li><a href="#ch-settings-display" data-t="toc_8_1">Anzeigeoptionen</a></li>
+        <li><a href="#ch-settings-music" data-t="toc_8_2">Hintergrundmusik</a></li>
+        <li><a href="#ch-settings-ai" data-t="toc_8_3">KI-Assistent</a></li>
+        <li><a href="#ch-settings-sso" data-t="toc_8_4">SSO / LDAP</a></li>
       </ol>
     </li>
-    <li><a href="#ch-troubleshoot">Fehlerbehebung</a></li>
-    <li><a href="#ch-reference">Schnellreferenz</a></li>
+    <li><a href="#ch-troubleshoot" data-t="toc_9">Fehlerbehebung</a></li>
+    <li><a href="#ch-reference" data-t="toc_10">Schnellreferenz</a></li>
   </ol>
 </div>
 
-<!--  1. LOGIN  -->
+<!-- 1. LOGIN -->
 <div class="chapter" id="ch-login">
-  <div class="chapter-title"><span class="chapter-num">1</span> Anmeldung</div>
-  <p>Der Zugang zum Admin-Panel erfolgt ausschließlich über den Browser. Es wird kein zusätzliches Programm benötigt.</p>
-
-  <h3 id="ch-login-step">1.1 Schritt-für-Schritt-Anmeldung</h3>
+  <div class="chapter-title"><span class="chapter-num">1</span> <span data-t="ch1_title">Anmeldung</span></div>
+  <p data-t="ch1_intro">Der Zugang zum Admin-Panel erfolgt ausschließlich über den Browser. Es wird kein zusätzliches Programm benötigt.</p>
+  <h3 id="ch-login-step" data-t="ch1_1_h">1.1 Schritt-für-Schritt-Anmeldung</h3>
   <ol class="steps">
-    <li>Browser öffnen und <code>https://prasco.zapto.org/admin</code> aufrufen.</li>
-    <li>E-Mail-Adresse in das erste Eingabefeld eingeben.</li>
-    <li>Passwort in das zweite Eingabefeld eingeben.</li>
-    <li>Optional: Häkchen bei <em>Angemeldet bleiben</em> setzen, um die Sitzung auch nach dem Browser-Neustart aktiv zu halten.</li>
-    <li>Auf den Button <strong>Anmelden</strong> klicken.</li>
-    <li>Nach erfolgreicher Anmeldung erscheint automatisch das Dashboard.</li>
+    <li data-t="ch1_s1">Browser öffnen und <code>https://prasco.zapto.org/admin</code> aufrufen.</li>
+    <li data-t="ch1_s2">E-Mail-Adresse in das erste Eingabefeld eingeben.</li>
+    <li data-t="ch1_s3">Passwort in das zweite Eingabefeld eingeben.</li>
+    <li data-t="ch1_s4">Optional: Häkchen bei <em>Angemeldet bleiben</em> setzen, um die Sitzung auch nach dem Browser-Neustart aktiv zu halten.</li>
+    <li data-t="ch1_s5">Auf den Button <strong>Anmelden</strong> klicken.</li>
+    <li data-t="ch1_s6">Nach erfolgreicher Anmeldung erscheint automatisch das Dashboard.</li>
   </ol>
-
   <div class="screenshot-block">
-    <img src="/handbuch/00_login.png" alt="Login-Seite" />
-    <div class="caption">Abb. 1.1  Anmeldeseite des Admin-Panels</div>
+    <img src="/handbuch/00_login.png" alt="Login" />
+    <div class="caption" data-t="ch1_fig1">Abb. 1.1  Anmeldeseite des Admin-Panels</div>
   </div>
-
-  <div class="tip">&#128161; HTTPS ist pflicht  alle Verbindungen sind TLS-verschlüsselt. Das Zertifikat wird automatisch über Let's Encrypt erneuert.</div>
-
-  <h3 id="ch-login-roles">1.2 Rollen &amp; Berechtigungen</h3>
-  <p>Jeder Benutzer hat genau eine Rolle. Die Rolle bestimmt, welche Bereiche des Admin-Panels sichtbar und bearbeitbar sind.</p>
+  <div class="tip" data-t="ch1_tip1">&#128161; HTTPS ist Pflicht  alle Verbindungen sind TLS-verschlüsselt. Das Zertifikat wird automatisch über Let's Encrypt erneuert.</div>
+  <h3 id="ch-login-roles" data-t="ch1_2_h">1.2 Rollen &amp; Berechtigungen</h3>
+  <p data-t="ch1_2_p">Jeder Benutzer hat genau eine Rolle. Die Rolle bestimmt, welche Bereiche des Admin-Panels sichtbar und bearbeitbar sind.</p>
   <table>
-    <tr><th>Rolle</th><th>Beiträge</th><th>Kategorien</th><th>Displays</th><th>Benutzer</th><th>Einstellungen</th><th>SSO</th></tr>
-    <tr><td><strong>Betrachter</strong></td><td>Lesen</td><td>Lesen</td><td>Lesen</td><td></td><td></td><td></td></tr>
-    <tr><td><strong>Editor</strong></td><td>Erstellen, Bearbeiten</td><td>Lesen</td><td>Lesen</td><td></td><td></td><td></td></tr>
-    <tr><td><strong>Admin</strong></td><td>Voll</td><td>Voll</td><td>Voll</td><td>Eingeschränkt</td><td>Voll (ohne SSO)</td><td></td></tr>
-    <tr><td><strong>Super-Admin</strong></td><td>Voll</td><td>Voll</td><td>Voll</td><td>Voll</td><td>Voll</td><td>Voll</td></tr>
+    <tr><th data-t="th_role">Rolle</th><th data-t="th_posts">Beiträge</th><th data-t="th_cat">Kategorien</th><th data-t="th_disp">Displays</th><th data-t="th_users">Benutzer</th><th data-t="th_settings">Einstellungen</th><th>SSO</th></tr>
+    <tr><td><strong data-t="role_viewer">Betrachter</strong></td><td data-t="perm_read">Lesen</td><td data-t="perm_read">Lesen</td><td data-t="perm_read">Lesen</td><td></td><td></td><td></td></tr>
+    <tr><td><strong data-t="role_editor">Editor</strong></td><td data-t="perm_create_edit">Erstellen, Bearbeiten</td><td data-t="perm_read">Lesen</td><td data-t="perm_read">Lesen</td><td></td><td></td><td></td></tr>
+    <tr><td><strong data-t="role_admin">Admin</strong></td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_limited">Eingeschränkt</td><td data-t="perm_full_nosso">Voll (ohne SSO)</td><td></td></tr>
+    <tr><td><strong data-t="role_superadmin">Super-Admin</strong></td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td><td data-t="perm_full">Voll</td></tr>
   </table>
-
-  <h3 id="ch-login-pw">1.3 Passwort ändern / zurücksetzen</h3>
-  <h4>Eigenes Passwort ändern</h4>
+  <h3 id="ch-login-pw" data-t="ch1_3_h">1.3 Passwort ändern / zurücksetzen</h3>
+  <h4 data-t="ch1_3_own">Eigenes Passwort ändern</h4>
   <ol class="steps">
-    <li>Oben rechts auf das Benutzer-Symbol klicken.</li>
-    <li><em>Profil</em> oder <em>Passwort ändern</em> auswählen.</li>
-    <li>Aktuelles Passwort und zweimal das neue Passwort eingeben.</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
+    <li data-t="ch1_pw1">Oben rechts auf das Benutzer-Symbol klicken.</li>
+    <li data-t="ch1_pw2"><em>Profil</em> oder <em>Passwort ändern</em> auswählen.</li>
+    <li data-t="ch1_pw3">Aktuelles Passwort und zweimal das neue Passwort eingeben.</li>
+    <li data-t="ch1_pw4">Auf <strong>Speichern</strong> klicken.</li>
   </ol>
-  <h4>Passwort eines anderen Benutzers zurücksetzen (Admin)</h4>
+  <h4 data-t="ch1_3_reset">Passwort eines anderen Benutzers zurücksetzen (Admin)</h4>
   <ol class="steps">
-    <li>Im Menü auf <em>Benutzer</em> navigieren.</li>
-    <li>Den gewünschten Benutzer in der Liste suchen und auf <strong>Bearbeiten</strong> klicken.</li>
-    <li>Im Feld <em>Neues Passwort</em> ein temporäres Passwort eingeben (mindestens 8 Zeichen).</li>
-    <li>Auf <strong>Speichern</strong> klicken und das temporäre Passwort dem Benutzer sicher übermitteln.</li>
+    <li data-t="ch1_rs1">Im Menü auf <em>Benutzer</em> navigieren.</li>
+    <li data-t="ch1_rs2">Den gewünschten Benutzer in der Liste suchen und auf <strong>Bearbeiten</strong> klicken.</li>
+    <li data-t="ch1_rs3">Im Feld <em>Neues Passwort</em> ein temporäres Passwort eingeben (mindestens 8 Zeichen).</li>
+    <li data-t="ch1_rs4">Auf <strong>Speichern</strong> klicken und das temporäre Passwort dem Benutzer sicher übermitteln.</li>
   </ol>
-  <div class="warning">&#9888; Super-Admin-Konten können nur von anderen Super-Admins zurückgesetzt werden.</div>
+  <div class="warning" data-t="ch1_warn1">&#9888; Super-Admin-Konten können nur von anderen Super-Admins zurückgesetzt werden.</div>
 </div>
 
-<!--  2. DASHBOARD  -->
+<!-- 2. DASHBOARD -->
 <div class="chapter" id="ch-dashboard">
-  <div class="chapter-title"><span class="chapter-num">2</span> Dashboard  Übersicht</div>
-  <p>Das Dashboard erscheint direkt nach der Anmeldung und gibt einen schnellen Überblick über den Systemstatus sowie Schnellzugriff auf die wichtigsten Aktionen.</p>
-
+  <div class="chapter-title"><span class="chapter-num">2</span> <span data-t="ch2_title">Dashboard  Übersicht</span></div>
+  <p data-t="ch2_intro">Das Dashboard erscheint direkt nach der Anmeldung und gibt einen schnellen Überblick über den Systemstatus sowie Schnellzugriff auf die wichtigsten Aktionen.</p>
   <div class="screenshot-block">
     <img src="/handbuch/01_dashboard.png" alt="Dashboard" />
-    <div class="caption">Abb. 2.1  Dashboard mit Statistik-Kacheln, Schnellzugriff und Seitenleiste</div>
+    <div class="caption" data-t="ch2_fig1">Abb. 2.1  Dashboard mit Statistik-Kacheln, Schnellzugriff und Seitenleiste</div>
   </div>
-
-  <h3 id="ch-dashboard-tiles">2.1 Statistik-Kacheln</h3>
+  <h3 id="ch-dashboard-tiles" data-t="ch2_1_h">2.1 Statistik-Kacheln</h3>
   <table>
-    <tr><th>Kachel</th><th>Inhalt</th><th>Klick-Ziel</th></tr>
-    <tr><td><strong>Beiträge</strong></td><td>Gesamtanzahl aktiver Beiträge im System</td><td>Beiträge-Übersicht</td></tr>
-    <tr><td><strong>Aktive Displays</strong></td><td>Displays mit Status "aktiv" (unabhängig von letzter Verbindung)</td><td>Displays-Übersicht</td></tr>
-    <tr><td><strong>Benutzer</strong></td><td>Anzahl aller registrierten Benutzerkonten</td><td>Benutzerverwaltung</td></tr>
-    <tr><td><strong>+ Neuer Beitrag</strong></td><td>Schnellzugriff-Button</td><td>Öffnet Beitrags-Formular</td></tr>
+    <tr><th data-t="th_tile">Kachel</th><th data-t="th_content">Inhalt</th><th data-t="th_target">Klick-Ziel</th></tr>
+    <tr><td><strong data-t="tile_posts">Beiträge</strong></td><td data-t="tile_posts_d">Gesamtanzahl aktiver Beiträge im System</td><td data-t="tile_posts_t">Beiträge-Übersicht</td></tr>
+    <tr><td><strong data-t="tile_displays">Aktive Displays</strong></td><td data-t="tile_displays_d">Displays mit Status aktiv"</td><td data-t="tile_displays_t">Displays-Übersicht</td></tr>
+    <tr><td><strong data-t="tile_users">Benutzer</strong></td><td data-t="tile_users_d">Anzahl aller registrierten Benutzerkonten</td><td data-t="tile_users_t">Benutzerverwaltung</td></tr>
+    <tr><td><strong data-t="tile_new">+ Neuer Beitrag</strong></td><td data-t="tile_new_d">Schnellzugriff-Button</td><td data-t="tile_new_t">Öffnet Beitrags-Formular</td></tr>
   </table>
-
-  <h3 id="ch-dashboard-nav">2.2 Navigation</h3>
-  <p>Die Seitenleiste links ist jederzeit sichtbar und enthält alle Hauptbereiche:</p>
+  <h3 id="ch-dashboard-nav" data-t="ch2_2_h">2.2 Navigation</h3>
+  <p data-t="ch2_2_p">Die Seitenleiste links ist jederzeit sichtbar und enthält alle Hauptbereiche:</p>
   <table>
-    <tr><th>Menüpunkt</th><th>Funktion</th></tr>
-    <tr><td>Dashboard</td><td>Startseite mit Übersicht und Statistiken</td></tr>
-    <tr><td>Beiträge</td><td>Alle Inhalte erstellen, bearbeiten, löschen</td></tr>
-    <tr><td>Kategorien</td><td>Inhalts-Kategorien verwalten</td></tr>
-    <tr><td>Displays</td><td>Bildschirm-Konfigurationen verwalten</td></tr>
-    <tr><td>Benutzer</td><td>Benutzerkonten und Rollen verwalten</td></tr>
-    <tr><td>Live-Daten</td><td>ÖPNV, Verkehr, Wetter, Nachrichten konfigurieren</td></tr>
-    <tr><td>Einstellungen</td><td>Globale Systemkonfiguration</td></tr>
-    <tr><td>Hilfe</td><td>Dieses Handbuch öffnen</td></tr>
-    <tr><td>Abmelden</td><td>Aktuelle Sitzung beenden</td></tr>
+    <tr><th data-t="th_menu">Menüpunkt</th><th data-t="th_func">Funktion</th></tr>
+    <tr><td data-t="nav_dashboard">Dashboard</td><td data-t="nav_dashboard_d">Startseite mit Übersicht und Statistiken</td></tr>
+    <tr><td data-t="nav_posts">Beiträge</td><td data-t="nav_posts_d">Alle Inhalte erstellen, bearbeiten, löschen</td></tr>
+    <tr><td data-t="nav_categories">Kategorien</td><td data-t="nav_categories_d">Inhalts-Kategorien verwalten</td></tr>
+    <tr><td data-t="nav_displays">Displays</td><td data-t="nav_displays_d">Bildschirm-Konfigurationen verwalten</td></tr>
+    <tr><td data-t="nav_users">Benutzer</td><td data-t="nav_users_d">Benutzerkonten und Rollen verwalten</td></tr>
+    <tr><td data-t="nav_livedata">Live-Daten</td><td data-t="nav_livedata_d">ÖPNV, Verkehr, Wetter, Nachrichten konfigurieren</td></tr>
+    <tr><td data-t="nav_settings">Einstellungen</td><td data-t="nav_settings_d">Globale Systemkonfiguration</td></tr>
+    <tr><td data-t="nav_help">Hilfe</td><td data-t="nav_help_d">Dieses Handbuch öffnen</td></tr>
+    <tr><td data-t="nav_logout">Abmelden</td><td data-t="nav_logout_d">Aktuelle Sitzung beenden</td></tr>
   </table>
 </div>
 
-<!--  3. BEITRÄGE  -->
+<!-- 3. BEITRÄGE -->
 <div class="chapter" id="ch-posts">
-  <div class="chapter-title"><span class="chapter-num">3</span> Beiträge verwalten</div>
-  <p>Beiträge sind die zentralen Inhaltseinheiten in IT-Westfalen Signature Screen. Jeder Beitrag wird auf einem oder mehreren Displays in einer definierten Reihenfolge abgespielt.</p>
-
+  <div class="chapter-title"><span class="chapter-num">3</span> <span data-t="ch3_title">Beiträge verwalten</span></div>
+  <p data-t="ch3_intro">Der Bereich <em>Beiträge</em> ist das Herzstück des Systems. Hier werden alle Inhalte erstellt, bearbeitet und geplant, die auf den Displays angezeigt werden.</p>
+  <h3 id="ch-posts-overview" data-t="ch3_1_h">3.1 Beitrags-Übersicht</h3>
+  <p data-t="ch3_1_p">Die Tabelle zeigt alle Beiträge mit Titel, Kategorie, Status, Zeitraum und Displays. Über die Suche und den Kategorie-Filter lassen sich Beiträge schnell finden.</p>
   <div class="screenshot-block">
-    <img src="/handbuch/02_beitraege.png" alt="Beiträge  Übersicht" />
-    <div class="caption">Abb. 3.1  Beiträge-Übersicht mit Listenansicht, Filter und Aktionsbuttons</div>
+    <img src="/handbuch/02_beitraege.png" alt="Beiträge" />
+    <div class="caption" data-t="ch3_fig1">Abb. 3.1  Beitrags-Übersicht mit Such- und Filterfunktion</div>
   </div>
-
-  <h3 id="ch-posts-types">3.1 Beitrags-Typen</h3>
-  <table>
-    <tr><th>Typ</th><th>Beschreibung</th><th>Empfohlene Formate</th></tr>
-    <tr><td><strong>Text</strong></td><td>Reiner Textbeitrag mit Titel und formatierbarem Beschreibungsfeld</td><td></td></tr>
-    <tr><td><strong>Bild</strong></td><td>Ein einzelnes Bild wird im Vollbildmodus angezeigt</td><td>JPG, PNG, WebP</td></tr>
-    <tr><td><strong>Video</strong></td><td>Video-Datei oder URL (auch YouTube-Links werden akzeptiert)</td><td>MP4, WebM</td></tr>
-    <tr><td><strong>Präsentation</strong></td><td>PowerPoint/PDF  wird serverseitig automatisch in Einzelbilder umgewandelt und als Dia-Show abgespielt</td><td>PPTX, PDF</td></tr>
-    <tr><td><strong>Web</strong></td><td>Externe Webseite als eingebetteter iFrame (erfordert HTTPS der Zielseite)</td><td>URL mit https://</td></tr>
-    <tr><td><strong>Wetterwidget</strong></td><td>Automatisch generiertes Wetterbild für den konfigurierten Standort</td><td>Kein Upload nötig</td></tr>
-  </table>
-
-  <h3 id="ch-posts-create">3.2 Beitrag erstellen  Schritt für Schritt</h3>
+  <h3 id="ch-posts-create" data-t="ch3_2_h">3.2 Neuen Beitrag erstellen</h3>
   <ol class="steps">
-    <li>Im Menü auf <strong>Beiträge</strong> klicken.</li>
-    <li>Oben rechts auf <strong>+ Neuer Beitrag</strong> klicken.</li>
-    <li>Den gewünschten Beitrags-Typ aus der Auswahlliste wählen.</li>
-    <li>Titel des Beitrags eingeben.</li>
-    <li>Je nach Typ: Text eingeben, Datei hochladen oder URL einfügen.</li>
-    <li>Eine Kategorie aus der Dropdown-Liste zuweisen.</li>
-    <li>Das Ziel-Display auswählen (Mehrfachauswahl möglich).</li>
-    <li>Optional: Anzeigedauer, Start- und Endzeit festlegen.</li>
-    <li>Den Schalter <strong>Beitrag aktiv</strong> auf EIN stellen.</li>
-    <li>Auf <strong>Speichern</strong> klicken  der Beitrag erscheint sofort auf dem Display.</li>
+    <li data-t="ch3_c1">Auf den Button <strong>+ Neuer Beitrag</strong> klicken.</li>
+    <li data-t="ch3_c2"><strong>Titel</strong> eingeben (Pflichtfeld, wird auf dem Display angezeigt).</li>
+    <li data-t="ch3_c3"><strong>Inhalt</strong> eingeben. Mehrzeiliger Text und einfaches Markdown sind möglich.</li>
+    <li data-t="ch3_c4"><strong>Kategorie</strong> aus der Dropdown-Liste wählen.</li>
+    <li data-t="ch3_c5"><strong>Anzeigedauer</strong> in Sekunden eingeben (wie lange der Beitrag auf dem Display verweilt).</li>
+    <li data-t="ch3_c6">Optional: <strong>Startdatum / Enddatum</strong> setzen, um die Sichtbarkeit zeitlich zu begrenzen.</li>
+    <li data-t="ch3_c7">Optional: Eines oder mehrere <strong>Bilder</strong> hochladen oder eine <strong>YouTube-URL</strong> eintragen.</li>
+    <li data-t="ch3_c8"><strong>Displays</strong> auswählen, auf denen der Beitrag erscheinen soll.</li>
+    <li data-t="ch3_c9">Auf <strong>Speichern</strong> klicken.</li>
   </ol>
-
-  <div class="screenshot-row">
-    <div class="screenshot-block">
-      <img src="/handbuch/03_beitrag_formular.png" alt="Beitrag-Formular oben" />
-      <div class="caption">Abb. 3.2  Formular: Allgemeine Angaben und Typ-Auswahl</div>
-    </div>
-    <div class="screenshot-block">
-      <img src="/handbuch/04_beitrag_formular_2.png" alt="Beitrag-Formular weitere Felder" />
-      <div class="caption">Abb. 3.3  Formular: Medien-Upload, Scheduling und Anzeige-Optionen</div>
-    </div>
-  </div>
-
-  <h3 id="ch-posts-fields">3.3 Felder im Detail</h3>
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">Titel <span class="fl-req">*</span></div><div class="fl-val">Name des Beitrags (intern sichtbar, auch auf dem Display wenn kein Medieninhalt)</div></div>
-    <div class="fl-row"><div class="fl-key">Typ <span class="fl-req">*</span></div><div class="fl-val">Text, Bild, Video, Präsentation, Web oder Wetterwidget  bestimmt das Formular-Layout</div></div>
-    <div class="fl-row"><div class="fl-key">Beschreibung</div><div class="fl-val">Optionaler Beschreibungstext, wird bei Textbeiträgen auf dem Display angezeigt</div></div>
-    <div class="fl-row"><div class="fl-key">Kategorie <span class="fl-req">*</span></div><div class="fl-val">Pflichtfeld  dient der internen Strukturierung; Kategoriefarbe wird in der Übersicht gezeigt</div></div>
-    <div class="fl-row"><div class="fl-key">Displays <span class="fl-req">*</span></div><div class="fl-val">Ein oder mehrere Ziel-Displays auswählen; der Beitrag erscheint nur auf gewählten Displays</div></div>
-    <div class="fl-row"><div class="fl-key">Anzeigedauer (s)</div><div class="fl-val">Wie lange dieser Beitrag pro Durchlauf gezeigt wird  überschreibt den globalen Standard-Wert</div></div>
-    <div class="fl-row"><div class="fl-key">Reihenfolge</div><div class="fl-val">Numerischer Wert  niedrigere Zahlen werden zuerst gezeigt</div></div>
-    <div class="fl-row"><div class="fl-key">Aktiv</div><div class="fl-val">Toggle  deaktivierte Beiträge werden nicht angezeigt, bleiben aber gespeichert</div></div>
-    <div class="fl-row"><div class="fl-key">Datei / URL</div><div class="fl-val">Abhängig vom Typ: Datei-Upload (Drag &amp; Drop oder Klick) oder URL-Eingabefeld</div></div>
-  </div>
-
-  <h3 id="ch-posts-schedule">3.4 Zeitsteuerung (Scheduling)</h3>
-  <p>Beiträge können auf bestimmte Zeiträume beschränkt werden  ideal für saisonale Inhalte, Veranstaltungen oder Wochenend-Angebote.</p>
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">Startzeit</div><div class="fl-val">Datum und Uhrzeit ab wann der Beitrag erscheint (leer = sofort aktiv)</div></div>
-    <div class="fl-row"><div class="fl-key">Endzeit</div><div class="fl-val">Datum und Uhrzeit bis wann der Beitrag erscheint (leer = kein Ablaufdatum)</div></div>
-  </div>
-  <h4>Beispiele</h4>
+  <h3 id="ch-posts-edit" data-t="ch3_3_h">3.3 Beitrag bearbeiten</h3>
+  <p data-t="ch3_3_p">In der Beitragsliste auf das Stift-Symbol &#9998; klicken. Das Formular öffnet sich mit den aktuellen Daten vorausgefüllt. Änderungen mit <strong>Speichern</strong> bestätigen.</p>
+  <h3 id="ch-posts-delete" data-t="ch3_4_h">3.4 Beitrag löschen</h3>
+  <p data-t="ch3_4_p">Auf das Papierkorb-Symbol &#128465; klicken. Eine Sicherheitsabfrage erscheint. Mit <strong>Bestätigen</strong> wird der Beitrag unwiderruflich gelöscht.</p>
+  <div class="warning" data-t="ch3_warn">&#9888; Gelöschte Beiträge können nicht wiederhergestellt werden. Sicherungskopien sind ratsam.</div>
+  <h3 id="ch-posts-image" data-t="ch3_5_h">3.5 Bilder &amp; Medien</h3>
   <table>
-    <tr><th>Szenario</th><th>Startzeit</th><th>Endzeit</th></tr>
-    <tr><td>Weihnachts-Aktion</td><td>01.12. 00:00</td><td>26.12. 23:59</td></tr>
-    <tr><td>Tagesangebot (tägl. wiederholt)</td><td>Heute 11:00</td><td>Heute 14:00 (tägl. manuell anpassen)</td></tr>
-    <tr><td>Dauerhafte Anzeige</td><td></td><td></td></tr>
-    <tr><td>Sofort starten, aber enden</td><td></td><td>31.03. 23:59</td></tr>
+    <tr><th data-t="th_type">Typ</th><th data-t="th_support">Unterstützt</th><th data-t="th_note">Hinweis</th></tr>
+    <tr><td>JPEG / PNG / WebP</td><td>&#10003;</td><td data-t="img_note">Max. 10 MB pro Datei</td></tr>
+    <tr><td>GIF</td><td>&#10003;</td><td data-t="gif_note">Animation wird auf dem Display abgespielt</td></tr>
+    <tr><td>YouTube URL</td><td>&#10003;</td><td data-t="yt_note">Stummgeschalten, Dauer wird automatisch ermittelt</td></tr>
+    <tr><td>MP4 / Video</td><td>&#10007;</td><td data-t="mp4_note">Nicht direkt  YouTube-Link verwenden</td></tr>
   </table>
-  <div class="tip">&#128161; Ein Beitrag mit Endzeit in der Vergangenheit wird nicht angezeigt, bleibt aber gespeichert und kann mit neuer Endzeit reaktiviert werden.</div>
-
-  <h3 id="ch-posts-ai">3.5 KI-Unterstützung beim Verfassen</h3>
-  <p>Wenn ein OpenAI API-Key hinterlegt ist (siehe Kap. 8.3), erscheint im Beitrags-Formular ein KI-Button neben dem Textfeld.</p>
-  <table>
-    <tr><th>Aktion</th><th>Funktion</th></tr>
-    <tr><td>Text generieren</td><td>KI erstellt einen Entwurf basierend auf einem Stichwort oder dem Titel</td></tr>
-    <tr><td>Text verbessern</td><td>Bestehenden Text stilistisch optimieren</td></tr>
-    <tr><td>Kürzen</td><td>Text auf wesentliche Aussagen komprimieren</td></tr>
-    <tr><td>Übersetzen</td><td>Text in Deutsch oder Englisch übersetzen</td></tr>
-  </table>
-  <div class="warning">&#9888; KI-generierte Texte immer vor dem Speichern prüfen. Der API-Key wird über die OpenAI-API abgerechnet.</div>
-
-  <div class="danger">&#128683; Beim Löschen eines Beitrags werden alle zugehörigen Mediendateien (Bild, Video, Präsentation, Hintergrundmusik) unwiderruflich vom Server entfernt.</div>
+  <h3 id="ch-posts-schedule" data-t="ch3_6_h">3.6 Zeitplanung</h3>
+  <p data-t="ch3_6_p">Mit <strong>Startdatum</strong> und <strong>Enddatum</strong> lässt sich ein Beitrag exakt terminieren. Beiträge außerhalb des gültigen Zeitrahmens werden auf dem Display nicht gezeigt, bleiben aber im System erhalten.</p>
+  <div class="tip" data-t="ch3_tip">&#128161; Für Aushänge, die immer gelten sollen, beide Datumsfelder leer lassen.</div>
 </div>
 
-<!--  4. KATEGORIEN  -->
+<!-- 4. KATEGORIEN -->
 <div class="chapter" id="ch-categories">
-  <div class="chapter-title"><span class="chapter-num">4</span> Kategorien</div>
-  <p>Kategorien strukturieren Ihre Beiträge. Sie sind ein Pflichtfeld beim Erstellen eines Beitrags und helfen bei der Filterung in der Übersicht.</p>
-
-  <div class="screenshot-block">
-    <img src="/handbuch/05_kategorien.png" alt="Kategorien" />
-    <div class="caption">Abb. 4.1  Kategorien-Übersicht mit Farbmarkierung und Anzahl zugeordneter Beiträge</div>
-  </div>
-
-  <h3>Kategorie anlegen</h3>
+  <div class="chapter-title"><span class="chapter-num">4</span> <span data-t="ch4_title">Kategorien</span></div>
+  <p data-t="ch4_intro">Kategorien gruppieren Beiträge thematisch. Jeder Beitrag gehört genau einer Kategorie an. Kategorien können auch Display-spezifisch gefiltert werden.</p>
+  <h3 id="ch-categories-create" data-t="ch4_1_h">4.1 Kategorie erstellen</h3>
   <ol class="steps">
-    <li>Im Menü auf <strong>Kategorien</strong> klicken.</li>
-    <li>Auf <strong>+ Neue Kategorie</strong> klicken.</li>
-    <li>Namen eingeben (z. B. Veranstaltungen", Speiseplan", Allgemein").</li>
-    <li>Optional: Beschreibung hinzufügen.</li>
-    <li>Eine Farbe aus dem Farbwähler auswählen  sie erleichtert die Unterscheidung in der Beitrags-Übersicht.</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
+    <li data-t="ch4_c1">Im Menü auf <em>Kategorien</em> klicken.</li>
+    <li data-t="ch4_c2">Auf <strong>+ Neue Kategorie</strong> klicken.</li>
+    <li data-t="ch4_c3">Einen aussagekräftigen <strong>Namen</strong> eingeben (z. B. Veranstaltungen" oder Speiseplan").</li>
+    <li data-t="ch4_c4">Optional: <strong>Farbe</strong> für die visuelle Unterscheidung auswählen.</li>
+    <li data-t="ch4_c5">Auf <strong>Speichern</strong> klicken.</li>
   </ol>
-
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">Name <span class="fl-req">*</span></div><div class="fl-val">Anzeigename der Kategorie, erscheint im Beitrags-Formular und der Übersicht</div></div>
-    <div class="fl-row"><div class="fl-key">Beschreibung</div><div class="fl-val">Interne Notiz zur Verwendung der Kategorie</div></div>
-    <div class="fl-row"><div class="fl-key">Farbe</div><div class="fl-val">Kennfarbe (Hex-Code), wird als farbiger Punkt in der Beitrags-Liste angezeigt</div></div>
-  </div>
-
-  <div class="warning">&#9888; Eine Kategorie kann nur gelöscht werden, wenn ihr keine Beiträge zugeordnet sind. Beiträge zuerst in eine andere Kategorie verschieben oder löschen.</div>
+  <h3 id="ch-categories-edit" data-t="ch4_2_h">4.2 Kategorie bearbeiten / löschen</h3>
+  <p data-t="ch4_2_p">In der Kategorieliste das Stift-Symbol &#9998; zum Bearbeiten oder das Papierkorb-Symbol &#128465; zum Löschen anklicken.</p>
+  <div class="warning" data-t="ch4_warn">&#9888; Eine Kategorie kann nicht gelöscht werden, solange ihr noch Beiträge zugeordnet sind. Beiträge zuerst in eine andere Kategorie verschieben oder löschen.</div>
 </div>
 
-<!--  5. DISPLAYS  -->
+<!-- 5. DISPLAYS -->
 <div class="chapter" id="ch-displays">
-  <div class="chapter-title"><span class="chapter-num">5</span> Displays</div>
-  <p>Jedes Display repräsentiert einen physischen Bildschirm. IT-Westfalen Signature Screen steuert alle Displays zentral — die Anzeige-Software auf dem Bildschirm ruft die Inhalte selbstständig vom Server ab.</p>
-
-  <div class="screenshot-block">
-    <img src="/handbuch/06_displays.png" alt="Displays  Übersicht" />
-    <div class="caption">Abb. 5.1  Displays-Übersicht mit Verbindungsstatus und letztem Ping</div>
-  </div>
-
-  <h3 id="ch-displays-create">5.1 Display anlegen</h3>
+  <div class="chapter-title"><span class="chapter-num">5</span> <span data-t="ch5_title">Displays</span></div>
+  <p data-t="ch5_intro">Im Bereich <em>Displays</em> werden alle angeschlossenen Bildschirme verwaltet. Jedes Display hat eine eigene Konfiguration, URL und Playlist.</p>
+  <h3 id="ch-displays-create" data-t="ch5_1_h">5.1 Display hinzufügen</h3>
   <ol class="steps">
-    <li>Im Menü auf <strong>Displays</strong> klicken.</li>
-    <li>Auf <strong>+ Neues Display</strong> klicken.</li>
-    <li>Einen sprechenden Namen eingeben (z. B. Empfang EG").</li>
-    <li>Einen eindeutigen Bezeichner eingeben  nur Kleinbuchstaben und Bindestriche (z. B. <code>empfang-eg</code>).</li>
-    <li>Optional Standort-Beschreibung eintragen.</li>
-    <li>Gewünschte Optionen aktivieren (ÖPNV, Verkehr, etc.).</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
-    <li>Die generierte Display-URL notieren und im Browser des Ziel-Geräts aufrufen.</li>
+    <li data-t="ch5_c1">Auf <strong>+ Neues Display</strong> klicken.</li>
+    <li data-t="ch5_c2">Einen eindeutigen <strong>Namen</strong> vergeben (z. B. Foyer EG" oder Kantine").</li>
+    <li data-t="ch5_c3"><strong>Standort</strong> und optionale Beschreibung eingeben.</li>
+    <li data-t="ch5_c4"><strong>Standard-Anzeigedauer</strong> festlegen (Sekunden pro Beitrag, wenn kein individueller Wert gesetzt).</li>
+    <li data-t="ch5_c5">Optional: <strong>Kategoriefilter</strong> aktivieren, um nur bestimmte Kategorien anzuzeigen.</li>
+    <li data-t="ch5_c6">Auf <strong>Speichern</strong> klicken. Die Display-URL wird automatisch generiert.</li>
   </ol>
-
-  <div class="screenshot-block">
-    <img src="/handbuch/06b_display_formular.png" alt="Display-Formular" />
-    <div class="caption">Abb. 5.2  Formular zum Erstellen eines Displays mit allen Konfigurationsoptionen</div>
-  </div>
-
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">Name <span class="fl-req">*</span></div><div class="fl-val">Frei wählbarer Anzeigename, nur intern sichtbar (z. B. Lobby 1. OG")</div></div>
-    <div class="fl-row"><div class="fl-key">Bezeichner <span class="fl-req">*</span></div><div class="fl-val">Eindeutiger technischer Schlüssel  erscheint in der URL (<code>/display/bezeichner</code>). Nur az, 09 und Bindestriche.</div></div>
-    <div class="fl-row"><div class="fl-key">Standort</div><div class="fl-val">Optionale Beschreibung des Aufstellorts, rein informativ</div></div>
-    <div class="fl-row"><div class="fl-key">Display aktiv</div><div class="fl-val">Inaktive Displays erhalten keine Beiträge und werden in der Statistik nicht gezählt</div></div>
-    <div class="fl-row"><div class="fl-key">ÖPNV-Daten</div><div class="fl-val">Aktiviert das Echtzeit-ÖPNV-Widget auf diesem Display (Konfiguration unter Live-Daten)</div></div>
-    <div class="fl-row"><div class="fl-key">Verkehrsdaten</div><div class="fl-val">Aktiviert das Autobahn-Verkehrs-Widget auf diesem Display</div></div>
-  </div>
-
-  <h3 id="ch-displays-url">5.2 Display-URL &amp; Kiosk-Modus</h3>
-  <p>Die URL eines Displays lautet:</p>
-  <pre>https://prasco.zapto.org/display/&lt;bezeichner&gt;</pre>
-  <p>Für einen dauerhaften Vollbild-Kiosk-Modus unter Chromium (z. B. Raspberry Pi) empfiehlt sich folgender Startbefehl:</p>
-  <pre>chromium-browser --kiosk --noerrdialogs --disable-infobars \
-  --incognito --check-for-update-interval=604800 \
-  "https://prasco.zapto.org/display/&lt;bezeichner&gt;"</pre>
-  <div class="tip">&#128161; Nach dem Speichern des Displays erscheint in der Übersichtsliste der Link <strong>Display öffnen</strong>  damit kann man die Vollbildansicht direkt im Browser testen, ohne den Kiosk-Modus einzurichten.</div>
+  <h3 id="ch-displays-url" data-t="ch5_2_h">5.2 Display-URL &amp; Kiosk-Modus</h3>
+  <p data-t="ch5_2_p">Jedes Display erhält eine eigene URL nach dem Schema <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Diese URL wird im Browser des Display-Geräts im Vollbild-Kiosk-Modus geöffnet.</p>
+  <div class="tip" data-t="ch5_tip1">&#128161; Android-TV-Geräte: Die PRASCO-App öffnet diese URL automatisch im Kiosk-Modus. Siehe Kapitel zur Android-App.</div>
+  <h3 id="ch-displays-config" data-t="ch5_3_h">5.3 Display-Konfiguration</h3>
+  <table>
+    <tr><th data-t="th_setting">Einstellung</th><th data-t="th_desc">Beschreibung</th></tr>
+    <tr><td data-t="disp_name">Name</td><td data-t="disp_name_d">Interner Bezeichner, auf dem Display selbst nicht sichtbar</td></tr>
+    <tr><td data-t="disp_dur">Anzeigedauer</td><td data-t="disp_dur_d">Standard-Verweildauer pro Beitrag in Sekunden</td></tr>
+    <tr><td data-t="disp_trans">Übergang</td><td data-t="disp_trans_d">Animationseffekt beim Beitragswechsel (Fade, Slide, )</td></tr>
+    <tr><td data-t="disp_ticker">Laufschrift</td><td data-t="disp_ticker_d">Benutzerdefinierter Ticker-Text am unteren Bildschirmrand</td></tr>
+    <tr><td data-t="disp_live">Live-Daten</td><td data-t="disp_live_d">ÖPNV, Wetter oder Nachrichten-Widget einblenden</td></tr>
+    <tr><td data-t="disp_active">Aktiv</td><td data-t="disp_active_d">Deaktivierte Displays zeigen nur einen schwarzen Bildschirm</td></tr>
+  </table>
+  <h3 id="ch-displays-preview" data-t="ch5_4_h">5.4 Vorschau</h3>
+  <p data-t="ch5_4_p">Über den Button <strong>Vorschau</strong> in der Display-Zeile öffnet sich die Display-Ansicht in einem neuen Tab  ideal zur Kontrolle ohne physischen Bildschirm.</p>
 </div>
 
-<!--  6. BENUTZER  -->
+<!-- 6. BENUTZER -->
 <div class="chapter" id="ch-users">
-  <div class="chapter-title"><span class="chapter-num">6</span> Benutzer &amp; Rollen</div>
-  <p>Im Bereich <em>Benutzer</em> verwalten Admins alle Konten des Systems. Die Benutzerverwaltung ist für Betrachter und Editoren nicht sichtbar.</p>
-
-  <div class="screenshot-block">
-    <img src="/handbuch/07_benutzer.png" alt="Benutzer" />
-    <div class="caption">Abb. 6.1  Benutzerverwaltung mit Rollen-Badge und Aktionsbuttons</div>
-  </div>
-
-  <h3 id="ch-users-create">6.1 Benutzer anlegen</h3>
+  <div class="chapter-title"><span class="chapter-num">6</span> <span data-t="ch6_title">Benutzer &amp; Rollen</span></div>
+  <p data-t="ch6_intro">Der Bereich <em>Benutzer</em> ist nur für Admins und Super-Admins zugänglich. Hier werden alle Konten verwaltet und Rollen zugewiesen.</p>
+  <h3 id="ch-users-create" data-t="ch6_1_h">6.1 Neuen Benutzer anlegen</h3>
   <ol class="steps">
-    <li>Im Menü auf <strong>Benutzer</strong> klicken.</li>
-    <li>Auf <strong>+ Neuer Benutzer</strong> klicken.</li>
-    <li>E-Mail-Adresse eingeben (wird als Login-Name verwendet).</li>
-    <li>Anzeigenamen eingeben (erscheint im Admin-Panel nach dem Login).</li>
-    <li>Initiales Passwort festlegen (mindestens 8 Zeichen, Kombination aus Buchstaben und Zahlen empfohlen).</li>
-    <li>Rolle aus der Dropdown-Liste wählen.</li>
-    <li>Auf <strong>Speichern</strong> klicken und Zugangsdaten sicher an den Benutzer übermitteln.</li>
+    <li data-t="ch6_c1">Auf <strong>+ Neuer Benutzer</strong> klicken.</li>
+    <li data-t="ch6_c2"><strong>Name</strong> und <strong>E-Mail-Adresse</strong> des Benutzers eingeben.</li>
+    <li data-t="ch6_c3">Ein temporäres <strong>Passwort</strong> vergeben (mindestens 8 Zeichen).</li>
+    <li data-t="ch6_c4">Die gewünschte <strong>Rolle</strong> aus der Dropdown-Liste wählen.</li>
+    <li data-t="ch6_c5">Auf <strong>Speichern</strong> klicken und das temporäre Passwort dem neuen Benutzer mitteilen.</li>
   </ol>
-
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">E-Mail <span class="fl-req">*</span></div><div class="fl-val">Login-Name; muss systemweit eindeutig sein</div></div>
-    <div class="fl-row"><div class="fl-key">Anzeigename <span class="fl-req">*</span></div><div class="fl-val">Name, der nach dem Login oben rechts angezeigt wird</div></div>
-    <div class="fl-row"><div class="fl-key">Passwort <span class="fl-req">*</span></div><div class="fl-val">Mindestens 8 Zeichen; beim Bearbeiten leer lassen, um das bestehende Passwort zu behalten</div></div>
-    <div class="fl-row"><div class="fl-key">Rolle <span class="fl-req">*</span></div><div class="fl-val">Betrachter / Editor / Admin / Super-Admin</div></div>
-  </div>
-
-  <h3 id="ch-users-matrix">6.2 Berechtigungsmatrix</h3>
+  <h3 id="ch-users-roles" data-t="ch6_2_h">6.2 Rollen im Detail</h3>
   <table>
-    <tr><th>Aktion</th><th>Betrachter</th><th>Editor</th><th>Admin</th><th>Super-Admin</th></tr>
-    <tr><td>Beiträge ansehen</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Beitrag erstellen</td><td></td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Beitrag löschen</td><td></td><td>Eigene</td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Displays verwalten</td><td></td><td></td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Kategorien verwalten</td><td></td><td></td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Benutzer anlegen</td><td></td><td></td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>Benutzer löschen</td><td></td><td></td><td>Nicht SA</td><td>&#10003;</td></tr>
-    <tr><td>Systemeinstellungen</td><td></td><td></td><td>&#10003;</td><td>&#10003;</td></tr>
-    <tr><td>SSO / LDAP konfigurieren</td><td></td><td></td><td></td><td>&#10003;</td></tr>
-    <tr><td>API-Keys verwalten</td><td></td><td></td><td></td><td>&#10003;</td></tr>
-    <tr><td>Live-Daten konfigurieren</td><td></td><td></td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><th data-t="th_role">Rolle</th><th data-t="th_roledesc">Beschreibung</th></tr>
+    <tr><td><strong data-t="role_viewer">Betrachter</strong></td><td data-t="role_viewer_d">Kann alle Beiträge und Displays einsehen, aber nicht ändern. Keine Schreibrechte.</td></tr>
+    <tr><td><strong data-t="role_editor">Editor</strong></td><td data-t="role_editor_d">Kann Beiträge erstellen und eigene Beiträge bearbeiten. Kein Zugriff auf Systemeinstellungen.</td></tr>
+    <tr><td><strong data-t="role_admin">Admin</strong></td><td data-t="role_admin_d">Vollzugriff auf Beiträge, Kategorien und Displays. Kann normale Benutzer und Editoren verwalten, aber keine anderen Admins.</td></tr>
+    <tr><td><strong data-t="role_superadmin">Super-Admin</strong></td><td data-t="role_superadmin_d">Vollzugriff auf alle Bereiche, einschließlich SSO-Konfiguration und Server-Einstellungen. Kann alle Rollen vergeben.</td></tr>
   </table>
-  <div class="tip">&#128161; SA = Super-Admin. Admins können keine Super-Admin-Konten bearbeiten oder löschen.</div>
+  <h3 id="ch-users-sso" data-t="ch6_3_h">6.3 SSO (Single Sign-On)</h3>
+  <p data-t="ch6_3_p">Das System unterstützt SSO via SAML 2.0 (z. B. Microsoft Entra ID / Azure AD). Die Konfiguration ist unter <em>Einstellungen  SSO</em> nur für Super-Admins zugänglich. Ausführliche Anleitung: Kapitel 8.3.</p>
 </div>
 
-<!--  7. LIVE-DATEN  -->
+<!-- 7. LIVE-DATEN -->
 <div class="chapter" id="ch-livedata">
-  <div class="chapter-title"><span class="chapter-num">7</span> Live-Daten (ÖPNV, Verkehr, Wetter &amp; Nachrichten)</div>
-  <p>IT-Westfalen Signature Screen kann Echtzeit-Informationen automatisch zwischen regulären Beiträgen einblenden. Die Konfiguration erfolgt im Bereich <em>Live-Daten</em>.</p>
-
-  <div class="screenshot-block">
-    <img src="/handbuch/08_live_daten.png" alt="Live-Daten" />
-    <div class="caption">Abb. 7.1  Live-Daten Übersicht mit vier Konfigurationskarten</div>
-  </div>
-
-  <h3 id="ch-livedata-opnv">7.1 ÖPNV-Abfahrten</h3>
-  <div class="screenshot-block">
-    <img src="/handbuch/08b_opnv.png" alt="ÖPNV-Konfiguration" />
-    <div class="caption">Abb. 7.2  ÖPNV-Konfiguration mit Stationssuche und Fahrzeugfiltern</div>
-  </div>
+  <div class="chapter-title"><span class="chapter-num">7</span> <span data-t="ch7_title">Live-Daten</span></div>
+  <p data-t="ch7_intro">Das System kann Echtzeit-Daten von externen Quellen einbinden und auf den Displays als Overlay oder eigener Beitrag darstellen.</p>
+  <h3 id="ch-livedata-transit" data-t="ch7_1_h">7.1 ÖPNV-Abfahrten</h3>
+  <p data-t="ch7_1_p">Abfahrtsinformationen von Bussen und Bahnen werden über eine HAFAS- oder GTFS-Schnittstelle abgerufen.</p>
   <ol class="steps">
-    <li>Schalter <em>ÖPNV-Abfahrten aktivieren</em> auf EIN stellen.</li>
-    <li>Im Suchfeld eine Haltestelle eingeben (z. B. Ahlen Bahnhof") und kurz warten.</li>
-    <li>Die gewünschte Haltestelle aus den Suchergebnissen auswählen.</li>
-    <li>Zeitfenster einstellen: Wie viele Minuten in die Zukunft sollen Abfahrten gezeigt werden? (Standard: 60 min)</li>
-    <li>Maximale Anzahl Abfahrten festlegen (Standard: 10).</li>
-    <li>Nicht benötigte Verkehrsmittel abwählen (Bus, S-Bahn, U-Bahn, Tram, Regional, Fern, Fähre).</li>
-    <li>Unter <em>Auf Displays anzeigen</em>: Ziel-Displays auswählen (Mehrfachauswahl).</li>
-    <li>Auf <strong>Speichern</strong> klicken  das Widget erscheint ab dem nächsten Live-Daten-Intervall.</li>
+    <li data-t="ch7_t1">Unter <em>Einstellungen  Live-Daten  ÖPNV</em> die <strong>Haltestellen-ID</strong> oder den Haltestellenname eingeben.</li>
+    <li data-t="ch7_t2">Die Anzahl der <strong>angezeigten Abfahrten</strong> festlegen.</li>
+    <li data-t="ch7_t3">Optional: Linienfilter, um nur bestimmte Linien anzuzeigen.</li>
+    <li data-t="ch7_t4">Auf <strong>Speichern</strong> klicken. Das Widget aktualisiert sich automatisch alle 60 Sekunden.</li>
   </ol>
-  <div class="tip">&#128161; Die Daten kommen über die freie HAFAS-API. Es ist kein eigener API-Key erforderlich.</div>
-
-  <h3 id="ch-livedata-traffic">7.2 Autobahn-Verkehrslage</h3>
+  <div class="tip" data-t="ch7_tip1">&#128161; Für westfälische Haltestellen empfiehlt sich die VRR-API (Verkehrsverbund Rhein-Ruhr). Die Haltestellen-IDs finden Sie in der VRR-Dokumentation.</div>
+  <h3 id="ch-livedata-weather" data-t="ch7_2_h">7.2 Wetter</h3>
+  <p data-t="ch7_2_p">Das Wetter-Widget zeigt aktuelle Temperatur, Wetterlage und eine 3-Tage-Vorschau.</p>
   <ol class="steps">
-    <li>Schalter <em>Verkehrslage aktivieren</em> auf EIN stellen.</li>
-    <li>Preset-Standort wählen (z. B. Ahlen, Münster, Dortmund) oder manuell Autobahnen aus der Liste aktivieren.</li>
-    <li>Meldungstypen auswählen: Warnungen, Baustellen, Sperrungen.</li>
-    <li>Ziel-Displays auswählen.</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
+    <li data-t="ch7_w1">Unter <em>Einstellungen  Live-Daten  Wetter</em> den <strong>Ort</strong> oder die <strong>Koordinaten</strong> eingeben.</li>
+    <li data-t="ch7_w2">Optional: OpenWeatherMap <strong>API-Key</strong> eintragen (kostenlos registrierbar).</li>
+    <li data-t="ch7_w3">Auf <strong>Speichern</strong> klicken.</li>
   </ol>
-
-  <h3 id="ch-livedata-weather">7.3 Wetter &amp; Vorhersage</h3>
+  <h3 id="ch-livedata-news" data-t="ch7_3_h">7.3 Nachrichten &amp; RSS</h3>
+  <p data-t="ch7_3_p">Beliebige RSS-Feeds können als Laufschrift oder Kachelansicht eingebunden werden.</p>
   <ol class="steps">
-    <li>Schalter <em>Wetter aktivieren</em> auf EIN stellen.</li>
-    <li>Ort in das Suchfeld eingeben (z. B. Ahlen, NRW") und Enter drücken.</li>
-    <li>Ergebnis aus der Auswahlliste auswählen  Koordinaten werden automatisch gespeichert.</li>
-    <li>Anzahl Vorhersage-Tage einstellen (17 Tage; 1 = nur heute).</li>
-    <li>Ziel-Displays auswählen.</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
+    <li data-t="ch7_n1">Unter <em>Einstellungen  Live-Daten  RSS</em> die <strong>URL des RSS-Feeds</strong> eingeben.</li>
+    <li data-t="ch7_n2">Anzahl der angezeigten Meldungen festlegen.</li>
+    <li data-t="ch7_n3">Auf <strong>Speichern</strong> klicken. Aktualisierungsintervall: 15 Minuten.</li>
   </ol>
-  <div class="success">&#10003; Daten kommen von Open-Meteo  komplett kostenlos, kein API-Key erforderlich, DSGVO-konform.</div>
-
-  <h3 id="ch-livedata-news">7.4 Nachrichten-Feed</h3>
-  <ol class="steps">
-    <li>Schalter <em>Nachrichten aktivieren</em> auf EIN stellen.</li>
-    <li>RSS-Feed-URL eingeben (z. B. <code>https://www.tagesschau.de/xml/rss2</code>).</li>
-    <li>Maximale Anzahl Nachrichten einstellen.</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
-  </ol>
-
-  <h3 id="ch-livedata-cache">7.5 Cache-Verwaltung</h3>
-  <p>Live-Daten werden serverseitig gecacht, um die externen APIs nicht zu überlasten.</p>
-  <table>
-    <tr><th>Datenquelle</th><th>Cache-Dauer</th><th>Cache leeren via</th></tr>
-    <tr><td>ÖPNV-Abfahrten</td><td>30 Sekunden</td><td>Button ÖPNV-Cache leeren"</td></tr>
-    <tr><td>Verkehrslage</td><td>5 Minuten</td><td>Button Verkehrs-Cache leeren"</td></tr>
-    <tr><td>Wetter</td><td>5 Minuten</td><td>Button Wetter-Cache leeren"</td></tr>
-    <tr><td>Nachrichten-Feed</td><td>15 Minuten</td><td>Button News-Cache leeren"</td></tr>
-  </table>
-  <div class="tip">&#128161; Das Intervall, wie oft Live-Daten-Widgets zwischen Beiträgen eingeblendet werden, sowie die Slide-Dauer, sind unter <strong>Einstellungen  Anzeigeoptionen</strong> konfigurierbar.</div>
+  <h3 id="ch-livedata-traffic" data-t="ch7_4_h">7.4 Verkehrslage</h3>
+  <p data-t="ch7_4_p">Aktuelle Verkehrsmeldungen für definierte Strecken werden über eine Verkehrs-API abgerufen. Konfiguration analog zu Wetter.</p>
 </div>
 
-<!--  8. EINSTELLUNGEN  -->
+<!-- 8. EINSTELLUNGEN -->
 <div class="chapter" id="ch-settings">
-  <div class="chapter-title"><span class="chapter-num">8</span> Systemeinstellungen</div>
-  <p>Unter <em>Einstellungen</em> werden globale Parameter konfiguriert, die das Verhalten aller Displays und Funktionen beeinflussen.</p>
-
-  <div class="screenshot-row">
-    <div class="screenshot-block">
-      <img src="/handbuch/09_einstellungen_top.png" alt="Einstellungen oben" />
-      <div class="caption">Abb. 8.1  Anzeigeoptionen und globale Hintergrundmusik</div>
-    </div>
-    <div class="screenshot-block">
-      <img src="/handbuch/09b_einstellungen_mitte.png" alt="Einstellungen Mitte" />
-      <div class="caption">Abb. 8.2  KI-Assistent und Spracheinstellungen</div>
-    </div>
-  </div>
-  <div class="screenshot-block">
-    <img src="/handbuch/09c_einstellungen_unten.png" alt="Einstellungen unten" />
-    <div class="caption">Abb. 8.3  SSO / LDAP-Konfiguration (nur Super-Admin)</div>
-  </div>
-
-  <h3 id="ch-settings-display">8.1 Anzeigeoptionen</h3>
+  <div class="chapter-title"><span class="chapter-num">8</span> <span data-t="ch8_title">Systemeinstellungen</span></div>
+  <p data-t="ch8_intro">Unter <em>Einstellungen</em> wird das System global konfiguriert. Der Bereich ist nur für Admins und Super-Admins zugänglich. Einige Unterabschnitte sind ausschließlich Super-Admins vorbehalten.</p>
+  <h3 id="ch-settings-general" data-t="ch8_1_h">8.1 Allgemein</h3>
   <table>
-    <tr><th>Einstellung</th><th>Beschreibung</th><th>Standard</th></tr>
-    <tr><td>Standard-Anzeigedauer (s)</td><td>Fallback-Dauer für Beiträge ohne individuelle Zeitangabe</td><td>10 s</td></tr>
-    <tr><td>Übergangseffekte aktivieren</td><td>Animierte Fade/Slide/Zoom-Übergänge zwischen Beiträgen</td><td>EIN</td></tr>
-    <tr><td>Effekte nur externe Displays</td><td>Raspberry-Pi-Displays erhalten keine Animationen (CPU/RAM sparen)</td><td>AUS</td></tr>
-    <tr><td>Live-Daten Intervall (min)</td><td>Wie viele reguläre Beiträge zwischen zwei Live-Daten-Einschüben gezeigt werden</td><td>5</td></tr>
-    <tr><td>Live-Daten Slide-Dauer (s)</td><td>Anzeigedauer jedes einzelnen Live-Daten-Widgets</td><td>20 s</td></tr>
-    <tr><td>Beitragsnummerierung anzeigen</td><td>Zeigt 1 / 5" Badge unten rechts auf dem Display</td><td>EIN</td></tr>
-    <tr><td>Aktualisierungsintervall (s)</td><td>Wie oft das Display neue Beiträge vom Server abruft</td><td>30 s</td></tr>
+    <tr><th data-t="th_setting">Einstellung</th><th data-t="th_desc">Beschreibung</th></tr>
+    <tr><td data-t="set_name">Systemname</td><td data-t="set_name_d">Wird im Browser-Titel und in E-Mails angezeigt</td></tr>
+    <tr><td data-t="set_lang">Standardsprache</td><td data-t="set_lang_d">Sprache des Admin-Panels für neue Benutzer</td></tr>
+    <tr><td data-t="set_tz">Zeitzone</td><td data-t="set_tz_d">Wichtig für korrekte Zeitplanung von Beiträgen</td></tr>
+    <tr><td data-t="set_logo">Logo</td><td data-t="set_logo_d">Organisationslogo für Login-Seite und Admin-Panel</td></tr>
   </table>
-
-  <h3 id="ch-settings-music">8.2 Globale Hintergrundmusik</h3>
-  <div class="field-list">
-    <div class="fl-row"><div class="fl-key">Musik aktivieren</div><div class="fl-val">Globale Hintergrundmusik ein- oder ausschalten</div></div>
-    <div class="fl-row"><div class="fl-key">Musik-URL</div><div class="fl-val">Direktlink zu einer Audio-Datei (MP3, AAC, OGG etc.) oder Stream-URL</div></div>
-    <div class="fl-row"><div class="fl-key">Datei-Upload</div><div class="fl-val">Alternativ: Audiodatei hochladen (MP3, AAC, OGG, FLAC, WAV, M4A, WMA, AIFF, OPUS)</div></div>
-    <div class="fl-row"><div class="fl-key">Lautstärke</div><div class="fl-val">Globale Lautstärke in Prozent (0100); wird auf allen Displays angewandt</div></div>
-    <div class="fl-row"><div class="fl-key">Videos stumm schalten</div><div class="fl-val">Verhindert, dass Video-Beiträge und Hintergrundmusik gleichzeitig tönen</div></div>
-    <div class="fl-row"><div class="fl-key">Priorität</div><div class="fl-val">Globale Musik bevorzugen" oder Beitrags-Musik bevorzugen" bei Konflikt</div></div>
-  </div>
-
-  <h3 id="ch-settings-ai">8.3 KI-Assistent einrichten</h3>
+  <h3 id="ch-settings-display" data-t="ch8_2_h">8.2 Display-Standardwerte</h3>
+  <p data-t="ch8_2_p">Hier lassen sich globale Standardwerte festlegen, die gelten, wenn ein Display keine eigene Konfiguration hat.</p>
+  <h3 id="ch-settings-sso" data-t="ch8_3_h">8.3 SSO-Konfiguration (Super-Admin)</h3>
+  <p data-t="ch8_3_p">Das System unterstützt SAML 2.0 für die Anmeldung per Microsoft 365 / Entra ID. Vorausgesetzt wird eine Enterprise-App-Registrierung im Azure-Portal.</p>
   <ol class="steps">
-    <li>OpenAI-Konto unter <a href="https://platform.openai.com" target="_blank">platform.openai.com</a> erstellen (falls noch nicht vorhanden).</li>
-    <li>Unter <em>API Keys</em> einen neuen Key erstellen und kopieren.</li>
-    <li>Im Admin-Panel: <em>Einstellungen  KI-Assistent</em> öffnen.</li>
-    <li>Den API-Key in das Feld <em>OpenAI API-Key</em> einfügen.</li>
-    <li>Gewünschtes Modell auswählen (Standard: gpt-4o-mini).</li>
-    <li>Auf <strong>Speichern</strong> klicken.</li>
-    <li>Beim nächsten Öffnen eines Beitrags erscheint der KI-Button neben dem Textfeld.</li>
+    <li data-t="ch8_sso1">Im Azure-Portal eine neue <em>Unternehmensanwendung</em> anlegen und SAML als SSO-Methode wählen.</li>
+    <li data-t="ch8_sso2"><strong>Entitäts-ID</strong> und <strong>Antwort-URL (ACS-URL)</strong> aus dem Admin-Panel kopieren und in Azure eintragen.</li>
+    <li data-t="ch8_sso3"><strong>SAML-Zertifikat</strong> (Base64) aus Azure herunterladen und im Admin-Panel unter <em>Einstellungen  SSO  Zertifikat</em> einfügen.</li>
+    <li data-t="ch8_sso4"><strong>Anmelde-URL</strong> und <strong>Azure AD-ID</strong> aus Azure kopieren und eintragen.</li>
+    <li data-t="ch8_sso5">Auf <strong>Speichern &amp; Testen</strong> klicken.</li>
   </ol>
-  <div class="warning">&#9888; Der API-Key wird verschlüsselt in der Datenbank gespeichert, aber nie im Browser-Quellcode sichtbar gemacht. OpenAI verrechnet Tokens; die Kosten liegen bei normaler Nutzung unter 1 € / Monat.</div>
-
-  <h3 id="ch-settings-sso">8.4 SSO / LDAP konfigurieren (Super-Admin)</h3>
-  <p>IT-Westfalen Signature Screen unterstützt Single Sign-On (SSO) über zwei Methoden:</p>
-  <h4>Azure AD / Microsoft Entra ID (OAuth2/OIDC)</h4>
-  <ol class="steps">
-    <li>Im Azure-Portal eine App-Registrierung erstellen.</li>
-    <li>Redirect-URI eintragen: <code>https://prasco.zapto.org/auth/azure/callback</code></li>
-    <li>Client-ID und Client-Secret notieren.</li>
-    <li>Im Admin-Panel: <em>Einstellungen  SSO  Azure AD</em> öffnen.</li>
-    <li>Tenant-ID, Client-ID und Client-Secret eintragen.</li>
-    <li>Auf <strong>Speichern &amp; Verbindung testen</strong> klicken.</li>
-  </ol>
-  <h4>LDAP / Active Directory</h4>
-  <ol class="steps">
-    <li>LDAP-Server-URL eingeben (z. B. <code>ldap://dc01.firma.local:389</code>).</li>
-    <li>Bind-DN und Bind-Passwort eintragen (Dienstkonto mit Lesezugriff).</li>
-    <li>Basis-DN für die Benutzersuche angeben (z. B. <code>OU=Users,DC=firma,DC=local</code>).</li>
-    <li>Attribut-Mapping konfigurieren (E-Mail, Anzeigename).</li>
-    <li>Auf <strong>Speichern &amp; Verbindung testen</strong> klicken.</li>
-  </ol>
-  <div class="tip">&#128161; Eine ausführliche Anleitung mit Screenshots für beide Verfahren ist in der Datei <code>SSO-SETUP.md</code> auf dem Server dokumentiert.</div>
+  <div class="tip" data-t="ch8_sso_tip">&#128161; Eine vollständige Schritt-für-Schritt-Anleitung mit Screenshots finden Sie in der Datei <code>SSO-SETUP.md</code> im Projektverzeichnis.</div>
+  <h3 id="ch-settings-backup" data-t="ch8_4_h">8.4 Backup &amp; Wiederherstellung</h3>
+  <p data-t="ch8_4_p">Das System erstellt automatisch täglich ein Datenbank-Backup. Manuelle Backups können jederzeit über den Server-Zugang ausgeführt werden:</p>
+  <div class="code-block"><code>bash /opt/Prasco/pg_backup.sh</code></div>
+  <p data-t="ch8_4_restore">Zur Wiederherstellung:</p>
+  <div class="code-block"><code>psql -U prasco prasco &lt; /opt/backups/prasco_DATUM.sql</code></div>
 </div>
 
-<!--  9. FEHLERBEHEBUNG  -->
+<!-- 9. FEHLERBEHEBUNG -->
 <div class="chapter" id="ch-troubleshoot">
-  <div class="chapter-title"><span class="chapter-num">9</span> Fehlerbehebung</div>
-  <p>Dieser Abschnitt beschreibt häufige Probleme und ihre Lösungsschritte.</p>
+  <div class="chapter-title"><span class="chapter-num">9</span> <span data-t="ch9_title">Fehlerbehebung</span></div>
+  <p data-t="ch9_intro">Dieser Abschnitt beschreibt die häufigsten Probleme und deren Lösung.</p>
 
-  <h3>9.1 Häufige Probleme</h3>
+  <h3 id="ch-trouble-login" data-t="ch9_1_h">9.1 Anmeldung schlägt fehl</h3>
   <table>
-    <tr><th>Problem</th><th>Mögliche Ursache</th><th>Lösung</th></tr>
-    <tr><td>Display zeigt keine Beiträge</td><td>Kein Beitrag dem Display zugewiesen; Display ist inaktiv</td><td>Beitrag bearbeiten  Display auswählen; Display auf aktiv" schalten</td></tr>
-    <tr><td>Display zeigt veraltete Inhalte</td><td>Aktualisierungsintervall zu hoch; Browser-Cache</td><td>Intervall unter Einstellungen verringern; Seite mit Strg+Shift+R neu laden</td></tr>
-    <tr><td>ÖPNV-Widget erscheint nicht</td><td>Keine Haltestelle konfiguriert; Live-Daten auf Display nicht aktiviert</td><td>Live-Daten  ÖPNV: Haltestelle auswählen; Display-Einstellungen: ÖPNV-Schalter EIN</td></tr>
-    <tr><td>Video spielt nicht ab</td><td>Nicht unterstütztes Format; Datei zu groß; Browser-Einschränkung</td><td>Video nach MP4/H.264 konvertieren; Dateigröße unter 500 MB halten</td></tr>
-    <tr><td>Präsentation wird nicht konvertiert</td><td>LibreOffice auf Server fehlt; Datei beschädigt</td><td>Server-Logs prüfen; alternativ PDF hochladen</td></tr>
-    <tr><td>KI-Funktion antwortet nicht</td><td>API-Key ungültig oder abgelaufen; kein Guthaben</td><td>Key unter Einstellungen  KI erneuern; OpenAI-Dashboard Guthaben prüfen</td></tr>
-    <tr><td>Anmeldung schlägt fehl</td><td>Passwort falsch; Konto deaktiviert; Browser-Cache</td><td>Passwort zurücksetzen (Super-Admin); Cookies löschen und neu versuchen</td></tr>
-    <tr><td>Admin-Panel nicht erreichbar</td><td>Server-Absturz; Docker-Container gestoppt; Netzwerkfehler</td><td>Server neu starten (s. Befehle unten); Systemadministrator kontaktieren</td></tr>
+    <tr><th data-t="th_prob">Problem</th><th data-t="th_sol">Lösung</th></tr>
+    <tr><td data-t="tr_pw_wrong">Falsches Passwort</td><td data-t="tr_pw_sol">Passwort zurücksetzen (Admin) oder Großschreibung prüfen</td></tr>
+    <tr><td data-t="tr_acc_locked">Konto gesperrt</td><td data-t="tr_acc_sol">Super-Admin kontaktieren  Konto in der Benutzerverwaltung entsperren</td></tr>
+    <tr><td data-t="tr_sso_fail">SSO-Fehler</td><td data-t="tr_sso_sol">Zertifikat-Ablaufdatum prüfen; Azure-Umleitungs-URL korrekt?</td></tr>
+    <tr><td data-t="tr_no_https">Kein HTTPS</td><td data-t="tr_no_https_sol">Browser-Warnung: Zertifikat erneuern per <code>certbot renew</code></td></tr>
   </table>
 
-  <h3>9.2 Server-Logs einsehen</h3>
-  <p>Für tiefergehende Diagnosen können die Container-Logs auf dem Server abgerufen werden (SSH-Zugang erforderlich):</p>
-  <pre># Letzte 100 Zeilen des App-Logs
-docker logs --tail 100 prasco-app
+  <h3 id="ch-trouble-display" data-t="ch9_2_h">9.2 Display zeigt keine Inhalte</h3>
+  <table>
+    <tr><th data-t="th_prob">Problem</th><th data-t="th_sol">Lösung</th></tr>
+    <tr><td data-t="td_no_posts">Keine aktiven Beiträge</td><td data-t="td_no_posts_sol">Mindestens einen Beitrag ohne Enddatum erstellen; Display zuweisen</td></tr>
+    <tr><td data-t="td_disp_inactive">Display deaktiviert</td><td data-t="td_disp_inactive_sol">Display-Status in der Verwaltung auf Aktiv" setzen</td></tr>
+    <tr><td data-t="td_no_cat">Kein passender Kategoriefilter</td><td data-t="td_no_cat_sol">Kategoriefilter des Displays prüfen; stimmt er mit den Beitragskategorien überein?</td></tr>
+    <tr><td data-t="td_server_down">Server nicht erreichbar</td><td data-t="td_server_down_sol">Docker-Container prüfen: <code>docker ps</code>; ggf. neu starten</td></tr>
+  </table>
 
-# Logs in Echtzeit verfolgen (Strg+C zum Beenden)
-docker logs -f prasco-app
+  <h3 id="ch-trouble-server" data-t="ch9_3_h">9.3 Server / Docker</h3>
+  <div class="code-block">
+<code># Container-Status prüfen
+docker ps
 
-# Nur Fehler anzeigen
-docker logs prasco-app 2>&amp;1 | grep -i "error\|fatal"</pre>
+# Logs ansehen
+docker logs prasco-app --tail 100
 
-  <h3>9.3 System neu starten</h3>
-  <ol class="steps">
-    <li>Per SSH auf den Server verbinden: <code>ssh root@212.227.20.158</code></li>
-    <li>In das Projektverzeichnis wechseln: <code>cd /opt/Prasco</code></li>
-    <li>App-Container neu starten: <code>docker compose -f docker-compose.prod.yml restart app</code></li>
-    <li>Status prüfen: <code>docker compose -f docker-compose.prod.yml ps</code></li>
-    <li>Im Browser <code>https://prasco.zapto.org/api/health</code> aufrufen  bei Erfolg erscheint <code>{"status":"ok"}</code>.</li>
-  </ol>
-  <div class="warning">&#9888; Ein vollständiger Neustart aller Container (<code>docker compose down &amp;&amp; docker compose up -d</code>) beendet kurzzeitig alle laufenden Displays.</div>
+# Container neu starten
+cd /opt/Prasco
+docker compose -f docker-compose.prod.yml restart app
+
+# Komplett neu bauen und starten
+docker compose -f docker-compose.prod.yml up -d --build app</code>
+  </div>
+
+  <h3 id="ch-trouble-db" data-t="ch9_4_h">9.4 Datenbank-Probleme</h3>
+  <div class="code-block">
+<code># Verbindung testen
+docker exec -it prasco-db psql -U prasco -d prasco -c "SELECT 1;"
+
+# DB-Logs
+docker logs prasco-db --tail 50</code>
+  </div>
+  <div class="tip" data-t="ch9_tip">&#128161; Bei unklaren Fehlern zuerst <code>docker logs prasco-app</code> ansehen  die meisten Probleme sind dort dokumentiert.</div>
 </div>
 
-<!--  10. SCHNELLREFERENZ  -->
+<!-- 10. SCHNELLREFERENZ -->
 <div class="chapter" id="ch-reference">
-  <div class="chapter-title"><span class="chapter-num">10</span> Schnellreferenz</div>
-
-  <h3>10.1 Wichtige URLs</h3>
+  <div class="chapter-title"><span class="chapter-num">10</span> <span data-t="ch10_title">Schnellreferenz</span></div>
+  <h3 id="ch-ref-shortcuts" data-t="ch10_1_h">10.1 Tastenkürzel</h3>
   <table>
-    <tr><th>Funktion</th><th>URL</th></tr>
-    <tr><td>Admin-Panel</td><td><code>https://prasco.zapto.org/admin</code></td></tr>
-    <tr><td>Display aufrufen</td><td><code>https://prasco.zapto.org/display/&lt;bezeichner&gt;</code></td></tr>
-    <tr><td>API-Dokumentation</td><td><code>https://prasco.zapto.org/api/docs</code></td></tr>
-    <tr><td>Health-Check</td><td><code>https://prasco.zapto.org/api/health</code></td></tr>
-    <tr><td>Dieses Handbuch</td><td><code>https://prasco.zapto.org/admin/handbuch</code></td></tr>
+    <tr><th data-t="th_key">Kürzel</th><th data-t="th_action">Aktion</th></tr>
+    <tr><td><kbd>Strg + S</kbd></td><td data-t="key_save">Aktuelles Formular speichern</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td data-t="key_close">Modales Fenster schließen</td></tr>
+    <tr><td><kbd>Strg + F</kbd></td><td data-t="key_search">Suchfeld fokussieren (Beitragsliste)</td></tr>
+    <tr><td><kbd>Strg + N</kbd></td><td data-t="key_new">Neuen Beitrag erstellen (wenn in Beiträge)</td></tr>
   </table>
-
-  <h3>10.2 Unterstützte Dateiformate</h3>
+  <h3 id="ch-ref-urls" data-t="ch10_2_h">10.2 Wichtige URLs</h3>
   <table>
-    <tr><th>Typ</th><th>Formate</th><th>Empfehlung</th></tr>
-    <tr><td>Bilder</td><td>JPG, JPEG, PNG, GIF, WebP, SVG, HEIC, TIFF, BMP</td><td>JPG oder WebP für beste Kompatibilität</td></tr>
-    <tr><td>Videos</td><td>MP4, WebM, OGG, MOV, AVI, MKV, FLV, WMV, MPEG</td><td>MP4 (H.264) für maximale Browser-Unterstützung</td></tr>
-    <tr><td>Audio</td><td>MP3, AAC, OGG, FLAC, WAV, M4A, WMA, AIFF, OPUS</td><td>MP3 für allgemeine Kompatibilität</td></tr>
-    <tr><td>Dokumente</td><td>PDF, PPT, PPTX, ODP</td><td>PPTX oder PDF für Präsentationen</td></tr>
+    <tr><th data-t="th_desc">Beschreibung</th><th>URL</th></tr>
+    <tr><td data-t="url_login">Login</td><td><code>https://prasco.zapto.org/admin</code></td></tr>
+    <tr><td data-t="url_api">API-Basis</td><td><code>https://prasco.zapto.org/api</code></td></tr>
+    <tr><td data-t="url_display">Display (Beispiel)</td><td><code>https://prasco.zapto.org/display/1</code></td></tr>
   </table>
-
-  <h3>10.3 Status-Indikatoren</h3>
+  <h3 id="ch-ref-contact" data-t="ch10_3_h">10.3 Support &amp; Kontakt</h3>
   <table>
-    <tr><th>Farbe / Symbol</th><th>Bedeutung</th></tr>
-    <tr><td>&#128994; Grün</td><td>Display aktiv und in letzten 5 Minuten verbunden</td></tr>
-    <tr><td>&#128993; Gelb</td><td>Display aktiv, aber seit &gt; 5 Minuten nicht gesehen</td></tr>
-    <tr><td>&#128308; Rot</td><td>Display inaktiv oder seit mehr als 30 Minuten offline</td></tr>
-    <tr><td>Schalter EIN (rot)</td><td>Option / Beitrag aktiviert</td></tr>
-    <tr><td>Schalter AUS (grau)</td><td>Option / Beitrag deaktiviert</td></tr>
-    <tr><td>&#9881; Zahnrad</td><td>Bearbeiten-Aktion</td></tr>
-    <tr><td>&#128465; Papierkorb</td><td>Löschen-Aktion (irreversibel!)</td></tr>
+    <tr><th data-t="th_channel">Kanal</th><th data-t="th_details">Details</th></tr>
+    <tr><td data-t="con_dev">Entwicklung</td><td data-t="con_dev_d">IT-Westfalen  Christian Pöser</td></tr>
+    <tr><td data-t="con_mail">E-Mail</td><td><code>support@it-westfalen.de</code></td></tr>
+    <tr><td data-t="con_docs">Dokumentation</td><td data-t="con_docs_d">Dieses Handbuch + <code>README.md</code> im Projektverzeichnis</td></tr>
   </table>
-
-  <h3>10.4 Wartungsbefehle (SSH)</h3>
-  <pre># App-Container-Status
-docker compose -f /opt/Prasco/docker-compose.prod.yml ps
-
-# App neu starten
-docker compose -f /opt/Prasco/docker-compose.prod.yml restart app
-
-# Redis-Cache vollständig leeren
-RPASS=$(grep REDIS_PASSWORD /opt/Prasco/.env | cut -d= -f2-)
-docker exec prasco-redis redis-cli -a "$RPASS" FLUSHALL
-
-# Datenbankbackup erstellen
-docker exec prasco-postgres pg_dump -U postgres bulletin_board > /opt/Prasco/backups/manual_$(date +%Y%m%d_%H%M%S).sql</pre>
-
-  <div class="tip">&#128161; Alle im Handbuch gezeigten Screenshots wurden automatisch mit Playwright generiert und spiegeln den aktuellen Stand des Systems wider.</div>
+  <h3 id="ch-ref-version" data-t="ch10_4_h">10.4 Versionshinweise</h3>
+  <p data-t="ch10_4_p">Die aktuelle Versionsnummer ist im Dashboard unten rechts sichtbar. Release-Notes befinden sich in der Datei <code>CHANGELOG.md</code> im Projektverzeichnis.</p>
 </div>
 
+</div><!-- /container -->
+
+<script>
+const T = {
+  de: {
+    nav_back: 'Zurück zum Admin-Panel',
+    cover_subtitle: 'Signature Screen &middot; Administrationshandbuch',
+    cover_meta: 'IT-Westfalen &middot; Alle Versionen',
+    toc_title: 'Inhaltsverzeichnis',
+    toc_1: '1. Anmeldung',
+    toc_1_1: '1.1 Schritt-für-Schritt-Anmeldung',
+    toc_1_2: '1.2 Rollen & Berechtigungen',
+    toc_1_3: '1.3 Passwort ändern / zurücksetzen',
+    toc_2: '2. Dashboard  Übersicht',
+    toc_2_1: '2.1 Statistik-Kacheln',
+    toc_2_2: '2.2 Navigation',
+    toc_3: '3. Beiträge verwalten',
+    toc_3_1: '3.1 Beitrags-Übersicht',
+    toc_3_2: '3.2 Neuen Beitrag erstellen',
+    toc_3_3: '3.3 Beitrag bearbeiten',
+    toc_3_4: '3.4 Beitrag löschen',
+    toc_3_5: '3.5 Bilder & Medien',
+    toc_3_6: '3.6 Zeitplanung',
+    toc_4: '4. Kategorien',
+    toc_4_1: '4.1 Kategorie erstellen',
+    toc_4_2: '4.2 Kategorie bearbeiten / löschen',
+    toc_5: '5. Displays',
+    toc_5_1: '5.1 Display hinzufügen',
+    toc_5_2: '5.2 Display-URL & Kiosk-Modus',
+    toc_5_3: '5.3 Display-Konfiguration',
+    toc_5_4: '5.4 Vorschau',
+    toc_6: '6. Benutzer & Rollen',
+    toc_6_1: '6.1 Neuen Benutzer anlegen',
+    toc_6_2: '6.2 Rollen im Detail',
+    toc_6_3: '6.3 SSO (Single Sign-On)',
+    toc_7: '7. Live-Daten',
+    toc_7_1: '7.1 ÖPNV-Abfahrten',
+    toc_7_2: '7.2 Wetter',
+    toc_7_3: '7.3 Nachrichten & RSS',
+    toc_7_4: '7.4 Verkehrslage',
+    toc_8: '8. Systemeinstellungen',
+    toc_8_1: '8.1 Allgemein',
+    toc_8_2: '8.2 Display-Standardwerte',
+    toc_8_3: '8.3 SSO-Konfiguration',
+    toc_8_4: '8.4 Backup & Wiederherstellung',
+    toc_9: '9. Fehlerbehebung',
+    toc_9_1: '9.1 Anmeldung schlägt fehl',
+    toc_9_2: '9.2 Display zeigt keine Inhalte',
+    toc_9_3: '9.3 Server / Docker',
+    toc_9_4: '9.4 Datenbank-Probleme',
+    toc_10: '10. Schnellreferenz',
+    toc_10_1: '10.1 Tastenkürzel',
+    toc_10_2: '10.2 Wichtige URLs',
+    toc_10_3: '10.3 Support & Kontakt',
+    toc_10_4: '10.4 Versionshinweise',
+    ch1_title: 'Anmeldung',
+    ch1_intro: 'Der Zugang zum Admin-Panel erfolgt ausschließlich über den Browser. Es wird kein zusätzliches Programm benötigt.',
+    ch1_1_h: '1.1 Schritt-für-Schritt-Anmeldung',
+    ch1_s1: 'Browser öffnen und <code>https://prasco.zapto.org/admin</code> aufrufen.',
+    ch1_s2: 'E-Mail-Adresse in das erste Eingabefeld eingeben.',
+    ch1_s3: 'Passwort in das zweite Eingabefeld eingeben.',
+    ch1_s4: 'Optional: Häkchen bei <em>Angemeldet bleiben</em> setzen, um die Sitzung auch nach dem Browser-Neustart aktiv zu halten.',
+    ch1_s5: 'Auf den Button <strong>Anmelden</strong> klicken.',
+    ch1_s6: 'Nach erfolgreicher Anmeldung erscheint automatisch das Dashboard.',
+    ch1_fig1: 'Abb. 1.1  Anmeldeseite des Admin-Panels',
+    ch1_tip1: '&#128161; HTTPS ist Pflicht  alle Verbindungen sind TLS-verschlüsselt. Das Zertifikat wird automatisch über Let\'s Encrypt erneuert.',
+    ch1_2_h: '1.2 Rollen &amp; Berechtigungen',
+    ch1_2_p: 'Jeder Benutzer hat genau eine Rolle. Die Rolle bestimmt, welche Bereiche des Admin-Panels sichtbar und bearbeitbar sind.',
+    ch1_3_h: '1.3 Passwort ändern / zurücksetzen',
+    ch1_3_own: 'Eigenes Passwort ändern',
+    ch1_pw1: 'Oben rechts auf das Benutzer-Symbol klicken.',
+    ch1_pw2: '<em>Profil</em> oder <em>Passwort ändern</em> auswählen.',
+    ch1_pw3: 'Aktuelles Passwort und zweimal das neue Passwort eingeben.',
+    ch1_pw4: 'Auf <strong>Speichern</strong> klicken.',
+    ch1_3_reset: 'Passwort eines anderen Benutzers zurücksetzen (Admin)',
+    ch1_rs1: 'Im Menü auf <em>Benutzer</em> navigieren.',
+    ch1_rs2: 'Den gewünschten Benutzer in der Liste suchen und auf <strong>Bearbeiten</strong> klicken.',
+    ch1_rs3: 'Im Feld <em>Neues Passwort</em> ein temporäres Passwort eingeben (mindestens 8 Zeichen).',
+    ch1_rs4: 'Auf <strong>Speichern</strong> klicken und das temporäre Passwort dem Benutzer sicher übermitteln.',
+    ch1_warn1: '&#9888; Super-Admin-Konten können nur von anderen Super-Admins zurückgesetzt werden.',
+    th_role: 'Rolle', th_posts: 'Beiträge', th_cat: 'Kategorien', th_disp: 'Displays', th_users: 'Benutzer', th_settings: 'Einstellungen',
+    role_viewer: 'Betrachter', role_editor: 'Editor', role_admin: 'Admin', role_superadmin: 'Super-Admin',
+    perm_read: 'Lesen', perm_create_edit: 'Erstellen, Bearbeiten', perm_full: 'Voll', perm_limited: 'Eingeschränkt', perm_full_nosso: 'Voll (ohne SSO)',
+    ch2_title: 'Dashboard  Übersicht', ch2_intro: 'Das Dashboard erscheint direkt nach der Anmeldung und gibt einen schnellen Überblick über den Systemstatus sowie Schnellzugriff auf die wichtigsten Aktionen.',
+    ch2_fig1: 'Abb. 2.1  Dashboard mit Statistik-Kacheln, Schnellzugriff und Seitenleiste',
+    ch2_1_h: '2.1 Statistik-Kacheln', ch2_2_h: '2.2 Navigation',
+    ch2_2_p: 'Die Seitenleiste links ist jederzeit sichtbar und enthält alle Hauptbereiche:',
+    th_tile: 'Kachel', th_content: 'Inhalt', th_target: 'Klick-Ziel', th_menu: 'Menüpunkt', th_func: 'Funktion',
+    tile_posts: 'Beiträge', tile_posts_d: 'Gesamtanzahl aktiver Beiträge im System', tile_posts_t: 'Beiträge-Übersicht',
+    tile_displays: 'Aktive Displays', tile_displays_d: 'Displays mit Status aktiv"', tile_displays_t: 'Displays-Übersicht',
+    tile_users: 'Benutzer', tile_users_d: 'Anzahl aller registrierten Benutzerkonten', tile_users_t: 'Benutzerverwaltung',
+    tile_new: '+ Neuer Beitrag', tile_new_d: 'Schnellzugriff-Button', tile_new_t: 'Öffnet Beitrags-Formular',
+    nav_dashboard: 'Dashboard', nav_dashboard_d: 'Startseite mit Übersicht und Statistiken',
+    nav_posts: 'Beiträge', nav_posts_d: 'Alle Inhalte erstellen, bearbeiten, löschen',
+    nav_categories: 'Kategorien', nav_categories_d: 'Inhalts-Kategorien verwalten',
+    nav_displays: 'Displays', nav_displays_d: 'Bildschirm-Konfigurationen verwalten',
+    nav_users: 'Benutzer', nav_users_d: 'Benutzerkonten und Rollen verwalten',
+    nav_livedata: 'Live-Daten', nav_livedata_d: 'ÖPNV, Verkehr, Wetter, Nachrichten konfigurieren',
+    nav_settings: 'Einstellungen', nav_settings_d: 'Globale Systemkonfiguration',
+    nav_help: 'Hilfe', nav_help_d: 'Dieses Handbuch öffnen',
+    nav_logout: 'Abmelden', nav_logout_d: 'Aktuelle Sitzung beenden',
+    ch3_title: 'Beiträge verwalten', ch3_intro: 'Der Bereich <em>Beiträge</em> ist das Herzstück des Systems. Hier werden alle Inhalte erstellt, bearbeitet und geplant, die auf den Displays angezeigt werden.',
+    ch3_1_h: '3.1 Beitrags-Übersicht', ch3_1_p: 'Die Tabelle zeigt alle Beiträge mit Titel, Kategorie, Status, Zeitraum und Displays. Über die Suche und den Kategorie-Filter lassen sich Beiträge schnell finden.',
+    ch3_fig1: 'Abb. 3.1  Beitrags-Übersicht mit Such- und Filterfunktion',
+    ch3_2_h: '3.2 Neuen Beitrag erstellen',
+    ch3_c1: 'Auf den Button <strong>+ Neuer Beitrag</strong> klicken.',
+    ch3_c2: '<strong>Titel</strong> eingeben (Pflichtfeld, wird auf dem Display angezeigt).',
+    ch3_c3: '<strong>Inhalt</strong> eingeben. Mehrzeiliger Text und einfaches Markdown sind möglich.',
+    ch3_c4: '<strong>Kategorie</strong> aus der Dropdown-Liste wählen.',
+    ch3_c5: '<strong>Anzeigedauer</strong> in Sekunden eingeben (wie lange der Beitrag auf dem Display verweilt).',
+    ch3_c6: 'Optional: <strong>Startdatum / Enddatum</strong> setzen, um die Sichtbarkeit zeitlich zu begrenzen.',
+    ch3_c7: 'Optional: Eines oder mehrere <strong>Bilder</strong> hochladen oder eine <strong>YouTube-URL</strong> eintragen.',
+    ch3_c8: '<strong>Displays</strong> auswählen, auf denen der Beitrag erscheinen soll.',
+    ch3_c9: 'Auf <strong>Speichern</strong> klicken.',
+    ch3_3_h: '3.3 Beitrag bearbeiten', ch3_3_p: 'In der Beitragsliste auf das Stift-Symbol &#9998; klicken. Das Formular öffnet sich mit den aktuellen Daten vorausgefüllt. Änderungen mit <strong>Speichern</strong> bestätigen.',
+    ch3_4_h: '3.4 Beitrag löschen', ch3_4_p: 'Auf das Papierkorb-Symbol &#128465; klicken. Eine Sicherheitsabfrage erscheint. Mit <strong>Bestätigen</strong> wird der Beitrag unwiderruflich gelöscht.',
+    ch3_warn: '&#9888; Gelöschte Beiträge können nicht wiederhergestellt werden. Sicherungskopien sind ratsam.',
+    ch3_5_h: '3.5 Bilder &amp; Medien', th_type: 'Typ', th_support: 'Unterstützt', th_note: 'Hinweis',
+    img_note: 'Max. 10 MB pro Datei', gif_note: 'Animation wird auf dem Display abgespielt',
+    yt_note: 'Stummgeschalten, Dauer wird automatisch ermittelt', mp4_note: 'Nicht direkt  YouTube-Link verwenden',
+    ch3_6_h: '3.6 Zeitplanung', ch3_6_p: 'Mit <strong>Startdatum</strong> und <strong>Enddatum</strong> lässt sich ein Beitrag exakt terminieren. Beiträge außerhalb des gültigen Zeitrahmens werden auf dem Display nicht gezeigt, bleiben aber im System erhalten.',
+    ch3_tip: '&#128161; Für Aushänge, die immer gelten sollen, beide Datumsfelder leer lassen.',
+    ch4_title: 'Kategorien', ch4_intro: 'Kategorien gruppieren Beiträge thematisch. Jeder Beitrag gehört genau einer Kategorie an. Kategorien können auch Display-spezifisch gefiltert werden.',
+    ch4_1_h: '4.1 Kategorie erstellen',
+    ch4_c1: 'Im Menü auf <em>Kategorien</em> klicken.', ch4_c2: 'Auf <strong>+ Neue Kategorie</strong> klicken.',
+    ch4_c3: 'Einen aussagekräftigen <strong>Namen</strong> eingeben (z. B. Veranstaltungen" oder Speiseplan").',
+    ch4_c4: 'Optional: <strong>Farbe</strong> für die visuelle Unterscheidung auswählen.',
+    ch4_c5: 'Auf <strong>Speichern</strong> klicken.',
+    ch4_2_h: '4.2 Kategorie bearbeiten / löschen', ch4_2_p: 'In der Kategorieliste das Stift-Symbol &#9998; zum Bearbeiten oder das Papierkorb-Symbol &#128465; zum Löschen anklicken.',
+    ch4_warn: '&#9888; Eine Kategorie kann nicht gelöscht werden, solange ihr noch Beiträge zugeordnet sind. Beiträge zuerst in eine andere Kategorie verschieben oder löschen.',
+    ch5_title: 'Displays', ch5_intro: 'Im Bereich <em>Displays</em> werden alle angeschlossenen Bildschirme verwaltet. Jedes Display hat eine eigene Konfiguration, URL und Playlist.',
+    ch5_1_h: '5.1 Display hinzufügen',
+    ch5_c1: 'Auf <strong>+ Neues Display</strong> klicken.', ch5_c2: 'Einen eindeutigen <strong>Namen</strong> vergeben (z. B. Foyer EG" oder Kantine").',
+    ch5_c3: '<strong>Standort</strong> und optionale Beschreibung eingeben.', ch5_c4: '<strong>Standard-Anzeigedauer</strong> festlegen (Sekunden pro Beitrag, wenn kein individueller Wert gesetzt).',
+    ch5_c5: 'Optional: <strong>Kategoriefilter</strong> aktivieren, um nur bestimmte Kategorien anzuzeigen.',
+    ch5_c6: 'Auf <strong>Speichern</strong> klicken. Die Display-URL wird automatisch generiert.',
+    ch5_2_h: '5.2 Display-URL &amp; Kiosk-Modus', ch5_2_p: 'Jedes Display erhält eine eigene URL nach dem Schema <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Diese URL wird im Browser des Display-Geräts im Vollbild-Kiosk-Modus geöffnet.',
+    ch5_tip1: '&#128161; Android-TV-Geräte: Die PRASCO-App öffnet diese URL automatisch im Kiosk-Modus. Siehe Kapitel zur Android-App.',
+    ch5_3_h: '5.3 Display-Konfiguration', th_setting: 'Einstellung', th_desc: 'Beschreibung',
+    disp_name: 'Name', disp_name_d: 'Interner Bezeichner, auf dem Display selbst nicht sichtbar',
+    disp_dur: 'Anzeigedauer', disp_dur_d: 'Standard-Verweildauer pro Beitrag in Sekunden',
+    disp_trans: 'Übergang', disp_trans_d: 'Animationseffekt beim Beitragswechsel (Fade, Slide, )',
+    disp_ticker: 'Laufschrift', disp_ticker_d: 'Benutzerdefinierter Ticker-Text am unteren Bildschirmrand',
+    disp_live: 'Live-Daten', disp_live_d: 'ÖPNV, Wetter oder Nachrichten-Widget einblenden',
+    disp_active: 'Aktiv', disp_active_d: 'Deaktivierte Displays zeigen nur einen schwarzen Bildschirm',
+    ch5_4_h: '5.4 Vorschau', ch5_4_p: 'Über den Button <strong>Vorschau</strong> in der Display-Zeile öffnet sich die Display-Ansicht in einem neuen Tab  ideal zur Kontrolle ohne physischen Bildschirm.',
+    ch6_title: 'Benutzer &amp; Rollen', ch6_intro: 'Der Bereich <em>Benutzer</em> ist nur für Admins und Super-Admins zugänglich. Hier werden alle Konten verwaltet und Rollen zugewiesen.',
+    ch6_1_h: '6.1 Neuen Benutzer anlegen',
+    ch6_c1: 'Auf <strong>+ Neuer Benutzer</strong> klicken.', ch6_c2: '<strong>Name</strong> und <strong>E-Mail-Adresse</strong> des Benutzers eingeben.',
+    ch6_c3: 'Ein temporäres <strong>Passwort</strong> vergeben (mindestens 8 Zeichen).', ch6_c4: 'Die gewünschte <strong>Rolle</strong> aus der Dropdown-Liste wählen.',
+    ch6_c5: 'Auf <strong>Speichern</strong> klicken und das temporäre Passwort dem neuen Benutzer mitteilen.',
+    ch6_2_h: '6.2 Rollen im Detail', th_roledesc: 'Beschreibung',
+    role_viewer_d: 'Kann alle Beiträge und Displays einsehen, aber nicht ändern. Keine Schreibrechte.',
+    role_editor_d: 'Kann Beiträge erstellen und eigene Beiträge bearbeiten. Kein Zugriff auf Systemeinstellungen.',
+    role_admin_d: 'Vollzugriff auf Beiträge, Kategorien und Displays. Kann normale Benutzer und Editoren verwalten, aber keine anderen Admins.',
+    role_superadmin_d: 'Vollzugriff auf alle Bereiche, einschließlich SSO-Konfiguration und Server-Einstellungen. Kann alle Rollen vergeben.',
+    ch6_3_h: '6.3 SSO (Single Sign-On)', ch6_3_p: 'Das System unterstützt SSO via SAML 2.0 (z. B. Microsoft Entra ID / Azure AD). Die Konfiguration ist unter <em>Einstellungen  SSO</em> nur für Super-Admins zugänglich. Ausführliche Anleitung: Kapitel 8.3.',
+    ch7_title: 'Live-Daten', ch7_intro: 'Das System kann Echtzeit-Daten von externen Quellen einbinden und auf den Displays als Overlay oder eigener Beitrag darstellen.',
+    ch7_1_h: '7.1 ÖPNV-Abfahrten', ch7_1_p: 'Abfahrtsinformationen von Bussen und Bahnen werden über eine HAFAS- oder GTFS-Schnittstelle abgerufen.',
+    ch7_t1: 'Unter <em>Einstellungen  Live-Daten  ÖPNV</em> die <strong>Haltestellen-ID</strong> oder den Haltestellenname eingeben.',
+    ch7_t2: 'Die Anzahl der <strong>angezeigten Abfahrten</strong> festlegen.', ch7_t3: 'Optional: Linienfilter, um nur bestimmte Linien anzuzeigen.',
+    ch7_t4: 'Auf <strong>Speichern</strong> klicken. Das Widget aktualisiert sich automatisch alle 60 Sekunden.',
+    ch7_tip1: '&#128161; Für westfälische Haltestellen empfiehlt sich die VRR-API (Verkehrsverbund Rhein-Ruhr). Die Haltestellen-IDs finden Sie in der VRR-Dokumentation.',
+    ch7_2_h: '7.2 Wetter', ch7_2_p: 'Das Wetter-Widget zeigt aktuelle Temperatur, Wetterlage und eine 3-Tage-Vorschau.',
+    ch7_w1: 'Unter <em>Einstellungen  Live-Daten  Wetter</em> den <strong>Ort</strong> oder die <strong>Koordinaten</strong> eingeben.',
+    ch7_w2: 'Optional: OpenWeatherMap <strong>API-Key</strong> eintragen (kostenlos registrierbar).', ch7_w3: 'Auf <strong>Speichern</strong> klicken.',
+    ch7_3_h: '7.3 Nachrichten &amp; RSS', ch7_3_p: 'Beliebige RSS-Feeds können als Laufschrift oder Kachelansicht eingebunden werden.',
+    ch7_n1: 'Unter <em>Einstellungen  Live-Daten  RSS</em> die <strong>URL des RSS-Feeds</strong> eingeben.',
+    ch7_n2: 'Anzahl der angezeigten Meldungen festlegen.', ch7_n3: 'Auf <strong>Speichern</strong> klicken. Aktualisierungsintervall: 15 Minuten.',
+    ch7_4_h: '7.4 Verkehrslage', ch7_4_p: 'Aktuelle Verkehrsmeldungen für definierte Strecken werden über eine Verkehrs-API abgerufen. Konfiguration analog zu Wetter.',
+    ch8_title: 'Systemeinstellungen', ch8_intro: 'Unter <em>Einstellungen</em> wird das System global konfiguriert. Der Bereich ist nur für Admins und Super-Admins zugänglich. Einige Unterabschnitte sind ausschließlich Super-Admins vorbehalten.',
+    ch8_1_h: '8.1 Allgemein',
+    set_name: 'Systemname', set_name_d: 'Wird im Browser-Titel und in E-Mails angezeigt',
+    set_lang: 'Standardsprache', set_lang_d: 'Sprache des Admin-Panels für neue Benutzer',
+    set_tz: 'Zeitzone', set_tz_d: 'Wichtig für korrekte Zeitplanung von Beiträgen',
+    set_logo: 'Logo', set_logo_d: 'Organisationslogo für Login-Seite und Admin-Panel',
+    ch8_2_h: '8.2 Display-Standardwerte', ch8_2_p: 'Hier lassen sich globale Standardwerte festlegen, die gelten, wenn ein Display keine eigene Konfiguration hat.',
+    ch8_3_h: '8.3 SSO-Konfiguration (Super-Admin)', ch8_3_p: 'Das System unterstützt SAML 2.0 für die Anmeldung per Microsoft 365 / Entra ID. Vorausgesetzt wird eine Enterprise-App-Registrierung im Azure-Portal.',
+    ch8_sso1: 'Im Azure-Portal eine neue <em>Unternehmensanwendung</em> anlegen und SAML als SSO-Methode wählen.',
+    ch8_sso2: '<strong>Entitäts-ID</strong> und <strong>Antwort-URL (ACS-URL)</strong> aus dem Admin-Panel kopieren und in Azure eintragen.',
+    ch8_sso3: '<strong>SAML-Zertifikat</strong> (Base64) aus Azure herunterladen und im Admin-Panel unter <em>Einstellungen  SSO  Zertifikat</em> einfügen.',
+    ch8_sso4: '<strong>Anmelde-URL</strong> und <strong>Azure AD-ID</strong> aus Azure kopieren und eintragen.',
+    ch8_sso5: 'Auf <strong>Speichern &amp; Testen</strong> klicken.',
+    ch8_sso_tip: '&#128161; Eine vollständige Schritt-für-Schritt-Anleitung mit Screenshots finden Sie in der Datei <code>SSO-SETUP.md</code> im Projektverzeichnis.',
+    ch8_4_h: '8.4 Backup &amp; Wiederherstellung', ch8_4_p: 'Das System erstellt automatisch täglich ein Datenbank-Backup. Manuelle Backups können jederzeit über den Server-Zugang ausgeführt werden:',
+    ch8_4_restore: 'Zur Wiederherstellung:',
+    ch9_title: 'Fehlerbehebung', ch9_intro: 'Dieser Abschnitt beschreibt die häufigsten Probleme und deren Lösung.',
+    ch9_1_h: '9.1 Anmeldung schlägt fehl', th_prob: 'Problem', th_sol: 'Lösung',
+    tr_pw_wrong: 'Falsches Passwort', tr_pw_sol: 'Passwort zurücksetzen (Admin) oder Großschreibung prüfen',
+    tr_acc_locked: 'Konto gesperrt', tr_acc_sol: 'Super-Admin kontaktieren  Konto in der Benutzerverwaltung entsperren',
+    tr_sso_fail: 'SSO-Fehler', tr_sso_sol: 'Zertifikat-Ablaufdatum prüfen; Azure-Umleitungs-URL korrekt?',
+    tr_no_https: 'Kein HTTPS', tr_no_https_sol: 'Browser-Warnung: Zertifikat erneuern per <code>certbot renew</code>',
+    ch9_2_h: '9.2 Display zeigt keine Inhalte',
+    td_no_posts: 'Keine aktiven Beiträge', td_no_posts_sol: 'Mindestens einen Beitrag ohne Enddatum erstellen; Display zuweisen',
+    td_disp_inactive: 'Display deaktiviert', td_disp_inactive_sol: 'Display-Status in der Verwaltung auf Aktiv" setzen',
+    td_no_cat: 'Kein passender Kategoriefilter', td_no_cat_sol: 'Kategoriefilter des Displays prüfen; stimmt er mit den Beitragskategorien überein?',
+    td_server_down: 'Server nicht erreichbar', td_server_down_sol: 'Docker-Container prüfen: <code>docker ps</code>; ggf. neu starten',
+    ch9_3_h: '9.3 Server / Docker', ch9_4_h: '9.4 Datenbank-Probleme',
+    ch9_tip: '&#128161; Bei unklaren Fehlern zuerst <code>docker logs prasco-app</code> ansehen  die meisten Probleme sind dort dokumentiert.',
+    ch10_title: 'Schnellreferenz', ch10_1_h: '10.1 Tastenkürzel', th_key: 'Kürzel', th_action: 'Aktion',
+    key_save: 'Aktuelles Formular speichern', key_close: 'Modales Fenster schließen',
+    key_search: 'Suchfeld fokussieren (Beitragsliste)', key_new: 'Neuen Beitrag erstellen (wenn in Beiträge)',
+    ch10_2_h: '10.2 Wichtige URLs', url_login: 'Login', url_api: 'API-Basis', url_display: 'Display (Beispiel)',
+    ch10_3_h: '10.3 Support &amp; Kontakt', th_channel: 'Kanal', th_details: 'Details',
+    con_dev: 'Entwicklung', con_dev_d: 'IT-Westfalen  Christian Pöser', con_mail: 'E-Mail',
+    con_docs: 'Dokumentation', con_docs_d: 'Dieses Handbuch + <code>README.md</code> im Projektverzeichnis',
+    ch10_4_h: '10.4 Versionshinweise', ch10_4_p: 'Die aktuelle Versionsnummer ist im Dashboard unten rechts sichtbar. Release-Notes befinden sich in der Datei <code>CHANGELOG.md</code> im Projektverzeichnis.'
+  },
+  en: {
+    nav_back: 'Back to Admin Panel',
+    cover_subtitle: 'Signature Screen &middot; Administration Manual',
+    cover_meta: 'IT-Westfalen &middot; All Versions',
+    toc_title: 'Table of Contents',
+    toc_1: '1. Login', toc_1_1: '1.1 Step-by-step Login', toc_1_2: '1.2 Roles & Permissions', toc_1_3: '1.3 Change / Reset Password',
+    toc_2: '2. Dashboard  Overview', toc_2_1: '2.1 Statistics Tiles', toc_2_2: '2.2 Navigation',
+    toc_3: '3. Manage Posts', toc_3_1: '3.1 Posts Overview', toc_3_2: '3.2 Create New Post', toc_3_3: '3.3 Edit Post', toc_3_4: '3.4 Delete Post', toc_3_5: '3.5 Images & Media', toc_3_6: '3.6 Scheduling',
+    toc_4: '4. Categories', toc_4_1: '4.1 Create Category', toc_4_2: '4.2 Edit / Delete Category',
+    toc_5: '5. Displays', toc_5_1: '5.1 Add Display', toc_5_2: '5.2 Display URL & Kiosk Mode', toc_5_3: '5.3 Display Configuration', toc_5_4: '5.4 Preview',
+    toc_6: '6. Users & Roles', toc_6_1: '6.1 Create New User', toc_6_2: '6.2 Roles in Detail', toc_6_3: '6.3 SSO (Single Sign-On)',
+    toc_7: '7. Live Data', toc_7_1: '7.1 Public Transit Departures', toc_7_2: '7.2 Weather', toc_7_3: '7.3 News & RSS', toc_7_4: '7.4 Traffic',
+    toc_8: '8. System Settings', toc_8_1: '8.1 General', toc_8_2: '8.2 Display Defaults', toc_8_3: '8.3 SSO Configuration', toc_8_4: '8.4 Backup & Restore',
+    toc_9: '9. Troubleshooting', toc_9_1: '9.1 Login Fails', toc_9_2: '9.2 Display Shows No Content', toc_9_3: '9.3 Server / Docker', toc_9_4: '9.4 Database Issues',
+    toc_10: '10. Quick Reference', toc_10_1: '10.1 Keyboard Shortcuts', toc_10_2: '10.2 Important URLs', toc_10_3: '10.3 Support & Contact', toc_10_4: '10.4 Version Notes',
+    ch1_title: 'Login', ch1_intro: 'Access to the admin panel is exclusively via browser. No additional software is required.',
+    ch1_1_h: '1.1 Step-by-step Login',
+    ch1_s1: 'Open your browser and navigate to <code>https://prasco.zapto.org/admin</code>.',
+    ch1_s2: 'Enter your email address in the first field.',
+    ch1_s3: 'Enter your password in the second field.',
+    ch1_s4: 'Optional: Check <em>Stay logged in</em> to keep the session active after restarting the browser.',
+    ch1_s5: 'Click the <strong>Login</strong> button.',
+    ch1_s6: 'After successful login, the dashboard appears automatically.',
+    ch1_fig1: 'Fig. 1.1  Admin panel login page',
+    ch1_tip1: '&#128161; HTTPS is mandatory  all connections are TLS-encrypted. The certificate is automatically renewed via Let\'s Encrypt.',
+    ch1_2_h: '1.2 Roles &amp; Permissions',
+    ch1_2_p: 'Every user has exactly one role. The role determines which areas of the admin panel are visible and editable.',
+    ch1_3_h: '1.3 Change / Reset Password',
+    ch1_3_own: 'Change your own password',
+    ch1_pw1: 'Click on the user icon in the top right.',
+    ch1_pw2: 'Select <em>Profile</em> or <em>Change Password</em>.',
+    ch1_pw3: 'Enter the current password and the new password twice.',
+    ch1_pw4: 'Click <strong>Save</strong>.',
+    ch1_3_reset: 'Reset another user\'s password (Admin)',
+    ch1_rs1: 'Navigate to <em>Users</em> in the menu.',
+    ch1_rs2: 'Find the user in the list and click <strong>Edit</strong>.',
+    ch1_rs3: 'Enter a temporary password (at least 8 characters) in the <em>New Password</em> field.',
+    ch1_rs4: 'Click <strong>Save</strong> and securely deliver the temporary password to the user.',
+    ch1_warn1: '&#9888; Super-Admin accounts can only be reset by other Super-Admins.',
+    th_role: 'Role', th_posts: 'Posts', th_cat: 'Categories', th_disp: 'Displays', th_users: 'Users', th_settings: 'Settings',
+    role_viewer: 'Viewer', role_editor: 'Editor', role_admin: 'Admin', role_superadmin: 'Super-Admin',
+    perm_read: 'Read', perm_create_edit: 'Create, Edit', perm_full: 'Full', perm_limited: 'Limited', perm_full_nosso: 'Full (excl. SSO)',
+    ch2_title: 'Dashboard  Overview', ch2_intro: 'The dashboard appears immediately after login and provides a quick overview of the system status and quick access to key actions.',
+    ch2_fig1: 'Fig. 2.1  Dashboard with statistics tiles, quick access and sidebar',
+    ch2_1_h: '2.1 Statistics Tiles', ch2_2_h: '2.2 Navigation',
+    ch2_2_p: 'The left sidebar is always visible and contains all main sections:',
+    th_tile: 'Tile', th_content: 'Content', th_target: 'Click Target', th_menu: 'Menu Item', th_func: 'Function',
+    tile_posts: 'Posts', tile_posts_d: 'Total number of active posts in the system', tile_posts_t: 'Posts Overview',
+    tile_displays: 'Active Displays', tile_displays_d: 'Displays with status "active"', tile_displays_t: 'Displays Overview',
+    tile_users: 'Users', tile_users_d: 'Total number of registered user accounts', tile_users_t: 'User Management',
+    tile_new: '+ New Post', tile_new_d: 'Quick-access button', tile_new_t: 'Opens post form',
+    nav_dashboard: 'Dashboard', nav_dashboard_d: 'Home page with overview and statistics',
+    nav_posts: 'Posts', nav_posts_d: 'Create, edit and delete all content',
+    nav_categories: 'Categories', nav_categories_d: 'Manage content categories',
+    nav_displays: 'Displays', nav_displays_d: 'Manage screen configurations',
+    nav_users: 'Users', nav_users_d: 'Manage user accounts and roles',
+    nav_livedata: 'Live Data', nav_livedata_d: 'Configure transit, traffic, weather, news',
+    nav_settings: 'Settings', nav_settings_d: 'Global system configuration',
+    nav_help: 'Help', nav_help_d: 'Open this manual',
+    nav_logout: 'Logout', nav_logout_d: 'End current session',
+    ch3_title: 'Manage Posts', ch3_intro: 'The <em>Posts</em> section is the heart of the system. All content displayed on screens is created, edited and scheduled here.',
+    ch3_1_h: '3.1 Posts Overview', ch3_1_p: 'The table shows all posts with title, category, status, period and displays. Use search and category filter to quickly find posts.',
+    ch3_fig1: 'Fig. 3.1  Posts overview with search and filter',
+    ch3_2_h: '3.2 Create New Post',
+    ch3_c1: 'Click the <strong>+ New Post</strong> button.',
+    ch3_c2: 'Enter a <strong>Title</strong> (required; shown on the display).',
+    ch3_c3: 'Enter the <strong>Content</strong>. Multi-line text and basic Markdown are supported.',
+    ch3_c4: 'Choose a <strong>Category</strong> from the dropdown.',
+    ch3_c5: 'Enter the <strong>Display Duration</strong> in seconds (how long the post stays on screen).',
+    ch3_c6: 'Optional: Set a <strong>Start Date / End Date</strong> to limit visibility.',
+    ch3_c7: 'Optional: Upload one or more <strong>Images</strong> or enter a <strong>YouTube URL</strong>.',
+    ch3_c8: 'Select the <strong>Displays</strong> on which the post should appear.',
+    ch3_c9: 'Click <strong>Save</strong>.',
+    ch3_3_h: '3.3 Edit Post', ch3_3_p: 'Click the pencil icon &#9998; in the post list. The form opens pre-filled with the current data. Confirm changes with <strong>Save</strong>.',
+    ch3_4_h: '3.4 Delete Post', ch3_4_p: 'Click the trash icon &#128465;. A confirmation dialog appears. Click <strong>Confirm</strong> to permanently delete the post.',
+    ch3_warn: '&#9888; Deleted posts cannot be recovered. Backups are recommended.',
+    ch3_5_h: '3.5 Images &amp; Media', th_type: 'Type', th_support: 'Supported', th_note: 'Note',
+    img_note: 'Max. 10 MB per file', gif_note: 'Animation is played on the display',
+    yt_note: 'Muted; duration is determined automatically', mp4_note: 'Not directly  use a YouTube link',
+    ch3_6_h: '3.6 Scheduling', ch3_6_p: 'Use <strong>Start Date</strong> and <strong>End Date</strong> to precisely schedule a post. Posts outside their valid period are not shown on displays but remain in the system.',
+    ch3_tip: '&#128161; Leave both date fields empty for posts that should always be shown.',
+    ch4_title: 'Categories', ch4_intro: 'Categories group posts by topic. Each post belongs to exactly one category. Categories can also be used as display filters.',
+    ch4_1_h: '4.1 Create Category',
+    ch4_c1: 'Click <em>Categories</em> in the menu.', ch4_c2: 'Click <strong>+ New Category</strong>.',
+    ch4_c3: 'Enter a descriptive <strong>Name</strong> (e.g. "Events" or "Menu").',
+    ch4_c4: 'Optional: Choose a <strong>Color</strong> for visual distinction.',
+    ch4_c5: 'Click <strong>Save</strong>.',
+    ch4_2_h: '4.2 Edit / Delete Category', ch4_2_p: 'In the category list, click the pencil &#9998; to edit or the trash icon &#128465; to delete.',
+    ch4_warn: '&#9888; A category cannot be deleted while posts are still assigned to it. Move or delete those posts first.',
+    ch5_title: 'Displays', ch5_intro: 'The <em>Displays</em> section manages all connected screens. Each display has its own configuration, URL and playlist.',
+    ch5_1_h: '5.1 Add Display',
+    ch5_c1: 'Click <strong>+ New Display</strong>.', ch5_c2: 'Enter a unique <strong>Name</strong> (e.g. "Foyer Ground Floor" or "Canteen").',
+    ch5_c3: 'Enter the <strong>Location</strong> and optional description.', ch5_c4: 'Set the <strong>Default Duration</strong> in seconds per post.',
+    ch5_c5: 'Optional: Enable <strong>Category Filter</strong> to show only specific categories.',
+    ch5_c6: 'Click <strong>Save</strong>. The display URL is generated automatically.',
+    ch5_2_h: '5.2 Display URL &amp; Kiosk Mode', ch5_2_p: 'Each display gets its own URL: <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Open this URL in the display device\'s browser in fullscreen kiosk mode.',
+    ch5_tip1: '&#128161; Android TV devices: The PRASCO app opens this URL automatically in kiosk mode. See the Android App chapter.',
+    ch5_3_h: '5.3 Display Configuration', th_setting: 'Setting', th_desc: 'Description',
+    disp_name: 'Name', disp_name_d: 'Internal identifier; not visible on the display itself',
+    disp_dur: 'Duration', disp_dur_d: 'Default time per post in seconds',
+    disp_trans: 'Transition', disp_trans_d: 'Animation effect when switching posts (Fade, Slide, )',
+    disp_ticker: 'Ticker', disp_ticker_d: 'Custom ticker text at the bottom of the screen',
+    disp_live: 'Live Data', disp_live_d: 'Show transit, weather or news widget',
+    disp_active: 'Active', disp_active_d: 'Deactivated displays show only a black screen',
+    ch5_4_h: '5.4 Preview', ch5_4_p: 'Click the <strong>Preview</strong> button in the display row to open the display view in a new tab  ideal for checking without a physical screen.',
+    ch6_title: 'Users &amp; Roles', ch6_intro: 'The <em>Users</em> section is only accessible to Admins and Super-Admins. All accounts are managed here and roles are assigned.',
+    ch6_1_h: '6.1 Create New User',
+    ch6_c1: 'Click <strong>+ New User</strong>.', ch6_c2: 'Enter the user\'s <strong>Name</strong> and <strong>Email</strong>.',
+    ch6_c3: 'Set a temporary <strong>Password</strong> (at least 8 characters).', ch6_c4: 'Select the desired <strong>Role</strong> from the dropdown.',
+    ch6_c5: 'Click <strong>Save</strong> and securely deliver the temporary password to the new user.',
+    ch6_2_h: '6.2 Roles in Detail', th_roledesc: 'Description',
+    role_viewer_d: 'Can view all posts and displays but cannot make changes. No write permissions.',
+    role_editor_d: 'Can create posts and edit their own posts. No access to system settings.',
+    role_admin_d: 'Full access to posts, categories and displays. Can manage regular users and editors, but not other admins.',
+    role_superadmin_d: 'Full access to all areas, including SSO configuration and server settings. Can assign all roles.',
+    ch6_3_h: '6.3 SSO (Single Sign-On)', ch6_3_p: 'The system supports SSO via SAML 2.0 (e.g. Microsoft Entra ID / Azure AD). Configuration is under <em>Settings  SSO</em> and is only accessible to Super-Admins. Detailed instructions: Chapter 8.3.',
+    ch7_title: 'Live Data', ch7_intro: 'The system can integrate real-time data from external sources and display it on screens as an overlay or standalone post.',
+    ch7_1_h: '7.1 Public Transit Departures', ch7_1_p: 'Departure information for buses and trains is retrieved via a HAFAS or GTFS interface.',
+    ch7_t1: 'Under <em>Settings  Live Data  Transit</em>, enter the <strong>Stop ID</strong> or stop name.',
+    ch7_t2: 'Set the number of <strong>displayed departures</strong>.', ch7_t3: 'Optional: Line filter to show only specific lines.',
+    ch7_t4: 'Click <strong>Save</strong>. The widget updates automatically every 60 seconds.',
+    ch7_tip1: '&#128161; For stops in the Westphalia region, the VRR API (Verkehrsverbund Rhein-Ruhr) is recommended. Stop IDs can be found in the VRR documentation.',
+    ch7_2_h: '7.2 Weather', ch7_2_p: 'The weather widget shows current temperature, conditions and a 3-day forecast.',
+    ch7_w1: 'Under <em>Settings  Live Data  Weather</em>, enter the <strong>Location</strong> or <strong>Coordinates</strong>.',
+    ch7_w2: 'Optional: Enter an OpenWeatherMap <strong>API key</strong> (free registration available).', ch7_w3: 'Click <strong>Save</strong>.',
+    ch7_3_h: '7.3 News &amp; RSS', ch7_3_p: 'Any RSS feed can be integrated as a ticker or tile view.',
+    ch7_n1: 'Under <em>Settings  Live Data  RSS</em>, enter the <strong>RSS feed URL</strong>.',
+    ch7_n2: 'Set the number of displayed items.', ch7_n3: 'Click <strong>Save</strong>. Update interval: 15 minutes.',
+    ch7_4_h: '7.4 Traffic', ch7_4_p: 'Current traffic alerts for defined routes are retrieved via a traffic API. Configuration is analogous to Weather.',
+    ch8_title: 'System Settings', ch8_intro: 'Under <em>Settings</em>, the system is configured globally. This section is only accessible to Admins and Super-Admins. Some subsections are exclusively for Super-Admins.',
+    ch8_1_h: '8.1 General',
+    set_name: 'System Name', set_name_d: 'Shown in browser title and emails',
+    set_lang: 'Default Language', set_lang_d: 'Admin panel language for new users',
+    set_tz: 'Time Zone', set_tz_d: 'Important for correct post scheduling',
+    set_logo: 'Logo', set_logo_d: 'Organization logo for login page and admin panel',
+    ch8_2_h: '8.2 Display Defaults', ch8_2_p: 'Set global default values that apply when a display has no individual configuration.',
+    ch8_3_h: '8.3 SSO Configuration (Super-Admin)', ch8_3_p: 'The system supports SAML 2.0 for login via Microsoft 365 / Entra ID. An enterprise app registration in the Azure portal is required.',
+    ch8_sso1: 'In the Azure portal, create a new <em>Enterprise Application</em> and choose SAML as the SSO method.',
+    ch8_sso2: 'Copy the <strong>Entity ID</strong> and <strong>Reply URL (ACS URL)</strong> from the admin panel and enter them in Azure.',
+    ch8_sso3: 'Download the <strong>SAML Certificate</strong> (Base64) from Azure and paste it in <em>Settings  SSO  Certificate</em>.',
+    ch8_sso4: 'Copy the <strong>Login URL</strong> and <strong>Azure AD ID</strong> from Azure and enter them.',
+    ch8_sso5: 'Click <strong>Save &amp; Test</strong>.',
+    ch8_sso_tip: '&#128161; A complete step-by-step guide with screenshots is in <code>SSO-SETUP.md</code> in the project directory.',
+    ch8_4_h: '8.4 Backup &amp; Restore', ch8_4_p: 'The system automatically creates a daily database backup. Manual backups can be triggered at any time via server access:',
+    ch8_4_restore: 'To restore:',
+    ch9_title: 'Troubleshooting', ch9_intro: 'This section describes the most common issues and their solutions.',
+    ch9_1_h: '9.1 Login Fails', th_prob: 'Problem', th_sol: 'Solution',
+    tr_pw_wrong: 'Wrong password', tr_pw_sol: 'Reset password (Admin) or check caps lock',
+    tr_acc_locked: 'Account locked', tr_acc_sol: 'Contact Super-Admin  unlock account in user management',
+    tr_sso_fail: 'SSO error', tr_sso_sol: 'Check certificate expiry date; is Azure redirect URL correct?',
+    tr_no_https: 'No HTTPS', tr_no_https_sol: 'Browser warning: renew certificate with <code>certbot renew</code>',
+    ch9_2_h: '9.2 Display Shows No Content',
+    td_no_posts: 'No active posts', td_no_posts_sol: 'Create at least one post without an end date; assign display',
+    td_disp_inactive: 'Display deactivated', td_disp_inactive_sol: 'Set display status to "Active" in management',
+    td_no_cat: 'No matching category filter', td_no_cat_sol: 'Check display category filter; does it match the post categories?',
+    td_server_down: 'Server unreachable', td_server_down_sol: 'Check Docker containers: <code>docker ps</code>; restart if needed',
+    ch9_3_h: '9.3 Server / Docker', ch9_4_h: '9.4 Database Issues',
+    ch9_tip: '&#128161; For unclear errors, check <code>docker logs prasco-app</code> first  most problems are documented there.',
+    ch10_title: 'Quick Reference', ch10_1_h: '10.1 Keyboard Shortcuts', th_key: 'Shortcut', th_action: 'Action',
+    key_save: 'Save current form', key_close: 'Close modal dialog',
+    key_search: 'Focus search field (post list)', key_new: 'Create new post (when in Posts)',
+    ch10_2_h: '10.2 Important URLs', url_login: 'Login', url_api: 'API Base', url_display: 'Display (example)',
+    ch10_3_h: '10.3 Support &amp; Contact', th_channel: 'Channel', th_details: 'Details',
+    con_dev: 'Development', con_dev_d: 'IT-Westfalen · Christian Pöser', con_mail: 'Email',
+    con_docs: 'Documentation', con_docs_d: 'This manual + <code>README.md</code> in the project directory',
+    ch10_4_h: '10.4 Version Notes', ch10_4_p: 'The current version number is visible in the dashboard (bottom right). Release notes are in <code>CHANGELOG.md</code> in the project directory.'
+  },
+  it: {
+    nav_back: 'Torna al pannello admin',
+    cover_subtitle: 'Signature Screen &middot; Manuale di Amministrazione',
+    cover_meta: 'IT-Westfalen &middot; Tutte le versioni',
+    toc_title: 'Indice',
+    toc_1: '1. Accesso', toc_1_1: '1.1 Accesso passo dopo passo', toc_1_2: '1.2 Ruoli e permessi', toc_1_3: '1.3 Cambio / reset password',
+    toc_2: '2. Dashboard – Panoramica', toc_2_1: '2.1 Riquadri statistiche', toc_2_2: '2.2 Navigazione',
+    toc_3: '3. Gestione post', toc_3_1: '3.1 Elenco post', toc_3_2: '3.2 Crea nuovo post', toc_3_3: '3.3 Modifica post', toc_3_4: '3.4 Elimina post', toc_3_5: '3.5 Immagini e media', toc_3_6: '3.6 Pianificazione',
+    toc_4: '4. Categorie', toc_4_1: '4.1 Crea categoria', toc_4_2: '4.2 Modifica / elimina categoria',
+    toc_5: '5. Display', toc_5_1: '5.1 Aggiungi display', toc_5_2: '5.2 URL display e modalità kiosk', toc_5_3: '5.3 Configurazione display', toc_5_4: '5.4 Anteprima',
+    toc_6: '6. Utenti e ruoli', toc_6_1: '6.1 Crea nuovo utente', toc_6_2: '6.2 Ruoli nel dettaglio', toc_6_3: '6.3 SSO (Single Sign-On)',
+    toc_7: '7. Dati in tempo reale', toc_7_1: '7.1 Partenze trasporto pubblico', toc_7_2: '7.2 Meteo', toc_7_3: '7.3 Notizie e RSS', toc_7_4: '7.4 Traffico',
+    toc_8: '8. Impostazioni di sistema', toc_8_1: '8.1 Generale', toc_8_2: '8.2 Impostazioni display predefinite', toc_8_3: '8.3 Configurazione SSO', toc_8_4: '8.4 Backup e ripristino',
+    toc_9: '9. Risoluzione problemi', toc_9_1: '9.1 Accesso fallito', toc_9_2: '9.2 Il display non mostra contenuti', toc_9_3: '9.3 Server / Docker', toc_9_4: '9.4 Problemi database',
+    toc_10: '10. Riferimento rapido', toc_10_1: '10.1 Scorciatoie da tastiera', toc_10_2: '10.2 URL importanti', toc_10_3: '10.3 Supporto e contatto', toc_10_4: '10.4 Note di versione',
+    ch1_title: 'Accesso', ch1_intro: 'L\'accesso al pannello admin avviene esclusivamente tramite browser. Non è necessario alcun programma aggiuntivo.',
+    ch1_1_h: '1.1 Accesso passo dopo passo',
+    ch1_s1: 'Aprire il browser e navigare su <code>https://prasco.zapto.org/admin</code>.',
+    ch1_s2: 'Inserire il proprio indirizzo e-mail nel primo campo.',
+    ch1_s3: 'Inserire la password nel secondo campo.',
+    ch1_s4: 'Opzionale: spuntare <em>Rimani connesso</em> per mantenere la sessione attiva dopo il riavvio del browser.',
+    ch1_s5: 'Fare clic sul pulsante <strong>Accedi</strong>.',
+    ch1_s6: 'Dopo l\'accesso riuscito, la dashboard appare automaticamente.',
+    ch1_fig1: 'Fig. 1.1 – Pagina di accesso del pannello admin',
+    ch1_tip1: '&#128161; HTTPS è obbligatorio – tutte le connessioni sono crittografate con TLS. Il certificato viene rinnovato automaticamente tramite Let\'s Encrypt.',
+    ch1_2_h: '1.2 Ruoli e permessi',
+    ch1_2_p: 'Ogni utente ha esattamente un ruolo. Il ruolo determina quali aree del pannello admin sono visibili e modificabili.',
+    ch1_3_h: '1.3 Cambio / reset password',
+    ch1_3_own: 'Cambiare la propria password',
+    ch1_pw1: 'Fare clic sull\'icona utente in alto a destra.',
+    ch1_pw2: 'Selezionare <em>Profilo</em> o <em>Cambia password</em>.',
+    ch1_pw3: 'Inserire la password attuale e due volte la nuova password.',
+    ch1_pw4: 'Fare clic su <strong>Salva</strong>.',
+    ch1_3_reset: 'Reset password di un altro utente (Admin)',
+    ch1_rs1: 'Navigare su <em>Utenti</em> nel menu.',
+    ch1_rs2: 'Trovare l\'utente nell\'elenco e fare clic su <strong>Modifica</strong>.',
+    ch1_rs3: 'Inserire una password temporanea (almeno 8 caratteri) nel campo <em>Nuova password</em>.',
+    ch1_rs4: 'Fare clic su <strong>Salva</strong> e consegnare la password temporanea all\'utente in modo sicuro.',
+    ch1_warn1: '&#9888; Gli account Super-Admin possono essere resettati solo da altri Super-Admin.',
+    th_role: 'Ruolo', th_posts: 'Post', th_cat: 'Categorie', th_disp: 'Display', th_users: 'Utenti', th_settings: 'Impostazioni',
+    role_viewer: 'Visualizzatore', role_editor: 'Editor', role_admin: 'Admin', role_superadmin: 'Super-Admin',
+    perm_read: 'Lettura', perm_create_edit: 'Crea, Modifica', perm_full: 'Completo', perm_limited: 'Limitato', perm_full_nosso: 'Completo (senza SSO)',
+    ch2_title: 'Dashboard – Panoramica', ch2_intro: 'La dashboard appare subito dopo l\'accesso e fornisce una rapida panoramica dello stato del sistema e l\'accesso rapido alle azioni principali.',
+    ch2_fig1: 'Fig. 2.1 – Dashboard con riquadri statistiche, accesso rapido e barra laterale',
+    ch2_1_h: '2.1 Riquadri statistiche', ch2_2_h: '2.2 Navigazione',
+    ch2_2_p: 'La barra laterale sinistra è sempre visibile e contiene tutte le sezioni principali:',
+    th_tile: 'Riquadro', th_content: 'Contenuto', th_target: 'Destinazione clic', th_menu: 'Voce menu', th_func: 'Funzione',
+    tile_posts: 'Post', tile_posts_d: 'Numero totale di post attivi nel sistema', tile_posts_t: 'Elenco post',
+    tile_displays: 'Display attivi', tile_displays_d: 'Display con stato "attivo"', tile_displays_t: 'Elenco display',
+    tile_users: 'Utenti', tile_users_d: 'Numero totale di account utente registrati', tile_users_t: 'Gestione utenti',
+    tile_new: '+ Nuovo post', tile_new_d: 'Pulsante accesso rapido', tile_new_t: 'Apre il modulo post',
+    nav_dashboard: 'Dashboard', nav_dashboard_d: 'Pagina iniziale con panoramica e statistiche',
+    nav_posts: 'Post', nav_posts_d: 'Crea, modifica ed elimina tutti i contenuti',
+    nav_categories: 'Categorie', nav_categories_d: 'Gestisci le categorie dei contenuti',
+    nav_displays: 'Display', nav_displays_d: 'Gestisci le configurazioni degli schermi',
+    nav_users: 'Utenti', nav_users_d: 'Gestisci account utente e ruoli',
+    nav_livedata: 'Dati live', nav_livedata_d: 'Configura trasporti, traffico, meteo, notizie',
+    nav_settings: 'Impostazioni', nav_settings_d: 'Configurazione globale del sistema',
+    nav_help: 'Aiuto', nav_help_d: 'Apri questo manuale',
+    nav_logout: 'Disconnetti', nav_logout_d: 'Termina la sessione corrente',
+    ch3_title: 'Gestione post', ch3_intro: 'La sezione <em>Post</em> è il cuore del sistema. Qui vengono creati, modificati e pianificati tutti i contenuti visualizzati sui display.',
+    ch3_1_h: '3.1 Elenco post', ch3_1_p: 'La tabella mostra tutti i post con titolo, categoria, stato, periodo e display. Usa la ricerca e il filtro categoria per trovare rapidamente i post.',
+    ch3_fig1: 'Fig. 3.1 – Elenco post con ricerca e filtro',
+    ch3_2_h: '3.2 Crea nuovo post',
+    ch3_c1: 'Fare clic sul pulsante <strong>+ Nuovo post</strong>.',
+    ch3_c2: 'Inserire un <strong>Titolo</strong> (obbligatorio; mostrato sul display).',
+    ch3_c3: 'Inserire il <strong>Contenuto</strong>. Testo multiriga e Markdown di base sono supportati.',
+    ch3_c4: 'Scegliere una <strong>Categoria</strong> dal menu a tendina.',
+    ch3_c5: 'Inserire la <strong>Durata visualizzazione</strong> in secondi.',
+    ch3_c6: 'Opzionale: impostare <strong>Data inizio / Data fine</strong> per limitare la visibilità.',
+    ch3_c7: 'Opzionale: caricare una o più <strong>Immagini</strong> o inserire un <strong>URL YouTube</strong>.',
+    ch3_c8: 'Selezionare i <strong>Display</strong> su cui il post deve apparire.',
+    ch3_c9: 'Fare clic su <strong>Salva</strong>.',
+    ch3_3_h: '3.3 Modifica post', ch3_3_p: 'Fare clic sull\'icona matita &#9998; nell\'elenco post. Il modulo si apre precompilato con i dati attuali. Confermare le modifiche con <strong>Salva</strong>.',
+    ch3_4_h: '3.4 Elimina post', ch3_4_p: 'Fare clic sull\'icona cestino &#128465;. Appare una finestra di conferma. Fare clic su <strong>Conferma</strong> per eliminare il post definitivamente.',
+    ch3_warn: '&#9888; I post eliminati non possono essere recuperati. Si consiglia di effettuare backup.',
+    ch3_5_h: '3.5 Immagini e media', th_type: 'Tipo', th_support: 'Supportato', th_note: 'Nota',
+    img_note: 'Max. 10 MB per file', gif_note: 'L\'animazione viene riprodotta sul display',
+    yt_note: 'Con audio disattivato; la durata viene determinata automaticamente', mp4_note: 'Non direttamente – usare un link YouTube',
+    ch3_6_h: '3.6 Pianificazione', ch3_6_p: 'Usa <strong>Data inizio</strong> e <strong>Data fine</strong> per pianificare con precisione un post. I post fuori dal periodo valido non vengono mostrati sui display, ma rimangono nel sistema.',
+    ch3_tip: '&#128161; Lasciare entrambi i campi data vuoti per i post che devono essere sempre visualizzati.',
+    ch4_title: 'Categorie', ch4_intro: 'Le categorie raggruppano i post per argomento. Ogni post appartiene esattamente a una categoria. Le categorie possono essere usate anche come filtri per i display.',
+    ch4_1_h: '4.1 Crea categoria',
+    ch4_c1: 'Fare clic su <em>Categorie</em> nel menu.', ch4_c2: 'Fare clic su <strong>+ Nuova categoria</strong>.',
+    ch4_c3: 'Inserire un <strong>Nome</strong> descrittivo (es. "Eventi" o "Menù").',
+    ch4_c4: 'Opzionale: scegliere un <strong>Colore</strong> per la distinzione visiva.',
+    ch4_c5: 'Fare clic su <strong>Salva</strong>.',
+    ch4_2_h: '4.2 Modifica / elimina categoria', ch4_2_p: 'Nell\'elenco categorie, fare clic sulla matita &#9998; per modificare o sul cestino &#128465; per eliminare.',
+    ch4_warn: '&#9888; Una categoria non può essere eliminata finché vi sono post assegnati. Spostare o eliminare prima quei post.',
+    ch5_title: 'Display', ch5_intro: 'La sezione <em>Display</em> gestisce tutti gli schermi collegati. Ogni display ha la propria configurazione, URL e playlist.',
+    ch5_1_h: '5.1 Aggiungi display',
+    ch5_c1: 'Fare clic su <strong>+ Nuovo display</strong>.', ch5_c2: 'Inserire un <strong>Nome</strong> univoco (es. "Ingresso PT" o "Mensa").',
+    ch5_c3: 'Inserire la <strong>Posizione</strong> e una descrizione opzionale.', ch5_c4: 'Impostare la <strong>Durata predefinita</strong> in secondi per post.',
+    ch5_c5: 'Opzionale: abilitare il <strong>Filtro categoria</strong> per mostrare solo determinate categorie.',
+    ch5_c6: 'Fare clic su <strong>Salva</strong>. L\'URL del display viene generato automaticamente.',
+    ch5_2_h: '5.2 URL display e modalità kiosk', ch5_2_p: 'Ogni display riceve un proprio URL: <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Aprire questo URL nel browser del dispositivo di visualizzazione in modalità a schermo intero.',
+    ch5_tip1: '&#128161; Dispositivi Android TV: l\'app PRASCO apre automaticamente questo URL in modalità kiosk. Vedi il capitolo sull\'app Android.',
+    ch5_3_h: '5.3 Configurazione display', th_setting: 'Impostazione', th_desc: 'Descrizione',
+    disp_name: 'Nome', disp_name_d: 'Identificatore interno; non visibile sul display stesso',
+    disp_dur: 'Durata', disp_dur_d: 'Tempo predefinito per post in secondi',
+    disp_trans: 'Transizione', disp_trans_d: 'Effetto animazione nel cambio post (Dissolvenza, Scivolamento, …)',
+    disp_ticker: 'Notiziario', disp_ticker_d: 'Testo personalizzato nella barra in basso',
+    disp_live: 'Dati live', disp_live_d: 'Mostra widget trasporti, meteo o notizie',
+    disp_active: 'Attivo', disp_active_d: 'I display disattivati mostrano solo uno schermo nero',
+    ch5_4_h: '5.4 Anteprima', ch5_4_p: 'Fare clic sul pulsante <strong>Anteprima</strong> nella riga del display per aprire la vista in una nuova scheda – ideale per verificare senza un monitor fisico.',
+    ch6_title: 'Utenti e ruoli', ch6_intro: 'La sezione <em>Utenti</em> è accessibile solo ad Admin e Super-Admin. Tutti gli account vengono gestiti qui e i ruoli vengono assegnati.',
+    ch6_1_h: '6.1 Crea nuovo utente',
+    ch6_c1: 'Fare clic su <strong>+ Nuovo utente</strong>.', ch6_c2: 'Inserire il <strong>Nome</strong> e l\'<strong>E-mail</strong> dell\'utente.',
+    ch6_c3: 'Impostare una <strong>Password</strong> temporanea (almeno 8 caratteri).', ch6_c4: 'Selezionare il <strong>Ruolo</strong> desiderato dal menu a tendina.',
+    ch6_c5: 'Fare clic su <strong>Salva</strong> e consegnare la password temporanea al nuovo utente in modo sicuro.',
+    ch6_2_h: '6.2 Ruoli nel dettaglio', th_roledesc: 'Descrizione',
+    role_viewer_d: 'Può visualizzare tutti i post e i display ma non modificarli. Nessun permesso di scrittura.',
+    role_editor_d: 'Può creare post e modificare i propri post. Nessun accesso alle impostazioni di sistema.',
+    role_admin_d: 'Accesso completo a post, categorie e display. Può gestire utenti normali ed editor, ma non altri admin.',
+    role_superadmin_d: 'Accesso completo a tutte le aree, inclusa la configurazione SSO e le impostazioni server. Può assegnare tutti i ruoli.',
+    ch6_3_h: '6.3 SSO (Single Sign-On)', ch6_3_p: 'Il sistema supporta SSO tramite SAML 2.0 (es. Microsoft Entra ID / Azure AD). La configurazione è in <em>Impostazioni → SSO</em> ed è accessibile solo ai Super-Admin. Istruzioni dettagliate: Capitolo 8.3.',
+    ch7_title: 'Dati in tempo reale', ch7_intro: 'Il sistema può integrare dati in tempo reale da fonti esterne e visualizzarli sui display come overlay o post autonomo.',
+    ch7_1_h: '7.1 Partenze trasporto pubblico', ch7_1_p: 'Le informazioni sulle partenze di autobus e treni vengono recuperate tramite un\'interfaccia HAFAS o GTFS.',
+    ch7_t1: 'In <em>Impostazioni → Dati live → TPL</em>, inserire l\'<strong>ID fermata</strong> o il nome della fermata.',
+    ch7_t2: 'Impostare il numero di <strong>partenze visualizzate</strong>.', ch7_t3: 'Opzionale: filtro linee per mostrare solo determinate linee.',
+    ch7_t4: 'Fare clic su <strong>Salva</strong>. Il widget si aggiorna automaticamente ogni 60 secondi.',
+    ch7_tip1: '&#128161; Per le fermate nella regione della Westfalia, si consiglia l\'API VRR (Verkehrsverbund Rhein-Ruhr). Gli ID fermata si trovano nella documentazione VRR.',
+    ch7_2_h: '7.2 Meteo', ch7_2_p: 'Il widget meteo mostra temperatura attuale, condizioni e previsioni a 3 giorni.',
+    ch7_w1: 'In <em>Impostazioni → Dati live → Meteo</em>, inserire la <strong>Posizione</strong> o le <strong>Coordinate</strong>.',
+    ch7_w2: 'Opzionale: inserire una <strong>chiave API</strong> OpenWeatherMap (registrazione gratuita disponibile).', ch7_w3: 'Fare clic su <strong>Salva</strong>.',
+    ch7_3_h: '7.3 Notizie e RSS', ch7_3_p: 'Qualsiasi feed RSS può essere integrato come notiziario o vista a tessere.',
+    ch7_n1: 'In <em>Impostazioni → Dati live → RSS</em>, inserire l\'<strong>URL del feed RSS</strong>.',
+    ch7_n2: 'Impostare il numero di elementi visualizzati.', ch7_n3: 'Fare clic su <strong>Salva</strong>. Intervallo di aggiornamento: 15 minuti.',
+    ch7_4_h: '7.4 Traffico', ch7_4_p: 'Gli avvisi di traffico attuali per percorsi definiti vengono recuperati tramite un\'API del traffico. La configurazione è analoga a Meteo.',
+    ch8_title: 'Impostazioni di sistema', ch8_intro: 'In <em>Impostazioni</em> il sistema viene configurato globalmente. Questa sezione è accessibile solo ad Admin e Super-Admin. Alcune sottosezioni sono riservate esclusivamente ai Super-Admin.',
+    ch8_1_h: '8.1 Generale',
+    set_name: 'Nome sistema', set_name_d: 'Mostrato nel titolo del browser e nelle e-mail',
+    set_lang: 'Lingua predefinita', set_lang_d: 'Lingua del pannello admin per i nuovi utenti',
+    set_tz: 'Fuso orario', set_tz_d: 'Importante per la corretta pianificazione dei post',
+    set_logo: 'Logo', set_logo_d: 'Logo dell\'organizzazione per la pagina di accesso e il pannello admin',
+    ch8_2_h: '8.2 Impostazioni display predefinite', ch8_2_p: 'Impostare valori predefiniti globali che si applicano quando un display non ha una configurazione individuale.',
+    ch8_3_h: '8.3 Configurazione SSO (Super-Admin)', ch8_3_p: 'Il sistema supporta SAML 2.0 per l\'accesso tramite Microsoft 365 / Entra ID. È richiesta la registrazione di un\'app enterprise nel portale Azure.',
+    ch8_sso1: 'Nel portale Azure, creare una nuova <em>Applicazione enterprise</em> e scegliere SAML come metodo SSO.',
+    ch8_sso2: 'Copiare l\'<strong>ID entità</strong> e l\'<strong>URL di risposta (ACS URL)</strong> dal pannello admin e inserirli in Azure.',
+    ch8_sso3: 'Scaricare il <strong>Certificato SAML</strong> (Base64) da Azure e incollarlo in <em>Impostazioni → SSO → Certificato</em>.',
+    ch8_sso4: 'Copiare l\'<strong>URL di accesso</strong> e l\'<strong>ID Azure AD</strong> da Azure e inserirli.',
+    ch8_sso5: 'Fare clic su <strong>Salva e testa</strong>.',
+    ch8_sso_tip: '&#128161; Una guida completa passo dopo passo con screenshot è in <code>SSO-SETUP.md</code> nella directory del progetto.',
+    ch8_4_h: '8.4 Backup e ripristino', ch8_4_p: 'Il sistema crea automaticamente un backup giornaliero del database. I backup manuali possono essere eseguiti in qualsiasi momento tramite accesso al server:',
+    ch8_4_restore: 'Per il ripristino:',
+    ch9_title: 'Risoluzione problemi', ch9_intro: 'Questa sezione descrive i problemi più comuni e le relative soluzioni.',
+    ch9_1_h: '9.1 Accesso fallito', th_prob: 'Problema', th_sol: 'Soluzione',
+    tr_pw_wrong: 'Password errata', tr_pw_sol: 'Resettare la password (Admin) o verificare le maiuscole',
+    tr_acc_locked: 'Account bloccato', tr_acc_sol: 'Contattare il Super-Admin – sbloccare l\'account nella gestione utenti',
+    tr_sso_fail: 'Errore SSO', tr_sso_sol: 'Verificare la data di scadenza del certificato; URL di reindirizzamento Azure corretto?',
+    tr_no_https: 'Nessun HTTPS', tr_no_https_sol: 'Avviso browser: rinnovare il certificato con <code>certbot renew</code>',
+    ch9_2_h: '9.2 Il display non mostra contenuti',
+    td_no_posts: 'Nessun post attivo', td_no_posts_sol: 'Creare almeno un post senza data di fine; assegnare il display',
+    td_disp_inactive: 'Display disattivato', td_disp_inactive_sol: 'Impostare lo stato del display su "Attivo" nella gestione',
+    td_no_cat: 'Nessun filtro categoria corrispondente', td_no_cat_sol: 'Verificare il filtro categoria del display; corrisponde alle categorie dei post?',
+    td_server_down: 'Server non raggiungibile', td_server_down_sol: 'Verificare i container Docker: <code>docker ps</code>; riavviare se necessario',
+    ch9_3_h: '9.3 Server / Docker', ch9_4_h: '9.4 Problemi database',
+    ch9_tip: '&#128161; Per errori non chiari, controllare prima <code>docker logs prasco-app</code> – la maggior parte dei problemi è documentata lì.',
+    ch10_title: 'Riferimento rapido', ch10_1_h: '10.1 Scorciatoie da tastiera', th_key: 'Scorciatoia', th_action: 'Azione',
+    key_save: 'Salva il modulo corrente', key_close: 'Chiudi la finestra modale',
+    key_search: 'Focalizza il campo di ricerca (elenco post)', key_new: 'Crea nuovo post (nella sezione Post)',
+    ch10_2_h: '10.2 URL importanti', url_login: 'Accesso', url_api: 'Base API', url_display: 'Display (esempio)',
+    ch10_3_h: '10.3 Supporto e contatto', th_channel: 'Canale', th_details: 'Dettagli',
+    con_dev: 'Sviluppo', con_dev_d: 'IT-Westfalen · Christian Pöser', con_mail: 'E-mail',
+    con_docs: 'Documentazione', con_docs_d: 'Questo manuale + <code>README.md</code> nella directory del progetto',
+    ch10_4_h: '10.4 Note di versione', ch10_4_p: 'Il numero di versione attuale è visibile nella dashboard in basso a destra. Le note di rilascio sono in <code>CHANGELOG.md</code> nella directory del progetto.'
+  }
+};
+
+function setLang(l) {
+  localStorage.setItem('handbuchLang', l);
+  document.documentElement.lang = l;
+  document.querySelectorAll('[data-t]').forEach(el => {
+    const k = el.getAttribute('data-t');
+    if (T[l] && T[l][k] !== undefined) el.innerHTML = T[l][k];
+  });
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim().toLowerCase() === l);
+  });
+}
+
+const saved = localStorage.getItem('handbuchLang') || 'de';
+setLang(saved);
+</script>
 </body>
 </html>
