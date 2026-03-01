@@ -1056,19 +1056,114 @@ async function loadDisplaySettings() {
   }
 }
 
+// Baut die Ticker-Texte aus statischen und Live-Daten zusammen
+async function buildLiveTickerParts() {
+  const sep = '     ✦     ';
+  const parts = [];
+
+  // 1. Statischer Text
+  const staticText = currentDisplayInfo && currentDisplayInfo.tickerText ? currentDisplayInfo.tickerText.trim() : '';
+  if (staticText) parts.push(staticText);
+
+  // 2. ÖPNV-Abfahrten
+  if (currentDisplayInfo && currentDisplayInfo.tickerTransit) {
+    const ts = liveDataState.transitSettings || {};
+    const stationId = ts['transit.stationId'];
+    const stationName = ts['transit.stationName'] || '';
+    if (stationId) {
+      try {
+        const res = await fetch(`/api/transit/departures/${stationId}?results=6&duration=60`);
+        if (res.ok) {
+          const data = await res.json();
+          const deps = (data.data || []).slice(0, 6);
+          if (deps.length > 0) {
+            const items = deps.map(dep => {
+              if (dep.cancelled) return null;
+              const line = dep.line?.name || dep.line?.fahrtNr || '?';
+              const dir = dep.direction || '';
+              const when = dep.when || dep.plannedWhen;
+              let minText = '';
+              if (when) {
+                const diffMs = new Date(when) - Date.now();
+                const diffMin = Math.round(diffMs / 60000);
+                if (diffMin <= 0) minText = 'jetzt';
+                else if (diffMin === 1) minText = '1 min';
+                else minText = `${diffMin} min`;
+                if (dep.delay && dep.delay > 60) minText += ` (+${Math.round(dep.delay / 60)})`;
+              }
+              return `${line} → ${dir}${minText ? ' in ' + minText : ''}`;
+            }).filter(Boolean);
+            if (items.length > 0) {
+              const label = stationName ? `🚌 ${stationName}: ` : '🚌 ';
+              parts.push(label + items.join(' | '));
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Ticker ÖPNV Fehler:', e);
+      }
+    }
+  }
+
+  // 3. Verkehrsmeldungen
+  if (currentDisplayInfo && currentDisplayInfo.tickerTraffic) {
+    const tr = liveDataState.trafficSettings || {};
+    const hwStr = tr['traffic.highways'] || '';
+    if (hwStr) {
+      const highways = hwStr.split(',').map(h => h.trim()).filter(Boolean);
+      const trafficItems = [];
+      for (const hw of highways) {
+        try {
+          const res = await fetch(`/api/traffic/highways/${hw}`);
+          if (res.ok) {
+            const data = await res.json();
+            const td = data.data || {};
+            const warnings = td.warnings || [];
+            const roadworks = td.roadworks || [];
+            const closures = td.closures || [];
+            for (const w of warnings.slice(0, 2)) trafficItems.push(`⚠️ ${hw}: ${w.title || w.subtitle || ''}`);
+            for (const r of roadworks.slice(0, 2)) trafficItems.push(`🚧 ${hw}: ${r.title || ''}`);
+            for (const c of closures.slice(0, 1)) trafficItems.push(`🚫 ${hw}: ${c.title || ''}`);
+          }
+        } catch (e) {
+          console.log('Ticker Verkehr Fehler:', hw, e);
+        }
+      }
+      if (trafficItems.length > 0) parts.push(trafficItems.join('  ·  '));
+    }
+  }
+
+  return parts.length > 0 ? parts.join(sep) : '';
+}
+
 // Aktualisiere Ticker / Laufschrift basierend auf Display-Info
-function updateTicker() {
+async function updateTicker() {
   const bar = document.getElementById('ticker-bar');
   const textEl = document.getElementById('ticker-text');
   const cloneEl = document.getElementById('ticker-text-clone');
   if (!bar || !textEl) return;
-  const text = currentDisplayInfo && currentDisplayInfo.tickerText ? currentDisplayInfo.tickerText.trim() : '';
+  const text = await buildLiveTickerParts();
   if (text) {
     textEl.textContent = text;
     if (cloneEl) cloneEl.textContent = text;
     bar.style.display = '';
   } else {
     bar.style.display = 'none';
+  }
+}
+
+let tickerLiveInterval = null;
+
+// Startet den Ticker und plant Live-Daten-Aktualisierung alle 60 s
+function startTickerRefresh() {
+  if (tickerLiveInterval) {
+    clearInterval(tickerLiveInterval);
+    tickerLiveInterval = null;
+  }
+  updateTicker();
+  if (currentDisplayInfo && (currentDisplayInfo.tickerTransit || currentDisplayInfo.tickerTraffic)) {
+    tickerLiveInterval = setInterval(() => updateTicker(), 60000);
+    console.log('📺 Ticker Live-Daten: Aktualisierung alle 60 s gestartet');
   }
 }
 
@@ -2484,6 +2579,7 @@ async function init() {
 
   await fetchPosts();
   await loadLiveDataDisplaySettings();
+  startTickerRefresh();
   startClock();
   updateDate();
 

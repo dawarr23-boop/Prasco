@@ -384,6 +384,10 @@ const translations = {
     'displays.tickerText': 'Laufschrift (Ticker)',
     'displays.tickerTextPlaceholder': 'Optionaler Text, der unten am Bildschirm entlangläuft',
     'displays.tickerTextHint': 'Wird als scrollender Text am unteren Rand des Displays angezeigt. Leer lassen = kein Ticker.',
+    'displays.tickerLiveTitle': 'Live-Daten im Ticker',
+    'displays.tickerTransit': '🚌 ÖPNV-Abfahrten im Ticker anzeigen',
+    'displays.tickerTraffic': '🚧 Verkehrsmeldungen im Ticker anzeigen',
+    'displays.tickerLiveHint': 'Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.',
     'displays.liveDataHint': 'Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden',
     'displays.create': 'Display erstellen',
     'displays.saveChanges': 'Änderungen speichern',
@@ -800,6 +804,10 @@ const translations = {
     'displays.tickerText': 'Ticker (scrolling text)',
     'displays.tickerTextPlaceholder': 'Optional text that scrolls across the bottom of the screen',
     'displays.tickerTextHint': 'Displayed as scrolling text at the bottom of the display. Leave empty = no ticker.',
+    'displays.tickerLiveTitle': 'Live data in ticker',
+    'displays.tickerTransit': '🚌 Show ÖPNV departures in ticker',
+    'displays.tickerTraffic': '🚧 Show traffic warnings in ticker',
+    'displays.tickerLiveHint': 'Live data is automatically updated every 60 seconds and appended to the static text.',
     'displays.liveDataHint': 'Controls whether live data widgets are shown on this display',
     'displays.create': 'Create Display',
     'displays.saveChanges': 'Save Changes',
@@ -1218,6 +1226,10 @@ const translations = {
     'displays.tickerText': 'Notiziario (testo scorrevole)',
     'displays.tickerTextPlaceholder': 'Testo opzionale che scorre in basso nello schermo',
     'displays.tickerTextHint': 'Visualizzato come testo scorrevole in basso. Lasciare vuoto = nessun notiziario.',
+    'displays.tickerLiveTitle': 'Dati live nel notiziario',
+    'displays.tickerTransit': '🚌 Mostra partenze trasporto nel notiziario',
+    'displays.tickerTraffic': '🚧 Mostra meldingen traffico nel notiziario',
+    'displays.tickerLiveHint': 'I dati live vengono aggiornati automaticamente ogni 60 secondi.',
     'displays.liveDataHint': 'Controlla se i widget di dati in diretta vengono mostrati su questo display',
     'displays.create': 'Crea Display',
     'displays.saveChanges': 'Salva Modifiche',
@@ -3817,6 +3829,10 @@ async function editDisplay(id) {
   document.getElementById('display-showTrafficData').checked = display.showTrafficData !== false;
   const tickerEl = document.getElementById('display-tickerText');
   if (tickerEl) tickerEl.value = display.tickerText || '';
+  const tickerTransitEl = document.getElementById('display-tickerTransit');
+  if (tickerTransitEl) tickerTransitEl.checked = display.tickerTransit === true;
+  const tickerTrafficEl = document.getElementById('display-tickerTraffic');
+  if (tickerTrafficEl) tickerTrafficEl.checked = display.tickerTraffic === true;
 
   // Scrolle zum Formular
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
@@ -3886,6 +3902,8 @@ async function handleDisplayFormSubmit(e) {
     showTransitData: document.getElementById('display-showTransitData').checked,
     showTrafficData: document.getElementById('display-showTrafficData').checked,
     tickerText: (document.getElementById('display-tickerText')?.value || '').trim(),
+    tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
+    tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
   };
 
   try {

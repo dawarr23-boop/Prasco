@@ -10,6 +10,8 @@ interface DisplayAttributes {
   showTransitData: boolean;
   showTrafficData: boolean;
   tickerText?: string;
+  tickerTransit: boolean;
+  tickerTraffic: boolean;
   organizationId?: number;
   // Device Authorization
   serialNumber?: string;
@@ -28,7 +30,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -43,6 +45,8 @@ class Display
   public showTransitData!: boolean;
   public showTrafficData!: boolean;
   public tickerText?: string;
+  public tickerTransit!: boolean;
+  public tickerTraffic!: boolean;
   public organizationId?: number;
   // Device Authorization
   public serialNumber?: string;
@@ -106,6 +110,18 @@ Display.init(
       type: DataTypes.TEXT,
       allowNull: true,
       field: 'ticker_text',
+    },
+    tickerTransit: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'ticker_transit',
+    },
+    tickerTraffic: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'ticker_traffic',
     },
     organizationId: {
       type: DataTypes.INTEGER,

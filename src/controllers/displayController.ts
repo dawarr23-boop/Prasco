@@ -132,6 +132,8 @@ export const getDisplayByIdentifier = async (
         'description',
         'isActive',
         'tickerText',
+        'tickerTransit',
+        'tickerTraffic',
         'showTransitData',
         'showTrafficData',
         'createdAt',
@@ -205,6 +207,8 @@ export const createDisplay = async (
       showTransitData: req.body.showTransitData !== undefined ? req.body.showTransitData : true,
       showTrafficData: req.body.showTrafficData !== undefined ? req.body.showTrafficData : true,
       tickerText: req.body.tickerText || null,
+      tickerTransit: req.body.tickerTransit === true || req.body.tickerTransit === 'true',
+      tickerTraffic: req.body.tickerTraffic === true || req.body.tickerTraffic === 'true',
       organizationId: req.user?.organizationId,
     });
 
@@ -265,6 +269,8 @@ export const updateDisplay = async (
     if (req.body.showTransitData !== undefined) display.showTransitData = req.body.showTransitData;
     if (req.body.showTrafficData !== undefined) display.showTrafficData = req.body.showTrafficData;
     if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
+    if (req.body.tickerTransit !== undefined) display.tickerTransit = req.body.tickerTransit === true || req.body.tickerTransit === 'true';
+    if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
 
     await display.save();
 
