@@ -4780,6 +4780,10 @@ async function testSSOConnection() {
 // Initialization
 // ============================================
 window.addEventListener('load', async () => {
+  // Sitzung als aktiv markieren – muss vor checkAuth() gesetzt werden, damit frische Logins
+  // nicht sofort als "Browser geschlossen" interpretiert werden.
+  sessionStorage.setItem('sessionAlive', '1');
+
   if (!checkAuth()) return;
 
   // Sitzungsverwaltung starten (Inaktivitätserkennung, Cross-Tab-Logout, etc.)
