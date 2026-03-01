@@ -145,6 +145,27 @@ const translations = {
     'appInfo.openDisplay': 'Display öffnen',
     'appInfo.apiDocs': 'API-Dokumentation',
 
+    // Hilfe
+    'hilfe.title': 'Hilfe & Dokumentation',
+    'hilfe.manual': 'Administrationshandbuch',
+    'hilfe.manualDesc': 'Das vollständige Handbuch erklärt alle Funktionen des Admin-Panels – von der Anmeldung über Beiträge, Displays und Live-Daten bis hin zu den Systemeinstellungen. Mit Screenshots und Schritt-für-Schritt-Anleitungen.',
+    'hilfe.openManual': 'Handbuch öffnen',
+    'hilfe.chapters': 'Kapitelübersicht',
+    'hilfe.ch1': 'Anmeldung & Rollen',
+    'hilfe.ch2': 'Dashboard – Übersicht',
+    'hilfe.ch3': 'Beiträge verwalten',
+    'hilfe.ch4': 'Kategorien',
+    'hilfe.ch5': 'Displays konfigurieren',
+    'hilfe.ch6': 'Benutzer & Rollen',
+    'hilfe.ch7': 'Live-Daten (ÖPNV, Verkehr, Wetter)',
+    'hilfe.ch8': 'Systemeinstellungen',
+    'hilfe.ch9': 'Schnellreferenz',
+    'hilfe.quickLinks': 'Direktlinks',
+    'hilfe.linkApi': '→ API Dokumentation',
+    'hilfe.linkHealth': '→ Health-Check',
+    'hilfe.linkReference': '→ Schnellreferenz',
+    'hilfe.linkSettings': '→ Einstellungen-Dokumentation',
+
     // SSO
     'sso.title': 'Single Sign-On (SSO) Konfiguration',
     'sso.enabled': 'SSO aktiviert',
@@ -539,6 +560,27 @@ const translations = {
     'appInfo.openDisplay': 'Open Display',
     'appInfo.apiDocs': 'API Documentation',
 
+    // Hilfe
+    'hilfe.title': 'Help & Documentation',
+    'hilfe.manual': 'Administration Manual',
+    'hilfe.manualDesc': 'The complete manual explains all functions of the admin panel – from login through posts, displays, and live data to system settings. With screenshots and step-by-step instructions.',
+    'hilfe.openManual': 'Open Manual',
+    'hilfe.chapters': 'Table of Contents',
+    'hilfe.ch1': 'Login & Roles',
+    'hilfe.ch2': 'Dashboard – Overview',
+    'hilfe.ch3': 'Manage Posts',
+    'hilfe.ch4': 'Categories',
+    'hilfe.ch5': 'Configure Displays',
+    'hilfe.ch6': 'Users & Roles',
+    'hilfe.ch7': 'Live Data (Transit, Traffic, Weather)',
+    'hilfe.ch8': 'System Settings',
+    'hilfe.ch9': 'Quick Reference',
+    'hilfe.quickLinks': 'Quick Links',
+    'hilfe.linkApi': '→ API Documentation',
+    'hilfe.linkHealth': '→ Health Check',
+    'hilfe.linkReference': '→ Quick Reference',
+    'hilfe.linkSettings': '→ Settings Documentation',
+
     // SSO
     'sso.title': 'Single Sign-On (SSO) Configuration',
     'sso.enabled': 'SSO enabled',
@@ -931,6 +973,27 @@ const translations = {
     'appInfo.openDisplay': 'Apri Display',
     'appInfo.apiDocs': 'Documentazione API',
 
+    // Hilfe
+    'hilfe.title': 'Aiuto & Documentazione',
+    'hilfe.manual': 'Manuale di Amministrazione',
+    'hilfe.manualDesc': "Il manuale completo spiega tutte le funzioni del pannello amministrativo – dall'accesso ai post, display e dati live fino alle impostazioni di sistema. Con screenshot e istruzioni passo-passo.",
+    'hilfe.openManual': 'Apri Manuale',
+    'hilfe.chapters': 'Indice dei Capitoli',
+    'hilfe.ch1': 'Accesso & Ruoli',
+    'hilfe.ch2': 'Dashboard – Panoramica',
+    'hilfe.ch3': 'Gestione Post',
+    'hilfe.ch4': 'Categorie',
+    'hilfe.ch5': 'Configurazione Display',
+    'hilfe.ch6': 'Utenti & Ruoli',
+    'hilfe.ch7': 'Dati Live (Trasporto, Traffico, Meteo)',
+    'hilfe.ch8': 'Impostazioni di Sistema',
+    'hilfe.ch9': 'Riferimento Rapido',
+    'hilfe.quickLinks': 'Link Rapidi',
+    'hilfe.linkApi': '→ Documentazione API',
+    'hilfe.linkHealth': '→ Health Check',
+    'hilfe.linkReference': '→ Riferimento Rapido',
+    'hilfe.linkSettings': '→ Documentazione Impostazioni',
+
     // SSO
     'sso.title': 'Configurazione Single Sign-On (SSO)',
     'sso.enabled': 'SSO abilitato',
@@ -1290,6 +1353,7 @@ function applyTranslations() {
     settings: { key: 'nav.settings', icon: '⚙' },
     livedata: { key: 'nav.liveData', icon: '◉' },
     displays: { key: 'nav.displays', icon: '▢' },
+    hilfe: { key: 'hilfe.title', icon: '?' },
   };
 
   document.querySelectorAll('.sidebar-menu a').forEach((link) => {
@@ -1317,6 +1381,7 @@ function applyTranslations() {
     'settings-section': 'settings.title',
     'livedata-section': 'nav.liveData',
     'displays-section': 'displays.title',
+    'hilfe-section': 'hilfe.title',
   };
 
   Object.entries(sectionTitles).forEach(([sectionId, key]) => {
@@ -1797,7 +1862,7 @@ function navigateTo(section) {
       livedata: 'nav.liveData',
       displays: 'displays.title',
       settings: 'settings.title',
-      hilfe: 'Hilfe & Dokumentation',
+      hilfe: 'hilfe.title',
     };
     document.getElementById('page-title').textContent = titles[section] ? t(titles[section]) : section;
 
