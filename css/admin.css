@@ -303,6 +303,17 @@ body {
   overflow-y: auto;
   z-index: 1000;
   border-right: 3px solid var(--prasco-red);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-menu {
+  flex: 1;
+}
+
+.sidebar-logout {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
 .sidebar-header {
@@ -368,7 +379,25 @@ body {
   font-weight: 600;
 }
 
-.sidebar-menu .icon {
+.sidebar-logout a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  color: #cccccc;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-logout a:hover {
+  background: rgba(0, 180, 80, 0.15);
+  color: var(--white);
+  border-left-color: #00b050;
+}
+
+.sidebar-menu .icon,
+.sidebar-logout .icon {
   font-size: 1rem;
   display: inline-flex;
   align-items: center;
