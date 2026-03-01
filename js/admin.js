@@ -1771,8 +1771,24 @@ async function refreshToken() {
 // ============================================
 // Authentication
 // ============================================
+// Session timer handles (initialized by initSessionManagement)
+let _idleTimer = null;
+let _warnTimer = null;
+let _warnCountdown = null;
+
 function checkAuth() {
   const accessToken = localStorage.getItem('accessToken');
+
+  // "Angemeldet bleiben" = false → Sitzung endet, wenn Browser komplett geschlossen wird.
+  // sessionStorage wird automatisch gelöscht, wenn ALLE Tabs dieser Seite geschlossen werden.
+  if (accessToken && !sessionStorage.getItem('sessionAlive') && !localStorage.getItem('rememberMe')) {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    window.location.href = '/admin';
+    return false;
+  }
+
   if (!accessToken) {
     window.location.href = '/admin';
     return false;
@@ -1829,12 +1845,100 @@ function setupRoleBasedUI(user) {
   }
 }
 
-function logout() {
+function logout(reason) {
+  // Timers stoppen
+  clearTimeout(_idleTimer);
+  clearTimeout(_warnTimer);
+  clearInterval(_warnCountdown);
+  // Session-Alive-Marker entfernen
+  sessionStorage.removeItem('sessionAlive');
+  // Tokens löschen — removeItem('accessToken') triggert storage-Event in anderen Tabs
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('user');
   localStorage.removeItem('rememberMe');
-  window.location.href = '/admin';
+  const url = reason ? `/admin?reason=${encodeURIComponent(reason)}` : '/admin';
+  window.location.href = url;
+}
+
+// ============================================
+// Session Management
+// ============================================
+const SESSION_IDLE_MS = 30 * 60 * 1000; // 30 Minuten Inaktivität → Abmeldung
+const SESSION_WARN_MS =      60 * 1000; // Warnung 60 Sekunden vor Abmeldung
+
+function resetIdleTimer() {
+  clearTimeout(_idleTimer);
+  clearTimeout(_warnTimer);
+  clearInterval(_warnCountdown);
+  _hideSessionWarning();
+
+  // Warnung kurz vor Ablauf anzeigen
+  _warnTimer = setTimeout(() => _showSessionWarning(), SESSION_IDLE_MS - SESSION_WARN_MS);
+
+  // Automatische Abmeldung
+  _idleTimer = setTimeout(() => logout('inactivity'), SESSION_IDLE_MS);
+}
+
+function _showSessionWarning() {
+  const modal = document.getElementById('session-timeout-modal');
+  if (!modal) return;
+  let secs = Math.ceil(SESSION_WARN_MS / 1000);
+  const counter = document.getElementById('session-timeout-counter');
+  if (counter) counter.textContent = secs;
+  modal.style.display = 'flex';
+  _warnCountdown = setInterval(() => {
+    secs--;
+    if (counter) counter.textContent = Math.max(0, secs);
+    if (secs <= 0) clearInterval(_warnCountdown);
+  }, 1000);
+}
+
+function _hideSessionWarning() {
+  const modal = document.getElementById('session-timeout-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function initSessionManagement() {
+  // Session-Alive-Marker setzen (wird gelöscht wenn alle Tabs geschlossen werden)
+  sessionStorage.setItem('sessionAlive', '1');
+
+  // Benutzeraktivität überwachen → Idle-Timer zurücksetzen
+  ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach((ev) => {
+    document.addEventListener(ev, resetIdleTimer, { passive: true });
+  });
+
+  // Cross-Tab-Logout: Wenn in einem anderen Tab ausgeloggt wird, hier ebenfalls ausloggen
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'accessToken' && e.newValue === null) {
+      window.location.href = '/admin?reason=other_tab';
+    }
+  });
+
+  // Tab-Rückkehr: Token auf Ablauf prüfen wenn Tab wieder sichtbar wird
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    const token = localStorage.getItem('accessToken');
+    if (!token) { window.location.href = '/admin?reason=expired'; return; }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        refreshToken().then((ok) => { if (!ok) logout('expired'); });
+      }
+    } catch (_) {
+      logout('invalid');
+    }
+  });
+
+  // Warnung-Modal Buttons
+  const stayBtn = document.getElementById('session-stay-btn');
+  if (stayBtn) stayBtn.addEventListener('click', resetIdleTimer);
+
+  const logoutNowBtn = document.getElementById('session-logout-btn');
+  if (logoutNowBtn) logoutNowBtn.addEventListener('click', () => logout('manual'));
+
+  // Idle-Timer starten
+  resetIdleTimer();
 }
 
 // ============================================
@@ -4677,6 +4781,9 @@ async function testSSOConnection() {
 // ============================================
 window.addEventListener('load', async () => {
   if (!checkAuth()) return;
+
+  // Sitzungsverwaltung starten (Inaktivitätserkennung, Cross-Tab-Logout, etc.)
+  initSessionManagement();
 
   // Logout Event Listener
   const logoutBtn = document.getElementById('logout');

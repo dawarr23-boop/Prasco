@@ -107,6 +107,25 @@ window.addEventListener('load', async () => {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
+  // Abmelde-Grund anzeigen (z. B. nach automatischer Abmeldung)
+  const reason = urlParams.get('reason');
+  if (reason) {
+    const infoEl = document.getElementById('error-message');
+    const reasonMessages = {
+      inactivity: 'Sie wurden wegen Inaktivität abgemeldet.',
+      expired:    'Ihre Sitzung ist abgelaufen. Bitte erneut anmelden.',
+      invalid:    'Ungültige Sitzung. Bitte erneut anmelden.',
+      other_tab:  'Sie wurden in einem anderen Tab abgemeldet.',
+      manual:     '',  // Kein Hinweis bei manueller Abmeldung
+    };
+    const msg = reasonMessages[reason] ?? `Sitzung beendet (${reason}).`;
+    if (msg && infoEl) {
+      infoEl.textContent = msg;
+      infoEl.style.display = 'block';
+    }
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   const accessToken = localStorage.getItem('accessToken');
   const rememberMe = localStorage.getItem('rememberMe');
 

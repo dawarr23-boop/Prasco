@@ -1778,6 +1778,20 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=4.2"></script>
+    <!-- Session Timeout Warning Modal -->
+    <div id="session-timeout-modal" class="modal" style="display: none" role="dialog" aria-modal="true" aria-labelledby="session-timeout-title">
+      <div class="modal-content" style="max-width: 420px; text-align: center">
+        <div class="modal-header">
+          <h3 id="session-timeout-title">&#9203; Sitzung läuft ab</h3>
+        </div>
+        <p style="margin: 1rem 0">Sie werden in <strong><span id="session-timeout-counter">60</span> Sekunden</strong> automatisch abgemeldet.</p>
+        <div class="form-actions" style="justify-content: center; gap: 0.75rem">
+          <button id="session-stay-btn" class="btn btn-primary">Angemeldet bleiben</button>
+          <button id="session-logout-btn" class="btn btn-secondary">Jetzt abmelden</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/admin.js?v=4.3"></script>
   </body>
 </html>
