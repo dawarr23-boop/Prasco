@@ -1092,17 +1092,87 @@ body {
 }
 
 /* Responsive */
+/* ============================================
+   Mobile Hamburger Button
+   ============================================ */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--prasco-black);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Sidebar Backdrop (mobile overlay) */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 999;
+}
+
+body.sidebar-open .sidebar-backdrop {
+  display: block;
+}
+
 @media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
+  /* Hamburger sichtbar */
+  .hamburger-btn {
+    display: flex;
   }
 
+  /* Sidebar: unsichtbar off-screen, kein space-reservation */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  /* Sidebar einblenden wenn body.sidebar-open */
+  body.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  /* Kein margin-left auf Mobile */
   .admin-content {
     margin-left: 0;
   }
 
+  /* Header-Layout auf Mobile */
+  .admin-header {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .admin-header h1 {
+    font-size: 1.25rem;
+    flex: 1;
+  }
+
+  .user-info {
+    gap: 0.5rem;
+  }
+
+  /* Grids: 1 Spalte */
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -1114,7 +1184,61 @@ body {
   .section-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 0.75rem;
+  }
+
+  /* Buttons in section-header: volle Breite */
+  .section-header .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Content-Padding auf Mobile reduzieren */
+  .content-area {
+    padding: 0;
+  }
+
+  .section {
+    padding: 1rem;
+  }
+
+  /* List-Items: Aktionen untereinander */
+  .list-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .list-item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .list-item-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Formulare: volle Breite */
+  .post-form,
+  .form-card {
+    padding: 1rem;
+  }
+
+  /* Modal / Overlay-Formulare */
+  .form-overlay {
+    padding: 0.5rem;
+  }
+
+  /* Sidebar-Links: größere Tap-Fläche */
+  .sidebar-menu a {
+    padding: 1.1rem 1.5rem;
+    font-size: 1rem;
   }
 }
 

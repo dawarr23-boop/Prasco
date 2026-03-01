@@ -6825,6 +6825,43 @@ document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
   }
 });
 
+// ============================================
+// Mobile Sidebar Toggle
+// ============================================
+(function initMobileSidebar() {
+  function openSidebar() {
+    document.body.classList.add('sidebar-open');
+  }
+  function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.getElementById('hamburger-btn');
+    const backdrop = document.getElementById('sidebar-backdrop');
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        document.body.classList.contains('sidebar-open') ? closeSidebar() : openSidebar();
+      });
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSidebar);
+    }
+
+    // Sidebar nach Klick auf Menüpunkt auf Mobile schließen
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+      sidebar.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768 && e.target.closest('a')) {
+          closeSidebar();
+        }
+      });
+    }
+  });
+})();
+
 // Init on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   initAIEventListeners();
