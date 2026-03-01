@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT-Westfalen Signature Screen</title>
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
-    <link rel="stylesheet" href="/css/display.css?v=4.9" />
+    <link rel="stylesheet" href="/css/display.css?v=5.0" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/js/qrcode.min.js"></script>
@@ -36,6 +36,13 @@
         </div>
       </main>
 
+      <!-- Laufschrift / Ticker -->
+      <div id="ticker-bar" class="ticker-bar" style="display:none;">
+        <div class="ticker-track" id="ticker-track">
+          <span id="ticker-text"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="ticker-text-clone" aria-hidden="true"></span>
+        </div>
+      </div>
+
       <footer class="display-footer">
         <div class="footer-info">
           <span id="date"></span>
@@ -45,6 +52,6 @@
       </footer>
     </div>
 
-    <script src="/js/display.js?v=5.8"></script>
+    <script src="/js/display.js?v=5.9"></script>
   </body>
 </html>

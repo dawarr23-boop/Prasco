@@ -39,6 +39,7 @@ export const getAllDisplays = async (
         'identifier',
         'description',
         'isActive',
+        'tickerText',
         'organizationId',
         'serialNumber',
         'macAddress',
@@ -83,6 +84,7 @@ export const getDisplayById = async (
         'identifier',
         'description',
         'isActive',
+        'tickerText',
         'organizationId',
         'createdAt',
         'updatedAt',
@@ -129,6 +131,7 @@ export const getDisplayByIdentifier = async (
         'identifier',
         'description',
         'isActive',
+        'tickerText',
         'showTransitData',
         'showTrafficData',
         'createdAt',
@@ -201,6 +204,7 @@ export const createDisplay = async (
       isActive: isActive !== undefined ? isActive : true,
       showTransitData: req.body.showTransitData !== undefined ? req.body.showTransitData : true,
       showTrafficData: req.body.showTrafficData !== undefined ? req.body.showTrafficData : true,
+      tickerText: req.body.tickerText || null,
       organizationId: req.user?.organizationId,
     });
 
@@ -260,6 +264,7 @@ export const updateDisplay = async (
     if (isActive !== undefined) display.isActive = isActive;
     if (req.body.showTransitData !== undefined) display.showTransitData = req.body.showTransitData;
     if (req.body.showTrafficData !== undefined) display.showTrafficData = req.body.showTrafficData;
+    if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
 
     await display.save();
 

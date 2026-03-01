@@ -9,6 +9,7 @@ interface DisplayAttributes {
   isActive: boolean;
   showTransitData: boolean;
   showTrafficData: boolean;
+  tickerText?: string;
   organizationId?: number;
   // Device Authorization
   serialNumber?: string;
@@ -27,7 +28,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -41,6 +42,7 @@ class Display
   public isActive!: boolean;
   public showTransitData!: boolean;
   public showTrafficData!: boolean;
+  public tickerText?: string;
   public organizationId?: number;
   // Device Authorization
   public serialNumber?: string;
@@ -99,6 +101,11 @@ Display.init(
       allowNull: false,
       defaultValue: true,
       field: 'show_traffic_data',
+    },
+    tickerText: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'ticker_text',
     },
     organizationId: {
       type: DataTypes.INTEGER,

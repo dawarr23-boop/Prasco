@@ -381,6 +381,9 @@ const translations = {
     'displays.liveDataTitle': 'Live-Daten auf diesem Display',
     'displays.showTransitData': 'ÖPNV-Abfahrten anzeigen',
     'displays.showTrafficData': 'Autobahn-Verkehr anzeigen',
+    'displays.tickerText': 'Laufschrift (Ticker)',
+    'displays.tickerTextPlaceholder': 'Optionaler Text, der unten am Bildschirm entlangläuft',
+    'displays.tickerTextHint': 'Wird als scrollender Text am unteren Rand des Displays angezeigt. Leer lassen = kein Ticker.',
     'displays.liveDataHint': 'Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden',
     'displays.create': 'Display erstellen',
     'displays.saveChanges': 'Änderungen speichern',
@@ -794,6 +797,9 @@ const translations = {
     'displays.liveDataTitle': 'Live Data on this Display',
     'displays.showTransitData': 'Show transit departures',
     'displays.showTrafficData': 'Show highway traffic',
+    'displays.tickerText': 'Ticker (scrolling text)',
+    'displays.tickerTextPlaceholder': 'Optional text that scrolls across the bottom of the screen',
+    'displays.tickerTextHint': 'Displayed as scrolling text at the bottom of the display. Leave empty = no ticker.',
     'displays.liveDataHint': 'Controls whether live data widgets are shown on this display',
     'displays.create': 'Create Display',
     'displays.saveChanges': 'Save Changes',
@@ -1209,6 +1215,9 @@ const translations = {
     'displays.liveDataTitle': 'Dati in Diretta su questo Display',
     'displays.showTransitData': 'Mostra partenze trasporto',
     'displays.showTrafficData': 'Mostra traffico autostradale',
+    'displays.tickerText': 'Notiziario (testo scorrevole)',
+    'displays.tickerTextPlaceholder': 'Testo opzionale che scorre in basso nello schermo',
+    'displays.tickerTextHint': 'Visualizzato come testo scorrevole in basso. Lasciare vuoto = nessun notiziario.',
     'displays.liveDataHint': 'Controlla se i widget di dati in diretta vengono mostrati su questo display',
     'displays.create': 'Crea Display',
     'displays.saveChanges': 'Salva Modifiche',
@@ -3806,6 +3815,8 @@ async function editDisplay(id) {
   document.getElementById('display-isActive').checked = display.isActive !== false;
   document.getElementById('display-showTransitData').checked = display.showTransitData !== false;
   document.getElementById('display-showTrafficData').checked = display.showTrafficData !== false;
+  const tickerEl = document.getElementById('display-tickerText');
+  if (tickerEl) tickerEl.value = display.tickerText || '';
 
   // Scrolle zum Formular
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
@@ -3874,6 +3885,7 @@ async function handleDisplayFormSubmit(e) {
     isActive: document.getElementById('display-isActive').checked,
     showTransitData: document.getElementById('display-showTransitData').checked,
     showTrafficData: document.getElementById('display-showTrafficData').checked,
+    tickerText: (document.getElementById('display-tickerText')?.value || '').trim(),
   };
 
   try {

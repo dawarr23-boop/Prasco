@@ -716,6 +716,18 @@
                   <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.liveDataHint">Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden</small>
                 </div>
 
+                <div class="form-group">
+                  <label for="display-tickerText" data-translate="displays.tickerText">Laufschrift (Ticker)</label>
+                  <textarea
+                    id="display-tickerText"
+                    name="tickerText"
+                    rows="2"
+                    placeholder="Optionaler Text, der unten am Bildschirm entlangläuft"
+                    data-translate-placeholder="displays.tickerTextPlaceholder"
+                  ></textarea>
+                  <small style="color: #6c757d;" data-translate="displays.tickerTextHint">Wird als scrollender Text am unteren Rand des Displays angezeigt. Leer lassen = kein Ticker.</small>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary" data-translate="displays.create">Display erstellen</button>
                   <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn" data-translate="btn.cancel">
@@ -1792,6 +1804,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=4.3"></script>
+    <script src="/js/admin.js?v=4.4"></script>
   </body>
 </html>

@@ -1056,6 +1056,22 @@ async function loadDisplaySettings() {
   }
 }
 
+// Aktualisiere Ticker / Laufschrift basierend auf Display-Info
+function updateTicker() {
+  const bar = document.getElementById('ticker-bar');
+  const textEl = document.getElementById('ticker-text');
+  const cloneEl = document.getElementById('ticker-text-clone');
+  if (!bar || !textEl) return;
+  const text = currentDisplayInfo && currentDisplayInfo.tickerText ? currentDisplayInfo.tickerText.trim() : '';
+  if (text) {
+    textEl.textContent = text;
+    if (cloneEl) cloneEl.textContent = text;
+    bar.style.display = '';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
 // Aktualisiere Refresh-Info in der Fußzeile
 function updateRefreshInfo() {
   const refreshElement = document.getElementById('auto-refresh-info');
@@ -1127,6 +1143,7 @@ async function loadDisplayInfo(identifier) {
         currentDisplayName = data.data.name;
         currentDisplayInfo = data.data;
         console.log('Display geladen:', data.data.name, '| Transit:', data.data.showTransitData, '| Traffic:', data.data.showTrafficData);
+        updateTicker();
         updateRefreshInfo();
         return data.data;
       }
