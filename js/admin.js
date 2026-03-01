@@ -6826,9 +6826,18 @@ document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
 });
 
 // ============================================
-// Mobile Sidebar Toggle
+// Touch-Erkennung & Mobile Sidebar Toggle
 // ============================================
 (function initMobileSidebar() {
+  // Erkennt Touch-Eingabe via pointer-media (zuverlässiger als userAgent)
+  function isTouchDevice() {
+    return window.matchMedia('(pointer: coarse)').matches;
+  }
+
+  function isMobileLayout() {
+    return window.innerWidth <= 768 || isTouchDevice();
+  }
+
   function openSidebar() {
     document.body.classList.add('sidebar-open');
   }
@@ -6836,7 +6845,17 @@ document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
     document.body.classList.remove('sidebar-open');
   }
 
+  // Touch-Klasse sofort setzen (vor DOMContentLoaded, verhindert Flash)
+  if (isTouchDevice()) {
+    document.documentElement.classList.add('touch-device');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+    // Body-Klasse aktualisieren (body ist jetzt verfügbar)
+    if (isTouchDevice()) {
+      document.body.classList.add('touch-device');
+    }
+
     const hamburger = document.getElementById('hamburger-btn');
     const backdrop = document.getElementById('sidebar-backdrop');
 
@@ -6850,15 +6869,21 @@ document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
       backdrop.addEventListener('click', closeSidebar);
     }
 
-    // Sidebar nach Klick auf Menüpunkt auf Mobile schließen
+    // Sidebar nach Klick auf Menüpunkt schließen (Mobile + Touch)
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) {
       sidebar.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768 && e.target.closest('a')) {
+        if (isMobileLayout() && e.target.closest('a')) {
           closeSidebar();
         }
       });
     }
+
+    // Bei Resize: Touch-Klasse neu prüfen
+    window.matchMedia('(pointer: coarse)').addEventListener('change', (e) => {
+      document.body.classList.toggle('touch-device', e.matches);
+      if (!e.matches) closeSidebar(); // Sidebar schließen wenn auf Desktop gewechselt
+    });
   });
 })();
 
