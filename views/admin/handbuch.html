@@ -281,7 +281,7 @@
     <li data-t="ch5_c6">Auf <strong>Speichern</strong> klicken. Die Display-URL wird automatisch generiert.</li>
   </ol>
   <h3 id="ch-displays-url" data-t="ch5_2_h">5.2 Display-URL &amp; Kiosk-Modus</h3>
-  <p data-t="ch5_2_p">Jedes Display erhält eine eigene URL nach dem Schema <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Diese URL wird im Browser des Display-Geräts im Vollbild-Kiosk-Modus geöffnet.</p>
+  <p data-t="ch5_2_p">Jedes Display wird im Browser über folgende URL aufgerufen – <code>&lt;bezeichner&gt;</code> ist der technische Bezeichner des Displays (z.&nbsp;B. <code>display02</code>):<br><br><code>https://prasco.zapto.org/public/display.html?id=&lt;bezeichner&gt;</code><br><br>Diese URL im Browser des Display-Geräts im Vollbild-Kiosk-Modus öffnen.</p>
   <div class="tip" data-t="ch5_tip1">&#128161; Android-TV-Geräte: Die PRASCO-App öffnet diese URL automatisch im Kiosk-Modus. Siehe Kapitel zur Android-App.</div>
   <h3 id="ch-displays-config" data-t="ch5_3_h">5.3 Display-Konfiguration</h3>
   <table>
@@ -598,7 +598,7 @@ const T = {
     ch5_c3: '<strong>Standort</strong> und optionale Beschreibung eingeben.', ch5_c4: '<strong>Standard-Anzeigedauer</strong> festlegen (Sekunden pro Beitrag, wenn kein individueller Wert gesetzt).',
     ch5_c5: 'Optional: <strong>Kategoriefilter</strong> aktivieren, um nur bestimmte Kategorien anzuzeigen.',
     ch5_c6: 'Auf <strong>Speichern</strong> klicken. Die Display-URL wird automatisch generiert.',
-    ch5_2_h: '5.2 Display-URL &amp; Kiosk-Modus', ch5_2_p: 'Jedes Display erhält eine eigene URL nach dem Schema <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Diese URL wird im Browser des Display-Geräts im Vollbild-Kiosk-Modus geöffnet.',
+    ch5_2_h: '5.2 Display-URL &amp; Kiosk-Modus', ch5_2_p: 'Jedes Display wird im Browser über folgende URL aufgerufen – <code>&lt;bezeichner&gt;</code> ist der technische Bezeichner des Displays (z.\u00a0B. <code>display02</code>):<br><br><code>https://prasco.zapto.org/public/display.html?id=&lt;bezeichner&gt;</code><br><br>Diese URL im Browser des Display-Geräts im Vollbild-Kiosk-Modus öffnen.',
     ch5_tip1: '&#128161; Android-TV-Geräte: Die PRASCO-App öffnet diese URL automatisch im Kiosk-Modus. Siehe Kapitel zur Android-App.',
     ch5_3_h: '5.3 Display-Konfiguration', th_setting: 'Einstellung', th_desc: 'Beschreibung',
     disp_name: 'Name', disp_name_d: 'Interner Bezeichner, auf dem Display selbst nicht sichtbar',
@@ -765,7 +765,7 @@ const T = {
     ch5_c3: 'Enter the <strong>Location</strong> and optional description.', ch5_c4: 'Set the <strong>Default Duration</strong> in seconds per post.',
     ch5_c5: 'Optional: Enable <strong>Category Filter</strong> to show only specific categories.',
     ch5_c6: 'Click <strong>Save</strong>. The display URL is generated automatically.',
-    ch5_2_h: '5.2 Display URL &amp; Kiosk Mode', ch5_2_p: 'Each display gets its own URL: <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Open this URL in the display device\'s browser in fullscreen kiosk mode.',
+    ch5_2_h: '5.2 Display URL &amp; Kiosk Mode', ch5_2_p: 'Each display is opened in the browser using the following URL – <code>&lt;identifier&gt;</code> is the display\'s technical identifier (e.g. <code>display02</code>):<br><br><code>https://prasco.zapto.org/public/display.html?id=&lt;identifier&gt;</code><br><br>Open this URL in the display device\'s browser in fullscreen kiosk mode.',
     ch5_tip1: '&#128161; Android TV devices: The PRASCO app opens this URL automatically in kiosk mode. See the Android App chapter.',
     ch5_3_h: '5.3 Display Configuration', th_setting: 'Setting', th_desc: 'Description',
     disp_name: 'Name', disp_name_d: 'Internal identifier; not visible on the display itself',
@@ -932,7 +932,7 @@ const T = {
     ch5_c3: 'Inserire la <strong>Posizione</strong> e una descrizione opzionale.', ch5_c4: 'Impostare la <strong>Durata predefinita</strong> in secondi per post.',
     ch5_c5: 'Opzionale: abilitare il <strong>Filtro categoria</strong> per mostrare solo determinate categorie.',
     ch5_c6: 'Fare clic su <strong>Salva</strong>. L\'URL del display viene generato automaticamente.',
-    ch5_2_h: '5.2 URL display e modalità kiosk', ch5_2_p: 'Ogni display riceve un proprio URL: <code>https://prasco.zapto.org/display/&lt;id&gt;</code>. Aprire questo URL nel browser del dispositivo di visualizzazione in modalità a schermo intero.',
+    ch5_2_h: '5.2 URL display e modalità kiosk', ch5_2_p: 'Ogni display viene aperto nel browser tramite il seguente URL – <code>&lt;identificatore&gt;</code> è il nome tecnico del display (es. <code>display02</code>):<br><br><code>https://prasco.zapto.org/public/display.html?id=&lt;identificatore&gt;</code><br><br>Aprire questo URL nel browser del dispositivo di visualizzazione in modalità a schermo intero.',
     ch5_tip1: '&#128161; Dispositivi Android TV: l\'app PRASCO apre automaticamente questo URL in modalità kiosk. Vedi il capitolo sull\'app Android.',
     ch5_3_h: '5.3 Configurazione display', th_setting: 'Impostazione', th_desc: 'Descrizione',
     disp_name: 'Nome', disp_name_d: 'Identificatore interno; non visibile sul display stesso',
