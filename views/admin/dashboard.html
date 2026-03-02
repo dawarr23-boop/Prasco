@@ -1811,6 +1811,20 @@
       </div>
     </div>
 
+    <!-- Display Vorschau Modal -->
+    <div id="display-preview-modal" class="modal" style="display:none" role="dialog" aria-modal="true">
+      <div class="modal-content" style="width:95vw;max-width:95vw;height:90vh;display:flex;flex-direction:column;padding:0;overflow:hidden;">
+        <div class="modal-header" style="padding:0.75rem 1rem;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;">
+          <h3 id="display-preview-title" style="margin:0;font-size:1rem;">Vorschau</h3>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <a id="display-preview-open-btn" href="#" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none;">&#8599; Vollbild</a>
+            <button class="modal-close" id="closeDisplayPreviewModal">&times;</button>
+          </div>
+        </div>
+        <iframe id="display-preview-iframe" src="" style="flex:1;width:100%;border:none;background:#000;" allowfullscreen></iframe>
+      </div>
+    </div>
+
     <!-- Session Timeout Warning Modal -->
     <div id="session-timeout-modal" class="modal" style="display: none" role="dialog" aria-modal="true" aria-labelledby="session-timeout-title">
       <div class="modal-content" style="max-width: 420px; text-align: center">
@@ -1825,6 +1839,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=4.5"></script>
+    <script src="/js/admin.js?v=4.6"></script>
   </body>
 </html>

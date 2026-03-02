@@ -392,6 +392,7 @@ const translations = {
     'displays.create': 'Display erstellen',
     'displays.saveChanges': 'Änderungen speichern',
     'displays.open': '▷ Öffnen',
+    'displays.preview': '👁 Vorschau',
     'displays.edit': 'Bearbeiten',
     'displays.delete': 'Löschen',
     'displays.clickToEdit': 'Klicken zum Bearbeiten',
@@ -812,6 +813,7 @@ const translations = {
     'displays.create': 'Create Display',
     'displays.saveChanges': 'Save Changes',
     'displays.open': '▷ Open',
+    'displays.preview': '👁 Preview',
     'displays.edit': 'Edit',
     'displays.delete': 'Delete',
     'displays.clickToEdit': 'Click to edit',
@@ -1234,6 +1236,7 @@ const translations = {
     'displays.create': 'Crea Display',
     'displays.saveChanges': 'Salva Modifiche',
     'displays.open': '▷ Apri',
+    'displays.preview': '👁 Anteprima',
     'displays.edit': 'Modifica',
     'displays.delete': 'Elimina',
     'displays.clickToEdit': 'Clicca per modificare',
@@ -3715,6 +3718,9 @@ async function loadDisplays() {
             </div>
             <div class="list-item-actions">
                 ${authActions}
+                <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
+                  ${t('displays.preview')}
+                </button>
                 <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="${t('displays.open')}">
                   ${t('displays.open')}
                 </button>
@@ -5149,6 +5155,23 @@ window.addEventListener('load', async () => {
     });
   }
 
+  // Display Vorschau Modal
+  const closeDisplayPreviewModal = document.getElementById('closeDisplayPreviewModal');
+  const displayPreviewModal = document.getElementById('display-preview-modal');
+  function hideDisplayPreviewModal() {
+    if (displayPreviewModal) displayPreviewModal.style.display = 'none';
+    const iframe = document.getElementById('display-preview-iframe');
+    if (iframe) iframe.src = '';
+  }
+  if (closeDisplayPreviewModal) {
+    closeDisplayPreviewModal.addEventListener('click', hideDisplayPreviewModal);
+  }
+  if (displayPreviewModal) {
+    displayPreviewModal.addEventListener('click', (e) => {
+      if (e.target === displayPreviewModal) hideDisplayPreviewModal();
+    });
+  }
+
   // Event Delegation für Posts (Klick, Long-Press, Rechtsklick)
   const postsList = document.getElementById('posts-list');
   if (postsList) {
@@ -5277,6 +5300,21 @@ window.addEventListener('load', async () => {
         editDisplay(displayId);
       } else if (action === 'delete-display' && displayId) {
         deleteDisplay(displayId);
+      } else if (action === 'preview-display') {
+        const url = actionElement.dataset.displayUrl;
+        const name = actionElement.dataset.displayName || 'Display';
+        if (url) {
+          const modal = document.getElementById('display-preview-modal');
+          const iframe = document.getElementById('display-preview-iframe');
+          const titleEl = document.getElementById('display-preview-title');
+          const openBtn = document.getElementById('display-preview-open-btn');
+          if (modal && iframe) {
+            iframe.src = url;
+            if (titleEl) titleEl.textContent = `Vorschau: ${name}`;
+            if (openBtn) openBtn.href = url;
+            modal.style.display = 'flex';
+          }
+        }
       } else if (action === 'open-display') {
         const url = actionElement.dataset.displayUrl;
         if (url) window.open(url, '_blank');
