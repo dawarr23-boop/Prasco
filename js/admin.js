@@ -3760,9 +3760,10 @@ async function loadDisplays() {
             </p>`;
           }
           
-          // Auth-Action-Buttons
+          // Auth-Action-Buttons (nur für Superadmin)
+          const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
           let authActions = '';
-          if (isDevice) {
+          if (isDevice && _authUser.role === 'super_admin') {
             if (authStatus === 'pending') {
               authActions = `
                 <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
