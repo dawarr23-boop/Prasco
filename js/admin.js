@@ -2364,6 +2364,7 @@ async function loadPosts() {
                 </div>
             </div>
             <div class="list-item-actions">
+                <button class="btn btn-info btn-sm" data-action="preview-post" data-post-id="${post.id}" title="Vorschau">&#128065;</button>
                 <button class="btn btn-secondary" data-action="edit" data-post-id="${post.id}">${t('common.edit')}</button>
                 <button class="btn btn-danger" data-action="delete" data-post-id="${post.id}">${t('common.delete')}</button>
             </div>
@@ -3117,6 +3118,69 @@ function initBackgroundMusicControls() {
       }
     });
   }
+}
+
+async function showPostPreview(id) {
+  let post = postsCache.find((p) => p.id === id);
+  if (!post) {
+    try { const r = await apiRequest(`/posts/${id}`); post = r?.data; } catch(e) { return; }
+  }
+  if (!post) return;
+
+  const modal  = document.getElementById('post-preview-modal');
+  const content = document.getElementById('post-preview-content');
+  const title   = document.getElementById('post-preview-modal-title');
+  if (!modal || !content) return;
+
+  if (title) title.textContent = escapeHtml(post.title);
+
+  const ct   = post.contentType || post.content_type || 'text';
+  const mediaUrl = post.media?.url || post.mediaUrl || post.media_url || null;
+
+  // YouTube-ID extrahieren
+  const ytMatch = (mediaUrl || post.content || '').match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+
+  let html = '';
+  const titleHtml = post.showTitle === true
+    ? `<h1 style="font-size:clamp(1.2rem,4vw,3rem);margin:0 0 0.5em;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.6);">${escapeHtml(post.title)}</h1>` : '';
+
+  switch (ct) {
+    case 'text':
+      html = `${titleHtml}<div style="font-size:clamp(0.9rem,2.5vw,1.8rem);text-align:center;white-space:pre-wrap;max-width:90%;line-height:1.5;">${escapeHtml(post.content || '').replace(/\n/g,'<br>')}</div>`;
+      break;
+    case 'image': {
+      const imgSrc = mediaUrl || (post.content?.startsWith('/uploads/') ? post.content : null);
+      const caption = post.content && !post.content.startsWith('/uploads/') ? post.content : '';
+      html = `${titleHtml}${imgSrc ? `<img src="${escapeHtml(imgSrc)}" style="max-width:100%;max-height:${post.showTitle ? '80%':'90%'};object-fit:contain;">` : '(Kein Bild)'}`
+           + (caption ? `<p style="font-size:clamp(0.8rem,2vw,1.2rem);margin-top:0.5em;">${escapeHtml(caption)}</p>` : '');
+      break;
+    }
+    case 'video': {
+      if (ytMatch) {
+        html = `${titleHtml}<iframe src="https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=0" style="width:min(90%,640px);aspect-ratio:16/9;border:none;" allowfullscreen></iframe>`;
+      } else if (mediaUrl?.startsWith('/uploads/')) {
+        html = `${titleHtml}<video src="${escapeHtml(mediaUrl)}" controls style="max-width:100%;max-height:80%;"></video>`;
+      } else {
+        html = `${titleHtml}<p style="opacity:.6;">Videovorschau nicht verfügbar</p>`;
+      }
+      break;
+    }
+    case 'html':
+      html = `<div style="width:100%;height:100%;"><iframe srcdoc="${escapeHtml(post.content || '')}" style="width:100%;height:100%;border:none;"></iframe></div>`;
+      break;
+    case 'pdf':
+      html = mediaUrl
+        ? `<iframe src="${escapeHtml(mediaUrl)}#toolbar=0" style="width:100%;height:100%;border:none;"></iframe>`
+        : `${titleHtml}<p style="opacity:.6;">PDF-Vorschau nicht verfügbar</p>`;
+      break;
+    default:
+      html = `${titleHtml}<p style="opacity:.6;font-size:1.2rem;">${ct.toUpperCase()}</p>`;
+  }
+
+  content.innerHTML = html;
+  modal.style.display = 'flex';
 }
 
 async function deletePost(id) {
@@ -5152,6 +5216,17 @@ window.addEventListener('load', async () => {
     });
   }
 
+  // Beitrags-Vorschau Modal
+  const closePostPreviewModal = document.getElementById('closePostPreviewModal');
+  const postPreviewModal = document.getElementById('post-preview-modal');
+  function hidePostPreviewModal() {
+    if (postPreviewModal) postPreviewModal.style.display = 'none';
+    const c = document.getElementById('post-preview-content');
+    if (c) c.innerHTML = '';
+  }
+  if (closePostPreviewModal) closePostPreviewModal.addEventListener('click', hidePostPreviewModal);
+  if (postPreviewModal) postPreviewModal.addEventListener('click', (e) => { if (e.target === postPreviewModal) hidePostPreviewModal(); });
+
   // Display Vorschau Modal
   const closeDisplayPreviewModal = document.getElementById('closeDisplayPreviewModal');
   const displayPreviewModal = document.getElementById('display-preview-modal');
@@ -5196,6 +5271,7 @@ window.addEventListener('load', async () => {
 
       if (action === 'edit' && actionPostId) editPost(actionPostId);
       else if (action === 'delete' && actionPostId) deletePost(actionPostId);
+      else if (action === 'preview-post' && actionPostId) showPostPreview(actionPostId);
     });
 
     // Doppelklick startet Selektionsmodus (Alternative zu Long-Press)

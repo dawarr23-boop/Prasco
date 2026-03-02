@@ -1825,6 +1825,20 @@
       </div>
     </div>
 
+    <!-- Beitrags-Vorschau Modal -->
+    <div id="post-preview-modal" class="modal" style="display:none" role="dialog" aria-modal="true">
+      <div class="modal-content" style="width:min(95vw,1200px);max-width:95vw;padding:0;overflow:hidden;">
+        <div class="modal-header" style="padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+          <h3 id="post-preview-modal-title" style="margin:0;font-size:1rem;">Vorschau</h3>
+          <button class="modal-close" id="closePostPreviewModal">&times;</button>
+        </div>
+        <!-- 16:9 Display-Simulation -->
+        <div style="background:#0d0d1a;position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;font-family:sans-serif;">
+          <div id="post-preview-content" style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4%;box-sizing:border-box;color:#fff;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Session Timeout Warning Modal -->
     <div id="session-timeout-modal" class="modal" style="display: none" role="dialog" aria-modal="true" aria-labelledby="session-timeout-title">
       <div class="modal-content" style="max-width: 420px; text-align: center">
@@ -1839,6 +1853,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=4.7"></script>
+    <script src="/js/admin.js?v=4.8"></script>
   </body>
 </html>
