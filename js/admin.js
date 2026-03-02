@@ -2364,7 +2364,7 @@ async function loadPosts() {
                 </div>
             </div>
             <div class="list-item-actions">
-                <button class="btn btn-info btn-sm" data-action="preview-post" data-post-id="${post.id}" title="Vorschau">&#128065;</button>
+                <button class="btn btn-secondary" data-action="preview-post" data-post-id="${post.id}">${t('displays.preview')}</button>
                 <button class="btn btn-secondary" data-action="edit" data-post-id="${post.id}">${t('common.edit')}</button>
                 <button class="btn btn-danger" data-action="delete" data-post-id="${post.id}">${t('common.delete')}</button>
             </div>
