@@ -5306,7 +5306,7 @@ window.addEventListener('load', async () => {
           const titleEl = document.getElementById('display-preview-title');
           const openBtn = document.getElementById('display-preview-open-btn');
           if (modal && iframe) {
-            iframe.src = url;
+            iframe.src = url + (url.includes('?') ? '&' : '?') + 'preview=1';
             if (titleEl) titleEl.textContent = `Vorschau: ${name}`;
             if (openBtn) openBtn.href = url;
             modal.style.display = 'flex';

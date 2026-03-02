@@ -51,6 +51,9 @@ let displaySettings = {
   showPostCounter: true, // Standard: Beitragsnummerierung anzeigen
 };
 
+// Prüfe ob Vorschau-Modus aktiv ist (iframe im Admin-Panel)
+const isPreviewMode = new URLSearchParams(window.location.search).has('preview');
+
 // Prüfe ob dieses Display extern ist (nicht localhost)
 let isExternalDisplay = false;
 
@@ -150,6 +153,7 @@ function getNextBlendEffect() {
 
 // Lade Live-Daten-Einstellungen vom Backend
 async function loadLiveDataDisplaySettings() {
+  if (isPreviewMode) return; // Keine Live-Daten in der Vorschau
   try {
     const [transitRes, trafficRes, weatherRes, newsRes] = await Promise.all([
       fetch('/api/settings?category=transit'),
@@ -1183,6 +1187,7 @@ let tickerLiveInterval = null;
 
 // Startet den Ticker und plant Live-Daten-Aktualisierung alle 60 s
 function startTickerRefresh() {
+  if (isPreviewMode) return; // Kein Ticker in der Vorschau
   if (tickerLiveInterval) {
     clearInterval(tickerLiveInterval);
     tickerLiveInterval = null;
