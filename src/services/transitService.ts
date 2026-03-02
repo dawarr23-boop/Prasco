@@ -39,6 +39,7 @@ export interface TransitServiceConfig {
   cacheEnabled: boolean;
   cacheTTL: number; // seconds
   maxDepartures: number;
+  defaultDuration?: number; // Minuten Standard-Zeitfenster
   defaultStationId?: string;
 }
 
@@ -72,6 +73,7 @@ class TransitService {
       cacheEnabled: true,
       cacheTTL: 30, // 30 Sekunden Cache für Live-Abfahrten
       maxDepartures: 10,
+      defaultDuration: 90, // 90 Minuten Standard-Zeitfenster
     };
 
     // Cache-Initialisierung
@@ -140,7 +142,7 @@ class TransitService {
     // Versuch 1: Offizielle DB Timetables API
     if (this.DB_CLIENT_ID && this.DB_API_KEY) {
       try {
-        const departures = await this.fetchFromDbTimetables(stationId, limit);
+        const departures = await this.fetchFromDbTimetables(stationId, limit, duration);
         if (departures.length > 0) {
           logger.info(`DB Timetables API: ${departures.length} Zug-Abfahrten mit Echtzeit geladen`);
           return departures;
@@ -203,7 +205,7 @@ class TransitService {
    * DB Timetables API: Plan + Echtzeit-Änderungen zusammenführen
    * Liefert exakte Verspätungsdaten direkt von der Deutschen Bahn
    */
-  private async fetchFromDbTimetables(evaNumber: string, limit: number): Promise<any[]> {
+  private async fetchFromDbTimetables(evaNumber: string, limit: number, duration: number = 60): Promise<any[]> {
     const headers = {
       'DB-Client-Id': this.DB_CLIENT_ID,
       'DB-Api-Key': this.DB_API_KEY,
@@ -211,34 +213,57 @@ class TransitService {
     };
 
     const now = new Date();
-    const dateStr = now.toISOString().slice(2, 10).replace(/-/g, ''); // YYMMDD
-    const hour = String(now.getHours()).padStart(2, '0');
+    const endTime = new Date(now.getTime() + duration * 60 * 1000);
 
-    // Parallele Abfrage: Planmäßige Abfahrten + Echtzeit-Änderungen
-    const [planRes, fchgRes] = await Promise.all([
-      fetch(`${this.DB_TIMETABLES_BASE}/plan/${evaNumber}/${dateStr}/${hour}`, {
-        headers, signal: AbortSignal.timeout(8000),
-      }),
-      fetch(`${this.DB_TIMETABLES_BASE}/fchg/${evaNumber}`, {
-        headers, signal: AbortSignal.timeout(8000),
-      }),
-    ]);
+    // Alle Stunden im Zeitfenster berechnen (z.B. 22:15 + 60min → Stunden 22 und 23)
+    const hourSlots: Array<{ dateStr: string; hour: string }> = [];
+    const cursor = new Date(now);
+    cursor.setMinutes(0, 0, 0);
+    while (cursor <= endTime) {
+      // DB Timetables erwartet lokale Zeit im Format YYMMDD / HH
+      const y = String(cursor.getFullYear()).slice(2);
+      const mo = String(cursor.getMonth() + 1).padStart(2, '0');
+      const d = String(cursor.getDate()).padStart(2, '0');
+      const h = String(cursor.getHours()).padStart(2, '0');
+      hourSlots.push({ dateStr: `${y}${mo}${d}`, hour: h });
+      cursor.setHours(cursor.getHours() + 1);
+    }
+    logger.debug(`DB Timetables: ${hourSlots.length} Stunde(n) werden abgefragt (${hourSlots.map(s => s.hour + ':xx').join(', ')})`);
 
-    if (!planRes.ok) throw new Error(`Plan API HTTP ${planRes.status}`);
+    // Plan für alle Stunden + fchg parallel holen
+    const planFetches = hourSlots.map(slot =>
+      fetch(`${this.DB_TIMETABLES_BASE}/plan/${evaNumber}/${slot.dateStr}/${slot.hour}`, {
+        headers, signal: AbortSignal.timeout(8000),
+      })
+    );
+    const fchgFetch = fetch(`${this.DB_TIMETABLES_BASE}/fchg/${evaNumber}`, {
+      headers, signal: AbortSignal.timeout(8000),
+    });
+
+    const [fchgRes, ...planResponses] = await Promise.all([fchgFetch, ...planFetches]);
+
     if (!fchgRes.ok) throw new Error(`Fchg API HTTP ${fchgRes.status}`);
-
-    const planXml = await planRes.text();
     const fchgXml = await fchgRes.text();
-
-    // XML parsen (einfacher Regex-basierter Parser für die DB Timetables XML-Struktur)
-    const planStops = this.parseTimetableXml(planXml);
     const fchgChanges = this.parseFchgXml(fchgXml);
+
+    // Plan-XMLs aller Stunden zusammenführen
+    let allPlanStops: any[] = [];
+    for (let i = 0; i < planResponses.length; i++) {
+      const res = planResponses[i];
+      if (!res.ok) {
+        logger.warn(`DB Timetables Plan ${hourSlots[i].hour}:xx HTTP ${res.status} – übersprungen`);
+        continue;
+      }
+      const xml = await res.text();
+      allPlanStops = allPlanStops.concat(this.parseTimetableXml(xml));
+    }
 
     // Echtzeit-Änderungen auf Plan anwenden
     const departures: any[] = [];
     const nowMs = now.getTime();
+    const endMs = endTime.getTime();
 
-    for (const stop of planStops) {
+    for (const stop of allPlanStops) {
       if (!stop.dpTime) continue; // Kein Abfahrt (Endstation)
       
       const change = fchgChanges.get(stop.id);
@@ -259,8 +284,9 @@ class TransitService {
         }
       }
 
-      // Nur zukünftige Abfahrten
-      if (actualTime.getTime() < nowMs - 60000) continue;
+      // Nur Abfahrten im Zeitfenster (max. 1 Minute in der Vergangenheit bis Fenster-Ende)
+      const t = actualTime.getTime();
+      if (t < nowMs - 60000 || t > endMs) continue;
 
       departures.push({
         tripId: stop.id,
@@ -408,7 +434,7 @@ class TransitService {
   ): Promise<Departure[]> {
     try {
       const limit = maxResults || this.config.maxDepartures;
-      const durationMinutes = duration || 60;
+      const durationMinutes = duration || this.config.defaultDuration || 90;
       const cacheKey = `departures:${stationId}:${limit}:${durationMinutes}`;
 
       // Cache-Check
