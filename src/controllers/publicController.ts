@@ -93,6 +93,7 @@ export const getActivePosts = async (
         'backgroundMusicVolume',
         'blendEffect',
         'soundEnabled',
+        'bgTheme',
         'createdAt',
       ],
     });

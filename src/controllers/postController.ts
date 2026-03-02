@@ -205,6 +205,7 @@ export const createPost = async (
       backgroundMusicVolume,
       blendEffect,
       soundEnabled,
+      bgTheme,
     } = req.body;
 
     // Validate priority range (0-100)
@@ -268,6 +269,7 @@ export const createPost = async (
       backgroundMusicVolume: musicVolume,
       blendEffect: blendEffect || null,
       soundEnabled: soundEnabled !== undefined ? soundEnabled : true,
+      bgTheme: bgTheme || 'light',
     });
 
     // Handle display assignments
@@ -447,6 +449,7 @@ export const updatePost = async (
       backgroundMusicVolume,
       blendEffect,
       soundEnabled,
+      bgTheme,
     } = req.body;
 
     const post = await Post.findByPk(id);
@@ -524,6 +527,7 @@ export const updatePost = async (
     if (displayMode !== undefined) post.displayMode = displayMode;
     if (blendEffect !== undefined) post.blendEffect = blendEffect;
     if (soundEnabled !== undefined) post.soundEnabled = soundEnabled;
+    if (bgTheme !== undefined) post.bgTheme = bgTheme;
 
     // Background music fields (only for non-video content)
     const effectiveContentType = contentType !== undefined ? contentType : post.contentType;

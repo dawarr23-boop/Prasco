@@ -2500,6 +2500,8 @@ async function showPostForm() {
   if (showTitleCheckbox) showTitleCheckbox.checked = true;
   const soundEnabledCheckbox = document.getElementById('sound-enabled');
   if (soundEnabledCheckbox) soundEnabledCheckbox.checked = true;
+  const bgThemeSelect = document.getElementById('bg-theme');
+  if (bgThemeSelect) bgThemeSelect.value = 'light';
 
   // Start- und Enddatum leer lassen (kein Vorschlag)
   document.getElementById('start-date').value = '';
@@ -2775,6 +2777,9 @@ async function editPost(id) {
   if (soundEnabledCheckbox) {
     soundEnabledCheckbox.checked = post.soundEnabled !== false;
   }
+
+  const bgThemeSelect = document.getElementById('bg-theme');
+  if (bgThemeSelect) bgThemeSelect.value = post.bgTheme || 'light';
 
   const categorySelect = document.getElementById('post-category');
   if (categorySelect && post.category) {
@@ -3134,6 +3139,9 @@ async function showPostPreview(id) {
 
   if (title) title.textContent = escapeHtml(post.title);
 
+  const isDark = post.bgTheme === 'dark';
+  content.style.cssText = `width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4%;box-sizing:border-box;color:${isDark ? '#f0f0f0' : '#1a1a1a'};background:${isDark ? '#1a1a2e' : '#ffffff'};`;
+
   const ct   = post.contentType || post.content_type || 'text';
   const mediaUrl = post.media?.url || post.mediaUrl || post.media_url || null;
 
@@ -3297,6 +3305,7 @@ async function handlePostFormSubmit(e) {
     isActive: document.getElementById('is-active')?.checked ?? true,
     showTitle: showTitleValue,
     soundEnabled: document.getElementById('sound-enabled')?.checked ?? true,
+    bgTheme: document.getElementById('bg-theme')?.value || 'light',
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
     blendEffect: formData.get('blend_effect') || null,

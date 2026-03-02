@@ -416,8 +416,35 @@ body {
   align-items: center;
 }
 
-.post {
-  width: 100%;
+.post.theme-dark {
+  background: #1a1a2e;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.post.theme-dark h1,
+.post.theme-dark p,
+.post.theme-dark div,
+.post.theme-dark strong,
+.post.theme-dark span,
+.post.theme-dark li {
+  color: #f0f0f0;
+}
+.post.theme-dark h1 {
+  border-left-color: #6a9fd8;
+}
+.post.theme-dark table th {
+  background: rgba(255,255,255,0.08);
+  color: #f0f0f0;
+}
+.post.theme-dark table td {
+  border-bottom-color: rgba(255,255,255,0.12);
+  color: #e0e0e0;
+}
+
+.post.theme-light {
+  background: var(--white);
+}
+
+
   height: 100%;
   display: flex;
   flex-direction: column;

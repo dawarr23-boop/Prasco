@@ -2784,6 +2784,9 @@ async function displayCurrentPost() {
   // Entferne alte Klassen
   container.className = 'post';
 
+  // Thema (hell/dunkel) anwenden
+  container.classList.add(post.bgTheme === 'dark' ? 'theme-dark' : 'theme-light');
+
   // Füge Content-Type Klasse hinzu
   container.classList.add(`type-${post.content_type}`);
 

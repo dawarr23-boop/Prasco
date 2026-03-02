@@ -22,6 +22,7 @@ interface PostAttributes {
   backgroundMusicVolume?: number;
   blendEffect?: string;
   soundEnabled?: boolean;
+  bgTheme?: 'light' | 'dark';
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -44,6 +45,7 @@ interface PostCreationAttributes
     | 'backgroundMusicVolume'
     | 'blendEffect'
     | 'soundEnabled'
+    | 'bgTheme'
     | 'createdAt'
     | 'updatedAt'
   > {}
@@ -69,6 +71,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public backgroundMusicVolume?: number;
   public blendEffect?: string;
   public soundEnabled?: boolean;
+  public bgTheme?: 'light' | 'dark';
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -208,6 +211,12 @@ Post.init(
       allowNull: true,
       defaultValue: true,
       comment: 'Whether sound/audio is enabled for this post (video posts)',
+    },
+    bgTheme: {
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      defaultValue: 'light',
+      comment: 'Background theme for the post: light or dark',
     },
   },
   {
