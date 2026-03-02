@@ -843,7 +843,7 @@
 
           <!-- Live-Daten Section -->
           <section id="livedata-section" class="section">
-            <h2 data-translate="liveData.sectionTitle">Live-Daten (ÖPNV, Verkehr & Wetter)</h2>
+            <h2 data-translate="liveData.sectionTitle">Live-Daten (ÖPNV, Verkehr, Wetter & Nachrichten)</h2>
 
             <div class="livedata-grid">
             <!-- Transit / ÖPNV Konfiguration -->
@@ -1091,6 +1091,53 @@
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.weather.previewTitle">Wetter-Vorschau</span></h3>
               <div id="weather-preview-content" class="live-preview-container">
                 <p class="text-muted" data-translate="liveData.weather.previewHint">Klicken Sie auf "Vorschau" um Wetterdaten zu laden.</p>
+              </div>
+            </div>
+
+            <!-- Nachrichten Konfiguration -->
+            <div class="settings-card">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="1" y="2" width="14" height="12" rx="1"/><line x1="4" y1="5.5" x2="12" y2="5.5"/><line x1="4" y1="8" x2="12" y2="8"/><line x1="4" y1="10.5" x2="8" y2="10.5"/></svg></span> <span data-translate="liveData.news.title">Nachrichten</span></h3>
+              <p class="settings-description" data-translate="liveData.news.description">
+                Zeigen Sie aktuelle Nachrichten aus RSS-Feeds (Tagesschau, SPIEGEL, lokale Quellen) auf Ihrem Display an.
+              </p>
+              <div class="settings-form">
+                <div class="form-group">
+                  <div class="checkbox-label">
+                    <div class="toggle-switch">
+                      <input type="checkbox" class="toggle-input" id="news-enabled" />
+                      <label class="toggle-label" for="news-enabled"><span class="toggle-slider"></span></label>
+                    </div>
+                    <span data-translate="liveData.news.enable">Nachrichten auf Display anzeigen</span>
+                  </div>
+                </div>
+
+                <div id="news-config" style="display: none">
+                  <div class="form-group">
+                    <label data-translate="liveData.news.sources">Nachrichtenquellen</label>
+                    <div class="transport-filter-grid">
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="news-show-world" checked /><label class="toggle-label" for="news-show-world"><span class="toggle-slider"></span></label></div><span data-translate="liveData.news.world">Weltnachrichten (Tagesschau, Spiegel)</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="news-show-local" checked /><label class="toggle-label" for="news-show-local"><span class="toggle-slider"></span></label></div><span data-translate="liveData.news.local">Lokale Nachrichten (WA Ahlen)</span></div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label data-translate="liveData.displayAssignment">Auf welchen Displays anzeigen?</label>
+                    <div id="news-display-checkboxes" class="transport-filter-grid">
+                      <p class="text-muted" data-translate="liveData.loadingDisplays">Lade Displays...</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-primary" id="saveNewsSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
+                <button class="btn btn-secondary" id="previewNewsData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
+              </div>
+            </div>
+
+            <!-- Nachrichten-Vorschau -->
+            <div id="news-preview-card" class="settings-card" style="display: none">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.news.previewTitle">Nachrichten-Vorschau</span></h3>
+              <div id="news-preview-content" class="live-preview-container">
+                <p class="text-muted" data-translate="liveData.news.previewHint">Klicken Sie auf "Vorschau" um aktuelle Nachrichten zu laden.</p>
               </div>
             </div>
 
@@ -1861,6 +1908,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.3"></script>
+    <script src="/js/admin.js?v=5.4"></script>
   </body>
 </html>

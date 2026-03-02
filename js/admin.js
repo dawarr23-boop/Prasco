@@ -299,7 +299,7 @@ const translations = {
     'category.descriptionPlaceholder': 'Optionale Beschreibung...',
 
     // Live Data
-    'liveData.sectionTitle': 'Live-Daten (ÖPNV, Verkehr & Wetter)',
+    'liveData.sectionTitle': 'Live-Daten (ÖPNV, Verkehr, Wetter & Nachrichten)',
     'liveData.transit.title': 'ÖPNV-Abfahrten',
     'liveData.transit.description': 'Konfigurieren Sie die Anzeige von Live-Abfahrtszeiten für Busse und Bahnen in Ihrer Nähe.',
     'liveData.transit.enable': 'ÖPNV-Abfahrten auf Display anzeigen',
@@ -348,6 +348,14 @@ const translations = {
     'liveData.weather.forecastDays': 'Vorhersage-Tage',
     'liveData.weather.previewTitle': 'Wetter-Vorschau',
     'liveData.weather.previewHint': 'Klicken Sie auf "Vorschau" um Wetterdaten zu laden.',
+    'liveData.news.title': 'Nachrichten',
+    'liveData.news.description': 'Aktuelle Nachrichten aus RSS-Feeds (Tagesschau, SPIEGEL, lokale Quellen) auf dem Display anzeigen.',
+    'liveData.news.enable': 'Nachrichten auf Display anzeigen',
+    'liveData.news.sources': 'Nachrichtenquellen',
+    'liveData.news.world': 'Weltnachrichten (Tagesschau, Spiegel)',
+    'liveData.news.local': 'Lokale Nachrichten (WA Ahlen)',
+    'liveData.news.previewTitle': 'Nachrichten-Vorschau',
+    'liveData.news.previewHint': 'Klicken Sie auf "Vorschau" um aktuelle Nachrichten zu laden.',
     'liveData.cache.title': 'Cache-Verwaltung',
     'liveData.cache.description': 'Leeren Sie den Cache für ÖPNV-, Verkehrs- und Wetterdaten, um aktuelle Daten zu erzwingen.',
     'liveData.cache.transit': 'ÖPNV-Cache:',
@@ -720,7 +728,7 @@ const translations = {
     'category.descriptionPlaceholder': 'Optional description...',
 
     // Live Data
-    'liveData.sectionTitle': 'Live Data (Transit, Traffic & Weather)',
+    'liveData.sectionTitle': 'Live Data (Transit, Traffic, Weather & News)',
     'liveData.transit.title': 'Public Transit Departures',
     'liveData.transit.description': 'Configure live departure times for buses and trains near you.',
     'liveData.transit.enable': 'Show transit departures on display',
@@ -769,6 +777,14 @@ const translations = {
     'liveData.weather.forecastDays': 'Forecast days',
     'liveData.weather.previewTitle': 'Weather Preview',
     'liveData.weather.previewHint': 'Click "Preview" to load weather data.',
+    'liveData.news.title': 'News',
+    'liveData.news.description': 'Show current news from RSS feeds (Tagesschau, SPIEGEL, local sources) on the display.',
+    'liveData.news.enable': 'Show news on display',
+    'liveData.news.sources': 'News sources',
+    'liveData.news.world': 'World news (Tagesschau, Spiegel)',
+    'liveData.news.local': 'Local news (WA Ahlen)',
+    'liveData.news.previewTitle': 'News Preview',
+    'liveData.news.previewHint': 'Click "Preview" to load current news.',
     'liveData.cache.title': 'Cache Management',
     'liveData.cache.description': 'Clear the cache for transit, traffic and weather data to force fresh data.',
     'liveData.cache.transit': 'Transit cache:',
@@ -1143,7 +1159,7 @@ const translations = {
     'category.descriptionPlaceholder': 'Descrizione opzionale...',
 
     // Live Data
-    'liveData.sectionTitle': 'Dati in Diretta (Trasporti, Traffico & Meteo)',
+    'liveData.sectionTitle': 'Dati in Diretta (Trasporti, Traffico, Meteo & Notizie)',
     'liveData.transit.title': 'Partenze Trasporto Pubblico',
     'liveData.transit.description': 'Configura i tempi di partenza in tempo reale per autobus e treni nelle vicinanze.',
     'liveData.transit.enable': 'Mostra partenze trasporto sul display',
@@ -1192,6 +1208,14 @@ const translations = {
     'liveData.weather.forecastDays': 'Giorni di previsione',
     'liveData.weather.previewTitle': 'Anteprima Meteo',
     'liveData.weather.previewHint': 'Fai clic su "Anteprima" per caricare i dati meteo.',
+    'liveData.news.title': 'Notizie',
+    'liveData.news.description': 'Mostra notizie aggiornate da feed RSS (Tagesschau, SPIEGEL, fonti locali) sul display.',
+    'liveData.news.enable': 'Mostra notizie sul display',
+    'liveData.news.sources': 'Fonti di notizie',
+    'liveData.news.world': 'Notizie mondiali (Tagesschau, Spiegel)',
+    'liveData.news.local': 'Notizie locali (WA Ahlen)',
+    'liveData.news.previewTitle': 'Anteprima Notizie',
+    'liveData.news.previewHint': 'Fai clic su "Anteprima" per caricare le notizie.',
     'liveData.cache.title': 'Gestione Cache',
     'liveData.cache.description': 'Svuota la cache per i dati di trasporto, traffico e meteo per forzare dati aggiornati.',
     'liveData.cache.transit': 'Cache trasporto:',
@@ -5969,6 +5993,8 @@ async function loadLiveDataSettings() {
   await loadTrafficSettings();
   // Lade Wetter-Einstellungen
   await loadWeatherSettings();
+  // Lade Nachrichten-Einstellungen
+  await loadNewsSettings();
   // Lade Autobahn-Liste
   await loadHighwayList();
   // Lade Cache-Stats
@@ -5982,7 +6008,7 @@ async function loadLiveDataSettings() {
 
 function populateLiveDataDisplays() {
   const displays = displaysCache || [];
-  const containers = ['transit-display-checkboxes', 'traffic-display-checkboxes', 'weather-display-checkboxes'];
+  const containers = ['transit-display-checkboxes', 'traffic-display-checkboxes', 'weather-display-checkboxes', 'news-display-checkboxes'];
   containers.forEach(containerId => {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -5990,7 +6016,7 @@ function populateLiveDataDisplays() {
       container.innerHTML = '<p class="text-muted">Keine Displays vorhanden</p>';
       return;
     }
-    const prefix = containerId.startsWith('transit') ? 'transit' : (containerId.startsWith('weather') ? 'weather' : 'traffic');
+    const prefix = containerId.startsWith('transit') ? 'transit' : containerId.startsWith('weather') ? 'weather' : containerId.startsWith('news') ? 'news' : 'traffic';
     container.innerHTML = displays.map(d => `
       <div class="checkbox-label">
         <div class="toggle-switch">
@@ -6148,6 +6174,19 @@ function initLiveDataEventListeners() {
   // Weather save & preview
   document.getElementById('saveWeatherSettings')?.addEventListener('click', saveWeatherSettings);
   document.getElementById('previewWeatherData')?.addEventListener('click', previewWeatherData);
+
+  // News toggle
+  const newsEnabled = document.getElementById('news-enabled');
+  if (newsEnabled) {
+    newsEnabled.addEventListener('change', () => {
+      const config = document.getElementById('news-config');
+      if (config) config.style.display = newsEnabled.checked ? 'block' : 'none';
+    });
+  }
+
+  // News save & preview
+  document.getElementById('saveNewsSettings')?.addEventListener('click', saveNewsSettings);
+  document.getElementById('previewNewsData')?.addEventListener('click', previewNewsData);
 
   // Weather cache clear
   document.getElementById('clearWeatherCache')?.addEventListener('click', async () => {
@@ -6727,6 +6766,104 @@ async function saveWeatherSettings() {
   } catch (error) {
     console.error('Fehler beim Speichern:', error);
     showNotification('Fehler beim Speichern der Wetter-Einstellungen', 'error');
+  }
+}
+
+async function loadNewsSettings() {
+  try {
+    const response = await fetch('/api/settings?category=news', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+    if (!response.ok) return;
+    const settings = await response.json();
+
+    const enabled = settings['news.enabled'] === 'true' || settings['news.enabled'] === true;
+    const enabledCheckbox = document.getElementById('news-enabled');
+    if (enabledCheckbox) enabledCheckbox.checked = enabled;
+
+    const config = document.getElementById('news-config');
+    if (config) config.style.display = enabled ? 'block' : 'none';
+
+    const showWorld = document.getElementById('news-show-world');
+    if (showWorld) showWorld.checked = settings['news.showWorld'] !== 'false' && settings['news.showWorld'] !== false;
+
+    const showLocal = document.getElementById('news-show-local');
+    if (showLocal) showLocal.checked = settings['news.showLocal'] !== 'false' && settings['news.showLocal'] !== false;
+
+    if (settings['news.displayIds']) {
+      const selectedIds = String(settings['news.displayIds']).split(',').map(id => id.trim());
+      document.querySelectorAll('#news-display-checkboxes input[type="checkbox"]').forEach(cb => {
+        cb.checked = selectedIds.includes(String(cb.dataset.displayId));
+      });
+    }
+  } catch (error) {
+    console.warn('Nachrichten-Einstellungen konnten nicht geladen werden:', error);
+  }
+}
+
+async function saveNewsSettings() {
+  const settings = {
+    'news.enabled': document.getElementById('news-enabled')?.checked ? 'true' : 'false',
+    'news.showWorld': document.getElementById('news-show-world')?.checked ? 'true' : 'false',
+    'news.showLocal': document.getElementById('news-show-local')?.checked ? 'true' : 'false',
+  };
+
+  const displayCheckboxes = document.querySelectorAll('#news-display-checkboxes input[type="checkbox"]:checked');
+  settings['news.displayIds'] = Array.from(displayCheckboxes).map(cb => cb.dataset.displayId).join(',');
+
+  try {
+    const response = await fetch('/api/settings/bulk', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+      },
+      body: JSON.stringify({ settings })
+    });
+    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    showNotification('Nachrichten-Einstellungen gespeichert!', 'success');
+  } catch (error) {
+    console.error('Fehler beim Speichern:', error);
+    showNotification('Fehler beim Speichern der Nachrichten-Einstellungen', 'error');
+  }
+}
+
+async function previewNewsData() {
+  const previewCard = document.getElementById('news-preview-card');
+  const previewContent = document.getElementById('news-preview-content');
+  if (!previewCard || !previewContent) return;
+
+  previewCard.style.display = 'block';
+  previewContent.innerHTML = '<p class="text-muted">Lade Nachrichten...</p>';
+  previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  try {
+    const response = await fetch('/api/news', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+    if (!response.ok) throw new Error('Fehler beim Laden');
+    const data = await response.json();
+    if (!data.success || !data.data) throw new Error('Ungültige Antwort');
+
+    const { world, local } = data.data;
+    const allItems = [...(world || []).slice(0, 4), ...(local || []).slice(0, 3)];
+
+    if (allItems.length === 0) {
+      previewContent.innerHTML = '<p class="text-muted">Keine Nachrichten verfügbar.</p>';
+      return;
+    }
+
+    previewContent.innerHTML = allItems.map(item => `
+      <div style="border-bottom: 1px solid #eee; padding: 0.6rem 0; display: flex; gap: 0.75rem; align-items: baseline;">
+        <span style="font-size: 0.7rem; background: ${item.category === 'local' ? '#d1e7dd' : '#cfe2ff'}; color: ${item.category === 'local' ? '#0f5132' : '#084298'}; padding: 1px 6px; border-radius: 3px; white-space: nowrap;">${item.source}</span>
+        <div>
+          <strong style="font-size: 0.88rem;">${item.title}</strong>
+          ${item.description ? `<p style="color: #6c757d; font-size: 0.8rem; margin: 0.2rem 0 0;">${item.description.substring(0, 120)}${item.description.length > 120 ? '…' : ''}</p>` : ''}
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    previewContent.innerHTML = `<p style="color: #dc3545;">Fehler: ${error.message}</p>`;
   }
 }
 
