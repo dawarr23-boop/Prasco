@@ -626,10 +626,13 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
+  align-items: end;
 }
 
 .form-group {
   margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
@@ -650,6 +653,7 @@ body {
   font-size: 0.9375rem;
   font-family: var(--font-primary);
   transition: all 0.2s ease;
+  margin-top: auto;
 }
 
 .form-group input:focus,
