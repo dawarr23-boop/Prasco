@@ -2709,7 +2709,9 @@ async function editPost(id) {
   if (!post) return;
 
   currentPostId = id;
-  document.getElementById('post-form').style.display = 'block';
+  const postFormEl = document.getElementById('post-form');
+  postFormEl.style.display = 'block';
+  postFormEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   await loadCategoryDropdown();
 
   document.getElementById('post-title').value = post.title || '';
