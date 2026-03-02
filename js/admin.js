@@ -3721,9 +3721,6 @@ async function loadDisplays() {
                 <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
                   ${t('displays.preview')}
                 </button>
-                <button class="btn btn-secondary btn-sm" data-action="open-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" title="${t('displays.open')}">
-                  ${t('displays.open')}
-                </button>
                 <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
                 <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
             </div>
