@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT-Westfalen Signature Screen - Admin Dashboard</title>
-    <link rel="stylesheet" href="/css/admin.css?v=4.1" />
+    <link rel="stylesheet" href="/css/admin.css?v=4.2" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -261,6 +261,34 @@
                   <!-- Rich-Text-Editor (für Typ Text / HTML) -->
                   <div id="rte-container" class="rte-wrapper" style="display:none;">
                     <div class="rte-toolbar" id="rte-toolbar">
+                      <select class="rte-select" id="rte-font-family" title="Schriftart">
+                        <option value="">— Schriftart —</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Tahoma, sans-serif">Tahoma</option>
+                        <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                        <option value="'Comic Sans MS', cursive">Comic Sans</option>
+                      </select>
+                      <select class="rte-select" id="rte-font-size" title="Schriftgröße">
+                        <option value="">— Größe —</option>
+                        <option value="10px">10</option>
+                        <option value="12px">12</option>
+                        <option value="14px">14</option>
+                        <option value="16px">16</option>
+                        <option value="18px">18</option>
+                        <option value="20px">20</option>
+                        <option value="24px">24</option>
+                        <option value="28px">28</option>
+                        <option value="32px">32</option>
+                        <option value="36px">36</option>
+                        <option value="48px">48</option>
+                        <option value="64px">64</option>
+                        <option value="72px">72</option>
+                      </select>
+                      <div class="rte-sep"></div>
                       <select class="rte-select" id="rte-block" title="Absatzformat">
                         <option value="p">Normal</option>
                         <option value="h1">Überschrift 1</option>
@@ -1988,6 +2016,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.8"></script>
+    <script src="/js/admin.js?v=5.9"></script>
   </body>
 </html>

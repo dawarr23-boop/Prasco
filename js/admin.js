@@ -3122,6 +3122,34 @@ function initRichTextEditor() {
     });
   }
 
+  // Schriftart-Select
+  const fontFamilySelect = document.getElementById('rte-font-family');
+  if (fontFamilySelect) {
+    fontFamilySelect.addEventListener('change', () => {
+      if (!fontFamilySelect.value) return;
+      editor.focus();
+      document.execCommand('fontName', false, fontFamilySelect.value);
+    });
+  }
+
+  // Schriftgröße-Select
+  const fontSizeSelect = document.getElementById('rte-font-size');
+  if (fontSizeSelect) {
+    fontSizeSelect.addEventListener('change', () => {
+      if (!fontSizeSelect.value) return;
+      editor.focus();
+      // execCommand fontSize nutzt 1–7, daher Sentinel 7 + direkte Ersetzung
+      document.execCommand('fontSize', false, '7');
+      const fonts = editor.querySelectorAll('font[size="7"]');
+      fonts.forEach(f => {
+        const span = document.createElement('span');
+        span.style.fontSize = fontSizeSelect.value;
+        span.innerHTML = f.innerHTML;
+        f.parentNode.replaceChild(span, f);
+      });
+    });
+  }
+
   // Toolbar-Buttons (data-cmd)
   const toolbar = document.getElementById('rte-toolbar');
   if (toolbar) {
