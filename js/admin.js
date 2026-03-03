@@ -3356,9 +3356,14 @@ async function showPostPreview(id) {
     ? `<h1 style="font-size:clamp(1.2rem,4vw,3rem);margin:0 0 0.5em;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.6);">${escapeHtml(post.title)}</h1>` : '';
 
   switch (ct) {
-    case 'text':
-      html = `${titleHtml}<div style="font-size:clamp(0.9rem,2.5vw,1.8rem);text-align:center;white-space:pre-wrap;max-width:90%;line-height:1.5;">${escapeHtml(post.content || '').replace(/\n/g,'<br>')}</div>`;
+    case 'text': {
+      const isRteHtml = (post.content || '').trimStart().startsWith('<');
+      const previewBody = isRteHtml
+        ? (post.content || '')
+        : escapeHtml(post.content || '').replace(/\n/g, '<br>');
+      html = `${titleHtml}<div style="font-size:clamp(0.9rem,2.5vw,1.8rem);text-align:center;max-width:90%;line-height:1.5;">${previewBody}</div>`;
       break;
+    }
     case 'image': {
       const imgSrc = mediaUrl || (post.content?.startsWith('/uploads/') ? post.content : null);
       const caption = post.content && !post.content.startsWith('/uploads/') ? post.content : '';
