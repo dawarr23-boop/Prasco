@@ -2082,7 +2082,7 @@ let currentPostId = null;
 let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
-let postContentQuill = null; // Quill Rich-Text Editor Instanz
+let rteEditorEl = null; // Native Rich-Text-Editor Instanz
 
 // ============================================
 // Bulk Selection & Context Menu
@@ -2545,8 +2545,8 @@ async function showPostForm() {
   // Editor + Upload-Sektion für Standard-Typ (text) initialisieren
   const postTypeSelect = document.getElementById('post-type');
   if (postTypeSelect) updateUploadSectionVisibility(postTypeSelect.value);
-  // Quill-Inhalt leeren
-  if (postContentQuill) postContentQuill.setText('');
+  // RTE-Inhalt leeren
+  if (rteEditorEl) rteEditorEl.innerHTML = '';
 
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
@@ -2710,8 +2710,8 @@ async function loadDisplayCheckboxes(selectedDisplayIds = []) {
 function hidePostForm() {
   document.getElementById('post-form').style.display = 'none';
   document.getElementById('postForm').reset();
-  // Quill-Inhalt zurücksetzen
-  if (postContentQuill) postContentQuill.setText('');
+  // RTE-Inhalt zurücksetzen
+  if (rteEditorEl) rteEditorEl.innerHTML = '';
   const fileInput = document.getElementById('media-file');
   if (fileInput) fileInput.value = '';
   const musicFileInput = document.getElementById('background-music-file');
@@ -2859,11 +2859,11 @@ async function editPost(id) {
 
   // Hintergrundmusik-Sektion je nach Content-Type ein/ausblenden
   updateBackgroundMusicVisibility(post.contentType);
-  // Upload-Sektion + Quill-Editor je nach Content-Type aktualisieren
+  // Upload-Sektion + RTE je nach Content-Type aktualisieren
   updateUploadSectionVisibility(post.contentType);
-  // Quill-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
-  if (postContentQuill) {
-    postContentQuill.clipboard.dangerouslyPasteHTML(post.content || '');
+  // RTE-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
+  if (rteEditorEl) {
+    rteEditorEl.innerHTML = post.content || '';
   }
 }
 
@@ -3087,39 +3087,120 @@ function updateUploadSectionVisibility(contentType) {
 
 // Quill Editor initialisieren
 function initQuillEditor() {
-  if (postContentQuill || typeof Quill === 'undefined') return;
-  const editorEl = document.getElementById('quill-editor');
-  if (!editorEl) return;
-  postContentQuill = new Quill('#quill-editor', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ color: [] }, { background: [] }],
-        [{ align: [] }],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link'],
-        ['clean'],
-      ],
-    },
-  });
+  // Quill wurde durch nativen RTE ersetzt
 }
 
-// Zeige Quill oder Textarea je nach Content-Typ
+// Zeige RTE oder Textarea je nach Content-Typ
 function updateTextEditor(contentType) {
   const textarea = document.getElementById('post-content');
-  const quillContainer = document.getElementById('quill-editor-container');
-  if (!textarea || !quillContainer) return;
+  const rteContainer = document.getElementById('rte-container');
+  if (!textarea || !rteContainer) return;
 
-  const useQuill = (contentType === 'text' || contentType === 'html') && typeof Quill !== 'undefined';
-  if (useQuill) {
+  const useRte = contentType === 'text' || contentType === 'html';
+  if (useRte) {
     textarea.style.display = 'none';
-    quillContainer.style.display = 'block';
-    if (!postContentQuill) initQuillEditor();
+    rteContainer.style.display = 'block';
+    if (!rteEditorEl) initRichTextEditor();
   } else {
-    quillContainer.style.display = 'none';
+    rteContainer.style.display = 'none';
     textarea.style.display = 'block';
+  }
+}
+
+// Native Rich-Text-Editor initialisieren
+function initRichTextEditor() {
+  const editor = document.getElementById('rte-editor');
+  if (!editor || rteEditorEl) return;
+  rteEditorEl = editor;
+
+  // Formatblock-Select
+  const blockSelect = document.getElementById('rte-block');
+  if (blockSelect) {
+    blockSelect.addEventListener('change', () => {
+      editor.focus();
+      document.execCommand('formatBlock', false, blockSelect.value);
+    });
+  }
+
+  // Toolbar-Buttons (data-cmd)
+  const toolbar = document.getElementById('rte-toolbar');
+  if (toolbar) {
+    toolbar.addEventListener('mousedown', (e) => {
+      const btn = e.target.closest('.rte-btn[data-cmd]');
+      if (!btn) return;
+      e.preventDefault(); // Fokus im Editor behalten
+      document.execCommand(btn.dataset.cmd, false, null);
+      updateRteToolbarState();
+    });
+  }
+
+  // Textfarbe
+  const fcInput = document.getElementById('rte-fc');
+  const fcPreview = document.getElementById('rte-fc-preview');
+  if (fcInput) {
+    fcInput.addEventListener('input', () => {
+      if (fcPreview) fcPreview.style.borderBottomColor = fcInput.value;
+    });
+    fcInput.addEventListener('change', () => {
+      editor.focus();
+      document.execCommand('foreColor', false, fcInput.value);
+    });
+    const fcLabel = fcInput.closest('.rte-color-lbl');
+    if (fcLabel) {
+      fcLabel.addEventListener('click', () => {
+        // Selektion merken und Picker öffnen
+        fcInput.savedSel = saveSelectionRte(editor);
+        fcInput.click();
+      });
+    }
+  }
+
+  // Hervorhebungsfarbe
+  const bgInput = document.getElementById('rte-bg');
+  const bgPreview = document.getElementById('rte-bg-preview');
+  if (bgInput) {
+    bgInput.addEventListener('input', () => {
+      if (bgPreview) bgPreview.style.background = bgInput.value;
+    });
+    bgInput.addEventListener('change', () => {
+      editor.focus();
+      document.execCommand('hiliteColor', false, bgInput.value);
+    });
+    const bgLabel = bgInput.closest('.rte-color-lbl');
+    if (bgLabel) {
+      bgLabel.addEventListener('click', () => {
+        bgInput.savedSel = saveSelectionRte(editor);
+        bgInput.click();
+      });
+    }
+  }
+
+  // Toolbar-Status bei Cursor-/Selektionswechsel aktualisieren
+  editor.addEventListener('keyup', updateRteToolbarState);
+  editor.addEventListener('mouseup', updateRteToolbarState);
+  editor.addEventListener('focus', updateRteToolbarState);
+}
+
+function saveSelectionRte(editor) {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) return sel.getRangeAt(0).cloneRange();
+  return null;
+}
+
+function updateRteToolbarState() {
+  const cmds = ['bold', 'italic', 'underline', 'strikeThrough',
+    'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull',
+    'insertUnorderedList', 'insertOrderedList'];
+  cmds.forEach(cmd => {
+    const btn = document.querySelector(`.rte-btn[data-cmd="${cmd}"]`);
+    if (btn) btn.classList.toggle('active', document.queryCommandState(cmd));
+  });
+  // Formatblock-Select synchronisieren
+  const blockSelect = document.getElementById('rte-block');
+  if (blockSelect) {
+    const val = document.queryCommandValue('formatBlock').toLowerCase().replace(/[<>]/g, '');
+    const match = ['p', 'h1', 'h2', 'h3', 'blockquote', 'pre'].find(v => v === val);
+    blockSelect.value = match || 'p';
   }
 }
 
@@ -3299,10 +3380,10 @@ async function deletePost(id) {
 async function handlePostFormSubmit(e) {
   e.preventDefault();
 
-  // Quill-Inhalt in Textarea synchronisieren
-  const quillContainer = document.getElementById('quill-editor-container');
-  if (postContentQuill && quillContainer && quillContainer.style.display !== 'none') {
-    document.getElementById('post-content').value = postContentQuill.root.innerHTML;
+  // RTE-Inhalt in Textarea synchronisieren
+  const rteContainer = document.getElementById('rte-container');
+  if (rteEditorEl && rteContainer && rteContainer.style.display !== 'none') {
+    document.getElementById('post-content').value = rteEditorEl.innerHTML;
   }
 
   const formData = new FormData(e.target);

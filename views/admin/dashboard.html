@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT-Westfalen Signature Screen - Admin Dashboard</title>
-    <link rel="stylesheet" href="/css/admin.css?v=4.0" />
-    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/admin.css?v=4.1" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -259,9 +258,58 @@
                     </span>
                   </label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
-                  <!-- Quill Rich-Text Editor (für Text / HTML) -->
-                  <div id="quill-editor-container" style="display:none; min-height:150px; border:1px solid #ccc; border-radius:4px;">
-                    <div id="quill-editor" style="min-height:120px;"></div>
+                  <!-- Rich-Text-Editor (für Typ Text / HTML) -->
+                  <div id="rte-container" class="rte-wrapper" style="display:none;">
+                    <div class="rte-toolbar" id="rte-toolbar">
+                      <select class="rte-select" id="rte-block" title="Absatzformat">
+                        <option value="p">Normal</option>
+                        <option value="h1">Überschrift 1</option>
+                        <option value="h2">Überschrift 2</option>
+                        <option value="h3">Überschrift 3</option>
+                        <option value="blockquote">Zitat</option>
+                        <option value="pre">Code</option>
+                      </select>
+                      <div class="rte-sep"></div>
+                      <button type="button" class="rte-btn" data-cmd="bold" title="Fett (Strg+B)"><b>F</b></button>
+                      <button type="button" class="rte-btn" data-cmd="italic" title="Kursiv (Strg+I)"><i>K</i></button>
+                      <button type="button" class="rte-btn" data-cmd="underline" title="Unterstreichen (Strg+U)"><u>U</u></button>
+                      <button type="button" class="rte-btn" data-cmd="strikeThrough" title="Durchgestrichen"><s>S</s></button>
+                      <div class="rte-sep"></div>
+                      <label class="rte-btn rte-color-lbl" title="Textfarbe">
+                        <span id="rte-fc-preview" style="font-weight:700;border-bottom:3px solid #000">A</span>
+                        <input type="color" id="rte-fc" value="#000000">
+                      </label>
+                      <label class="rte-btn rte-color-lbl" title="Hervorhebungsfarbe">
+                        <span id="rte-bg-preview" style="background:#ff0;padding:0 3px">H</span>
+                        <input type="color" id="rte-bg" value="#ffff00">
+                      </label>
+                      <div class="rte-sep"></div>
+                      <button type="button" class="rte-btn" data-cmd="justifyLeft" title="Linksbündig">
+                        <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect y="4.5" width="10" height="2"/><rect y="9" width="12" height="2"/></svg>
+                      </button>
+                      <button type="button" class="rte-btn" data-cmd="justifyCenter" title="Zentriert">
+                        <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect x="2.5" y="4.5" width="10" height="2"/><rect x="1.5" y="9" width="12" height="2"/></svg>
+                      </button>
+                      <button type="button" class="rte-btn" data-cmd="justifyRight" title="Rechtsbündig">
+                        <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect x="5" y="4.5" width="10" height="2"/><rect x="3" y="9" width="12" height="2"/></svg>
+                      </button>
+                      <button type="button" class="rte-btn" data-cmd="justifyFull" title="Blocksatz">
+                        <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect y="4.5" width="15" height="2"/><rect y="9" width="15" height="2"/></svg>
+                      </button>
+                      <div class="rte-sep"></div>
+                      <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Aufzählungsliste">
+                        <svg width="15" height="12" viewBox="0 0 15 12"><circle cx="2" cy="2" r="1.5"/><rect x="6" y="1" width="9" height="2"/><circle cx="2" cy="6" r="1.5"/><rect x="6" y="5" width="9" height="2"/><circle cx="2" cy="10" r="1.5"/><rect x="6" y="9" width="9" height="2"/></svg>
+                      </button>
+                      <button type="button" class="rte-btn" data-cmd="insertOrderedList" title="Nummerierte Liste">
+                        <svg width="15" height="12" viewBox="0 0 15 12"><text x="0" y="4.5" font-size="4.5" font-family="monospace" fill="#333">1.</text><rect x="6" y="1" width="9" height="2"/><text x="0" y="8.5" font-size="4.5" font-family="monospace" fill="#333">2.</text><rect x="6" y="5" width="9" height="2"/><text x="0" y="12.5" font-size="4.5" font-family="monospace" fill="#333">3.</text><rect x="6" y="9" width="9" height="2"/></svg>
+                      </button>
+                      <div class="rte-sep"></div>
+                      <button type="button" class="rte-btn" data-cmd="outdent" title="Einzug verringern" style="font-size:1.1rem">⇤</button>
+                      <button type="button" class="rte-btn" data-cmd="indent" title="Einzug erhöhen" style="font-size:1.1rem">⇥</button>
+                      <div class="rte-sep"></div>
+                      <button type="button" class="rte-btn" data-cmd="removeFormat" title="Formatierung entfernen" style="font-size:0.8rem">⊗ Frm</button>
+                    </div>
+                    <div id="rte-editor" class="rte-content" contenteditable="true"></div>
                   </div>
                   <!-- KI-Assistent -->
                   <div id="ai-assistant" class="ai-assistant" style="display: none;">
@@ -1940,7 +1988,6 @@
       </div>
     </div>
 
-    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-    <script src="/js/admin.js?v=5.7"></script>
+    <script src="/js/admin.js?v=5.8"></script>
   </body>
 </html>

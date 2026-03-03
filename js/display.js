@@ -2841,12 +2841,18 @@ async function displayCurrentPost() {
   let html = '';
 
   switch (post.content_type) {
-    case 'text':
+    case 'text': {
+      // RTE-Inhalt ist HTML; einfacher Text hat kein < → Fallback auf br-replace
+      const isHtml = (post.content || '').trimStart().startsWith('<');
+      const textBody = isHtml
+        ? (post.content || '')
+        : (post.content || '').replace(/\n/g, '<br>');
       html = `
                 ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
-                <div>${(post.content || '').replace(/\n/g, '<br>')}</div>
+                <div>${textBody}</div>
             `;
       break;
+    }
 
     case 'image':
       // Wenn kein media_url vorhanden ist, verwende content als Bild-URL (für Presentation Slides)
