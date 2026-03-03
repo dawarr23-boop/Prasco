@@ -267,7 +267,78 @@ app.features = FEATURES;
 
 // Frontend Routes
 app.get('/', (_req: Request, res: Response) => {
-  res.redirect('/public/display.html');
+  res.status(200).send(`<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT-Westfalen Signature Screen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #58585a;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 3rem 3.5rem;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+    .logo {
+      max-width: 160px;
+      margin-bottom: 2rem;
+    }
+    .icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: #009640;
+    }
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+    p {
+      font-size: 0.97rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: 0.35rem 1rem;
+      background: #f0f9f4;
+      border: 1px solid #009640;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: #009640;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img class="logo"
+      src="https://www.prasco.net/content/files/images/Prasco/logo-small.png"
+      alt="IT-Westfalen" />
+    <div class="icon">ℹ️</div>
+    <h1>Kein Zugriff über diese Adresse</h1>
+    <p>Diese Seite ist nicht für den direkten Aufruf vorgesehen.<br/>
+    Bitte wenden Sie sich an Ihren <strong>Systemadministrator</strong>.</p>
+    <div class="badge">IT-Westfalen Signature Screen</div>
+  </div>
+</body>
+</html>`);
 });
 
 app.get('/public/display.html', (_req: Request, res: Response) => {
