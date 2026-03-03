@@ -260,8 +260,8 @@
                   </label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
                   <!-- Quill Rich-Text Editor (für Text / HTML) -->
-                  <div id="quill-editor-container" style="display:none;">
-                    <div id="quill-editor"></div>
+                  <div id="quill-editor-container" style="display:none; min-height:150px; border:1px solid #ccc; border-radius:4px;">
+                    <div id="quill-editor" style="min-height:120px;"></div>
                   </div>
                   <!-- KI-Assistent -->
                   <div id="ai-assistant" class="ai-assistant" style="display: none;">
@@ -1941,6 +1941,6 @@
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-    <script src="/js/admin.js?v=5.6"></script>
+    <script src="/js/admin.js?v=5.7"></script>
   </body>
 </html>

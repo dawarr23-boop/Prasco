@@ -3112,7 +3112,7 @@ function updateTextEditor(contentType) {
   const quillContainer = document.getElementById('quill-editor-container');
   if (!textarea || !quillContainer) return;
 
-  const useQuill = contentType === 'text' || contentType === 'html';
+  const useQuill = (contentType === 'text' || contentType === 'html') && typeof Quill !== 'undefined';
   if (useQuill) {
     textarea.style.display = 'none';
     quillContainer.style.display = 'block';
