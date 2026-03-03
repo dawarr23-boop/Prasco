@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IT-Westfalen Signature Screen - Admin Dashboard</title>
     <link rel="stylesheet" href="/css/admin.css?v=4.0" />
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
   <body>
@@ -178,6 +179,33 @@
                   </div>
                 </div>
 
+                <!-- Titel Schriftart & Schriftgröße -->
+                <div class="form-row" id="title-font-options">
+                  <div class="form-group">
+                    <label for="title-font-size">Titel Schriftgröße</label>
+                    <select id="title-font-size" name="title_font_size">
+                      <option value="">Standard</option>
+                      <option value="1.5rem">Klein (1.5rem)</option>
+                      <option value="2rem">Mittel (2rem)</option>
+                      <option value="3rem">Groß (3rem)</option>
+                      <option value="4rem">Sehr groß (4rem)</option>
+                      <option value="5rem">Riesig (5rem)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="title-font-family">Titel Schriftart</label>
+                    <select id="title-font-family" name="title_font_family">
+                      <option value="">Standard</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Verdana">Verdana</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Tahoma">Tahoma</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div class="form-group">
                   <label for="post-category" data-translate="form.category">Kategorie</label>
                   <select id="post-category" name="category_id">
@@ -231,6 +259,10 @@
                     </span>
                   </label>
                   <textarea id="post-content" name="content" rows="5"></textarea>
+                  <!-- Quill Rich-Text Editor (für Text / HTML) -->
+                  <div id="quill-editor-container" style="display:none;">
+                    <div id="quill-editor"></div>
+                  </div>
                   <!-- KI-Assistent -->
                   <div id="ai-assistant" class="ai-assistant" style="display: none;">
                     <div class="ai-toolbar">
@@ -1908,6 +1940,7 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.4"></script>
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    <script src="/js/admin.js?v=5.5"></script>
   </body>
 </html>

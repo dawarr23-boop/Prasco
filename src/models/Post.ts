@@ -23,6 +23,8 @@ interface PostAttributes {
   blendEffect?: string;
   soundEnabled?: boolean;
   bgTheme?: 'light' | 'dark';
+  titleFontSize?: string;
+  titleFontFamily?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -46,6 +48,8 @@ interface PostCreationAttributes
     | 'blendEffect'
     | 'soundEnabled'
     | 'bgTheme'
+    | 'titleFontSize'
+    | 'titleFontFamily'
     | 'createdAt'
     | 'updatedAt'
   > {}
@@ -72,6 +76,8 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public blendEffect?: string;
   public soundEnabled?: boolean;
   public bgTheme?: 'light' | 'dark';
+  public titleFontSize?: string;
+  public titleFontFamily?: string;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -217,6 +223,16 @@ Post.init(
       allowNull: false,
       defaultValue: 'light',
       comment: 'Background theme for the post: light or dark',
+    },
+    titleFontSize: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      comment: 'Custom font size for post title (e.g. 2rem)',
+    },
+    titleFontFamily: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: 'Custom font family for post title (e.g. Georgia)',
     },
   },
   {

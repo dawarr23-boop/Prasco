@@ -2082,6 +2082,7 @@ let currentPostId = null;
 let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
+let postContentQuill = null; // Quill Rich-Text Editor Instanz
 
 // ============================================
 // Bulk Selection & Context Menu
@@ -2697,6 +2698,8 @@ async function loadDisplayCheckboxes(selectedDisplayIds = []) {
 function hidePostForm() {
   document.getElementById('post-form').style.display = 'none';
   document.getElementById('postForm').reset();
+  // Quill-Inhalt zurücksetzen
+  if (postContentQuill) postContentQuill.setText('');
   const fileInput = document.getElementById('media-file');
   if (fileInput) fileInput.value = '';
   const musicFileInput = document.getElementById('background-music-file');
@@ -2807,6 +2810,12 @@ async function editPost(id) {
   const bgThemeSelect = document.getElementById('bg-theme');
   if (bgThemeSelect) bgThemeSelect.value = post.bgTheme || 'light';
 
+  // Titel-Schriftgröße und -Schriftart setzen
+  const titleFontSizeSelect = document.getElementById('title-font-size');
+  if (titleFontSizeSelect) titleFontSizeSelect.value = post.titleFontSize || '';
+  const titleFontFamilySelect = document.getElementById('title-font-family');
+  if (titleFontFamilySelect) titleFontFamilySelect.value = post.titleFontFamily || '';
+
   const categorySelect = document.getElementById('post-category');
   if (categorySelect && post.category) {
     categorySelect.value = post.category.id || post.categoryId;
@@ -2838,6 +2847,12 @@ async function editPost(id) {
 
   // Hintergrundmusik-Sektion je nach Content-Type ein/ausblenden
   updateBackgroundMusicVisibility(post.contentType);
+  // Upload-Sektion + Quill-Editor je nach Content-Type aktualisieren
+  updateUploadSectionVisibility(post.contentType);
+  // Quill-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
+  if (postContentQuill) {
+    postContentQuill.clipboard.dangerouslyPasteHTML(post.content || '');
+  }
 }
 
 // Helper: Datum für datetime-local Input formatieren
@@ -3055,6 +3070,45 @@ function updateUploadSectionVisibility(contentType) {
   
   // Bei Video-Typ: Offline-Download-Option initial verstecken
   updateOfflineDownloadVisibility();
+  updateTextEditor(contentType);
+}
+
+// Quill Editor initialisieren
+function initQuillEditor() {
+  if (postContentQuill || typeof Quill === 'undefined') return;
+  const editorEl = document.getElementById('quill-editor');
+  if (!editorEl) return;
+  postContentQuill = new Quill('#quill-editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link'],
+        ['clean'],
+      ],
+    },
+  });
+}
+
+// Zeige Quill oder Textarea je nach Content-Typ
+function updateTextEditor(contentType) {
+  const textarea = document.getElementById('post-content');
+  const quillContainer = document.getElementById('quill-editor-container');
+  if (!textarea || !quillContainer) return;
+
+  const useQuill = contentType === 'text' || contentType === 'html';
+  if (useQuill) {
+    textarea.style.display = 'none';
+    quillContainer.style.display = 'block';
+    if (!postContentQuill) initQuillEditor();
+  } else {
+    quillContainer.style.display = 'none';
+    textarea.style.display = 'block';
+  }
 }
 
 // Zeige/Verstecke Offline-Download-Option basierend auf URL
@@ -3233,6 +3287,12 @@ async function deletePost(id) {
 async function handlePostFormSubmit(e) {
   e.preventDefault();
 
+  // Quill-Inhalt in Textarea synchronisieren
+  const quillContainer = document.getElementById('quill-editor-container');
+  if (postContentQuill && quillContainer && quillContainer.style.display !== 'none') {
+    document.getElementById('post-content').value = postContentQuill.root.innerHTML;
+  }
+
   const formData = new FormData(e.target);
   const fileInput = document.getElementById('media-file');
   let mediaId = null;
@@ -3332,6 +3392,8 @@ async function handlePostFormSubmit(e) {
     showTitle: showTitleValue,
     soundEnabled: document.getElementById('sound-enabled')?.checked ?? true,
     bgTheme: document.getElementById('bg-theme')?.value || 'light',
+    titleFontSize: document.getElementById('title-font-size')?.value || null,
+    titleFontFamily: document.getElementById('title-font-family')?.value || null,
     backgroundMusicUrl: backgroundMusicUrl,
     backgroundMusicVolume: backgroundMusicVolume,
     blendEffect: formData.get('blend_effect') || null,
@@ -5048,6 +5110,8 @@ window.addEventListener('load', async () => {
 
   // Hintergrundmusik-Steuerung initialisieren
   initBackgroundMusicControls();
+  // Quill Rich-Text-Editor initialisieren
+  initQuillEditor();
 
   // Display-Einstellungen speichern
   const saveDisplaySettingsBtn = document.getElementById('saveDisplaySettings');

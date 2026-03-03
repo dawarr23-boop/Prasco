@@ -1546,6 +1546,14 @@ function escapeHtml(text) {
   return text ? String(text).replace(/[&<>"']/g, m => map[m]) : '';
 }
 
+// Baut inline-style Attribut für benutzerdefinierten Titelstil
+function buildTitleStyle(post) {
+  const parts = [];
+  if (post.titleFontSize) parts.push(`font-size:${post.titleFontSize}`);
+  if (post.titleFontFamily) parts.push(`font-family:${post.titleFontFamily}`);
+  return parts.length ? ` style="${parts.join(';')}"` : '';
+}
+
 // ============================================
 // Hintergrundmusik Funktionen
 // ============================================
@@ -2835,7 +2843,7 @@ async function displayCurrentPost() {
   switch (post.content_type) {
     case 'text':
       html = `
-                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <div>${(post.content || '').replace(/\n/g, '<br>')}</div>
             `;
       break;
@@ -2847,7 +2855,7 @@ async function displayCurrentPost() {
       const imageContent = post.content && !post.content.startsWith('/uploads/') ? post.content : '';
       
       html = `
-                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(post.title)}">` : ''}
                 ${imageContent ? `<p>${escapeHtml(imageContent)}</p>` : ''}
             `;
@@ -2989,7 +2997,7 @@ async function displayCurrentPost() {
 
     case 'html':
       html = `
-                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <div>${post.content || ''}</div>
             `;
       break;
@@ -3011,7 +3019,7 @@ async function displayCurrentPost() {
 
     default:
       html = `
-                ${post.showTitle === true ? `<h1>${escapeHtml(post.title)}</h1>` : ''}
+                ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <p>${escapeHtml(post.content || '')}</p>
             `;
   }

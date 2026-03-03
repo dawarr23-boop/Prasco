@@ -206,6 +206,8 @@ export const createPost = async (
       blendEffect,
       soundEnabled,
       bgTheme,
+      titleFontSize,
+      titleFontFamily,
     } = req.body;
 
     // Validate priority range (0-100)
@@ -270,6 +272,8 @@ export const createPost = async (
       blendEffect: blendEffect || null,
       soundEnabled: soundEnabled !== undefined ? soundEnabled : true,
       bgTheme: bgTheme || 'light',
+      titleFontSize: titleFontSize || null,
+      titleFontFamily: titleFontFamily || null,
     });
 
     // Handle display assignments
@@ -450,6 +454,8 @@ export const updatePost = async (
       blendEffect,
       soundEnabled,
       bgTheme,
+      titleFontSize,
+      titleFontFamily,
     } = req.body;
 
     const post = await Post.findByPk(id);
@@ -528,6 +534,8 @@ export const updatePost = async (
     if (blendEffect !== undefined) post.blendEffect = blendEffect;
     if (soundEnabled !== undefined) post.soundEnabled = soundEnabled;
     if (bgTheme !== undefined) post.bgTheme = bgTheme;
+    if (titleFontSize !== undefined) post.titleFontSize = titleFontSize || undefined;
+    if (titleFontFamily !== undefined) post.titleFontFamily = titleFontFamily || undefined;
 
     // Background music fields (only for non-video content)
     const effectiveContentType = contentType !== undefined ? contentType : post.contentType;
