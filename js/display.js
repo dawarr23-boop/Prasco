@@ -135,6 +135,7 @@ let liveDataState = {
   newsSettings: null,
   lastInsertTime: 0,
   lastTransitInsertTime: 0, // Für Rush-Hour-Priorität (16:30-20:00 alle 3 min)
+  lastNewsInsertTime: 0,    // Für Nachrichten-Priorität vor 14:00 Uhr alle 3 min
   widgetTimer: null,
   isWidgetActive: false,
   nextCategoryIdx: 0, // Zeiger auf nächste Kategorie in der Rotation
@@ -270,11 +271,26 @@ function isTransitRushHour() {
   return mins >= (16 * 60 + 30) && mins < (20 * 60);
 }
 
+// Prüft ob jetzt Nachrichten-Priorität gilt (vor 14:00 Uhr)
+function isNewsMorning() {
+  const now = new Date();
+  return now.getHours() < 14;
+}
+
 // Gibt die nächste fällige Kategorie zurück, oder null wenn noch nicht Zeit
 function shouldInsertLiveDataWidget() {
-  if (!isLiveDataScheduled()) return null;
   const cats = getActiveLiveCategories();
   if (cats.length === 0) return null;
+
+  // Nachrichten-Priorität: vor 14:00 → News alle 3 Minuten (unabhängig vom Zeitplan)
+  if (isNewsMorning() && cats.includes('news')) {
+    const newsIntervalMs = 3 * 60 * 1000; // 3 Minuten
+    if (Date.now() - liveDataState.lastNewsInsertTime >= newsIntervalMs) {
+      return 'news';
+    }
+  }
+
+  if (!isLiveDataScheduled()) return null;
 
   // Rush-Hour-Priorität: 16:30–20:00 → ÖPNV alle 3 Minuten, unabhängig vom normalen Interval
   if (isTransitRushHour() && cats.includes('transit')) {
@@ -870,6 +886,9 @@ async function showLiveDataWidget(categoryFilter) {
   liveDataState.lastInsertTime = Date.now();
   if (categoryFilter === 'transit') {
     liveDataState.lastTransitInsertTime = Date.now(); // Rush-Hour-Timer aktualisieren
+  }
+  if (categoryFilter === 'news') {
+    liveDataState.lastNewsInsertTime = Date.now(); // Nachrichten-Morgen-Timer aktualisieren
   }
   const cats = getActiveLiveCategories();
   if (cats.length > 0) {
