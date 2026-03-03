@@ -2528,6 +2528,12 @@ async function showPostForm() {
   const bgThemeSelect = document.getElementById('bg-theme');
   if (bgThemeSelect) bgThemeSelect.value = 'light';
 
+  // Titel-Font-Selects zurücksetzen
+  const titleFontSizeSelect = document.getElementById('title-font-size');
+  if (titleFontSizeSelect) titleFontSizeSelect.value = '';
+  const titleFontFamilySelect = document.getElementById('title-font-family');
+  if (titleFontFamilySelect) titleFontFamilySelect.value = '';
+
   // Start- und Enddatum leer lassen (kein Vorschlag)
   document.getElementById('start-date').value = '';
   document.getElementById('end-date').value = '';
@@ -2535,6 +2541,12 @@ async function showPostForm() {
   // Display-Auswahl auf "alle" zurücksetzen
   document.getElementById('display-mode-all').checked = true;
   document.getElementById('display-selection-container').style.display = 'none';
+
+  // Editor + Upload-Sektion für Standard-Typ (text) initialisieren
+  const postTypeSelect = document.getElementById('post-type');
+  if (postTypeSelect) updateUploadSectionVisibility(postTypeSelect.value);
+  // Quill-Inhalt leeren
+  if (postContentQuill) postContentQuill.setText('');
 
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
@@ -5110,8 +5122,6 @@ window.addEventListener('load', async () => {
 
   // Hintergrundmusik-Steuerung initialisieren
   initBackgroundMusicControls();
-  // Quill Rich-Text-Editor initialisieren
-  initQuillEditor();
 
   // Display-Einstellungen speichern
   const saveDisplaySettingsBtn = document.getElementById('saveDisplaySettings');
