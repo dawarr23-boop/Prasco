@@ -3081,7 +3081,7 @@ async function displayCurrentPost() {
         .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
       const layersHtml = sortedLayers.map(renderCompositeLayer).join('');
       html = `<div class="composite-canvas" style="background:${escapeHtml(bgColor)}">${layersHtml}</div>`;
-      // Composite-Canvas ist position:fixed und überdeckt Header/Footer automatisch
+      // Composite-Canvas füllt den Post-Bereich (position:absolute relativ zu .post.type-composite)
       break;
     }
 
