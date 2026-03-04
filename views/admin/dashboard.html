@@ -824,7 +824,7 @@
                     id="display-identifier" 
                     name="identifier" 
                     required 
-                    pattern="[a-zA-Z0-9_-]+"
+                    pattern="[-a-zA-Z0-9_]+"
                     placeholder="z.B. empfangsbereich-1" 
                     title="Nur Buchstaben, Zahlen, Bindestriche und Unterstriche"
                     data-translate-placeholder="displays.identifierPlaceholder"
@@ -946,7 +946,7 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="user-email" data-translate="users.email">E-Mail *</label>
-                    <input type="email" id="user-email" name="email" required />
+                    <input type="email" id="user-email" name="email" autocomplete="username" required />
                   </div>
 
                   <div class="form-group">
@@ -1582,7 +1582,7 @@
                 <div id="ai-config" style="display: none;">
                   <div class="form-group">
                     <label for="ai-api-key" data-translate="settings.aiApiKey">OpenAI API-Key</label>
-                    <input type="password" id="ai-api-key" placeholder="sk-..." autocomplete="off" />
+                    <input type="text" id="ai-api-key" placeholder="sk-..." autocomplete="off" spellcheck="false" style="font-family: monospace;" />
                     <small style="color: #666;">Erhältlich unter <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #58585a;">platform.openai.com/api-keys</a></small>
                   </div>
                   <div id="ai-key-status" style="margin-bottom: 1rem;"></div>
@@ -1987,6 +1987,7 @@
           <button class="modal-close" id="closePasswordModal">&times;</button>
         </div>
         <form id="changePasswordForm">
+          <input type="hidden" name="username" autocomplete="username" />
           <div class="form-group">
             <label for="current-password">Aktuelles Passwort *</label>
             <input type="password" id="current-password" name="currentPassword" autocomplete="current-password" required />
