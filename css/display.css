@@ -323,17 +323,23 @@
 html {
   /* Dynamische Basis-Schriftgröße: skaliert zwischen 12px (bei 720px Breite) und 20px (bei 3840px) */
   font-size: clamp(12px, calc(10px + 0.4vw + 0.3vh), 22px);
+  margin: 0;
+  padding: 0;
 }
 
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-primary);
   background: var(--prasco-gray-bg);
   color: var(--text-color);
   overflow: hidden;
   height: 100vh;
+  width: 100%;
 }
 
 #bulletin-board {
+  width: 100%;
   height: 100vh;
   display: flex;
   flex-direction: column;
