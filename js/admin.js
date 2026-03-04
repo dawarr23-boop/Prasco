@@ -7666,7 +7666,7 @@ function initLayerBuilder() {
       const field = el.dataset.lbField;
       const layer = layerBuilderLayers[idx];
       if (!layer || !field) return;
-      if (field === 'x' || field === 'y' || field === 'w' || field === 'h') {
+      if (field === 'x' || field === 'y' || field === 'w' || field === 'h' || field === 'delay' || field === 'duration') {
         layer[field] = parseFloat(el.value) || 0;
       } else if (field.startsWith('style.')) {
         const styleKey = field.slice(6);
@@ -7739,6 +7739,9 @@ function lbAddLayer(type) {
     type,
     ...defaults[type] || defaults.text,
     zIndex: layerBuilderLayers.length,
+    delay: 0,
+    duration: 0,
+    transition: 'none',
   };
   _lbSelectedLayerIdx = layerBuilderLayers.length; // neuen Layer direkt selektieren
   layerBuilderLayers.push(layer);
@@ -7823,6 +7826,32 @@ function lbRenderDOM() {
         </div>`;
     }
 
+    // Zeitsteuerung
+    const tr = layer.transition || 'none';
+    const timingHtml = `
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem 1.2rem;margin-top:0.6rem;padding-top:0.5rem;border-top:1px dashed #ddd;">
+        <div class="lb-pos-field">
+          <label title="Sekunden nach Post-Start, bevor dieser Layer erscheint">Einblenden nach (s)</label>
+          <input type="number" min="0" max="120" step="0.5" value="${layer.delay || 0}" style="width:62px;" data-lb-layer="${idx}" data-lb-field="delay">
+        </div>
+        <div class="lb-pos-field">
+          <label title="Sichtbar für X Sekunden, dann ausblenden. 0 = immer sichtbar">Dauer (s, 0=immer)</label>
+          <input type="number" min="0" max="600" step="0.5" value="${layer.duration || 0}" style="width:62px;" data-lb-layer="${idx}" data-lb-field="duration">
+        </div>
+        <div class="lb-pos-field">
+          <label>Übergang</label>
+          <select data-lb-layer="${idx}" data-lb-field="transition" style="padding:0.22rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;">
+            <option value="none"${tr==='none'?' selected':''}>Kein</option>
+            <option value="fade"${tr==='fade'?' selected':''}>Einblenden (Fade)</option>
+            <option value="slide-left"${tr==='slide-left'?' selected':''}>Von links</option>
+            <option value="slide-right"${tr==='slide-right'?' selected':''}>Von rechts</option>
+            <option value="slide-up"${tr==='slide-up'?' selected':''}>Von oben</option>
+            <option value="slide-down"${tr==='slide-down'?' selected':''}>Von unten</option>
+            <option value="zoom"${tr==='zoom'?' selected':''}>Zoom</option>
+          </select>
+        </div>
+      </div>`;
+
     return `
       <div class="lb-layer-card${isSelected ? ' lb-card-selected' : ''}">
         <div class="lb-layer-header" data-lb-select="${idx}" title="Klicken zum Auswählen, dann im Vorschau-Canvas ziehen">
@@ -7841,6 +7870,7 @@ function lbRenderDOM() {
           </div>
           ${contentHtml}
           ${styleHtml}
+          ${timingHtml}
         </div>
       </div>`;
   }).join('');

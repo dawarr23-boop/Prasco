@@ -1575,16 +1575,26 @@ function renderCompositeLayer(layer) {
   const extraStyle = extraParts.join(';');
   const fullStyle = posStyle + (extraStyle ? extraStyle + ';' : '');
 
+  // Zeitliche Attribute (delay/duration/transition) – für startCompositeLayerAnimations
+  const delay = parseFloat(layer.delay || 0);
+  const duration = parseFloat(layer.duration || 0);
+  const transition = layer.transition || 'none';
+  const needsAnim = delay > 0 || transition !== 'none';
+  const dataAttrs = ` data-lb-delay="${delay}" data-lb-duration="${duration}" data-lb-transition="${transition}"${needsAnim ? ' style="opacity:0"' : ''}`;
+
+  let html;
   switch (layer.type) {
     case 'text': {
       const isHtml = (layer.content || '').trimStart().startsWith('<');
       const body = isHtml
         ? layer.content
         : escapeHtml(layer.content || '').replace(/\n/g, '<br>');
-      return `<div class="composite-layer composite-layer-text" style="${fullStyle}">${body}</div>`;
+      html = `<div class="composite-layer composite-layer-text" style="${fullStyle}">${body}</div>`;
+      break;
     }
     case 'image':
-      return `<div class="composite-layer" style="${posStyle}"><img src="${escapeHtml(layer.src || '')}" style="width:100%;height:100%;object-fit:${layer.fit || 'cover'}" alt=""></div>`;
+      html = `<div class="composite-layer" style="${posStyle}"><img src="${escapeHtml(layer.src || '')}" style="width:100%;height:100%;object-fit:${layer.fit || 'cover'}" alt=""></div>`;
+      break;
     case 'ticker': {
       const rawItems = Array.isArray(layer.items)
         ? layer.items
@@ -1592,13 +1602,61 @@ function renderCompositeLayer(layer) {
       const tickerContent = rawItems.map(i => `<span class="composite-ticker-item">${escapeHtml(i)}</span>`).join('');
       const bg = (layer.style && layer.style['background-color']) || '#009640';
       const col = (layer.style && layer.style.color) || '#fff';
-      return `<div class="composite-layer composite-layer-ticker" style="${posStyle}background:${bg};color:${col};"><div class="composite-ticker-inner">${tickerContent}${tickerContent}</div></div>`;
+      html = `<div class="composite-layer composite-layer-ticker" style="${posStyle}background:${bg};color:${col};"><div class="composite-ticker-inner">${tickerContent}${tickerContent}</div></div>`;
+      break;
     }
     case 'html':
-      return `<div class="composite-layer" style="${fullStyle}">${layer.content || ''}</div>`;
+      html = `<div class="composite-layer" style="${fullStyle}">${layer.content || ''}</div>`;
+      break;
     default:
       return '';
   }
+  // Data-Attribute in das äußere <div> injizieren
+  return html.replace(/^<div /, `<div${dataAttrs} `);
+}
+
+/**
+ * Startet zeitgesteuerte Ein-/Ausblend-Animationen für Layer im Composite-Canvas.
+ * Liest data-lb-delay (s), data-lb-duration (s), data-lb-transition aus dem DOM.
+ */
+function startCompositeLayerAnimations(canvas) {
+  canvas.querySelectorAll('.composite-layer').forEach(el => {
+    const delay      = parseFloat(el.dataset.lbDelay      || 0) * 1000;
+    const duration   = parseFloat(el.dataset.lbDuration   || 0) * 1000;
+    const transition = el.dataset.lbTransition || 'none';
+    const animInClass  = transition !== 'none' ? `lb-anim-${transition}` : null;
+    const animOutClass = transition === 'zoom'  ? 'lb-anim-zoom-out' : 'lb-anim-fadeout';
+
+    const showEl = () => {
+      el.style.opacity = '';
+      el.style.pointerEvents = '';
+      if (animInClass) {
+        el.classList.remove(animInClass); // reset falls bereits vorhanden
+        void el.offsetWidth;             // reflow
+        el.classList.add(animInClass);
+      }
+    };
+
+    const hideEl = () => {
+      el.style.pointerEvents = 'none';
+      if (animInClass) el.classList.remove(animInClass);
+      el.classList.add(animOutClass);
+    };
+
+    if (delay > 0) {
+      el.style.opacity = '0';
+      el.style.pointerEvents = 'none';
+      setTimeout(showEl, delay);
+    } else if (animInClass) {
+      // Direkt beim Start einblenden (nächster Frame für CSS-Transition)
+      el.style.opacity = '0';
+      requestAnimationFrame(() => requestAnimationFrame(showEl));
+    }
+
+    if (duration > 0) {
+      setTimeout(hideEl, delay + duration);
+    }
+  });
 }
 
 // Lade globale Musik-Einstellungen aus LocalStorage
@@ -3082,6 +3140,7 @@ async function displayCurrentPost() {
       const layersHtml = sortedLayers.map(renderCompositeLayer).join('');
       html = `<div class="composite-canvas" style="background:${escapeHtml(bgColor)}">${layersHtml}</div>`;
       // Composite-Canvas füllt den Post-Bereich (position:absolute relativ zu .post.type-composite)
+      // Animationen werden nach DOM-Insertion gestartet (siehe unten)
       break;
     }
 
@@ -3105,6 +3164,10 @@ async function displayCurrentPost() {
   while (tempDiv.firstChild) {
     container.appendChild(tempDiv.firstChild);
   }
+
+  // Composite Layer Animationen starten (Delay, Dauer, Übergang)
+  const compositeCanvas = container.querySelector('.composite-canvas');
+  if (compositeCanvas) startCompositeLayerAnimations(compositeCanvas);
 
   // Update Post Counter
   updatePostCounter();
