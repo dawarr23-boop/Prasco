@@ -4069,7 +4069,8 @@ async function loadDisplays() {
 }
 
 function updateDisplayLicenseInfo() {
-  const count = displaysCache.length;
+  // Nur sichtbare (nicht versteckte) Displays zählen für Lizenz
+  const count = displaysCache.filter(d => !d.isHidden).length;
   const licenseUsed = document.getElementById('display-license-used');
   if (licenseUsed) licenseUsed.textContent = count;
 

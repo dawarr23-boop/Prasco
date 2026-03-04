@@ -184,9 +184,9 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
-    // License check: max 2 displays
+    // License check: max 2 visible (non-hidden) customer displays
     const MAX_LICENSED_DISPLAYS = 2;
-    const displayCount = await Display.count();
+    const displayCount = await Display.count({ where: { isHidden: false } });
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
         `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter kontakt@it-westfalen.de, um weitere Display-Lizenzen zu erwerben.`,
