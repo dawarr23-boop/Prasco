@@ -3386,7 +3386,7 @@ async function showPostPreview(id) {
 
   switch (ct) {
     case 'text': {
-      const isRteHtml = (post.content || '').trimStart().startsWith('<');
+      const isRteHtml = /<[a-zA-Z][^>]*>/.test(post.content || '');
       const previewBody = isRteHtml
         ? (post.content || '')
         : escapeHtml(post.content || '').replace(/\n/g, '<br>');
