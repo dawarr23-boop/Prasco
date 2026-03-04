@@ -132,6 +132,7 @@ export const getDisplayByIdentifier = async (
         'identifier',
         'description',
         'isActive',
+        'authorizationStatus',
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
