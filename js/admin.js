@@ -7752,7 +7752,12 @@ function lbRenderDOM() {
     } else if (layer.type === 'image') {
       contentHtml = `
         <div class="lb-content-label">Bild-URL</div>
-        <input type="text" style="width:100%;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;" data-lb-layer="${idx}" data-lb-field="src" value="${escapeHtmlAttr(layer.src || '')}" placeholder="/uploads/datei.jpg">
+        <div style="display:flex;gap:0.4rem;align-items:center;">
+          <input type="text" style="flex:1;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;" data-lb-layer="${idx}" data-lb-field="src" value="${escapeHtmlAttr(layer.src || '')}" placeholder="/uploads/datei.jpg">
+          <button type="button" onclick="lbUploadLayerImage(${idx})" style="white-space:nowrap;padding:0.28rem 0.65rem;font-size:0.8rem;border:1px solid #4a7c4a;border-radius:4px;background:#4a7c4a;color:#fff;cursor:pointer;" title="Bild hochladen">📁 Hochladen</button>
+          <input type="file" id="lb-img-upload-${idx}" accept="image/*" style="display:none;" onchange="lbHandleImageUpload(event,${idx})">
+        </div>
+        <div id="lb-upload-status-${idx}" style="font-size:0.78rem;margin-top:0.25rem;min-height:1.1em;"></div>
         <div style="margin-top:0.35rem;display:flex;align-items:center;gap:0.5rem;">
           <label style="font-size:0.78rem;color:#666;margin:0;">Anpassung:</label>
           <select style="padding:0.22rem 0.4rem;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;" data-lb-layer="${idx}" data-lb-field="fit">
@@ -7956,6 +7961,44 @@ function lbCanvasMousemove(e) {
 
 function lbCanvasMouseup() {
   _lbDragState = null;
+}
+
+// Layer-Builder: Bild-Upload
+function lbUploadLayerImage(idx) {
+  const fileInput = document.getElementById(`lb-img-upload-${idx}`);
+  if (fileInput) fileInput.click();
+}
+
+async function lbHandleImageUpload(event, idx) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`lb-upload-status-${idx}`);
+  if (statusEl) { statusEl.style.color = '#888'; statusEl.textContent = '⏳ Wird hochgeladen…'; }
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('/api/media/upload', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` },
+      body: formData
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+    const url = result.data?.url || result.url || result.data?.originalUrl;
+    if (!url) throw new Error('Keine URL in der Antwort');
+    // URL ins Feld und in den Layer übernehmen
+    const inp = document.querySelector(`[data-lb-layer="${idx}"][data-lb-field="src"]`);
+    if (inp) { inp.value = url; inp.dispatchEvent(new Event('input', { bubbles: true })); }
+    layerBuilderLayers[idx].src = url;
+    renderLayerBuilderPreview();
+    if (statusEl) { statusEl.style.color = '#4a7c4a'; statusEl.textContent = '✓ Hochgeladen'; }
+    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+  } catch (err) {
+    if (statusEl) { statusEl.style.color = '#dc3545'; statusEl.textContent = '❌ ' + err.message; }
+    console.error('Layer-Bild Upload Fehler:', err);
+  }
+  // Input zurücksetzen damit dasselbe Bild erneut hochgeladen werden kann
+  event.target.value = '';
 }
 
 function lbSyncInputsForLayer(idx) {
