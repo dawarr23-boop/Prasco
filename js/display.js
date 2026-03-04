@@ -1115,20 +1115,24 @@ async function buildLiveTickerParts() {
     const stationName = ts['transit.stationName'] || '';
     if (stationId) {
       try {
-        const res = await fetch(`/api/transit/departures/${stationId}?results=6&duration=60`);
+        const res = await fetch(`/api/transit/departures/${stationId}?limit=20&duration=120`);
         if (res.ok) {
           const data = await res.json();
           // Nur Verspätungen und Ausfälle anzeigen
           const deps = (data.data || []).filter(dep =>
-            dep.cancelled || (dep.delay && dep.delay > 60)
+            dep.cancelled || dep.isDelayed || (dep.delay && dep.delay > 60)
           ).slice(0, 6);
           if (deps.length > 0) {
             const items = deps.map(dep => {
               const line = dep.line?.name || dep.line?.fahrtNr || '?';
               const dir = dep.direction || '';
               if (dep.cancelled) return `❌ ${line} → ${dir}: ausgefallen`;
-              const delayMin = Math.round(dep.delay / 60);
-              return `⚠️ ${line} → ${dir}: +${delayMin} min`;
+              // Verspätung in Minuten: aus delay (Sekunden) oder when vs plannedWhen
+              let delayMin = dep.delay ? Math.round(dep.delay / 60) : 0;
+              if (!delayMin && dep.when && dep.plannedWhen) {
+                delayMin = Math.round((new Date(dep.when) - new Date(dep.plannedWhen)) / 60000);
+              }
+              return `⚠️ ${line} → ${dir}: +${delayMin || '?'} min`;
             }).filter(Boolean);
             if (items.length > 0) {
               const label = stationName ? `🚨 ${stationName}: ` : '🚨 ';
