@@ -446,34 +446,41 @@
                 <!-- Layer-Builder (nur für Typ "composite") -->
                 <div id="layer-builder" style="display:none;margin-top:0.25rem;">
                   <label style="font-weight:600;margin-bottom:0.75rem;display:block;">🎨 Layer-Komposition</label>
-                  <div class="form-row" style="align-items:flex-end;margin-bottom:0.75rem;">
-                    <div class="form-group" style="flex:0 0 auto;">
-                      <label for="lb-bg-color">Hintergrund</label>
-                      <div style="display:flex;gap:0.5rem;align-items:center;">
-                        <input type="color" id="lb-bg-color" value="#1a1a2e" style="width:44px;height:36px;padding:2px;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
-                        <input type="text" id="lb-bg-hex" value="#1a1a2e" style="width:90px;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-family:monospace;">
+
+                  <div class="lb-split">
+                    <!-- Linke Spalte: Karten + Steuerung -->
+                    <div class="lb-split-left">
+                      <div class="form-row" style="align-items:flex-end;margin-bottom:0.25rem;">
+                        <div class="form-group" style="flex:0 0 auto;">
+                          <label for="lb-bg-color">Hintergrund</label>
+                          <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <input type="color" id="lb-bg-color" value="#1a1a2e" style="width:44px;height:36px;padding:2px;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+                            <input type="text" id="lb-bg-hex" value="#1a1a2e" style="width:90px;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-family:monospace;">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div id="lb-layers-list" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+
+                      <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;">
+                        <select id="lb-new-type" style="padding:0.4rem 0.75rem;border:1px solid #ddd;border-radius:4px;background:#fff;flex:1;">
+                          <option value="text">📝 Text / HTML</option>
+                          <option value="image">🖼️ Bild</option>
+                          <option value="ticker">📢 Laufschrift</option>
+                          <option value="html">🔖 HTML-Block</option>
+                        </select>
+                        <button type="button" id="lb-add-btn" class="btn btn-secondary" style="white-space:nowrap;">＋ Hinzufügen</button>
                       </div>
                     </div>
-                    <div class="form-group">
-                      <small style="color:#777;">Koordinaten in % (0–100) → skaliert auf jede Displaygröße</small>
+
+                    <!-- Rechte Spalte: interaktiver Vorschau-Canvas -->
+                    <div class="lb-split-right">
+                      <label style="font-weight:500;font-size:0.85rem;margin-bottom:0.3rem;display:block;">
+                        Vorschau — Layer anklicken &amp; ziehen
+                      </label>
+                      <div id="lb-preview-canvas" style="position:relative;padding-top:56.25%;border:2px solid #ddd;border-radius:6px;overflow:hidden;background:#1a1a2e;"></div>
+                      <div id="lb-coord-bar" class="lb-coord-bar">Layer anklicken zum Auswählen, dann ziehen oder Pfeiltasten</div>
                     </div>
-                  </div>
-
-                  <div id="lb-layers-list" style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:0.75rem;"></div>
-
-                  <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem;">
-                    <select id="lb-new-type" style="padding:0.4rem 0.75rem;border:1px solid #ddd;border-radius:4px;background:#fff;">
-                      <option value="text">📝 Text / RTE</option>
-                      <option value="image">🖼️ Bild</option>
-                      <option value="ticker">📢 Laufschrift</option>
-                      <option value="html">🔖 HTML</option>
-                    </select>
-                    <button type="button" id="lb-add-btn" class="btn btn-secondary" style="white-space:nowrap;">＋ Layer hinzufügen</button>
-                  </div>
-
-                  <div>
-                    <label style="font-weight:500;font-size:0.9rem;margin-bottom:0.4rem;display:block;">Schematische Vorschau</label>
-                    <div id="lb-preview-canvas" style="position:relative;padding-top:56.25%;border:2px solid #ddd;border-radius:6px;overflow:hidden;background:#1a1a2e;"></div>
                   </div>
                 </div>
 

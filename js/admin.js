@@ -2084,6 +2084,8 @@ let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
 let rteEditorEl = null; // Native Rich-Text-Editor Instanz
 let layerBuilderLayers = []; // Layer-Builder Zustand für Kompositions-Posts
+let _lbSelectedLayerIdx = null; // Selektierter Layer-Index im Builder
+let _lbDragState = null; // Aktueller Drag/Resize-Zustand
 
 // ============================================
 // Bulk Selection & Context Menu
@@ -2550,6 +2552,8 @@ async function showPostForm() {
   if (rteEditorEl) rteEditorEl.innerHTML = '';
   // Layer-Builder zurücksetzen
   layerBuilderLayers = [];
+  _lbSelectedLayerIdx = null;
+  _lbDragState = null;
   const lbList = document.getElementById('lb-layers-list');
   if (lbList) lbList.innerHTML = '';
   const lbPreview = document.getElementById('lb-preview-canvas');
@@ -7628,12 +7632,18 @@ function initLayerBuilder() {
       const idx = parseInt(btn.dataset.lbIdx);
       if (action === 'delete') {
         layerBuilderLayers.splice(idx, 1);
+        if (_lbSelectedLayerIdx === idx) _lbSelectedLayerIdx = null;
+        else if (_lbSelectedLayerIdx > idx) _lbSelectedLayerIdx--;
         lbRenderDOM();
       } else if (action === 'up' && idx > 0) {
         [layerBuilderLayers[idx - 1], layerBuilderLayers[idx]] = [layerBuilderLayers[idx], layerBuilderLayers[idx - 1]];
+        if (_lbSelectedLayerIdx === idx) _lbSelectedLayerIdx = idx - 1;
+        else if (_lbSelectedLayerIdx === idx - 1) _lbSelectedLayerIdx = idx;
         lbRenderDOM();
       } else if (action === 'down' && idx < layerBuilderLayers.length - 1) {
         [layerBuilderLayers[idx], layerBuilderLayers[idx + 1]] = [layerBuilderLayers[idx + 1], layerBuilderLayers[idx]];
+        if (_lbSelectedLayerIdx === idx) _lbSelectedLayerIdx = idx + 1;
+        else if (_lbSelectedLayerIdx === idx + 1) _lbSelectedLayerIdx = idx;
         lbRenderDOM();
       }
     });
@@ -7663,7 +7673,46 @@ function initLayerBuilder() {
       }
       lbUpdatePreview();
     });
+
+    // Klick auf Karten-Kopf → Layer selektieren
+    list.addEventListener('click', (e) => {
+      if (e.target.closest('[data-lb-action]')) return; // Buttons behandelt oben
+      const hdr = e.target.closest('[data-lb-select]');
+      if (!hdr) return;
+      const idx = parseInt(hdr.dataset.lbSelect);
+      _lbSelectedLayerIdx = _lbSelectedLayerIdx === idx ? null : idx;
+      lbUpdatePreview();
+      lbHighlightSelectedCard();
+    });
   }
+
+  // Drag & Resize auf Preview-Canvas
+  const previewCanvas = document.getElementById('lb-preview-canvas');
+  if (previewCanvas) {
+    previewCanvas.addEventListener('mousedown', lbCanvasMousedown);
+    document.addEventListener('mousemove', lbCanvasMousemove);
+    document.addEventListener('mouseup',   lbCanvasMouseup);
+  }
+
+  // Pfeiltasten: selektierten Layer bewegen
+  document.addEventListener('keydown', (e) => {
+    if (_lbSelectedLayerIdx === null) return;
+    const lb = document.getElementById('layer-builder');
+    if (!lb || lb.style.display === 'none') return;
+    const layer = layerBuilderLayers[_lbSelectedLayerIdx];
+    if (!layer) return;
+    const step = e.shiftKey ? 5 : 1;
+    let moved = false;
+    if (e.key === 'ArrowLeft')  { layer.x = Math.max(0, layer.x - step);               moved = true; }
+    if (e.key === 'ArrowRight') { layer.x = Math.min(100 - layer.w, layer.x + step);   moved = true; }
+    if (e.key === 'ArrowUp')    { layer.y = Math.max(0, layer.y - step);               moved = true; }
+    if (e.key === 'ArrowDown')  { layer.y = Math.min(100 - layer.h, layer.y + step);   moved = true; }
+    if (moved) {
+      e.preventDefault();
+      lbUpdatePreview();
+      lbSyncInputsForLayer(_lbSelectedLayerIdx);
+    }
+  });
 }
 
 function lbAddLayer(type) {
@@ -7679,6 +7728,7 @@ function lbAddLayer(type) {
     ...defaults[type] || defaults.text,
     zIndex: layerBuilderLayers.length,
   };
+  _lbSelectedLayerIdx = layerBuilderLayers.length; // neuen Layer direkt selektieren
   layerBuilderLayers.push(layer);
   lbRenderDOM();
 }
@@ -7686,10 +7736,16 @@ function lbAddLayer(type) {
 function lbRenderDOM() {
   const list = document.getElementById('lb-layers-list');
   if (!list) return;
+  if (layerBuilderLayers.length === 0) {
+    list.innerHTML = '<div class="lb-empty-hint">Noch keine Layer — Typ wählen und "＋ Layer hinzufügen" klicken.</div>';
+    lbUpdatePreview();
+    return;
+  }
   const typeLabels = { text: 'TEXT', image: 'BILD', ticker: 'TICKER', html: 'HTML' };
   list.innerHTML = layerBuilderLayers.map((layer, idx) => {
     const typeClass = `type-${layer.type}`;
     const typeLabel = typeLabels[layer.type] || layer.type.toUpperCase();
+    const isSelected = _lbSelectedLayerIdx === idx;
 
     // Content-Bereich je nach Typ
     let contentHtml = '';
@@ -7751,10 +7807,10 @@ function lbRenderDOM() {
     }
 
     return `
-      <div class="lb-layer-card">
-        <div class="lb-layer-header">
+      <div class="lb-layer-card${isSelected ? ' lb-card-selected' : ''}">
+        <div class="lb-layer-header" data-lb-select="${idx}" title="Klicken zum Auswählen, dann im Vorschau-Canvas ziehen">
           <span class="lb-layer-type-badge ${typeClass}">${typeLabel}</span>
-          <span class="lb-layer-title">Layer ${idx + 1}</span>
+          <span class="lb-layer-title">Layer ${idx + 1}${isSelected ? ' ✓' : ''}</span>
           <button type="button" class="lb-btn-icon" data-lb-action="up" data-lb-idx="${idx}" title="Nach oben" ${idx === 0 ? 'disabled' : ''}>&#8593;</button>
           <button type="button" class="lb-btn-icon" data-lb-action="down" data-lb-idx="${idx}" title="Nach unten" ${idx === layerBuilderLayers.length - 1 ? 'disabled' : ''}>&#8595;</button>
           <button type="button" class="lb-btn-icon delete" data-lb-action="delete" data-lb-idx="${idx}" title="Layer löschen">×</button>
@@ -7779,24 +7835,150 @@ function lbUpdatePreview() {
   if (!canvas) return;
   const bgColor = document.getElementById('lb-bg-color')?.value || '#1a1a2e';
   canvas.style.background = bgColor;
-  // Entferne vorhandene Layer-Vorschauen
   canvas.querySelectorAll('.lb-preview-layer').forEach(el => el.remove());
-  layerBuilderLayers.forEach((layer) => {
+
+  const typeNames = { text: 'TEXT', image: 'BILD', ticker: 'TICKER', html: 'HTML' };
+
+  layerBuilderLayers.forEach((layer, idx) => {
+    const isSelected = _lbSelectedLayerIdx === idx;
     const div = document.createElement('div');
-    div.className = `lb-preview-layer type-${layer.type}`;
-    div.style.left   = layer.x + '%';
-    div.style.top    = layer.y + '%';
-    div.style.width  = layer.w + '%';
-    div.style.height = layer.h + '%';
-    div.style.zIndex = layer.zIndex || 0;
-    const typeNames = { text: 'TEXT', image: 'BILD', ticker: 'TICKER', html: 'HTML' };
-    div.textContent = typeNames[layer.type] || layer.type;
+    div.className = `lb-preview-layer type-${layer.type}${isSelected ? ' lb-selected' : ''}`;
+    div.dataset.lbPreviewIdx = idx;
+    div.style.cssText = `left:${layer.x}%;top:${layer.y}%;width:${layer.w}%;height:${layer.h}%;z-index:${(layer.zIndex || 0) + 1};`;
+
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'lb-preview-label';
+    labelDiv.innerHTML = `<span class="lb-preview-label-name">${typeNames[layer.type] || layer.type}</span><span class="lb-preview-label-pos lb-pos-readout">${layer.x},${layer.y} • ${layer.w}×${layer.h}</span>`;
+    div.appendChild(labelDiv);
+
+    // Resize-Handles nur für selektierten Layer
+    if (isSelected) {
+      ['nw','n','ne','e','se','s','sw','w'].forEach(h => {
+        const handle = document.createElement('div');
+        handle.className = `lb-resize-handle ${h}`;
+        handle.dataset.lbHandle = h;
+        div.appendChild(handle);
+      });
+    }
+
     canvas.appendChild(div);
+  });
+
+  // Koordinatenanzeige aktualisieren
+  const coordBar = document.getElementById('lb-coord-bar');
+  if (coordBar) {
+    if (_lbSelectedLayerIdx !== null && layerBuilderLayers[_lbSelectedLayerIdx]) {
+      const l = layerBuilderLayers[_lbSelectedLayerIdx];
+      coordBar.textContent = `Layer ${_lbSelectedLayerIdx + 1}: X=${l.x}%  Y=${l.y}%  B=${l.w}%  H=${l.h}%  —  Pfeiltasten bewegen, Shift+Pfeiltaste = 5%`;
+    } else {
+      coordBar.textContent = 'Layer anklicken zum Auswählen, dann ziehen oder Pfeiltasten';
+    }
+  }
+}
+
+// ── Layer-Builder Drag & Resize ──────────────────────────────────
+function lbCanvasMousedown(e) {
+  const canvas = document.getElementById('lb-preview-canvas');
+  if (!canvas) return;
+  const handleEl = e.target.closest('[data-lb-handle]');
+  const layerEl  = e.target.closest('[data-lb-preview-idx]');
+
+  if (!layerEl) {
+    // Klick auf leere Canvas-Fläche → Selektion aufheben
+    _lbSelectedLayerIdx = null;
+    lbUpdatePreview();
+    lbHighlightSelectedCard();
+    return;
+  }
+
+  const idx = parseInt(layerEl.dataset.lbPreviewIdx);
+  _lbSelectedLayerIdx = idx;
+  lbUpdatePreview();
+  lbHighlightSelectedCard();
+
+  const rect = canvas.getBoundingClientRect();
+  const startMouseX = (e.clientX - rect.left) / rect.width  * 100;
+  const startMouseY = (e.clientY - rect.top)  / rect.height * 100;
+  const layer = layerBuilderLayers[idx];
+
+  _lbDragState = {
+    idx,
+    handle:      handleEl ? handleEl.dataset.lbHandle : 'move',
+    startMouseX, startMouseY,
+    startX: layer.x, startY: layer.y,
+    startW: layer.w, startH: layer.h,
+    canvasEl: canvas,
+  };
+  e.preventDefault();
+}
+
+function lbCanvasMousemove(e) {
+  if (!_lbDragState) return;
+  const { idx, handle, startMouseX, startMouseY, startX, startY, startW, startH, canvasEl } = _lbDragState;
+  const rect = canvasEl.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width  * 100;
+  const my = (e.clientY - rect.top)  / rect.height * 100;
+  const dx = mx - startMouseX;
+  const dy = my - startMouseY;
+  const layer = layerBuilderLayers[idx];
+
+  if (handle === 'move') {
+    layer.x = Math.round(Math.max(0, Math.min(100 - startW, startX + dx)));
+    layer.y = Math.round(Math.max(0, Math.min(100 - startH, startY + dy)));
+    layer.w = startW;
+    layer.h = startH;
+  } else {
+    let newX = startX, newY = startY, newW = startW, newH = startH;
+    if (handle.includes('e')) newW = Math.max(5, Math.min(100 - startX,       startW + dx));
+    if (handle.includes('s')) newH = Math.max(5, Math.min(100 - startY,       startH + dy));
+    if (handle.includes('w')) {
+      newX = Math.max(0, Math.min(startX + startW - 5, startX + dx));
+      newW = startX + startW - newX;
+    }
+    if (handle.includes('n')) {
+      newY = Math.max(0, Math.min(startY + startH - 5, startY + dy));
+      newH = startY + startH - newY;
+    }
+    layer.x = Math.round(newX); layer.y = Math.round(newY);
+    layer.w = Math.round(newW); layer.h = Math.round(newH);
+  }
+
+  // Schnelles DOM-Update (kein volles Re-Render für Performance)
+  const layerEl = canvasEl.querySelector(`[data-lb-preview-idx="${idx}"]`);
+  if (layerEl) {
+    layerEl.style.left   = layer.x + '%';
+    layerEl.style.top    = layer.y + '%';
+    layerEl.style.width  = layer.w + '%';
+    layerEl.style.height = layer.h + '%';
+    const readout = layerEl.querySelector('.lb-pos-readout');
+    if (readout) readout.textContent = `${layer.x},${layer.y} • ${layer.w}×${layer.h}`;
+  }
+  const coordBar = document.getElementById('lb-coord-bar');
+  if (coordBar) coordBar.textContent = `Layer ${idx + 1}: X=${layer.x}%  Y=${layer.y}%  B=${layer.w}%  H=${layer.h}%`;
+
+  lbSyncInputsForLayer(idx);
+}
+
+function lbCanvasMouseup() {
+  _lbDragState = null;
+}
+
+function lbSyncInputsForLayer(idx) {
+  const layer = layerBuilderLayers[idx];
+  if (!layer) return;
+  ['x','y','w','h'].forEach(f => {
+    const inp = document.querySelector(`[data-lb-layer="${idx}"][data-lb-field="${f}"]`);
+    if (inp) inp.value = layer[f];
+  });
+}
+
+function lbHighlightSelectedCard() {
+  document.querySelectorAll('#lb-layers-list .lb-layer-card').forEach((card, idx) => {
+    card.classList.toggle('lb-card-selected', idx === _lbSelectedLayerIdx);
   });
 }
 
 function buildCompositeJson() {
-  const bg = document.getElementById('lb-bg-color')?.value || '#1a1a2e';
   const layers = layerBuilderLayers.map((layer, idx) => {
     const out = {
       id: layer.id,
