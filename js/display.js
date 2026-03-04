@@ -1118,26 +1118,20 @@ async function buildLiveTickerParts() {
         const res = await fetch(`/api/transit/departures/${stationId}?results=6&duration=60`);
         if (res.ok) {
           const data = await res.json();
-          const deps = (data.data || []).slice(0, 6);
+          // Nur Verspätungen und Ausfälle anzeigen
+          const deps = (data.data || []).filter(dep =>
+            dep.cancelled || (dep.delay && dep.delay > 60)
+          ).slice(0, 6);
           if (deps.length > 0) {
             const items = deps.map(dep => {
-              if (dep.cancelled) return null;
               const line = dep.line?.name || dep.line?.fahrtNr || '?';
               const dir = dep.direction || '';
-              const when = dep.when || dep.plannedWhen;
-              let minText = '';
-              if (when) {
-                const diffMs = new Date(when) - Date.now();
-                const diffMin = Math.round(diffMs / 60000);
-                if (diffMin <= 0) minText = 'jetzt';
-                else if (diffMin === 1) minText = '1 min';
-                else minText = `${diffMin} min`;
-                if (dep.delay && dep.delay > 60) minText += ` (+${Math.round(dep.delay / 60)})`;
-              }
-              return `${line} → ${dir}${minText ? ' in ' + minText : ''}`;
+              if (dep.cancelled) return `❌ ${line} → ${dir}: ausgefallen`;
+              const delayMin = Math.round(dep.delay / 60);
+              return `⚠️ ${line} → ${dir}: +${delayMin} min`;
             }).filter(Boolean);
             if (items.length > 0) {
-              const label = stationName ? `🚌 ${stationName}: ` : '🚌 ';
+              const label = stationName ? `🚨 ${stationName}: ` : '🚨 ';
               parts.push(label + items.join(' | '));
             }
           }
