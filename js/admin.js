@@ -5688,11 +5688,9 @@ window.addEventListener('load', async () => {
     });
   }
 
-  // Initial laden - Posts und Categories werden einmal geladen und für Stats wiederverwendet
+  // Initial laden - Posts, Categories und Displays parallel für schnellere Ladezeit
   startFooterClock();
-  await loadPosts();
-  await loadCategories();
-  await loadDisplays();
+  await Promise.all([loadPosts(), loadCategories(), loadDisplays()]);
   await updateDashboardStats();
 
   // Dashboard Statistik-Karten klickbar machen
@@ -5705,11 +5703,8 @@ window.addEventListener('load', async () => {
     });
   });
 
-  // SSO-Einstellungen initialisieren (nur für Super-Admin)
-  await initSSOSettings();
-
-  // App-Info laden
-  await loadAppInfo();
+  // SSO-Einstellungen + App-Info parallel laden
+  await Promise.all([initSSOSettings(), loadAppInfo()]);
 
   // Sprache initialisieren
   initLanguage();
