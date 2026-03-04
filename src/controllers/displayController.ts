@@ -39,6 +39,7 @@ export const getAllDisplays = async (
         'identifier',
         'description',
         'isActive',
+        'isHidden',
         'tickerText',
         'organizationId',
         'serialNumber',
@@ -147,6 +148,17 @@ export const getDisplayByIdentifier = async (
 
     if (!display.isActive) {
       throw new AppError('Display ist nicht aktiv', 403);
+    }
+
+    // Öffentliche Anfragen: Gerät muss autorisiert sein
+    if (!req.user && display.authorizationStatus !== 'authorized') {
+      res.status(403).json({
+        success: false,
+        blocked: true,
+        reason: display.authorizationStatus,
+        message: 'Dieses Gerät ist nicht autorisiert. Bitte wenden Sie sich an den Systemadministrator.',
+      });
+      return;
     }
 
     res.json({
@@ -271,6 +283,24 @@ export const updateDisplay = async (
     if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
     if (req.body.tickerTransit !== undefined) display.tickerTransit = req.body.tickerTransit === true || req.body.tickerTransit === 'true';
     if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
+
+    // Superadmin only: Gerätedaten und Sichtbarkeit bearbeiten
+    if (req.user?.role === 'super_admin') {
+      if (req.body.serialNumber !== undefined) display.serialNumber = req.body.serialNumber || null;
+      if (req.body.macAddress !== undefined) display.macAddress = req.body.macAddress || null;
+      if (req.body.deviceModel !== undefined) display.deviceModel = req.body.deviceModel || null;
+      if (req.body.deviceOsVersion !== undefined) display.deviceOsVersion = req.body.deviceOsVersion || null;
+      if (req.body.appVersion !== undefined) display.appVersion = req.body.appVersion || null;
+      if (req.body.authorizationStatus !== undefined) {
+        const validStatuses = ['pending', 'authorized', 'rejected', 'revoked'];
+        if (validStatuses.includes(req.body.authorizationStatus)) {
+          display.authorizationStatus = req.body.authorizationStatus as any;
+        }
+      }
+      if (req.body.isHidden !== undefined) {
+        display.isHidden = req.body.isHidden === true || req.body.isHidden === 'true';
+      }
+    }
 
     await display.save();
 
@@ -422,9 +452,9 @@ export const getPublicDisplays = async (
     }
 
     const displays = await Display.findAll({
-      where: { isActive: true },
+      where: { isActive: true, isHidden: false },
       order: [['name', 'ASC']],
-      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'showTransitData', 'showTrafficData', 'organizationId'],
+      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'isHidden', 'showTransitData', 'showTrafficData', 'organizationId'],
     });
 
     const response = {
@@ -470,6 +500,17 @@ export const getPublicDisplayPosts = async (
 
     if (!display) {
       throw new AppError('Display nicht gefunden oder nicht aktiv', 404);
+    }
+
+    // Öffentliche Anfragen: Gerät muss autorisiert sein
+    if (!req.user && display.authorizationStatus !== 'authorized') {
+      res.status(403).json({
+        success: false,
+        blocked: true,
+        reason: display.authorizationStatus,
+        message: 'Dieses Gerät ist nicht autorisiert. Bitte wenden Sie sich an den Systemadministrator.',
+      });
+      return;
     }
 
     const now = new Date();

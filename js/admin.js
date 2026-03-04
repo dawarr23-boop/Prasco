@@ -4002,6 +4002,9 @@ async function loadDisplays() {
             };
             statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
           }
+          if (display.isHidden) {
+            statusBadge += `<span style="background: #6c757d; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 4px;" title="Nicht in der öffentlichen Auswahl sichtbar">👁️‍🗨️ Versteckt</span>`;
+          }
           
           // Device-Info
           let deviceInfo = '';
@@ -4119,6 +4122,18 @@ function showDisplayForm() {
   const submitBtn = document.querySelector('#displayForm button[type="submit"]');
   if (submitBtn) submitBtn.textContent = t('displays.create');
 
+  // Geräte-Sektion verstecken (nur bei Neuanlage sichtbar wenn Superadmin)
+  const devSection = document.getElementById('display-device-section');
+  const newUser = JSON.parse(localStorage.getItem('user') || '{}');
+  if (devSection) devSection.style.display = newUser.role === 'super_admin' ? 'block' : 'none';
+  if (devSection && newUser.role === 'super_admin') {
+    // Defaults setzen
+    const authStatusEl = document.getElementById('display-authorizationStatus');
+    if (authStatusEl) authStatusEl.value = 'authorized';
+    const hiddenEl = document.getElementById('display-isHidden');
+    if (hiddenEl) hiddenEl.checked = false;
+  }
+
   // Live-Daten Checkboxen auf Standard setzen
   document.getElementById('display-showTransitData').checked = true;
   document.getElementById('display-showTrafficData').checked = true;
@@ -4164,6 +4179,29 @@ async function editDisplay(id) {
   if (tickerTransitEl) tickerTransitEl.checked = display.tickerTransit === true;
   const tickerTrafficEl = document.getElementById('display-tickerTraffic');
   if (tickerTrafficEl) tickerTrafficEl.checked = display.tickerTraffic === true;
+
+  // Superadmin: Gerätefelder
+  const editUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const devSection = document.getElementById('display-device-section');
+  if (editUser.role === 'super_admin' && devSection) {
+    devSection.style.display = 'block';
+    const snEl = document.getElementById('display-serialNumber');
+    if (snEl) snEl.value = display.serialNumber || '';
+    const macEl = document.getElementById('display-macAddress');
+    if (macEl) macEl.value = display.macAddress || '';
+    const modelEl = document.getElementById('display-deviceModel');
+    if (modelEl) modelEl.value = display.deviceModel || '';
+    const osEl = document.getElementById('display-deviceOsVersion');
+    if (osEl) osEl.value = display.deviceOsVersion || '';
+    const appvEl = document.getElementById('display-appVersion');
+    if (appvEl) appvEl.value = display.appVersion || '';
+    const authStatusEl = document.getElementById('display-authorizationStatus');
+    if (authStatusEl) authStatusEl.value = display.authorizationStatus || 'authorized';
+    const hiddenEl = document.getElementById('display-isHidden');
+    if (hiddenEl) hiddenEl.checked = display.isHidden === true;
+  } else if (devSection) {
+    devSection.style.display = 'none';
+  }
 
   // Scrolle zum Formular
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
@@ -4236,6 +4274,25 @@ async function handleDisplayFormSubmit(e) {
     tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
   };
+
+  // Superadmin: Gerätedaten mitspeichern
+  const submitUser = JSON.parse(localStorage.getItem('user') || '{}');
+  if (submitUser.role === 'super_admin') {
+    const snEl = document.getElementById('display-serialNumber');
+    if (snEl) displayData.serialNumber = snEl.value.trim() || null;
+    const macEl = document.getElementById('display-macAddress');
+    if (macEl) displayData.macAddress = macEl.value.trim() || null;
+    const modelEl = document.getElementById('display-deviceModel');
+    if (modelEl) displayData.deviceModel = modelEl.value.trim() || null;
+    const osEl = document.getElementById('display-deviceOsVersion');
+    if (osEl) displayData.deviceOsVersion = osEl.value.trim() || null;
+    const appvEl = document.getElementById('display-appVersion');
+    if (appvEl) displayData.appVersion = appvEl.value.trim() || null;
+    const authStatusEl = document.getElementById('display-authorizationStatus');
+    if (authStatusEl) displayData.authorizationStatus = authStatusEl.value;
+    const hiddenEl = document.getElementById('display-isHidden');
+    if (hiddenEl) displayData.isHidden = hiddenEl.checked;
+  }
 
   try {
     if (currentDisplayId) {

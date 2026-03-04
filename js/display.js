@@ -1301,6 +1301,16 @@ async function loadDisplayInfo(identifier) {
 
   try {
     const response = await fetch(`/api/public/display/${identifier}`);
+
+    // Gerät nicht autorisiert
+    if (response.status === 403) {
+      const errData = await response.json().catch(() => ({}));
+      if (errData.blocked) {
+        showBlockedScreen(errData.reason || 'rejected', errData.message);
+        return 'blocked';
+      }
+    }
+
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.data) {
@@ -1316,6 +1326,36 @@ async function loadDisplayInfo(identifier) {
     console.warn('Display-Info konnte nicht geladen werden:', error);
   }
   return null;
+}
+
+// Zeigt eine vollbild-Sperrseite wenn das Gerät nicht autorisiert ist
+function showBlockedScreen(reason, customMessage) {
+  const reasonTexts = {
+    pending:  'Die Autorisierung für dieses Gerät ist noch ausstehend und muss vom Administrator freigegeben werden.',
+    rejected: 'Die Autorisierungsanfrage für dieses Gerät wurde abgelehnt.',
+    revoked:  'Die Autorisierung für dieses Gerät wurde widerrufen.',
+  };
+  const reasonText = reasonTexts[reason] || customMessage || 'Dieses Gerät ist nicht für die Anzeige von Inhalten autorisiert.';
+
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.innerHTML = `
+    <div style="min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
+      color:#fff; font-family:Arial,Helvetica,sans-serif; text-align:center; padding:2rem; box-sizing:border-box;">
+      <div style="max-width:560px;">
+        <div style="font-size:5rem; margin-bottom:1rem; filter:drop-shadow(0 0 20px rgba(231,76,60,0.5));">&#x1F512;</div>
+        <h1 style="font-size:2.2rem; font-weight:700; margin-bottom:0.75rem; color:#e74c3c; letter-spacing:-0.5px;">Zugriff verweigert</h1>
+        <p style="font-size:1.1rem; color:#aaa; margin-bottom:2rem; line-height:1.7;">${reasonText}</p>
+        <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:1.5rem 2rem; margin-bottom:1.5rem;">
+          <p style="margin:0 0 0.4rem; font-size:0.9rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Kontakt</p>
+          <p style="margin:0; font-size:1.2rem; font-weight:600; color:#fff;">Systemadministrator</p>
+        </div>
+        <p style="font-size:0.78rem; color:#444; font-family:monospace;">Status: ${reason || 'unauthorized'} &nbsp;|&nbsp; ${new Date().toLocaleString('de-DE')}</p>
+      </div>
+    </div>
+  `;
+  console.warn('Display gesperrt. Status:', reason);
 }
 
 // Zeige Display-Auswahl Overlay
@@ -3940,7 +3980,11 @@ document.addEventListener('click', (e) => {
   
   // 3. Lade Display-Info falls vorhanden
   if (currentDisplayIdentifier) {
-    await loadDisplayInfo(currentDisplayIdentifier);
+    const displayResult = await loadDisplayInfo(currentDisplayIdentifier);
+    if (displayResult === 'blocked') {
+      console.warn('Display nicht autorisiert — Initialisierung abgebrochen.');
+      return; // Keine weitere Initialisierung
+    }
   }
   
   // 4. Prüfe ob dieses Display extern ist (für Transition-Optimierung)

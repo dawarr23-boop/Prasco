@@ -70,6 +70,13 @@ export const initializeDatabaseSchema = async (): Promise<void> => {
             } catch (e) {
                 // Typ existiert noch nicht (erste Installation) – Sequelize sync erstellt ihn korrekt
             }
+            // Migration: is_hidden Spalte für Displays
+            try {
+                await sequelize.query(`ALTER TABLE displays ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN NOT NULL DEFAULT false`);
+                logger.info('✅ Migration: is_hidden Spalte in displays verfügbar');
+            } catch (e) {
+                // Ignorieren – Spalte existiert bereits oder Tabelle existiert noch nicht
+            }
         }
 
         // Versuche sync() - wenn Tabellen existieren, wird nichts geändert (force: false)
