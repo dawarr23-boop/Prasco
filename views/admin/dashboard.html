@@ -1672,10 +1672,12 @@
                     <div class="form-group">
                       <label for="azure-client-secret">Client Secret *</label>
                       <input
-                        type="password"
+                        type="text"
                         id="azure-client-secret"
                         name="clientSecret"
                         placeholder="Geheimnis eingeben..."
+                        autocomplete="off"
+                        style="-webkit-text-security:disc;font-family:monospace;"
                       />
                       <small>Client Secret aus Azure Portal (Zertifikate & Geheimnisse)</small>
                     </div>
@@ -1748,10 +1750,12 @@
                       <div class="form-group">
                         <label for="ldap-bind-password">Bind Passwort *</label>
                         <input
-                          type="password"
+                          type="text"
                           id="ldap-bind-password"
                           name="ldapBindPassword"
                           placeholder="Service-Account Passwort"
+                          autocomplete="off"
+                          style="-webkit-text-security:disc;font-family:monospace;"
                         />
                       </div>
                     </div>
@@ -2060,6 +2064,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.15"></script>
+    <script src="/js/admin.js?v=5.16"></script>
   </body>
 </html>

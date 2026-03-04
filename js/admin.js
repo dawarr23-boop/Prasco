@@ -8034,6 +8034,7 @@ function lbHighlightSelectedCard() {
 }
 
 function buildCompositeJson() {
+  const bg = (document.getElementById('lb-bg-color') || {}).value || '#1a1a2e';
   const layers = layerBuilderLayers.map((layer, idx) => {
     const out = {
       id: layer.id,
