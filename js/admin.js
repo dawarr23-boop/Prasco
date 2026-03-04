@@ -4797,7 +4797,8 @@ async function initSSOSettings() {
   }
 
   if (ssoConfigForm) {
-    ssoConfigForm.addEventListener('submit', handleSSOConfigSubmit);
+    const ssoSaveBtn = document.getElementById('sso-save-btn');
+    if (ssoSaveBtn) ssoSaveBtn.addEventListener('click', handleSSOConfigSubmit);
   }
 
   if (ssoTestBtn) {
@@ -4972,7 +4973,7 @@ function updateSSOStatusBanner(status, message) {
  * Speichert die SSO-Konfiguration
  */
 async function handleSSOConfigSubmit(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) e.preventDefault();
 
   const saveBtn = document.getElementById('sso-save-btn');
   const originalText = saveBtn.textContent;
@@ -7324,10 +7325,13 @@ async function loadAISettings() {
     // Gracefully handle 404 if ai_enabled key doesn't exist in DB yet
     let enabledSetting = null;
     try {
-      const _r = await fetch('/api/settings/ai_enabled', {
+      const _r = await fetch('/api/settings?category=ai', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
       });
-      if (_r.ok) enabledSetting = await _r.json();
+      if (_r.ok) {
+        const _d = await _r.json();
+        enabledSetting = { data: { value: _d['ai_enabled'] ?? _d['ai.enabled'] ?? null } };
+      }
     } catch (e) {
       // network error – treat as disabled
     }
@@ -8003,7 +8007,7 @@ async function lbHandleImageUpload(event, idx) {
     const inp = document.querySelector(`[data-lb-layer="${idx}"][data-lb-field="src"]`);
     if (inp) { inp.value = url; inp.dispatchEvent(new Event('input', { bubbles: true })); }
     layerBuilderLayers[idx].src = url;
-    renderLayerBuilderPreview();
+    lbRenderDOM();
     if (statusEl) { statusEl.style.color = '#4a7c4a'; statusEl.textContent = '✓ Hochgeladen'; }
     setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
   } catch (err) {

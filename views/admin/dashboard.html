@@ -1614,7 +1614,7 @@
                 <span class="sso-status-text">Status wird geladen...</span>
               </div>
 
-              <form id="sso-config-form" class="settings-form" autocomplete="off">
+              <div id="sso-config-form" class="settings-form">
                 <!-- SSO aktivieren -->
                 <div class="form-group">
                   <div class="checkbox-label sso-toggle">
@@ -1858,7 +1858,7 @@
 
                 <!-- Aktionen -->
                 <div class="form-actions sso-actions">
-                  <button type="submit" class="btn btn-primary" id="sso-save-btn">
+                  <button type="button" class="btn btn-primary" id="sso-save-btn">
                     Konfiguration speichern
                   </button>
                   <button type="button" class="btn btn-secondary" id="sso-test-btn">
@@ -1867,7 +1867,7 @@
                 </div>
 
                 <div id="sso-test-result" class="sso-test-result" style="display: none"></div>
-              </form>
+              </div>
             </div>
 
             <!-- Info / Über diese Anwendung -->
@@ -2060,6 +2060,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.14"></script>
+    <script src="/js/admin.js?v=5.15"></script>
   </body>
 </html>
