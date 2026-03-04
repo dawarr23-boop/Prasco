@@ -62,6 +62,16 @@ export const sequelize = new Sequelize(sequelizeConfig);
  */
 export const initializeDatabaseSchema = async (): Promise<void> => {
     try {
+        // Inkrementelle Migrationen (außerhalb einer Transaktion, da PostgreSQL ENUM-Änderungen das erfordern)
+        if (dialect === 'postgres') {
+            try {
+                await sequelize.query(`ALTER TYPE "enum_posts_contentType" ADD VALUE IF NOT EXISTS 'composite'`);
+                logger.info('✅ Migration: composite contentType verfügbar');
+            } catch (e) {
+                // Typ existiert noch nicht (erste Installation) – Sequelize sync erstellt ihn korrekt
+            }
+        }
+
         // Versuche sync() - wenn Tabellen existieren, wird nichts geändert (force: false)
         // Bei Berechtigungsfehlern bedeutet das meist dass Tabellen bereits existieren
         await sequelize.sync({ force: false, alter: false });

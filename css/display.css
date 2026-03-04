@@ -819,6 +819,67 @@ body {
   background: #cc0000;
 }
 
+/* ============================================
+   Composite Layer Canvas
+   ============================================ */
+
+/* Vollbild-Canvas für composite-Typ Posts */
+.composite-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9998;
+  overflow: hidden;
+}
+
+/* Basis-Layer: absolut positioniert, Koordinaten in % */
+.composite-layer {
+  position: absolute;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Text-Layer: bessere Lesbarkeit */
+.composite-layer-text {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0.5rem;
+  line-height: 1.4;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+/* Ticker/Laufschrift-Layer */
+.composite-layer-ticker {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.composite-ticker-inner {
+  display: inline-flex;
+  gap: 3rem;
+  animation: composite-ticker-scroll 20s linear infinite;
+  white-space: nowrap;
+}
+
+.composite-ticker-item::before {
+  content: '▶ ';
+  opacity: 0.7;
+}
+
+@keyframes composite-ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* Verstecke Header/Footer während Video */
 .header.hidden-for-video,
 .footer.hidden-for-video,

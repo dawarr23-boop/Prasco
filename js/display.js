@@ -1555,8 +1555,51 @@ function buildTitleStyle(post) {
 }
 
 // ============================================
-// Hintergrundmusik Funktionen
+// Composite Layer Renderer
 // ============================================
+
+/**
+ * Rendert einen einzelnen Layer innerhalb einer composite-Komposition.
+ * Koordinaten in % (0–100), skaliert auf jede Displaygröße.
+ */
+function renderCompositeLayer(layer) {
+  const x = layer.x != null ? layer.x : 0;
+  const y = layer.y != null ? layer.y : 0;
+  const w = layer.w != null ? layer.w : 100;
+  const h = layer.h != null ? layer.h : 100;
+  const z = layer.zIndex || 0;
+  const posStyle = `left:${x}%;top:${y}%;width:${w}%;height:${h}%;z-index:${z};`;
+
+  // Zusätzliche Inline-Styles aus layer.style-Objekt
+  const extraParts = layer.style ? Object.entries(layer.style).map(([k, v]) => `${k}:${v}`) : [];
+  const extraStyle = extraParts.join(';');
+  const fullStyle = posStyle + (extraStyle ? extraStyle + ';' : '');
+
+  switch (layer.type) {
+    case 'text': {
+      const isHtml = (layer.content || '').trimStart().startsWith('<');
+      const body = isHtml
+        ? layer.content
+        : escapeHtml(layer.content || '').replace(/\n/g, '<br>');
+      return `<div class="composite-layer composite-layer-text" style="${fullStyle}">${body}</div>`;
+    }
+    case 'image':
+      return `<div class="composite-layer" style="${posStyle}"><img src="${escapeHtml(layer.src || '')}" style="width:100%;height:100%;object-fit:${layer.fit || 'cover'}" alt=""></div>`;
+    case 'ticker': {
+      const rawItems = Array.isArray(layer.items)
+        ? layer.items
+        : (layer.content || '').split('\n').filter(Boolean);
+      const tickerContent = rawItems.map(i => `<span class="composite-ticker-item">${escapeHtml(i)}</span>`).join('');
+      const bg = (layer.style && layer.style['background-color']) || '#009640';
+      const col = (layer.style && layer.style.color) || '#fff';
+      return `<div class="composite-layer composite-layer-ticker" style="${posStyle}background:${bg};color:${col};"><div class="composite-ticker-inner">${tickerContent}${tickerContent}</div></div>`;
+    }
+    case 'html':
+      return `<div class="composite-layer" style="${fullStyle}">${layer.content || ''}</div>`;
+    default:
+      return '';
+  }
+}
 
 // Lade globale Musik-Einstellungen aus LocalStorage
 function loadGlobalMusicSettings() {
@@ -3022,6 +3065,25 @@ async function displayCurrentPost() {
       // Word Dokument anzeigen
       html = renderWordDocument(post);
       break;
+
+    case 'composite': {
+      // Multi-Layer-Komposition
+      let compositeData;
+      try {
+        compositeData = JSON.parse(post.content || '{}');
+      } catch (e) {
+        compositeData = { bg: '#ffffff', layers: [] };
+      }
+      const bgColor = compositeData.bg || '#ffffff';
+      const layers = Array.isArray(compositeData.layers) ? compositeData.layers : [];
+      const sortedLayers = layers
+        .slice()
+        .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+      const layersHtml = sortedLayers.map(renderCompositeLayer).join('');
+      html = `<div class="composite-canvas" style="background:${escapeHtml(bgColor)}">${layersHtml}</div>`;
+      // Composite-Canvas ist position:fixed und überdeckt Header/Footer automatisch
+      break;
+    }
 
     default:
       html = `

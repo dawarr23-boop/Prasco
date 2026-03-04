@@ -5,7 +5,7 @@ interface PostAttributes {
   id: number;
   title: string;
   content: string;
-  contentType: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
+  contentType: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word' | 'composite';
   mediaId?: number;
   categoryId?: number;
   organizationId?: number;
@@ -58,7 +58,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public id!: number;
   public title!: string;
   public content!: string;
-  public contentType!: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word';
+  public contentType!: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word' | 'composite';
   public mediaId?: number;
   public categoryId?: number;
   public organizationId?: number;
@@ -114,7 +114,7 @@ Post.init(
       allowNull: false,
     },
     contentType: {
-      type: DataTypes.ENUM('text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'),
+      type: DataTypes.ENUM('text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'),
       allowNull: false,
       defaultValue: 'text',
     },

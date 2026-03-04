@@ -2083,6 +2083,7 @@ let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
 let rteEditorEl = null; // Native Rich-Text-Editor Instanz
+let layerBuilderLayers = []; // Layer-Builder Zustand für Kompositions-Posts
 
 // ============================================
 // Bulk Selection & Context Menu
@@ -2547,6 +2548,14 @@ async function showPostForm() {
   if (postTypeSelect) updateUploadSectionVisibility(postTypeSelect.value);
   // RTE-Inhalt leeren
   if (rteEditorEl) rteEditorEl.innerHTML = '';
+  // Layer-Builder zurücksetzen
+  layerBuilderLayers = [];
+  const lbList = document.getElementById('lb-layers-list');
+  if (lbList) lbList.innerHTML = '';
+  const lbPreview = document.getElementById('lb-preview-canvas');
+  if (lbPreview) lbPreview.querySelectorAll('.lb-preview-layer').forEach(e => e.remove());
+  const lbBuilder = document.getElementById('layer-builder');
+  if (lbBuilder) lbBuilder.style.display = 'none';
 
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
@@ -2861,8 +2870,11 @@ async function editPost(id) {
   updateBackgroundMusicVisibility(post.contentType);
   // Upload-Sektion + RTE je nach Content-Type aktualisieren
   updateUploadSectionVisibility(post.contentType);
-  // RTE-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
-  if (rteEditorEl) {
+  // Composite: Layer-Builder füllen
+  if (post.contentType === 'composite') {
+    loadCompositeIntoUI(post.content || '{}');
+  } else if (rteEditorEl) {
+    // RTE-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
     rteEditorEl.innerHTML = post.content || '';
   }
 }
@@ -3061,8 +3073,25 @@ function updateUploadSectionVisibility(contentType) {
   const wordPdfImport = document.getElementById('word-pdf-import');
   const fileUploadSection = document.getElementById('file-upload-section');
   const mediaUrlSection = document.getElementById('media-url-section');
+  const layerBuilder = document.getElementById('layer-builder');
 
   if (!uploadSection) return;
+
+  // Composite: Layer-Builder anzeigen, alles andere ausblenden
+  if (contentType === 'composite') {
+    uploadSection.style.display = 'none';
+    if (layerBuilder) layerBuilder.style.display = 'block';
+    // RTE und Textarea ausblenden
+    const rteContainer = document.getElementById('rte-container');
+    const textarea = document.getElementById('post-content');
+    if (rteContainer) rteContainer.style.display = 'none';
+    if (textarea) textarea.style.display = 'none';
+    initLayerBuilder();
+    return;
+  }
+
+  // Alle anderen Typen: Layer-Builder ausblenden
+  if (layerBuilder) layerBuilder.style.display = 'none';
 
   // Generell Upload-Section anzeigen
   uploadSection.style.display = 'block';
@@ -3417,6 +3446,13 @@ async function handlePostFormSubmit(e) {
   const rteContainer = document.getElementById('rte-container');
   if (rteEditorEl && rteContainer && rteContainer.style.display !== 'none') {
     document.getElementById('post-content').value = rteEditorEl.innerHTML;
+  }
+
+  // Composite: Layer-JSON in Textarea schreiben
+  const layerBuilderEl = document.getElementById('layer-builder');
+  if (layerBuilderEl && layerBuilderEl.style.display !== 'none') {
+    document.getElementById('post-content').value = buildCompositeJson();
+    document.getElementById('post-content').name = 'content'; // sicherstellen
   }
 
   const formData = new FormData(e.target);
@@ -7547,4 +7583,252 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial AI status laden (für Post-Form)
   loadAISettings();
 });
+
+// ============================================
+// Layer-Builder (Composite-Posts)
+// ============================================
+
+let _lbInitialized = false;
+
+function initLayerBuilder() {
+  if (_lbInitialized) return;
+  _lbInitialized = true;
+
+  // Hintergrundfarbe Sync
+  const bgColorInput = document.getElementById('lb-bg-color');
+  const bgHexInput = document.getElementById('lb-bg-hex');
+  if (bgColorInput && bgHexInput) {
+    bgColorInput.addEventListener('input', () => {
+      bgHexInput.value = bgColorInput.value;
+      lbUpdatePreview();
+    });
+    bgHexInput.addEventListener('input', () => {
+      const v = bgHexInput.value.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(v)) bgColorInput.value = v;
+      lbUpdatePreview();
+    });
+  }
+
+  // Layer hinzufügen
+  const addBtn = document.getElementById('lb-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const type = document.getElementById('lb-new-type')?.value || 'text';
+      lbAddLayer(type);
+    });
+  }
+
+  // Event-Delegation für Layer-Aktionen
+  const list = document.getElementById('lb-layers-list');
+  if (list) {
+    list.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-lb-action]');
+      if (!btn) return;
+      const action = btn.dataset.lbAction;
+      const idx = parseInt(btn.dataset.lbIdx);
+      if (action === 'delete') {
+        layerBuilderLayers.splice(idx, 1);
+        lbRenderDOM();
+      } else if (action === 'up' && idx > 0) {
+        [layerBuilderLayers[idx - 1], layerBuilderLayers[idx]] = [layerBuilderLayers[idx], layerBuilderLayers[idx - 1]];
+        lbRenderDOM();
+      } else if (action === 'down' && idx < layerBuilderLayers.length - 1) {
+        [layerBuilderLayers[idx], layerBuilderLayers[idx + 1]] = [layerBuilderLayers[idx + 1], layerBuilderLayers[idx]];
+        lbRenderDOM();
+      }
+    });
+    list.addEventListener('input', (e) => {
+      const el = e.target;
+      const idx = parseInt(el.dataset.lbLayer);
+      if (isNaN(idx)) return;
+      const field = el.dataset.lbField;
+      const layer = layerBuilderLayers[idx];
+      if (!layer || !field) return;
+      if (field === 'x' || field === 'y' || field === 'w' || field === 'h') {
+        layer[field] = parseFloat(el.value) || 0;
+      } else if (field.startsWith('style.')) {
+        const styleKey = field.slice(6);
+        layer.style = layer.style || {};
+        layer.style[styleKey] = el.value;
+        // Sync color picker <-> hex
+        if (el.type === 'color') {
+          const hex = el.closest('.lb-style-field')?.querySelector('[type="text"]');
+          if (hex) hex.value = el.value;
+        } else if (el.type === 'text' && /^#[0-9a-fA-F]{6}$/.test(el.value)) {
+          const picker = el.closest('.lb-style-field')?.querySelector('[type="color"]');
+          if (picker) picker.value = el.value;
+        }
+      } else {
+        layer[field] = el.value;
+      }
+      lbUpdatePreview();
+    });
+  }
+}
+
+function lbAddLayer(type) {
+  const defaults = {
+    text:   { x: 5, y: 5, w: 60, h: 40, content: '<p>Neuer Text</p>', style: { color: '#ffffff', 'font-size': '1.5rem' } },
+    image:  { x: 5, y: 5, w: 40, h: 50, src: '', fit: 'cover', style: {} },
+    ticker: { x: 0, y: 88, w: 100, h: 12, content: 'Meldung 1\nMeldung 2\nMeldung 3', style: { 'background-color': '#009640', color: '#ffffff' } },
+    html:   { x: 5, y: 5, w: 90, h: 90, content: '<div style="color:#fff;padding:1rem;">HTML-Inhalt</div>', style: {} },
+  };
+  const layer = {
+    id: Math.random().toString(36).slice(2),
+    type,
+    ...defaults[type] || defaults.text,
+    zIndex: layerBuilderLayers.length,
+  };
+  layerBuilderLayers.push(layer);
+  lbRenderDOM();
+}
+
+function lbRenderDOM() {
+  const list = document.getElementById('lb-layers-list');
+  if (!list) return;
+  const typeLabels = { text: 'TEXT', image: 'BILD', ticker: 'TICKER', html: 'HTML' };
+  list.innerHTML = layerBuilderLayers.map((layer, idx) => {
+    const typeClass = `type-${layer.type}`;
+    const typeLabel = typeLabels[layer.type] || layer.type.toUpperCase();
+
+    // Content-Bereich je nach Typ
+    let contentHtml = '';
+    if (layer.type === 'text' || layer.type === 'html') {
+      const label = layer.type === 'html' ? 'HTML-Inhalt' : 'Text / HTML';
+      contentHtml = `
+        <div class="lb-content-label">${label}</div>
+        <textarea class="lb-textarea" data-lb-layer="${idx}" data-lb-field="content" rows="3">${escapeHtmlAttr(layer.content || '')}</textarea>`;
+    } else if (layer.type === 'image') {
+      contentHtml = `
+        <div class="lb-content-label">Bild-URL</div>
+        <input type="text" style="width:100%;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;" data-lb-layer="${idx}" data-lb-field="src" value="${escapeHtmlAttr(layer.src || '')}" placeholder="/uploads/datei.jpg">
+        <div style="margin-top:0.35rem;display:flex;align-items:center;gap:0.5rem;">
+          <label style="font-size:0.78rem;color:#666;margin:0;">Anpassung:</label>
+          <select style="padding:0.22rem 0.4rem;border:1px solid #ddd;border-radius:4px;font-size:0.82rem;" data-lb-layer="${idx}" data-lb-field="fit">
+            <option value="cover"${layer.fit === 'cover' ? ' selected' : ''}>Cover (ausfüllen)</option>
+            <option value="contain"${layer.fit === 'contain' ? ' selected' : ''}>Contain (einpassen)</option>
+            <option value="fill"${layer.fit === 'fill' ? ' selected' : ''}>Fill (strecken)</option>
+          </select>
+        </div>`;
+    } else if (layer.type === 'ticker') {
+      contentHtml = `
+        <div class="lb-content-label">Meldungen (je Zeile eine)</div>
+        <textarea class="lb-textarea" data-lb-layer="${idx}" data-lb-field="content" rows="3" style="font-family:inherit;">${escapeHtmlAttr(layer.content || '')}</textarea>`;
+    }
+
+    // Style-Bereich je nach Typ
+    let styleHtml = '';
+    const col = (layer.style && layer.style.color) || '#ffffff';
+    const bg = (layer.style && layer.style['background-color']) || '#009640';
+    const fs = (layer.style && layer.style['font-size']) || '';
+    if (layer.type === 'text') {
+      styleHtml = `
+        <div class="lb-style-row">
+          <div class="lb-style-field">
+            <label>Farbe</label>
+            <input type="color" value="${col}" data-lb-layer="${idx}" data-lb-field="style.color">
+            <input type="text" value="${col}" style="width:72px;" data-lb-layer="${idx}" data-lb-field="style.color">
+          </div>
+          <div class="lb-style-field">
+            <label>Schriftgröße</label>
+            <input type="text" value="${fs}" style="width:70px;" placeholder="2rem" data-lb-layer="${idx}" data-lb-field="style.font-size">
+          </div>
+        </div>`;
+    } else if (layer.type === 'ticker') {
+      styleHtml = `
+        <div class="lb-style-row">
+          <div class="lb-style-field">
+            <label>Textfarbe</label>
+            <input type="color" value="${col}" data-lb-layer="${idx}" data-lb-field="style.color">
+            <input type="text" value="${col}" style="width:72px;" data-lb-layer="${idx}" data-lb-field="style.color">
+          </div>
+          <div class="lb-style-field">
+            <label>Hintergrund</label>
+            <input type="color" value="${bg}" data-lb-layer="${idx}" data-lb-field="style.background-color">
+            <input type="text" value="${bg}" style="width:72px;" data-lb-layer="${idx}" data-lb-field="style.background-color">
+          </div>
+        </div>`;
+    }
+
+    return `
+      <div class="lb-layer-card">
+        <div class="lb-layer-header">
+          <span class="lb-layer-type-badge ${typeClass}">${typeLabel}</span>
+          <span class="lb-layer-title">Layer ${idx + 1}</span>
+          <button type="button" class="lb-btn-icon" data-lb-action="up" data-lb-idx="${idx}" title="Nach oben" ${idx === 0 ? 'disabled' : ''}>&#8593;</button>
+          <button type="button" class="lb-btn-icon" data-lb-action="down" data-lb-idx="${idx}" title="Nach unten" ${idx === layerBuilderLayers.length - 1 ? 'disabled' : ''}>&#8595;</button>
+          <button type="button" class="lb-btn-icon delete" data-lb-action="delete" data-lb-idx="${idx}" title="Layer löschen">×</button>
+        </div>
+        <div class="lb-layer-body">
+          <div class="lb-pos-row">
+            <div class="lb-pos-field"><label>X %</label><input type="number" min="0" max="100" step="1" value="${layer.x}" data-lb-layer="${idx}" data-lb-field="x"></div>
+            <div class="lb-pos-field"><label>Y %</label><input type="number" min="0" max="100" step="1" value="${layer.y}" data-lb-layer="${idx}" data-lb-field="y"></div>
+            <div class="lb-pos-field"><label>Breite %</label><input type="number" min="1" max="100" step="1" value="${layer.w}" data-lb-layer="${idx}" data-lb-field="w"></div>
+            <div class="lb-pos-field"><label>Höhe %</label><input type="number" min="1" max="100" step="1" value="${layer.h}" data-lb-layer="${idx}" data-lb-field="h"></div>
+          </div>
+          ${contentHtml}
+          ${styleHtml}
+        </div>
+      </div>`;
+  }).join('');
+  lbUpdatePreview();
+}
+
+function lbUpdatePreview() {
+  const canvas = document.getElementById('lb-preview-canvas');
+  if (!canvas) return;
+  const bgColor = document.getElementById('lb-bg-color')?.value || '#1a1a2e';
+  canvas.style.background = bgColor;
+  // Entferne vorhandene Layer-Vorschauen
+  canvas.querySelectorAll('.lb-preview-layer').forEach(el => el.remove());
+  layerBuilderLayers.forEach((layer) => {
+    const div = document.createElement('div');
+    div.className = `lb-preview-layer type-${layer.type}`;
+    div.style.left   = layer.x + '%';
+    div.style.top    = layer.y + '%';
+    div.style.width  = layer.w + '%';
+    div.style.height = layer.h + '%';
+    div.style.zIndex = layer.zIndex || 0;
+    const typeNames = { text: 'TEXT', image: 'BILD', ticker: 'TICKER', html: 'HTML' };
+    div.textContent = typeNames[layer.type] || layer.type;
+    canvas.appendChild(div);
+  });
+}
+
+function buildCompositeJson() {
+  const bg = document.getElementById('lb-bg-color')?.value || '#1a1a2e';
+  const layers = layerBuilderLayers.map((layer, idx) => {
+    const out = {
+      id: layer.id,
+      type: layer.type,
+      x: layer.x, y: layer.y, w: layer.w, h: layer.h,
+      zIndex: idx,
+    };
+    if (layer.type === 'image') {
+      out.src = layer.src || '';
+      out.fit = layer.fit || 'cover';
+    } else {
+      out.content = layer.content || '';
+    }
+    if (layer.style && Object.keys(layer.style).length) out.style = layer.style;
+    return out;
+  });
+  return JSON.stringify({ bg, layers });
+}
+
+function loadCompositeIntoUI(jsonStr) {
+  let data;
+  try { data = JSON.parse(jsonStr); } catch { data = { bg: '#1a1a2e', layers: [] }; }
+  const bgColorInput = document.getElementById('lb-bg-color');
+  const bgHexInput = document.getElementById('lb-bg-hex');
+  if (bgColorInput) bgColorInput.value = data.bg || '#1a1a2e';
+  if (bgHexInput) bgHexInput.value = data.bg || '#1a1a2e';
+  layerBuilderLayers = (data.layers || []).map(l => ({ ...l }));
+  lbRenderDOM();
+}
+
+// Hilfsfunktion für Attribut-Escaping in Layer-Builder-Templates
+function escapeHtmlAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
