@@ -1614,7 +1614,7 @@
                 <span class="sso-status-text">Status wird geladen...</span>
               </div>
 
-              <form id="sso-config-form" class="settings-form">
+              <form id="sso-config-form" class="settings-form" autocomplete="off">
                 <!-- SSO aktivieren -->
                 <div class="form-group">
                   <div class="checkbox-label sso-toggle">
@@ -1987,7 +1987,7 @@
           <button class="modal-close" id="closePasswordModal">&times;</button>
         </div>
         <form id="changePasswordForm">
-          <input type="hidden" name="username" autocomplete="username" />
+          <input type="text" name="username" autocomplete="username" style="display:none;position:absolute;" />
           <div class="form-group">
             <label for="current-password">Aktuelles Passwort *</label>
             <input type="password" id="current-password" name="currentPassword" autocomplete="current-password" required />
@@ -2060,6 +2060,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.13"></script>
+    <script src="/js/admin.js?v=5.14"></script>
   </body>
 </html>

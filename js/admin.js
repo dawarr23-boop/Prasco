@@ -7324,9 +7324,12 @@ async function loadAISettings() {
     // Gracefully handle 404 if ai_enabled key doesn't exist in DB yet
     let enabledSetting = null;
     try {
-      enabledSetting = await apiRequest('/settings/ai_enabled');
+      const _r = await fetch('/api/settings/ai_enabled', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+      if (_r.ok) enabledSetting = await _r.json();
     } catch (e) {
-      // Key not yet seeded in DB – treat as disabled
+      // network error – treat as disabled
     }
     aiEnabled = enabledSetting?.data?.value === 'true';
     
@@ -7640,6 +7643,16 @@ function initLayerBuilder() {
         if (_lbSelectedLayerIdx === idx) _lbSelectedLayerIdx = idx + 1;
         else if (_lbSelectedLayerIdx === idx + 1) _lbSelectedLayerIdx = idx;
         lbRenderDOM();
+      } else if (action === 'upload-img') {
+        const uploadIdx = parseInt(btn.dataset.lbUploadIdx);
+        const fileInput = document.getElementById(`lb-img-upload-${uploadIdx}`);
+        if (fileInput) fileInput.click();
+      }
+    });
+    list.addEventListener('change', (e) => {
+      const el = e.target;
+      if (el.dataset.lbAction === 'upload-img-file') {
+        lbHandleImageUpload(e, parseInt(el.dataset.lbUploadIdx));
       }
     });
     list.addEventListener('input', (e) => {
@@ -7754,8 +7767,8 @@ function lbRenderDOM() {
         <div class="lb-content-label">Bild-URL</div>
         <div style="display:flex;gap:0.4rem;align-items:center;">
           <input type="text" style="flex:1;padding:0.3rem 0.5rem;border:1px solid #ddd;border-radius:4px;font-size:0.85rem;" data-lb-layer="${idx}" data-lb-field="src" value="${escapeHtmlAttr(layer.src || '')}" placeholder="/uploads/datei.jpg">
-          <button type="button" onclick="lbUploadLayerImage(${idx})" style="white-space:nowrap;padding:0.28rem 0.65rem;font-size:0.8rem;border:1px solid #4a7c4a;border-radius:4px;background:#4a7c4a;color:#fff;cursor:pointer;" title="Bild hochladen">📁 Hochladen</button>
-          <input type="file" id="lb-img-upload-${idx}" accept="image/*" style="display:none;" onchange="lbHandleImageUpload(event,${idx})">
+          <button type="button" data-lb-action="upload-img" data-lb-upload-idx="${idx}" style="white-space:nowrap;padding:0.28rem 0.65rem;font-size:0.8rem;border:1px solid #4a7c4a;border-radius:4px;background:#4a7c4a;color:#fff;cursor:pointer;" title="Bild hochladen">📁 Hochladen</button>
+          <input type="file" id="lb-img-upload-${idx}" data-lb-action="upload-img-file" data-lb-upload-idx="${idx}" accept="image/*" style="display:none;">
         </div>
         <div id="lb-upload-status-${idx}" style="font-size:0.78rem;margin-top:0.25rem;min-height:1.1em;"></div>
         <div style="margin-top:0.35rem;display:flex;align-items:center;gap:0.5rem;">
