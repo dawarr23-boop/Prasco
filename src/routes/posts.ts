@@ -314,7 +314,7 @@ router.post(
     body('title').notEmpty().trim().withMessage('Titel erforderlich'),
     body('content').optional(),
     body('contentType')
-      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'])
+      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'])
       .withMessage('Ungültiger Content-Type'),
     body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
     body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),
@@ -412,7 +412,7 @@ router.put(
     body('content').optional(),
     body('contentType')
       .optional({ values: 'null' })
-      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word'])
+      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'])
       .withMessage('Ungültiger Content-Type'),
     body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
     body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),
