@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { Display } from '../models';
+import Setting from '../models/Setting';
 import { AppError } from '../middleware/errorHandler';
 import { logger, securityLogger } from '../utils/logger';
 import { DeviceRequest } from '../middleware/deviceAuth';
+import { invalidateSettingCache } from '../middleware/deviceAuth';
 import crypto from 'crypto';
 import sequelize from '../config/database';
 
@@ -50,6 +52,23 @@ export const registerDevice = async (
         },
       });
       return;
+    }
+
+    // New device — check if registration mode is enabled
+    const regModeSetting = await Setting.findOne({ where: { key: 'display.registrationMode' } });
+    const registrationMode = regModeSetting?.value === 'true';
+
+    if (!registrationMode) {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      securityLogger.logSuspiciousActivity('Device registration attempted while registration mode is disabled', ip, {
+        serialNumber,
+        macAddress,
+        deviceModel,
+      });
+      throw new AppError(
+        'Registrierung ist derzeit deaktiviert. Bitte den Administrator kontaktieren.',
+        403
+      );
     }
 
     // New device - check license limit

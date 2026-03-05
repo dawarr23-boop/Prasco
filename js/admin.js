@@ -2029,6 +2029,7 @@ function navigateTo(section) {
     if (section === 'categories') loadCategories();
     if (section === 'displays') {
       loadDisplays();
+      loadSecuritySettings();
       // Auto-Refresh alle 10 Sekunden für neue Registrierungen
       displaysAutoRefreshInterval = setInterval(() => {
         loadDisplays();
@@ -4191,6 +4192,112 @@ async function revokeDevice(displayId) {
   }
 }
 
+// ============================================
+// Display-Sicherheitseinstellungen
+// ============================================
+
+/**
+ * Lade Sicherheits-Settings und zeige Panel (nur für super_admin)
+ */
+async function loadSecuritySettings() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const panel = document.getElementById('display-security-panel');
+  if (!panel) return;
+
+  // Panel nur für super_admin anzeigen
+  if (user.role !== 'super_admin') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+
+  try {
+    // Lade beide Settings parallel
+    const [secureModeRes, regModeRes] = await Promise.all([
+      apiRequest('/settings/display.secureMode'),
+      apiRequest('/settings/display.registrationMode'),
+    ]);
+
+    const secureMode = secureModeRes?.value === 'true' || secureModeRes?.data?.value === 'true';
+    const registrationMode = regModeRes?.value === 'true' || regModeRes?.data?.value === 'true';
+
+    updateSecurityToggleUI('secure-mode', secureMode);
+    updateSecurityToggleUI('registration-mode', registrationMode);
+
+    // Event-Listener einrichten (einmalig)
+    const secureToggle = document.getElementById('toggle-secure-mode');
+    const regToggle = document.getElementById('toggle-registration-mode');
+
+    if (secureToggle && !secureToggle._listenerAttached) {
+      secureToggle.addEventListener('change', () => toggleSecuritySetting('display.secureMode', secureToggle.checked));
+      secureToggle._listenerAttached = true;
+    }
+
+    if (regToggle && !regToggle._listenerAttached) {
+      regToggle.addEventListener('change', () => toggleSecuritySetting('display.registrationMode', regToggle.checked));
+      regToggle._listenerAttached = true;
+    }
+  } catch (error) {
+    console.warn('Sicherheitseinstellungen konnten nicht geladen werden:', error);
+  }
+}
+
+/**
+ * Aktualisiere die UI eines Security-Toggles
+ */
+function updateSecurityToggleUI(prefix, isActive) {
+  const toggle = document.getElementById('toggle-' + prefix);
+  const badge = document.getElementById(prefix + '-badge');
+  const desc = document.getElementById(prefix + '-description');
+
+  if (toggle) toggle.checked = isActive;
+  
+  if (badge) {
+    badge.textContent = isActive ? 'AN' : 'AUS';
+    badge.style.background = isActive ? '#28a745' : '#6c757d';
+  }
+
+  if (desc) {
+    if (prefix === 'secure-mode') {
+      desc.textContent = isActive
+        ? 'An: Nur autorisierte Geräte haben Zugriff auf Display-Inhalte'
+        : 'Aus: Displays können ohne Anmeldung auf Inhalte zugreifen';
+    } else if (prefix === 'registration-mode') {
+      desc.textContent = isActive
+        ? 'An: Neue Geräte können sich registrieren (Status: wartend)'
+        : 'Aus: Keine neuen Geräte können sich registrieren';
+    }
+  }
+}
+
+/**
+ * Toggle eine Sicherheitseinstellung
+ */
+async function toggleSecuritySetting(settingKey, newValue) {
+  const prefix = settingKey === 'display.secureMode' ? 'secure-mode' : 'registration-mode';
+  const label = settingKey === 'display.secureMode' ? 'Gesicherter Modus' : 'Registrierungsmodus';
+
+  try {
+    await apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify({
+        key: settingKey,
+        value: String(newValue),
+        type: 'boolean',
+        category: 'display',
+      }),
+    });
+
+    updateSecurityToggleUI(prefix, newValue);
+    showNotification(label + (newValue ? ' aktiviert' : ' deaktiviert'), newValue ? 'success' : 'info');
+  } catch (error) {
+    // Rollback Toggle auf alten Wert
+    updateSecurityToggleUI(prefix, !newValue);
+    showNotification('Fehler beim Ändern: ' + error.message, 'error');
+  }
+}
+
 async function handleDisplayFormSubmit(e) {
   e.preventDefault();
 
@@ -5594,6 +5701,7 @@ window.addEventListener('load', async () => {
   // Initial laden - Posts, Categories und Displays parallel für schnellere Ladezeit
   startFooterClock();
   await Promise.all([loadPosts(), loadCategories(), loadDisplays()]);
+  loadSecuritySettings(); // Sicherheitseinstellungen laden (non-blocking)
   await updateDashboardStats();
 
   // Dashboard Statistik-Karten klickbar machen

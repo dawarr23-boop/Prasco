@@ -40,6 +40,12 @@ let currentDisplayIdentifier = null;
 let currentDisplayName = null;
 let currentDisplayInfo = null; // Vollständige Display-Daten inkl. showTransitData/showTrafficData
 
+// Device-Authentifizierung
+let deviceToken = null;
+let deviceAuthStatus = null; // 'authorized', 'pending', 'rejected', 'revoked', null
+let authStatusPollInterval = null;
+let heartbeatInterval = null;
+
 // Display-Einstellungen (werden vom Backend geladen)
 let displaySettings = {
   refreshInterval: 5, // Standard: 5 Minuten
@@ -1303,12 +1309,354 @@ function getDisplayIdentifier() {
   return null;
 }
 
+// ============================================
+// Device-Authentifizierung & Token-Management
+// ============================================
+
+/**
+ * Generiere eine stabile Client-ID für diesen Browser.
+ * Wird einmalig erzeugt und in localStorage gespeichert.
+ */
+function getClientId() {
+  let clientId = localStorage.getItem('deviceClientId');
+  if (!clientId) {
+    // crypto.randomUUID() ist in allen modernen Browsern verfügbar
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      clientId = crypto.randomUUID();
+    } else {
+      // Fallback für ältere Browser
+      clientId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+      });
+    }
+    localStorage.setItem('deviceClientId', clientId);
+    console.log('Neue Client-ID generiert:', clientId);
+  }
+  return clientId;
+}
+
+/**
+ * Registriere dieses Gerät beim Server und erhalte einen Device-Token.
+ * Falls bereits registriert, wird der bestehende Token zurückgegeben.
+ */
+async function getOrCreateDeviceToken() {
+  // 1. Prüfe localStorage auf vorhandenen Token
+  const storedToken = localStorage.getItem('deviceToken');
+  if (storedToken) {
+    deviceToken = storedToken;
+    console.log('Device-Token aus localStorage geladen');
+    return deviceToken;
+  }
+
+  // 2. Registriere Gerät
+  const clientId = getClientId();
+  const serialNumber = 'web-' + clientId;
+
+  // Geräteinformationen sammeln
+  const ua = navigator.userAgent;
+  let deviceModel = 'Web Browser';
+  if (ua.includes('Chrome')) deviceModel = 'Chrome';
+  else if (ua.includes('Firefox')) deviceModel = 'Firefox';
+  else if (ua.includes('Safari')) deviceModel = 'Safari';
+  else if (ua.includes('Edge')) deviceModel = 'Edge';
+
+  try {
+    console.log('Registriere Gerät:', serialNumber);
+    const response = await fetch('/api/devices/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        serialNumber: serialNumber,
+        deviceModel: deviceModel + ' (' + navigator.platform + ')',
+        deviceOsVersion: navigator.platform || 'Unknown',
+        appVersion: 'web-1.0',
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.data) {
+        deviceToken = data.data.deviceToken;
+        deviceAuthStatus = data.data.authorizationStatus;
+        localStorage.setItem('deviceToken', deviceToken);
+        console.log('Gerät registriert, Status:', deviceAuthStatus);
+        return deviceToken;
+      }
+    } else if (response.status === 403) {
+      // Registrierung deaktiviert
+      const data = await response.json().catch(() => ({}));
+      console.warn('Registrierung deaktiviert:', data.message || 'Unbekannter Fehler');
+      deviceAuthStatus = 'registration_disabled';
+      return null;
+    } else {
+      console.warn('Registrierung fehlgeschlagen, Status:', response.status);
+    }
+  } catch (error) {
+    console.warn('Registrierung fehlgeschlagen:', error);
+  }
+
+  return null;
+}
+
+/**
+ * Authentifizierter Fetch-Wrapper.
+ * Fügt Device-Token als Bearer-Header hinzu (wenn vorhanden).
+ * Behandelt 401/403 Antworten für den Secure-Mode.
+ */
+async function authenticatedFetch(url, options = {}) {
+  const fetchOptions = { ...options };
+
+  if (deviceToken) {
+    fetchOptions.headers = {
+      ...(fetchOptions.headers || {}),
+      'Authorization': 'Bearer ' + deviceToken,
+    };
+  }
+
+  const response = await fetch(url, fetchOptions);
+
+  // Behandle Auth-Fehler im Secure-Mode
+  if (response.status === 401) {
+    const data = await response.clone().json().catch(() => ({}));
+    if (data.requiresAuth) {
+      console.warn('Secure-Mode aktiv — Authentifizierung erforderlich');
+      // Versuche Registrierung falls noch kein Token
+      if (!deviceToken) {
+        const token = await getOrCreateDeviceToken();
+        if (token) {
+          // Retry mit neuem Token
+          return authenticatedFetch(url, options);
+        }
+      }
+      showAuthStatusScreen('no_token');
+      throw new Error('AUTH_REQUIRED');
+    }
+  }
+
+  if (response.status === 403) {
+    const data = await response.clone().json().catch(() => ({}));
+    if (data.authorizationStatus) {
+      deviceAuthStatus = data.authorizationStatus;
+      console.warn('Gerät nicht autorisiert, Status:', deviceAuthStatus);
+      showAuthStatusScreen(deviceAuthStatus);
+      throw new Error('NOT_AUTHORIZED');
+    }
+  }
+
+  return response;
+}
+
+/**
+ * Zeige Vollbild-Statusbildschirm wenn Gerät nicht autorisiert ist
+ */
+function showAuthStatusScreen(status) {
+  // Entferne vorhandenes Overlay falls vorhanden
+  const existing = document.getElementById('auth-status-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'auth-status-overlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  `;
+
+  const clientId = localStorage.getItem('deviceClientId') || 'Unbekannt';
+  const serialDisplay = 'web-' + clientId.substring(0, 8) + '...';
+
+  let icon, title, message, statusColor;
+  
+  switch (status) {
+    case 'pending':
+      icon = '⏳';
+      title = 'Warte auf Autorisierung';
+      message = 'Dieses Gerät wurde registriert und wartet auf die Freigabe durch den Administrator.';
+      statusColor = '#ffaa00';
+      break;
+    case 'rejected':
+      icon = '🚫';
+      title = 'Zugriff verweigert';
+      message = 'Dieses Gerät wurde vom Administrator abgelehnt.';
+      statusColor = '#dc3545';
+      break;
+    case 'revoked':
+      icon = '🔒';
+      title = 'Autorisierung widerrufen';
+      message = 'Die Berechtigung für dieses Gerät wurde widerrufen.';
+      statusColor = '#ff8800';
+      break;
+    case 'registration_disabled':
+      icon = '🔐';
+      title = 'Registrierung geschlossen';
+      message = 'Die Geräte-Registrierung ist derzeit deaktiviert. Bitte den Administrator kontaktieren.';
+      statusColor = '#6c757d';
+      break;
+    case 'no_token':
+      icon = '🔑';
+      title = 'Authentifizierung erforderlich';
+      message = 'Dieses Display erfordert eine Geräte-Authentifizierung.';
+      statusColor = '#ffaa00';
+      break;
+    default:
+      icon = '❓';
+      title = 'Unbekannter Status';
+      message = 'Bitte den Administrator kontaktieren.';
+      statusColor = '#6c757d';
+  }
+
+  overlay.innerHTML = `
+    <div style="text-align: center; max-width: 600px; padding: 2rem;">
+      <div style="font-size: 5rem; margin-bottom: 1.5rem;">${icon}</div>
+      <h1 style="font-size: 2.2rem; margin-bottom: 1rem; font-weight: 300;">${title}</h1>
+      <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 2rem; line-height: 1.6;">${message}</p>
+      <div style="
+        background: rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255,255,255,0.1);
+      ">
+        <p style="font-size: 0.9rem; color: #aaa; margin: 0;">
+          Geräte-ID: <code style="color: #fff; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${serialDisplay}</code>
+        </p>
+        <p style="font-size: 0.9rem; color: #aaa; margin: 0.5rem 0 0;">
+          Status: <span style="color: ${statusColor}; font-weight: 600;">${title}</span>
+        </p>
+      </div>
+      ${status === 'pending' || status === 'no_token' || status === 'registration_disabled' ? `
+        <div id="auth-status-spinner" style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; color: #888;">
+          <div style="width: 20px; height: 20px; border: 2px solid #444; border-top-color: ${statusColor}; border-radius: 50%; animation: authSpin 1s linear infinite;"></div>
+          <span style="font-size: 0.9rem;">Prüfe Status alle 10 Sekunden...</span>
+        </div>
+        <style>@keyframes authSpin { to { transform: rotate(360deg); } }</style>
+      ` : ''}
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Starte Status-Polling
+  startAuthStatusPolling();
+}
+
+/**
+ * Polling: Prüfe alle 10 Sekunden den Geräte-Status.
+ * Bei Wechsel zu 'authorized' → Seite neu laden.
+ */
+function startAuthStatusPolling() {
+  if (authStatusPollInterval) clearInterval(authStatusPollInterval);
+
+  async function checkStatus() {
+    if (!deviceToken) {
+      // Versuche erneut zu registrieren
+      const token = await getOrCreateDeviceToken();
+      if (token) {
+        // Token erhalten, prüfe Status
+        deviceToken = token;
+      } else {
+        return; // Immer noch kein Token
+      }
+    }
+
+    try {
+      const response = await fetch('/api/devices/status', {
+        headers: { 'Authorization': 'Bearer ' + deviceToken },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const newStatus = data.data.authorizationStatus;
+          console.log('Geräte-Status:', newStatus);
+
+          if (newStatus === 'authorized') {
+            // Autorisiert! Seite neu laden.
+            console.log('Gerät autorisiert — lade Seite neu');
+            clearInterval(authStatusPollInterval);
+            authStatusPollInterval = null;
+            window.location.reload();
+            return;
+          }
+
+          // Status hat sich geändert aber nicht zu authorized — UI aktualisieren
+          if (newStatus !== deviceAuthStatus) {
+            deviceAuthStatus = newStatus;
+            showAuthStatusScreen(newStatus);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Status-Abfrage fehlgeschlagen:', error);
+    }
+  }
+
+  // Sofort prüfen, dann alle 10 Sekunden
+  checkStatus();
+  authStatusPollInterval = setInterval(checkStatus, 10000);
+}
+
+/**
+ * Heartbeat: Aktualisiert lastSeenAt auf dem Server alle 60 Sekunden.
+ * Prüft gleichzeitig den Auth-Status — bei Widerruf wird sofort reagiert.
+ */
+function startHeartbeat() {
+  if (heartbeatInterval) clearInterval(heartbeatInterval);
+  if (!deviceToken) return;
+
+  async function sendHeartbeat() {
+    try {
+      const response = await fetch('/api/devices/heartbeat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + deviceToken,
+        },
+        body: JSON.stringify({ appVersion: 'web-1.0' }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const newStatus = data.data.authorizationStatus;
+
+          // Prüfe ob Autorisierung widerrufen wurde
+          if (newStatus !== 'authorized' && deviceAuthStatus === 'authorized') {
+            console.warn('Autorisierung widerrufen! Status:', newStatus);
+            deviceAuthStatus = newStatus;
+            showAuthStatusScreen(newStatus);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Heartbeat fehlgeschlagen:', error);
+    }
+  }
+
+  // Erster Heartbeat nach 30s, dann alle 60s
+  setTimeout(() => {
+    sendHeartbeat();
+    heartbeatInterval = setInterval(sendHeartbeat, 60000);
+  }, 30000);
+}
+
 // Lade Display-Informationen
 async function loadDisplayInfo(identifier) {
   if (!identifier) return null;
 
   try {
-    const response = await fetch(`/api/public/display/${identifier}`);
+    const response = await authenticatedFetch(`/api/public/display/${identifier}`);
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.data) {
@@ -1321,6 +1669,9 @@ async function loadDisplayInfo(identifier) {
       }
     }
   } catch (error) {
+    if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED') {
+      return null; // Auth-Screen wird bereits angezeigt
+    }
     console.warn('Display-Info konnte nicht geladen werden:', error);
   }
   return null;
@@ -1391,9 +1742,9 @@ async function showDisplaySelection() {
   // D-Pad / Fernbedienungs-Navigation für Display-Auswahl
   setupDisplaySelectionNavigation(overlay);
 
-  // Lade verfügbare Displays (öffentlicher Endpoint, kein Auth nötig)
+  // Lade verfügbare Displays (mit Auth falls Secure-Mode aktiv)
   try {
-    const response = await fetch('/api/public/displays');
+    const response = await authenticatedFetch('/api/public/displays');
     if (response.ok) {
       const data = await response.json();
       const displays = data.data || [];
@@ -2828,8 +3179,8 @@ async function fetchPosts() {
       console.log('Lade alle Posts (kein spezifisches Display)');
     }
 
-    // Versuche zuerst die API
-    const response = await fetch(apiUrl);
+    // Versuche zuerst die API (mit Auth falls Secure-Mode)
+    const response = await authenticatedFetch(apiUrl);
     if (response.ok) {
       const data = await response.json();
       if (data.success && data.data && data.data.length > 0) {
@@ -2870,6 +3221,10 @@ async function fetchPosts() {
       }
     }
   } catch (apiError) {
+    // Auth-Fehler — Status-Screen wird bereits angezeigt
+    if (apiError.message === 'AUTH_REQUIRED' || apiError.message === 'NOT_AUTHORIZED') {
+      return;
+    }
     // API nicht erreichbar, versuche LocalStorage
   }
 
@@ -3920,6 +4275,9 @@ document.addEventListener('click', (e) => {
 (async function() {
   console.log('Display-Modus wird initialisiert...');
   
+  // 0. Device-Token laden/registrieren (für Secure-Mode)
+  await getOrCreateDeviceToken();
+  
   // 1. Lade Display-Identifier
   currentDisplayIdentifier = getDisplayIdentifier();
   
@@ -3930,7 +4288,7 @@ document.addEventListener('click', (e) => {
   if (!currentDisplayIdentifier && !skipSelection) {
     // Prüfe ob Displays existieren
     try {
-      const response = await fetch('/api/public/displays');
+      const response = await authenticatedFetch('/api/public/displays');
       if (response.ok) {
         const data = await response.json();
         const activeDisplays = data.data?.filter(d => d.isActive) || [];
@@ -3942,6 +4300,9 @@ document.addEventListener('click', (e) => {
         }
       }
     } catch (error) {
+      if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED') {
+        return; // Auth-Screen wird bereits angezeigt
+      }
       console.warn('Konnte Displays nicht laden:', error);
     }
   }
@@ -3962,6 +4323,9 @@ document.addEventListener('click', (e) => {
   
   // 7. Starte Auto-Refresh mit konfigurierten Intervall
   startAutoRefresh();
+  
+  // 8. Starte Heartbeat (für Online-Status und Widerrufs-Erkennung)
+  startHeartbeat();
   
   console.log('Display-Modus gestartet 🚀');
 })();

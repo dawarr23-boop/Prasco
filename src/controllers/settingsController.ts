@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Setting from '../models/Setting';
 import { cacheService } from '../utils/cache';
+import { invalidateSettingCache } from '../middleware/deviceAuth';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -92,7 +93,7 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
         stringValue = JSON.stringify(value);
         break;
       case 'boolean':
-        stringValue = value ? 'true' : 'false';
+        stringValue = (value === true || value === 'true') ? 'true' : 'false';
         break;
       default:
         stringValue = String(value);
@@ -108,6 +109,7 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
 
     // Invalidate all settings caches
     cacheService.delByPrefix('settings:');
+    invalidateSettingCache(key);
 
     // Spezielle Behandlung für system.networkMode - update boot-mode file
     if (key === 'system.networkMode' && (stringValue === 'normal' || stringValue === 'hotspot')) {
@@ -218,6 +220,7 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
 
     // Invalidate all settings caches
     cacheService.delByPrefix('settings:');
+    invalidateSettingCache();
 
     res.json({
       message: 'Einstellungen gespeichert',
@@ -245,6 +248,7 @@ export const deleteSetting = async (req: Request, res: Response): Promise<void> 
 
     // Invalidate all settings caches
     cacheService.delByPrefix('settings:');
+    invalidateSettingCache();
 
     res.json({ message: 'Einstellung gelöscht' });
   } catch (error: unknown) {

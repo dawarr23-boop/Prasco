@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { param, query } from 'express-validator';
 import { validate } from '../middleware/validator';
+import { conditionalDeviceAuth } from '../middleware/deviceAuth';
 import * as publicController from '../controllers/publicController';
 import * as displayController from '../controllers/displayController';
 import fs from 'fs';
@@ -70,11 +71,12 @@ router.get(
 );
 
 // GET /api/public/displays - Get all active displays (for Android TV app)
-router.get('/displays', displayController.getPublicDisplays);
+router.get('/displays', conditionalDeviceAuth, displayController.getPublicDisplays);
 
-// GET /api/public/display/:identifier - Get display info by identifier (for display page, no auth needed)
+// GET /api/public/display/:identifier - Get display info by identifier (conditionally secured)
 router.get(
   '/display/:identifier',
+  conditionalDeviceAuth,
   [
     param('identifier')
       .matches(/^[a-zA-Z0-9-_]+$/)
@@ -84,9 +86,10 @@ router.get(
   displayController.getDisplayByIdentifier
 );
 
-// GET /api/public/display/:identifier/posts - Get posts for specific display (for display page)
+// GET /api/public/display/:identifier/posts - Get posts for specific display (conditionally secured)
 router.get(
   '/display/:identifier/posts',
+  conditionalDeviceAuth,
   [
     param('identifier')
       .matches(/^[a-zA-Z0-9-_]+$/)

@@ -797,6 +797,50 @@
               </div>
             </div>
 
+            <!-- Display Security Panel (nur super_admin) -->
+            <div id="display-security-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.2rem;">
+                <span style="font-size: 1.4rem;">🔒</span>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Display-Sicherheit</h3>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Secure Mode Toggle -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="toggle-secure-mode" />
+                        <label class="toggle-label" for="toggle-secure-mode"><span class="toggle-slider"></span></label>
+                      </div>
+                      <label for="toggle-secure-mode" style="cursor: pointer; font-weight: 500; color: #fff;">Gesicherter Modus</label>
+                    </div>
+                    <p id="secure-mode-description" style="font-size: 0.8rem; color: #aaa; margin: 0.3rem 0 0 0;">
+                      Aus: Displays können ohne Anmeldung auf Inhalte zugreifen
+                    </p>
+                  </div>
+                  <span id="secure-mode-badge" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #6c757d; color: #fff;">AUS</span>
+                </div>
+
+                <!-- Registration Mode Toggle -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div class="toggle-switch">
+                        <input type="checkbox" class="toggle-input" id="toggle-registration-mode" />
+                        <label class="toggle-label" for="toggle-registration-mode"><span class="toggle-slider"></span></label>
+                      </div>
+                      <label for="toggle-registration-mode" style="cursor: pointer; font-weight: 500; color: #fff;">Registrierungsmodus</label>
+                    </div>
+                    <p id="registration-mode-description" style="font-size: 0.8rem; color: #aaa; margin: 0.3rem 0 0 0;">
+                      Aus: Keine neuen Geräte können sich registrieren
+                    </p>
+                  </div>
+                  <span id="registration-mode-badge" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #6c757d; color: #fff;">AUS</span>
+                </div>
+              </div>
+            </div>
+
             <div id="display-license-warning" class="license-warning" style="display: none">
               <strong data-translate="displays.licenseWarning">Display-Lizenzlimit erreicht</strong>
               <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
