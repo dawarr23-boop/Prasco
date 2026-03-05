@@ -39,7 +39,6 @@ export const getAllDisplays = async (
         'identifier',
         'description',
         'isActive',
-        'isHidden',
         'tickerText',
         'organizationId',
         'serialNumber',
@@ -50,7 +49,6 @@ export const getAllDisplays = async (
         'appVersion',
         'lastSeenAt',
         'registeredAt',
-        'mirrorDisplayId',
         'createdAt',
         'updatedAt',
       ],
@@ -133,8 +131,6 @@ export const getDisplayByIdentifier = async (
         'identifier',
         'description',
         'isActive',
-        'authorizationStatus',
-        'mirrorDisplayId',
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
@@ -153,38 +149,9 @@ export const getDisplayByIdentifier = async (
       throw new AppError('Display ist nicht aktiv', 403);
     }
 
-    // Öffentliche Anfragen: Gerät muss autorisiert sein
-    if (!req.user && display.authorizationStatus !== 'authorized') {
-      res.status(403).json({
-        success: false,
-        blocked: true,
-        reason: display.authorizationStatus,
-        message: 'Dieses Gerät ist nicht autorisiert. Bitte wenden Sie sich an den Systemadministrator.',
-      });
-      return;
-    }
-
-    // Mirror-Display: Inhaltseinstellungen vom Ziel-Display übernehmen
-    let responseData: any = display.toJSON();
-    if (display.mirrorDisplayId) {
-      const mirrorTarget = await Display.findByPk(display.mirrorDisplayId, {
-        attributes: ['tickerText', 'tickerTransit', 'tickerTraffic', 'showTransitData', 'showTrafficData'],
-      });
-      if (mirrorTarget) {
-        responseData = {
-          ...responseData,
-          tickerText: mirrorTarget.tickerText,
-          tickerTransit: mirrorTarget.tickerTransit,
-          tickerTraffic: mirrorTarget.tickerTraffic,
-          showTransitData: mirrorTarget.showTransitData,
-          showTrafficData: mirrorTarget.showTrafficData,
-        };
-      }
-    }
-
     res.json({
       success: true,
-      data: responseData,
+      data: display,
     });
 
     logger.info(`Display by identifier abgerufen: ${identifier}`);
@@ -205,9 +172,9 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
-    // License check: max 2 visible (non-hidden) customer displays
+    // License check: max 2 displays
     const MAX_LICENSED_DISPLAYS = 2;
-    const displayCount = await Display.count({ where: { isHidden: false } });
+    const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
         `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter kontakt@it-westfalen.de, um weitere Display-Lizenzen zu erwerben.`,
@@ -304,27 +271,6 @@ export const updateDisplay = async (
     if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
     if (req.body.tickerTransit !== undefined) display.tickerTransit = req.body.tickerTransit === true || req.body.tickerTransit === 'true';
     if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
-
-    // Superadmin only: Gerätedaten und Sichtbarkeit bearbeiten
-    if (req.user?.role === 'super_admin') {
-      if (req.body.serialNumber !== undefined) display.serialNumber = req.body.serialNumber || null;
-      if (req.body.macAddress !== undefined) display.macAddress = req.body.macAddress || null;
-      if (req.body.deviceModel !== undefined) display.deviceModel = req.body.deviceModel || null;
-      if (req.body.deviceOsVersion !== undefined) display.deviceOsVersion = req.body.deviceOsVersion || null;
-      if (req.body.appVersion !== undefined) display.appVersion = req.body.appVersion || null;
-      if (req.body.authorizationStatus !== undefined) {
-        const validStatuses = ['pending', 'authorized', 'rejected', 'revoked'];
-        if (validStatuses.includes(req.body.authorizationStatus)) {
-          display.authorizationStatus = req.body.authorizationStatus as any;
-        }
-      }
-      if (req.body.isHidden !== undefined) {
-        display.isHidden = req.body.isHidden === true || req.body.isHidden === 'true';
-      }
-      if (req.body.mirrorDisplayId !== undefined) {
-        display.mirrorDisplayId = req.body.mirrorDisplayId ? parseInt(req.body.mirrorDisplayId) : undefined;
-      }
-    }
 
     await display.save();
 
@@ -476,9 +422,9 @@ export const getPublicDisplays = async (
     }
 
     const displays = await Display.findAll({
-      where: { isActive: true, isHidden: false },
+      where: { isActive: true },
       order: [['name', 'ASC']],
-      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'isHidden', 'showTransitData', 'showTrafficData', 'organizationId'],
+      attributes: ['id', 'name', 'identifier', 'description', 'isActive', 'showTransitData', 'showTrafficData', 'organizationId'],
     });
 
     const response = {
@@ -526,25 +472,11 @@ export const getPublicDisplayPosts = async (
       throw new AppError('Display nicht gefunden oder nicht aktiv', 404);
     }
 
-    // Öffentliche Anfragen: Gerät muss autorisiert sein
-    if (!req.user && display.authorizationStatus !== 'authorized') {
-      res.status(403).json({
-        success: false,
-        blocked: true,
-        reason: display.authorizationStatus,
-        message: 'Dieses Gerät ist nicht autorisiert. Bitte wenden Sie sich an den Systemadministrator.',
-      });
-      return;
-    }
-
     const now = new Date();
-
-    // Mirror-Display: Posts vom Ziel-Display laden
-    const effectiveDisplayId = display.mirrorDisplayId || display.id;
 
     // Get active posts for this display
     const postIds = await PostDisplay.findAll({
-      where: { displayId: effectiveDisplayId },
+      where: { displayId: display.id },
       attributes: ['postId'],
     });
 

@@ -3973,96 +3973,90 @@ async function loadDisplays() {
     const response = await apiRequest('/displays');
     displaysCache = response?.data || [];
 
-    // Reguläre und versteckte (Superadmin) Displays trennen
-    const regularDisplays = displaysCache.filter(d => !d.isHidden);
-    const hiddenDisplays = displaysCache.filter(d => d.isHidden);
-
-    if (regularDisplays.length === 0) {
+    if (displaysCache.length === 0) {
       displaysList.innerHTML =
         '<p style="text-align:center; color: #6c757d;">' + t('displays.empty') + '</p>';
-    } else {
-      displaysList.innerHTML = regularDisplays
-        .map(
-          (display) => {
-            const isDevice = !!display.serialNumber;
-            const authStatus = display.authorizationStatus || 'authorized';
-            
-            // Status-Badge
-            let statusBadge = '';
-            if (isDevice) {
-              const statusColors = {
-                pending: '#ffaa00',
-                authorized: '#28a745',
-                rejected: '#dc3545',
-                revoked: '#ff8800'
-              };
-              const statusLabels = {
-                pending: t('displays.statusPending'),
-                authorized: t('displays.statusAuthorized'),
-                rejected: t('displays.statusRejected'),
-                revoked: t('displays.statusRevoked')
-              };
-              statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
-            }
-            
-            // Device-Info
-            let deviceInfo = '';
-            if (isDevice) {
-              deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
-                📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
-                ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
-                ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
-                ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
-              </p>`;
-            }
-            
-            // Auth-Action-Buttons (nur für Superadmin)
-            const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
-            let authActions = '';
-            if (isDevice && _authUser.role === 'super_admin') {
-              if (authStatus === 'pending') {
-                authActions = `
-                  <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
-                  <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
-              } else if (authStatus === 'authorized') {
-                authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
-              } else if (authStatus === 'rejected' || authStatus === 'revoked') {
-                authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
-              }
-            }
-            
-            return `
-          <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
-              <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
-                  <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
-                  <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
-                  ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
-                  ${deviceInfo}
-                  <p style="font-size: 0.8em; margin-top: 0.4rem;">
-                    ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
-                    ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
-                  </p>
-                  <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
-                    ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
-                  </p>
-              </div>
-              <div class="list-item-actions">
-                  ${authActions}
-                  <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
-                    ${t('displays.preview')}
-                  </button>
-                  <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
-                  <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
-              </div>
-          </div>
-        `;
-          }
-        )
-        .join('');
+      return;
     }
 
-    // Superadmin-Geräte-Sektion (versteckte Displays)
-    _renderSuperadminDevices(hiddenDisplays);
+    displaysList.innerHTML = displaysCache
+      .map(
+        (display) => {
+          const isDevice = !!display.serialNumber;
+          const authStatus = display.authorizationStatus || 'authorized';
+          
+          // Status-Badge
+          let statusBadge = '';
+          if (isDevice) {
+            const statusColors = {
+              pending: '#ffaa00',
+              authorized: '#28a745',
+              rejected: '#dc3545',
+              revoked: '#ff8800'
+            };
+            const statusLabels = {
+              pending: t('displays.statusPending'),
+              authorized: t('displays.statusAuthorized'),
+              rejected: t('displays.statusRejected'),
+              revoked: t('displays.statusRevoked')
+            };
+            statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
+          }
+          
+          // Device-Info
+          let deviceInfo = '';
+          if (isDevice) {
+            deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
+              📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
+              ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
+              ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
+              ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
+            </p>`;
+          }
+          
+          // Auth-Action-Buttons (nur für Superadmin)
+          const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
+          let authActions = '';
+          if (isDevice && _authUser.role === 'super_admin') {
+            if (authStatus === 'pending') {
+              authActions = `
+                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
+                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
+            } else if (authStatus === 'authorized') {
+              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
+            } else if (authStatus === 'rejected' || authStatus === 'revoked') {
+              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
+            }
+          }
+          
+          return `
+        <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
+            <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
+                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
+                <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
+                ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
+                ${deviceInfo}
+                <p style="font-size: 0.8em; margin-top: 0.4rem;">
+                  ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
+                  ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
+                </p>
+                <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
+                  ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                </p>
+            </div>
+            <div class="list-item-actions">
+                ${authActions}
+                <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
+                  ${t('displays.preview')}
+                </button>
+                <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
+                <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
+            </div>
+        </div>
+      `;
+        }
+      )
+      .join('');
   } catch (error) {
     displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">${t('displays.errorLoading')} ${error.message}</p>`;
   }
@@ -4071,52 +4065,8 @@ async function loadDisplays() {
   updateDisplayLicenseInfo();
 }
 
-function _renderSuperadminDevices(hiddenDisplays) {
-  const wrapper = document.getElementById('superadmin-devices-wrapper');
-  const listEl = document.getElementById('superadmin-devices-list');
-  if (!wrapper || !listEl) return;
-
-  const saUser = JSON.parse(localStorage.getItem('user') || '{}');
-  if (saUser.role !== 'super_admin') {
-    wrapper.style.display = 'none';
-    return;
-  }
-
-  wrapper.style.display = 'block';
-
-  if (hiddenDisplays.length === 0) {
-    listEl.innerHTML = '<p style="text-align:center; color:#6c757d; padding:1rem;">Keine Superadmin-Geräte konfiguriert</p>';
-    return;
-  }
-
-  listEl.innerHTML = hiddenDisplays.map(display => {
-    const authStatus = display.authorizationStatus || 'authorized';
-    const mirrorTarget = display.mirrorDisplayId
-      ? displaysCache.find(d => d.id === display.mirrorDisplayId)
-      : null;
-    const mirrorInfo = mirrorTarget
-      ? `<p style="color:#dc3545; font-size:0.85em; margin-top:0.4rem;">&#128250; Spiegelt: <strong>${escapeHtml(mirrorTarget.name)}</strong> <code>/${escapeHtml(mirrorTarget.identifier)}</code></p>`
-      : `<p style="color:#aaa; font-size:0.85em; margin-top:0.4rem;">Kein Mirror konfiguriert — zeigt eigene Inhalte</p>`;
-    const authColors = { pending:'#ffaa00', authorized:'#28a745', rejected:'#dc3545', revoked:'#ff8800' };
-    const authBadge = `<span style="background:${authColors[authStatus]||'#6c757d'}; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.75em; margin-left:8px;">${authStatus}</span>`;
-    return `
-      <div class="list-item" data-display-id="${display.id}" style="border-left:3px solid #dc3545;">
-        <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Gerät bearbeiten">
-          <h3>&#128274; ${escapeHtml(display.name)} ${display.isActive ? '<span style="color:#28a745;">&#9679;</span>' : '<span style="color:#6c757d;">&#9675;</span>'}${authBadge}</h3>
-          <p style="color:#6c757d; font-family:monospace; font-size:0.9em;">/${escapeHtml(display.identifier)}</p>
-          <p style="font-size:0.8em; color:#6c757d;">&#128241; ${escapeHtml(display.deviceModel||'-')} | SN: ${escapeHtml(display.serialNumber||'-')}</p>
-          ${mirrorInfo}
-        </div>
-        <div class="list-item-actions">
-          <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">Bearbeiten</button>
-        </div>
-      </div>`;
-  }).join('');
-}
-
 function updateDisplayLicenseInfo() {
-  // Nur sichtbare (nicht versteckte) Displays zählen für Lizenz
-  const count = displaysCache.filter(d => !d.isHidden).length;
+  const count = displaysCache.length;
   const licenseUsed = document.getElementById('display-license-used');
   if (licenseUsed) licenseUsed.textContent = count;
 
@@ -4169,18 +4119,6 @@ function showDisplayForm() {
   const submitBtn = document.querySelector('#displayForm button[type="submit"]');
   if (submitBtn) submitBtn.textContent = t('displays.create');
 
-  // Geräte-Sektion verstecken (nur bei Neuanlage sichtbar wenn Superadmin)
-  const devSection = document.getElementById('display-device-section');
-  const newUser = JSON.parse(localStorage.getItem('user') || '{}');
-  if (devSection) devSection.style.display = newUser.role === 'super_admin' ? 'block' : 'none';
-  if (devSection && newUser.role === 'super_admin') {
-    // Defaults setzen
-    const authStatusEl = document.getElementById('display-authorizationStatus');
-    if (authStatusEl) authStatusEl.value = 'authorized';
-    const hiddenEl = document.getElementById('display-isHidden');
-    if (hiddenEl) hiddenEl.checked = false;
-  }
-
   // Live-Daten Checkboxen auf Standard setzen
   document.getElementById('display-showTransitData').checked = true;
   document.getElementById('display-showTrafficData').checked = true;
@@ -4226,37 +4164,6 @@ async function editDisplay(id) {
   if (tickerTransitEl) tickerTransitEl.checked = display.tickerTransit === true;
   const tickerTrafficEl = document.getElementById('display-tickerTraffic');
   if (tickerTrafficEl) tickerTrafficEl.checked = display.tickerTraffic === true;
-
-  // Superadmin: Gerätefelder
-  const editUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const devSection = document.getElementById('display-device-section');
-  if (editUser.role === 'super_admin' && devSection) {
-    devSection.style.display = 'block';
-    const snEl = document.getElementById('display-serialNumber');
-    if (snEl) snEl.value = display.serialNumber || '';
-    const macEl = document.getElementById('display-macAddress');
-    if (macEl) macEl.value = display.macAddress || '';
-    const modelEl = document.getElementById('display-deviceModel');
-    if (modelEl) modelEl.value = display.deviceModel || '';
-    const osEl = document.getElementById('display-deviceOsVersion');
-    if (osEl) osEl.value = display.deviceOsVersion || '';
-    const appvEl = document.getElementById('display-appVersion');
-    if (appvEl) appvEl.value = display.appVersion || '';
-    const authStatusEl = document.getElementById('display-authorizationStatus');
-    if (authStatusEl) authStatusEl.value = display.authorizationStatus || 'authorized';
-    const hiddenEl = document.getElementById('display-isHidden');
-    if (hiddenEl) hiddenEl.checked = display.isHidden === true;
-    // Mirror-Display Dropdown befüllen
-    const mirrorEl = document.getElementById('display-mirrorDisplayId');
-    if (mirrorEl) {
-      const nonHidden = displaysCache.filter(d => !d.isHidden);
-      mirrorEl.innerHTML = '<option value="">— Keine Kopie (eigenständig) —</option>' +
-        nonHidden.map(d => `<option value="${d.id}"${display.mirrorDisplayId === d.id ? ' selected' : ''}>${escapeHtml(d.name)} (/${escapeHtml(d.identifier)})</option>`).join('');
-      mirrorEl.value = display.mirrorDisplayId ? String(display.mirrorDisplayId) : '';
-    }
-  } else if (devSection) {
-    devSection.style.display = 'none';
-  }
 
   // Scrolle zum Formular
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
@@ -4329,27 +4236,6 @@ async function handleDisplayFormSubmit(e) {
     tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
   };
-
-  // Superadmin: Gerätedaten mitspeichern
-  const submitUser = JSON.parse(localStorage.getItem('user') || '{}');
-  if (submitUser.role === 'super_admin') {
-    const snEl = document.getElementById('display-serialNumber');
-    if (snEl) displayData.serialNumber = snEl.value.trim() || null;
-    const macEl = document.getElementById('display-macAddress');
-    if (macEl) displayData.macAddress = macEl.value.trim() || null;
-    const modelEl = document.getElementById('display-deviceModel');
-    if (modelEl) displayData.deviceModel = modelEl.value.trim() || null;
-    const osEl = document.getElementById('display-deviceOsVersion');
-    if (osEl) displayData.deviceOsVersion = osEl.value.trim() || null;
-    const appvEl = document.getElementById('display-appVersion');
-    if (appvEl) displayData.appVersion = appvEl.value.trim() || null;
-    const authStatusEl = document.getElementById('display-authorizationStatus');
-    if (authStatusEl) displayData.authorizationStatus = authStatusEl.value;
-    const hiddenEl = document.getElementById('display-isHidden');
-    if (hiddenEl) displayData.isHidden = hiddenEl.checked;
-    const mirrorEl2 = document.getElementById('display-mirrorDisplayId');
-    if (mirrorEl2) displayData.mirrorDisplayId = mirrorEl2.value ? parseInt(mirrorEl2.value) : null;
-  }
 
   try {
     if (currentDisplayId) {

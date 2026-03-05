@@ -30,8 +30,6 @@ export const requirePermission = (permissions: string | string[]) => {
 
       if (!hasPermission) {
         const ip = req.ip || req.socket.remoteAddress || 'unknown';
-        // Debug: Direkt in Docker-Logs
-        console.error(`[PERMISSION_DEBUG] DENIED user.id=${user.id} email=${user.email} role=${user.role} permission=${permissionArray.join(',')} path=${req.path}`);
         securityLogger.logPermissionDenied(
           user.id,
           user.email,

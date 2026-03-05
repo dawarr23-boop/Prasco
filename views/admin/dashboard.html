@@ -914,81 +914,12 @@
                     Abbrechen
                   </button>
                 </div>
-
-                <!-- Superadmin: Geräteverwaltung (nur sichtbar für super_admin) -->
-                <div id="display-device-section" style="display:none; margin-top:1.5rem;">
-                  <hr style="border:none; border-top:2px dashed #dc3545; margin-bottom:1.5rem;">
-                  <h3 style="color:#dc3545; font-size:1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-                    🔒 Geräteverwaltung <span style="font-size:0.75rem; background:#dc3545; color:#fff; padding:2px 8px; border-radius:4px;">Superadmin</span>
-                  </h3>
-                  <div class="form-group">
-                    <label for="display-serialNumber">Seriennummer</label>
-                    <input type="text" id="display-serialNumber" name="serialNumber" placeholder="z.B. T3BB3FMQKQCLJ" />
-                    <small style="color:#6c757d;">Eindeutige Geräteseriennummer — wird bei der automatischen Registrierung gesetzt</small>
-                  </div>
-                  <div class="form-group">
-                    <label for="display-macAddress">MAC-Adresse</label>
-                    <input type="text" id="display-macAddress" name="macAddress" placeholder="z.B. AA:BB:CC:DD:EE:FF" />
-                  </div>
-                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-                    <div class="form-group">
-                      <label for="display-deviceModel">Gerätemodell</label>
-                      <input type="text" id="display-deviceModel" name="deviceModel" placeholder="z.B. Xiaomi Mi TV Stick" />
-                    </div>
-                    <div class="form-group">
-                      <label for="display-deviceOsVersion">OS-Version</label>
-                      <input type="text" id="display-deviceOsVersion" name="deviceOsVersion" placeholder="z.B. Android 9" />
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label for="display-appVersion">App-Version</label>
-                    <input type="text" id="display-appVersion" name="appVersion" placeholder="z.B. 1.2.3" />
-                  </div>
-                  <div class="form-group">
-                    <label for="display-authorizationStatus" style="font-weight:600;">Autorisierungsstatus</label>
-                    <select id="display-authorizationStatus" name="authorizationStatus" style="width:100%; padding:0.5rem 0.75rem; border:1px solid #ced4da; border-radius:6px; font-size:1rem;">
-                      <option value="authorized">✅ Autorisiert — Gerät darf Inhalte anzeigen</option>
-                      <option value="pending">⏳ Ausstehend — Warte auf Freigabe</option>
-                      <option value="rejected">❌ Abgelehnt — Zugriff verweigert</option>
-                      <option value="revoked">🚫 Widerrufen — Autorisierung entzogen</option>
-                    </select>
-                    <small style="color:#6c757d;">Nur autorisierte Geräte können Inhalte abrufen</small>
-                  </div>
-                  <div class="form-group">
-                    <div style="display:flex; align-items:center; gap:0.75rem;">
-                      <div class="toggle-switch">
-                        <input type="checkbox" class="toggle-input" id="display-isHidden" name="isHidden" />
-                        <label class="toggle-label" for="display-isHidden"><span class="toggle-slider"></span></label>
-                      </div>
-                      <label for="display-isHidden" style="cursor:pointer; font-weight:600;">Als verstecktes Superadmin-Display markieren</label>
-                    </div>
-                    <small style="color:#6c757d; display:block; margin-top:0.25rem;">Versteckte Displays erscheinen nicht in der öffentlichen Display-Auswahl, sind aber über die direkte URL erreichbar (z.B. für interne Überwachung).</small>
-                  </div>
-                  <div class="form-group" id="display-mirror-group">
-                    <label for="display-mirrorDisplayId" style="font-weight:600;">&#128250; Als Kopie anzeigen (Mirror-Display)</label>
-                    <select id="display-mirrorDisplayId" name="mirrorDisplayId" style="width:100%; padding:0.5rem 0.75rem; border:1px solid #ced4da; border-radius:6px; font-size:1rem;">
-                      <option value="">— Keine Kopie (eigenständig) —</option>
-                    </select>
-                    <small style="color:#6c757d;">Das Gerät zeigt exakt denselben Inhalt wie das gewählte Kunden-Display — ideal für Superadmin-Überwachung.</small>
-                  </div>
-                </div>
               </form>
             </div>
 
             <div class="displays-list" id="displays-list">
               <!-- Wird dynamisch gefüllt -->
             </div>
-
-            <!-- Superadmin: Versteckte Geräte (nur für super_admin sichtbar) -->
-            <div id="superadmin-devices-wrapper" style="display:none; margin-top:2.5rem;">
-              <hr style="border:none; border-top:2px dashed #dc3545; margin-bottom:1.5rem;">
-              <h3 style="color:#dc3545; font-size:1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
-                🔒 Superadmin-Geräte
-                <span style="font-size:0.75rem; background:#dc3545; color:#fff; padding:2px 8px; border-radius:4px;">Nur für Superadmin</span>
-              </h3>
-              <div id="superadmin-devices-list"></div>
-            </div>
-
           </section>
 
           <!-- Users Section -->
@@ -2133,6 +2064,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.19"></script>
+    <script src="/js/admin.js?v=5.17"></script>
   </body>
 </html>

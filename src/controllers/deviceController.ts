@@ -52,9 +52,9 @@ export const registerDevice = async (
       return;
     }
 
-    // New device - check license limit (only non-hidden displays count)
+    // New device - check license limit
     const MAX_LICENSED_DISPLAYS = 2;
-    const displayCount = await Display.count({ where: { isHidden: false } });
+    const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
         `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Neue Geräte können nicht registriert werden.`,
