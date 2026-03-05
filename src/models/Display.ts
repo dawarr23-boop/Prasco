@@ -14,6 +14,7 @@ interface DisplayAttributes {
   tickerTraffic: boolean;
   organizationId?: number;
   isHidden: boolean;
+  mirrorDisplayId?: number;
   // Device Authorization
   serialNumber?: string;
   macAddress?: string;
@@ -31,7 +32,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt' | 'isHidden'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt' | 'isHidden' | 'mirrorDisplayId'
   > {}
 
 class Display
@@ -50,6 +51,7 @@ class Display
   public tickerTraffic!: boolean;
   public organizationId?: number;
   public isHidden!: boolean;
+  public mirrorDisplayId?: number;
   // Device Authorization
   public serialNumber?: string;
   public macAddress?: string;
@@ -187,6 +189,15 @@ Display.init(
       allowNull: false,
       defaultValue: false,
       field: 'is_hidden',
+    },
+    mirrorDisplayId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: 'mirror_display_id',
+      references: {
+        model: 'displays',
+        key: 'id',
+      },
     },
   },
   {

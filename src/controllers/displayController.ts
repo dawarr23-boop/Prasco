@@ -50,6 +50,7 @@ export const getAllDisplays = async (
         'appVersion',
         'lastSeenAt',
         'registeredAt',
+        'mirrorDisplayId',
         'createdAt',
         'updatedAt',
       ],
@@ -133,6 +134,7 @@ export const getDisplayByIdentifier = async (
         'description',
         'isActive',
         'authorizationStatus',
+        'mirrorDisplayId',
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
@@ -162,9 +164,27 @@ export const getDisplayByIdentifier = async (
       return;
     }
 
+    // Mirror-Display: Inhaltseinstellungen vom Ziel-Display übernehmen
+    let responseData: any = display.toJSON();
+    if (display.mirrorDisplayId) {
+      const mirrorTarget = await Display.findByPk(display.mirrorDisplayId, {
+        attributes: ['tickerText', 'tickerTransit', 'tickerTraffic', 'showTransitData', 'showTrafficData'],
+      });
+      if (mirrorTarget) {
+        responseData = {
+          ...responseData,
+          tickerText: mirrorTarget.tickerText,
+          tickerTransit: mirrorTarget.tickerTransit,
+          tickerTraffic: mirrorTarget.tickerTraffic,
+          showTransitData: mirrorTarget.showTransitData,
+          showTrafficData: mirrorTarget.showTrafficData,
+        };
+      }
+    }
+
     res.json({
       success: true,
-      data: display,
+      data: responseData,
     });
 
     logger.info(`Display by identifier abgerufen: ${identifier}`);
@@ -300,6 +320,9 @@ export const updateDisplay = async (
       }
       if (req.body.isHidden !== undefined) {
         display.isHidden = req.body.isHidden === true || req.body.isHidden === 'true';
+      }
+      if (req.body.mirrorDisplayId !== undefined) {
+        display.mirrorDisplayId = req.body.mirrorDisplayId ? parseInt(req.body.mirrorDisplayId) : undefined;
       }
     }
 
@@ -516,9 +539,12 @@ export const getPublicDisplayPosts = async (
 
     const now = new Date();
 
+    // Mirror-Display: Posts vom Ziel-Display laden
+    const effectiveDisplayId = display.mirrorDisplayId || display.id;
+
     // Get active posts for this display
     const postIds = await PostDisplay.findAll({
-      where: { displayId: display.id },
+      where: { displayId: effectiveDisplayId },
       attributes: ['postId'],
     });
 

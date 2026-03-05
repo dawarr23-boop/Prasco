@@ -3973,99 +3973,145 @@ async function loadDisplays() {
     const response = await apiRequest('/displays');
     displaysCache = response?.data || [];
 
-    if (displaysCache.length === 0) {
+    // Reguläre und versteckte (Superadmin) Displays trennen
+    const regularDisplays = displaysCache.filter(d => !d.isHidden);
+    const hiddenDisplays = displaysCache.filter(d => d.isHidden);
+
+    if (regularDisplays.length === 0) {
       displaysList.innerHTML =
         '<p style="text-align:center; color: #6c757d;">' + t('displays.empty') + '</p>';
-      return;
+    } else {
+      displaysList.innerHTML = regularDisplays
+        .map(
+          (display) => {
+            const isDevice = !!display.serialNumber;
+            const authStatus = display.authorizationStatus || 'authorized';
+            
+            // Status-Badge
+            let statusBadge = '';
+            if (isDevice) {
+              const statusColors = {
+                pending: '#ffaa00',
+                authorized: '#28a745',
+                rejected: '#dc3545',
+                revoked: '#ff8800'
+              };
+              const statusLabels = {
+                pending: t('displays.statusPending'),
+                authorized: t('displays.statusAuthorized'),
+                rejected: t('displays.statusRejected'),
+                revoked: t('displays.statusRevoked')
+              };
+              statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
+            }
+            
+            // Device-Info
+            let deviceInfo = '';
+            if (isDevice) {
+              deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
+                📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
+                ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
+                ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
+                ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
+              </p>`;
+            }
+            
+            // Auth-Action-Buttons (nur für Superadmin)
+            const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
+            let authActions = '';
+            if (isDevice && _authUser.role === 'super_admin') {
+              if (authStatus === 'pending') {
+                authActions = `
+                  <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
+                  <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
+              } else if (authStatus === 'authorized') {
+                authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
+              } else if (authStatus === 'rejected' || authStatus === 'revoked') {
+                authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
+              }
+            }
+            
+            return `
+          <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
+              <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
+                  <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
+                  <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
+                  ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
+                  ${deviceInfo}
+                  <p style="font-size: 0.8em; margin-top: 0.4rem;">
+                    ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
+                    ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
+                  </p>
+                  <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
+                    ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                  </p>
+              </div>
+              <div class="list-item-actions">
+                  ${authActions}
+                  <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
+                    ${t('displays.preview')}
+                  </button>
+                  <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
+                  <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
+              </div>
+          </div>
+        `;
+          }
+        )
+        .join('');
     }
 
-    displaysList.innerHTML = displaysCache
-      .map(
-        (display) => {
-          const isDevice = !!display.serialNumber;
-          const authStatus = display.authorizationStatus || 'authorized';
-          
-          // Status-Badge
-          let statusBadge = '';
-          if (isDevice) {
-            const statusColors = {
-              pending: '#ffaa00',
-              authorized: '#28a745',
-              rejected: '#dc3545',
-              revoked: '#ff8800'
-            };
-            const statusLabels = {
-              pending: t('displays.statusPending'),
-              authorized: t('displays.statusAuthorized'),
-              rejected: t('displays.statusRejected'),
-              revoked: t('displays.statusRevoked')
-            };
-            statusBadge = `<span style="background: ${statusColors[authStatus] || '#6c757d'}; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 8px;">${statusLabels[authStatus] || authStatus}</span>`;
-          }
-          if (display.isHidden) {
-            statusBadge += `<span style="background: #6c757d; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.75em; margin-left: 4px;" title="Nicht in der öffentlichen Auswahl sichtbar">👁️‍🗨️ Versteckt</span>`;
-          }
-          
-          // Device-Info
-          let deviceInfo = '';
-          if (isDevice) {
-            deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
-              📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
-              ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
-              ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
-              ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
-            </p>`;
-          }
-          
-          // Auth-Action-Buttons (nur für Superadmin)
-          const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
-          let authActions = '';
-          if (isDevice && _authUser.role === 'super_admin') {
-            if (authStatus === 'pending') {
-              authActions = `
-                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
-                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
-            } else if (authStatus === 'authorized') {
-              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
-            } else if (authStatus === 'rejected' || authStatus === 'revoked') {
-              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
-            }
-          }
-          
-          return `
-        <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
-            <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
-                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
-                <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
-                ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
-                ${deviceInfo}
-                <p style="font-size: 0.8em; margin-top: 0.4rem;">
-                  ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
-                  ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
-                </p>
-                <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
-                  ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
-                </p>
-            </div>
-            <div class="list-item-actions">
-                ${authActions}
-                <button class="btn btn-info btn-sm" data-action="preview-display" data-display-url="/public/display.html?id=${escapeHtml(display.identifier)}" data-display-name="${escapeHtml(display.name)}" title="${t('displays.preview')}">
-                  ${t('displays.preview')}
-                </button>
-                <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">${t('displays.edit')}</button>
-                <button class="btn btn-danger" data-action="delete-display" data-display-id="${display.id}">${t('displays.delete')}</button>
-            </div>
-        </div>
-      `;
-        }
-      )
-      .join('');
+    // Superadmin-Geräte-Sektion (versteckte Displays)
+    _renderSuperadminDevices(hiddenDisplays);
   } catch (error) {
     displaysList.innerHTML = `<p style="text-align:center; color: #dc3545;">${t('displays.errorLoading')} ${error.message}</p>`;
   }
 
   // License info aktualisieren
   updateDisplayLicenseInfo();
+}
+
+function _renderSuperadminDevices(hiddenDisplays) {
+  const wrapper = document.getElementById('superadmin-devices-wrapper');
+  const listEl = document.getElementById('superadmin-devices-list');
+  if (!wrapper || !listEl) return;
+
+  const saUser = JSON.parse(localStorage.getItem('user') || '{}');
+  if (saUser.role !== 'super_admin') {
+    wrapper.style.display = 'none';
+    return;
+  }
+
+  wrapper.style.display = 'block';
+
+  if (hiddenDisplays.length === 0) {
+    listEl.innerHTML = '<p style="text-align:center; color:#6c757d; padding:1rem;">Keine Superadmin-Geräte konfiguriert</p>';
+    return;
+  }
+
+  listEl.innerHTML = hiddenDisplays.map(display => {
+    const authStatus = display.authorizationStatus || 'authorized';
+    const mirrorTarget = display.mirrorDisplayId
+      ? displaysCache.find(d => d.id === display.mirrorDisplayId)
+      : null;
+    const mirrorInfo = mirrorTarget
+      ? `<p style="color:#dc3545; font-size:0.85em; margin-top:0.4rem;">&#128250; Spiegelt: <strong>${escapeHtml(mirrorTarget.name)}</strong> <code>/${escapeHtml(mirrorTarget.identifier)}</code></p>`
+      : `<p style="color:#aaa; font-size:0.85em; margin-top:0.4rem;">Kein Mirror konfiguriert — zeigt eigene Inhalte</p>`;
+    const authColors = { pending:'#ffaa00', authorized:'#28a745', rejected:'#dc3545', revoked:'#ff8800' };
+    const authBadge = `<span style="background:${authColors[authStatus]||'#6c757d'}; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.75em; margin-left:8px;">${authStatus}</span>`;
+    return `
+      <div class="list-item" data-display-id="${display.id}" style="border-left:3px solid #dc3545;">
+        <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="Gerät bearbeiten">
+          <h3>&#128274; ${escapeHtml(display.name)} ${display.isActive ? '<span style="color:#28a745;">&#9679;</span>' : '<span style="color:#6c757d;">&#9675;</span>'}${authBadge}</h3>
+          <p style="color:#6c757d; font-family:monospace; font-size:0.9em;">/${escapeHtml(display.identifier)}</p>
+          <p style="font-size:0.8em; color:#6c757d;">&#128241; ${escapeHtml(display.deviceModel||'-')} | SN: ${escapeHtml(display.serialNumber||'-')}</p>
+          ${mirrorInfo}
+        </div>
+        <div class="list-item-actions">
+          <button class="btn btn-secondary" data-action="edit-display" data-display-id="${display.id}">Bearbeiten</button>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function updateDisplayLicenseInfo() {
@@ -4200,6 +4246,14 @@ async function editDisplay(id) {
     if (authStatusEl) authStatusEl.value = display.authorizationStatus || 'authorized';
     const hiddenEl = document.getElementById('display-isHidden');
     if (hiddenEl) hiddenEl.checked = display.isHidden === true;
+    // Mirror-Display Dropdown befüllen
+    const mirrorEl = document.getElementById('display-mirrorDisplayId');
+    if (mirrorEl) {
+      const nonHidden = displaysCache.filter(d => !d.isHidden);
+      mirrorEl.innerHTML = '<option value="">— Keine Kopie (eigenständig) —</option>' +
+        nonHidden.map(d => `<option value="${d.id}"${display.mirrorDisplayId === d.id ? ' selected' : ''}>${escapeHtml(d.name)} (/${escapeHtml(d.identifier)})</option>`).join('');
+      mirrorEl.value = display.mirrorDisplayId ? String(display.mirrorDisplayId) : '';
+    }
   } else if (devSection) {
     devSection.style.display = 'none';
   }
@@ -4293,6 +4347,8 @@ async function handleDisplayFormSubmit(e) {
     if (authStatusEl) displayData.authorizationStatus = authStatusEl.value;
     const hiddenEl = document.getElementById('display-isHidden');
     if (hiddenEl) displayData.isHidden = hiddenEl.checked;
+    const mirrorEl2 = document.getElementById('display-mirrorDisplayId');
+    if (mirrorEl2) displayData.mirrorDisplayId = mirrorEl2.value ? parseInt(mirrorEl2.value) : null;
   }
 
   try {
