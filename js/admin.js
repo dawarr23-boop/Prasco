@@ -2029,7 +2029,6 @@ function navigateTo(section) {
     if (section === 'categories') loadCategories();
     if (section === 'displays') {
       loadDisplays();
-      loadRegistrationMode();
       // Auto-Refresh alle 10 Sekunden für neue Registrierungen
       displaysAutoRefreshInterval = setInterval(() => {
         loadDisplays();
@@ -3935,80 +3934,6 @@ let displaysCache = [];
 let currentDisplayId = null;
 const MAX_LICENSED_DISPLAYS = 2;
 let displaysAutoRefreshInterval = null;
-let registrationModeActive = false;
-
-// ============================================
-// Registrierungsmodus
-// ============================================
-async function loadRegistrationMode() {
-  const panel = document.getElementById('registration-mode-panel');
-  if (!panel) return;
-
-  // Nur für Super-Admin sichtbar
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.role !== 'super_admin') {
-    panel.style.display = 'none';
-    return;
-  }
-  panel.style.display = '';
-
-  try {
-    const response = await apiRequest('/settings?category=display');
-    if (response) {
-      registrationModeActive = response['display.registrationMode'] === 'true';
-    }
-  } catch (e) {
-    console.warn('Registrierungsmodus nicht ladbar:', e);
-    registrationModeActive = false;
-  }
-  updateRegistrationModeUI();
-}
-
-function updateRegistrationModeUI() {
-  const toggle = document.getElementById('registration-mode-toggle');
-  const status = document.getElementById('registration-mode-status');
-  const info = document.getElementById('registration-mode-active-info');
-  const panel = document.getElementById('registration-mode-panel');
-
-  if (toggle) toggle.checked = registrationModeActive;
-  if (status) {
-    status.textContent = registrationModeActive ? 'Aktiv' : 'Inaktiv';
-    status.style.color = registrationModeActive ? '#28a745' : '#6c757d';
-  }
-  if (info) info.style.display = registrationModeActive ? '' : 'none';
-  if (panel) {
-    panel.style.borderColor = registrationModeActive ? '#28a745' : '#dee2e6';
-  }
-}
-
-async function toggleRegistrationMode() {
-  const newValue = !registrationModeActive;
-
-  try {
-    await apiRequest('/settings', {
-      method: 'PUT',
-      body: JSON.stringify({
-        key: 'display.registrationMode',
-        value: String(newValue),
-        type: 'boolean',
-        category: 'display',
-        description: 'Registrierungsmodus für neue Geräte',
-      }),
-    });
-    registrationModeActive = newValue;
-    updateRegistrationModeUI();
-
-    if (newValue) {
-      showNotification('Registrierungsmodus aktiviert — neue Geräte können sich jetzt verbinden.', 'success');
-    } else {
-      showNotification('Registrierungsmodus deaktiviert — keine neuen Geräte werden akzeptiert.', 'info');
-    }
-  } catch (error) {
-    showNotification('Fehler: ' + (error.message || error), 'error');
-    // Revert UI
-    updateRegistrationModeUI();
-  }
-}
 
 async function loadDisplays() {
   const displaysList = document.getElementById('displays-list');
@@ -5298,16 +5223,6 @@ window.addEventListener('load', async () => {
   if (hideDisplayFormBtn) {
     hideDisplayFormBtn.addEventListener('click', hideDisplayForm);
   }
-
-  // Registrierungsmodus Toggle
-  const regModeToggle = document.getElementById('registration-mode-toggle');
-  if (regModeToggle) {
-    regModeToggle.addEventListener('change', (e) => {
-      e.preventDefault();
-      toggleRegistrationMode();
-    });
-  }
-
   if (showUserFormBtn) {
     showUserFormBtn.addEventListener('click', showUserForm);
   }
