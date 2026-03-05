@@ -4,7 +4,6 @@ import Setting from '../models/Setting';
 import { AppError } from '../middleware/errorHandler';
 import { logger, securityLogger } from '../utils/logger';
 import { DeviceRequest } from '../middleware/deviceAuth';
-import { invalidateSettingCache } from '../middleware/deviceAuth';
 import crypto from 'crypto';
 import sequelize from '../config/database';
 
