@@ -1108,7 +1108,7 @@ async function buildLiveTickerParts() {
   const staticText = currentDisplayInfo && currentDisplayInfo.tickerText ? currentDisplayInfo.tickerText.trim() : '';
   if (staticText) parts.push(staticText);
 
-  // 2. ÖPNV-Abfahrten
+  // 2. ÖPNV-Abfahrten (alle nächsten Abfahrten, Verspätungen hervorgehoben)
   if (currentDisplayInfo && currentDisplayInfo.tickerTransit) {
     const ts = liveDataState.transitSettings || {};
     const stationId = ts['transit.stationId'];
@@ -1118,24 +1118,29 @@ async function buildLiveTickerParts() {
         const res = await fetch(`/api/transit/departures/${stationId}?limit=20&duration=120`);
         if (res.ok) {
           const data = await res.json();
-          // Nur Verspätungen und Ausfälle anzeigen
-          const deps = (data.data || []).filter(dep =>
-            dep.cancelled || dep.isDelayed || (dep.delay && dep.delay > 60)
-          ).slice(0, 6);
-          if (deps.length > 0) {
-            const items = deps.map(dep => {
+          const allDeps = (data.data || []).slice(0, 8);
+          if (allDeps.length > 0) {
+            const items = allDeps.map(dep => {
               const line = dep.line?.name || dep.line?.fahrtNr || '?';
-              const dir = dep.direction || '';
-              if (dep.cancelled) return `❌ ${line} → ${dir}: ausgefallen`;
-              // Verspätung in Minuten: aus delay (Sekunden) oder when vs plannedWhen
+              const dir = dep.direction ? dep.direction.substring(0, 20) : '';
+              // Abfahrtszeit formatieren
+              const whenStr = dep.when || dep.plannedWhen;
+              let timeStr = '';
+              if (whenStr) {
+                const d = new Date(whenStr);
+                timeStr = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+              }
+              if (dep.cancelled) return `❌ ${line} ${dir} ${timeStr}: Ausfall`;
+              // Verspätung prüfen
               let delayMin = dep.delay ? Math.round(dep.delay / 60) : 0;
               if (!delayMin && dep.when && dep.plannedWhen) {
                 delayMin = Math.round((new Date(dep.when) - new Date(dep.plannedWhen)) / 60000);
               }
-              return `⚠️ ${line} → ${dir}: +${delayMin || '?'} min`;
+              if (delayMin > 1) return `⚠️ ${line} ${dir} ${timeStr} (+${delayMin}')`;
+              return `🚏 ${line} ${dir} ${timeStr}`;
             }).filter(Boolean);
             if (items.length > 0) {
-              const label = stationName ? `🚨 ${stationName}: ` : '🚨 ';
+              const label = stationName ? `🚉 ${stationName}: ` : '🚉 ';
               parts.push(label + items.join(' | '));
             }
           }
@@ -1165,6 +1170,9 @@ async function buildLiveTickerParts() {
             for (const w of warnings.slice(0, 2)) trafficItems.push(`⚠️ ${hw}: ${w.title || w.subtitle || ''}`);
             for (const r of roadworks.slice(0, 2)) trafficItems.push(`🚧 ${hw}: ${r.title || ''}`);
             for (const c of closures.slice(0, 1)) trafficItems.push(`🚫 ${hw}: ${c.title || ''}`);
+            if (warnings.length === 0 && roadworks.length === 0 && closures.length === 0) {
+              trafficItems.push(`✅ ${hw}: keine Meldungen`);
+            }
           }
         } catch (e) {
           console.log('Ticker Verkehr Fehler:', hw, e);
