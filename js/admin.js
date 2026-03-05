@@ -6263,12 +6263,8 @@ async function updateDisplayLiveDataFlags(type, displayIdsCsv) {
     const shouldShow = selectedIds.includes(String(display.id));
     if (display[flagField] !== shouldShow) {
       try {
-        await fetch(`/api/displays/${display.id}`, {
+        await apiRequest(`/displays/${display.id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-          },
           body: JSON.stringify({ [flagField]: shouldShow })
         });
         display[flagField] = shouldShow; // Cache aktualisieren
@@ -6565,16 +6561,12 @@ async function saveTransitSettings() {
   settings['transit.displayIds'] = Array.from(transitDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
   try {
-    const response = await fetch('/api/settings/bulk', {
+    const result = await apiRequest('/settings/bulk', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-      },
       body: JSON.stringify({ settings })
     });
 
-    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    if (!result) throw new Error('Speichern fehlgeschlagen');
 
     // Per-Display Flags aktualisieren
     await updateDisplayLiveDataFlags('transit', settings['transit.displayIds']);
@@ -6804,16 +6796,12 @@ async function saveTrafficSettings() {
   settings['traffic.displayIds'] = Array.from(trafficDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
   try {
-    const response = await fetch('/api/settings/bulk', {
+    const result = await apiRequest('/settings/bulk', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-      },
       body: JSON.stringify({ settings })
     });
 
-    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+    if (!result) throw new Error('Speichern fehlgeschlagen');
 
     // Per-Display Flags aktualisieren
     await updateDisplayLiveDataFlags('traffic', settings['traffic.displayIds']);

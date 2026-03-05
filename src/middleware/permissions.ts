@@ -29,6 +29,7 @@ export const requirePermission = (permissions: string | string[]) => {
       const hasPermission = await user.hasAnyPermission(permissionArray);
 
       if (!hasPermission) {
+        console.error(`🔒 PERMISSION DENIED: User ${user.id} (${user.email}, role=${user.role}) missing ${permissionArray.join(', ')} for ${req.method} ${req.path}`);
         const ip = req.ip || req.socket.remoteAddress || 'unknown';
         securityLogger.logPermissionDenied(
           user.id,
