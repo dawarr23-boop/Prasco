@@ -1073,8 +1073,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveTransitSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewTransitData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
+                <button class="btn btn-secondary" id="previewTransitData" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
@@ -1155,8 +1154,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveTrafficSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewTrafficData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
+                <button class="btn btn-secondary" id="previewTrafficData" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
@@ -1232,8 +1230,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveWeatherSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewWeatherData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
+                <button class="btn btn-secondary" id="previewWeatherData" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
@@ -1279,8 +1276,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveNewsSettings" data-translate="liveData.saveSettings">Einstellungen speichern</button>
-                <button class="btn btn-secondary" id="previewNewsData" style="margin-left: 0.5rem" data-translate="liveData.preview">Vorschau</button>
+                <button class="btn btn-secondary" id="previewNewsData" data-translate="liveData.preview">Vorschau</button>
               </div>
             </div>
 
@@ -1319,6 +1315,13 @@
               </div>
             </div>
             </div><!-- /.livedata-grid -->
+
+            <!-- Zentraler Speichern-Button für alle Live-Daten -->
+            <div style="margin-top: 1.5rem; padding: 1rem 0; border-top: 2px solid #e9ecef; text-align: right;">
+              <button class="btn btn-primary" id="saveAllLiveDataSettings" style="padding: 0.6rem 2rem; font-size: 1rem;">
+                Alle Live-Daten speichern
+              </button>
+            </div>
           </section>
 
           <!-- Settings Section -->
@@ -1488,9 +1491,7 @@
                   <input type="number" id="live-data-slide-duration" value="20" min="5" max="120" />
                 </div>
 
-                <button class="btn btn-primary" id="saveDisplaySettings">
-                  Einstellungen speichern
-                </button>
+
               </div>
             </div>
 
@@ -1554,10 +1555,7 @@
                   </div>
                 </div>
 
-                <button class="btn btn-primary" id="saveGlobalMusicSettings">
-                  Musik-Einstellungen speichern
-                </button>
-                <button class="btn btn-secondary" id="testGlobalMusic" style="margin-left: 0.5rem">
+                <button class="btn btn-secondary" id="testGlobalMusic">
                   Test
                 </button>
               </div>
@@ -1587,10 +1585,15 @@
                   </div>
                   <div id="ai-key-status" style="margin-bottom: 1rem;"></div>
                 </div>
-                <button class="btn btn-primary" id="saveAISettings">
-                  Einstellungen speichern
-                </button>
+
               </div>
+            </div>
+
+            <!-- Zentraler Speichern-Button für alle Einstellungen -->
+            <div style="margin-top: 1.5rem; padding: 1rem 0; border-top: 2px solid #e9ecef; text-align: right;">
+              <button class="btn btn-primary" id="saveAllSettings" style="padding: 0.6rem 2rem; font-size: 1rem;">
+                Alle Einstellungen speichern
+              </button>
             </div>
 
             <!-- SSO Einstellungen (nur für Super-Admin) -->
@@ -2064,6 +2067,6 @@
       </div>
     </div>
 
-    <script src="/js/admin.js?v=5.18"></script>
+    <script src="/js/admin.js?v=5.19"></script>
   </body>
 </html>

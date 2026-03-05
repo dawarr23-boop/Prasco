@@ -3004,37 +3004,7 @@ function initGlobalMusicSettings() {
     });
   }
 
-  // Speichern mit automatischem Upload, falls Datei ausgewählt
-  if (saveBtn) {
-    saveBtn.addEventListener('click', async () => {
-      // Prüfen, ob eine neue Datei ausgewählt wurde und noch nicht hochgeladen ist
-      if (musicFileInput && musicFileInput.files.length > 0 && !uploadedMusicUrl) {
-        try {
-          saveBtn.disabled = true;
-          saveBtn.textContent = 'Hochladen...';
-          const result = await uploadFile(musicFileInput.files[0]);
-          uploadedMusicUrl = result.url;
-          showNotification('Musik-Datei hochgeladen!', 'success');
-        } catch (error) {
-          showNotification('Upload fehlgeschlagen: ' + error.message, 'error');
-          saveBtn.disabled = false;
-          saveBtn.textContent = 'Speichern';
-          return;
-        }
-      }
-      const settings = {
-        enabled: enabledCheckbox?.checked || false,
-        url: uploadedMusicUrl || urlInput?.value || '',
-        volume: parseInt(volumeSlider?.value) || 30,
-        muteVideos: muteVideosCheckbox?.checked !== false,
-        priority: prioritySelect?.value || 'global',
-      };
-      localStorage.setItem('globalMusicSettings', JSON.stringify(settings));
-      showNotification('Globale Musik-Einstellungen gespeichert!', 'success');
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'Speichern';
-    });
-  }
+  // Speichern wird über saveAllSettings() aufgerufen
 
   // Test-Button
   let testAudio = null;
@@ -5278,76 +5248,8 @@ window.addEventListener('load', async () => {
   // Hintergrundmusik-Steuerung initialisieren
   initBackgroundMusicControls();
 
-  // Display-Einstellungen speichern
-  const saveDisplaySettingsBtn = document.getElementById('saveDisplaySettings');
-  if (saveDisplaySettingsBtn) {
-    saveDisplaySettingsBtn.addEventListener('click', async () => {
-      const refreshInterval = document.getElementById('refresh-interval');
-      const defaultDuration = document.getElementById('default-duration');
-      const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
-      const transitionsExternalOnly = document.getElementById('transitions-external-only');
-      const liveDataInterval = document.getElementById('live-data-interval');
-      const liveDataSlideDuration = document.getElementById('live-data-slide-duration');
-      const showPostCounter = document.getElementById('show-post-counter');
-      
-      if (refreshInterval && defaultDuration && blendEffectsEnabled && transitionsExternalOnly) {
-        const settingsArray = [
-          { key: 'display.refreshInterval', value: parseInt(refreshInterval.value) || 5 },
-          { key: 'display.defaultDuration', value: parseInt(defaultDuration.value) || 10 },
-          { key: 'display.blendEffectsEnabled', value: blendEffectsEnabled.checked ? 'true' : 'false' },
-          { key: 'display.transitionsExternalOnly', value: transitionsExternalOnly.checked ? 'true' : 'false' },
-          { key: 'display.liveDataIntervalMinutes', value: parseInt(liveDataInterval?.value) || 5 },
-          { key: 'display.liveDataSlideDuration', value: parseInt(liveDataSlideDuration?.value) || 20 },
-          { key: 'display.showPostCounter', value: showPostCounter ? (showPostCounter.checked ? 'true' : 'false') : 'true' }
-        ];
-        
-        console.log('💾 Speichere Display-Einstellungen (Array):', settingsArray);
-        
-        // Konvertiere zu normalem Objekt für API
-        const settings = {};
-        settingsArray.forEach(item => {
-          settings[item.key] = item.value;
-        });
-        
-        const requestBody = { settings };
-        console.log('📦 Request Body:', JSON.stringify(requestBody, null, 2));
-        
-        try {
-          const response = await fetch('/api/settings/bulk', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            },
-            body: JSON.stringify(requestBody)
-          });
-
-          console.log('📡 Response Status:', response.status, response.statusText);
-          
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            console.error('❌ Server-Fehler:', errorData);
-            throw new Error('Fehler beim Speichern der Einstellungen');
-          }
-
-          const result = await response.json();
-          console.log('✅ Erfolgreich gespeichert:', result);
-
-          // Fallback zu localStorage für Kompatibilität
-          localStorage.setItem('displaySettings', JSON.stringify({
-            refreshInterval: parseInt(refreshInterval.value) || 5,
-            defaultDuration: parseInt(defaultDuration.value) || 10,
-            blendEffectsEnabled: blendEffectsEnabled.checked ? 'true' : 'false'
-          }));
-
-          showNotification('Display-Einstellungen gespeichert!', 'success');
-        } catch (error) {
-          console.error('❌ Fehler beim Speichern:', error);
-          showNotification('Fehler beim Speichern der Einstellungen', 'error');
-        }
-      }
-    });
-  }
+  // Display-Einstellungen speichern (ehemals inline, jetzt als Funktion)
+  // Button wurde entfernt, wird über saveAllSettings() aufgerufen
 
   // Display-Einstellungen laden
   const loadDisplaySettings = async () => {
@@ -6560,22 +6462,15 @@ async function saveTransitSettings() {
   const transitDisplayCheckboxes = document.querySelectorAll('#transit-display-checkboxes input[type="checkbox"]:checked');
   settings['transit.displayIds'] = Array.from(transitDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
-  try {
-    const result = await apiRequest('/settings/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ settings })
-    });
+  const result = await apiRequest('/settings/bulk', {
+    method: 'POST',
+    body: JSON.stringify({ settings })
+  });
 
-    if (!result) throw new Error('Speichern fehlgeschlagen');
+  if (!result) throw new Error('Speichern fehlgeschlagen');
 
-    // Per-Display Flags aktualisieren
-    await updateDisplayLiveDataFlags('transit', settings['transit.displayIds']);
-
-    showNotification('ÖPNV-Einstellungen gespeichert!', 'success');
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    showNotification('Fehler beim Speichern der ÖPNV-Einstellungen', 'error');
-  }
+  // Per-Display Flags aktualisieren
+  await updateDisplayLiveDataFlags('transit', settings['transit.displayIds']);
 }
 
 async function previewTransitData() {
@@ -6795,22 +6690,15 @@ async function saveTrafficSettings() {
   const trafficDisplayCheckboxes = document.querySelectorAll('#traffic-display-checkboxes input[type="checkbox"]:checked');
   settings['traffic.displayIds'] = Array.from(trafficDisplayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
-  try {
-    const result = await apiRequest('/settings/bulk', {
-      method: 'POST',
-      body: JSON.stringify({ settings })
-    });
+  const result = await apiRequest('/settings/bulk', {
+    method: 'POST',
+    body: JSON.stringify({ settings })
+  });
 
-    if (!result) throw new Error('Speichern fehlgeschlagen');
+  if (!result) throw new Error('Speichern fehlgeschlagen');
 
-    // Per-Display Flags aktualisieren
-    await updateDisplayLiveDataFlags('traffic', settings['traffic.displayIds']);
-
-    showNotification('Verkehrs-Einstellungen gespeichert!', 'success');
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    showNotification('Fehler beim Speichern der Verkehrs-Einstellungen', 'error');
-  }
+  // Per-Display Flags aktualisieren
+  await updateDisplayLiveDataFlags('traffic', settings['traffic.displayIds']);
 }
 
 async function previewTrafficData() {
@@ -6963,22 +6851,11 @@ async function saveWeatherSettings() {
   const displayCheckboxes = document.querySelectorAll('#weather-display-checkboxes input[type="checkbox"]:checked');
   settings['weather.displayIds'] = Array.from(displayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
-  try {
-    const response = await fetch('/api/settings/bulk', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-      },
-      body: JSON.stringify({ settings })
-    });
-
-    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
-    showNotification('Wetter-Einstellungen gespeichert!', 'success');
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    showNotification('Fehler beim Speichern der Wetter-Einstellungen', 'error');
-  }
+  const result = await apiRequest('/settings/bulk', {
+    method: 'POST',
+    body: JSON.stringify({ settings })
+  });
+  if (!result) throw new Error('Speichern fehlgeschlagen');
 }
 
 async function loadNewsSettings() {
@@ -7023,21 +6900,11 @@ async function saveNewsSettings() {
   const displayCheckboxes = document.querySelectorAll('#news-display-checkboxes input[type="checkbox"]:checked');
   settings['news.displayIds'] = Array.from(displayCheckboxes).map(cb => cb.dataset.displayId).join(',');
 
-  try {
-    const response = await fetch('/api/settings/bulk', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-      },
-      body: JSON.stringify({ settings })
-    });
-    if (!response.ok) throw new Error('Speichern fehlgeschlagen');
-    showNotification('Nachrichten-Einstellungen gespeichert!', 'success');
-  } catch (error) {
-    console.error('Fehler beim Speichern:', error);
-    showNotification('Fehler beim Speichern der Nachrichten-Einstellungen', 'error');
-  }
+  const result = await apiRequest('/settings/bulk', {
+    method: 'POST',
+    body: JSON.stringify({ settings })
+  });
+  if (!result) throw new Error('Speichern fehlgeschlagen');
 }
 
 async function previewNewsData() {
@@ -7429,46 +7296,150 @@ async function handleAIAction(action) {
 }
 
 async function saveAISettings() {
-  try {
-    const enabled = document.getElementById('ai-enabled')?.checked || false;
-    const apiKeyInput = document.getElementById('ai-api-key');
-    const apiKey = apiKeyInput?.value?.trim();
+  const enabled = document.getElementById('ai-enabled')?.checked || false;
+  const apiKeyInput = document.getElementById('ai-api-key');
+  const apiKey = apiKeyInput?.value?.trim();
 
-    // Enabled-Setting speichern
+  // Enabled-Setting speichern
+  await apiRequest('/settings', {
+    method: 'PUT',
+    body: JSON.stringify({
+      key: 'ai_enabled',
+      value: String(enabled),
+      type: 'boolean',
+      category: 'ai',
+      description: 'KI-Assistent aktiviert',
+    }),
+  });
+
+  // API-Key nur speichern wenn eingegeben (nicht den Platzhalter)
+  if (apiKey && apiKey.startsWith('sk-')) {
     await apiRequest('/settings', {
       method: 'PUT',
       body: JSON.stringify({
-        key: 'ai_enabled',
-        value: String(enabled),
-        type: 'boolean',
+        key: 'ai_openai_api_key',
+        value: apiKey,
+        type: 'string',
         category: 'ai',
-        description: 'KI-Assistent aktiviert',
+        description: 'OpenAI API Key',
       }),
     });
+    // Input leeren und Platzhalter aktualisieren
+    apiKeyInput.value = '';
+    apiKeyInput.placeholder = 'sk-...••••••• (gespeichert)';
+    document.getElementById('ai-key-status').innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
+  }
 
-    // API-Key nur speichern wenn eingegeben (nicht den Platzhalter)
-    if (apiKey && apiKey.startsWith('sk-')) {
-      await apiRequest('/settings', {
-        method: 'PUT',
-        body: JSON.stringify({
-          key: 'ai_openai_api_key',
-          value: apiKey,
-          type: 'string',
-          category: 'ai',
-          description: 'OpenAI API Key',
-        }),
-      });
-      // Input leeren und Platzhalter aktualisieren
-      apiKeyInput.value = '';
-      apiKeyInput.placeholder = 'sk-...••••••• (gespeichert)';
-      document.getElementById('ai-key-status').innerHTML = '<small style="color: #4a7c4a;">✓ API-Key hinterlegt</small>';
-    }
+  aiEnabled = enabled;
+  updateAIToolbarVisibility();
+}
 
-    aiEnabled = enabled;
-    updateAIToolbarVisibility();
-    showNotification('KI-Einstellungen gespeichert', 'success');
-  } catch (error) {
-    showNotification('Fehler beim Speichern: ' + (error.message || error), 'error');
+// ============================================
+// Zentraler Speichern-Button: Display-Einstellungen
+// ============================================
+async function saveDisplaySettings() {
+  const refreshInterval = document.getElementById('refresh-interval');
+  const defaultDuration = document.getElementById('default-duration');
+  const blendEffectsEnabled = document.getElementById('blend-effects-enabled');
+  const transitionsExternalOnly = document.getElementById('transitions-external-only');
+  const liveDataInterval = document.getElementById('live-data-interval');
+  const liveDataSlideDuration = document.getElementById('live-data-slide-duration');
+  const showPostCounter = document.getElementById('show-post-counter');
+
+  if (!refreshInterval || !defaultDuration || !blendEffectsEnabled || !transitionsExternalOnly) return;
+
+  const settings = {
+    'display.refreshInterval': parseInt(refreshInterval.value) || 5,
+    'display.defaultDuration': parseInt(defaultDuration.value) || 10,
+    'display.blendEffectsEnabled': blendEffectsEnabled.checked ? 'true' : 'false',
+    'display.transitionsExternalOnly': transitionsExternalOnly.checked ? 'true' : 'false',
+    'display.liveDataIntervalMinutes': parseInt(liveDataInterval?.value) || 5,
+    'display.liveDataSlideDuration': parseInt(liveDataSlideDuration?.value) || 20,
+    'display.showPostCounter': showPostCounter ? (showPostCounter.checked ? 'true' : 'false') : 'true'
+  };
+
+  const result = await apiRequest('/settings/bulk', {
+    method: 'POST',
+    body: JSON.stringify({ settings })
+  });
+  if (!result) throw new Error('Fehler beim Speichern der Display-Einstellungen');
+
+  localStorage.setItem('displaySettings', JSON.stringify({
+    refreshInterval: parseInt(refreshInterval.value) || 5,
+    defaultDuration: parseInt(defaultDuration.value) || 10,
+    blendEffectsEnabled: blendEffectsEnabled.checked ? 'true' : 'false'
+  }));
+}
+
+// ============================================
+// Zentraler Speichern-Button: Musik-Einstellungen
+// ============================================
+async function saveGlobalMusicSettings() {
+  const enabledCheckbox = document.getElementById('global-music-enabled');
+  const urlInput = document.getElementById('global-music-url');
+  const volumeSlider = document.getElementById('global-music-volume');
+  const muteVideosCheckbox = document.getElementById('global-music-mute-videos');
+  const prioritySelect = document.getElementById('global-music-priority');
+  const musicFileInput = document.getElementById('global-music-file');
+
+  let uploadedMusicUrl = null;
+  if (musicFileInput && musicFileInput.files.length > 0) {
+    const uploadResult = await uploadFile(musicFileInput.files[0]);
+    uploadedMusicUrl = uploadResult.url;
+  }
+
+  const musicSettings = {
+    enabled: enabledCheckbox?.checked || false,
+    url: uploadedMusicUrl || urlInput?.value || '',
+    volume: parseInt(volumeSlider?.value) || 30,
+    muteVideos: muteVideosCheckbox?.checked !== false,
+    priority: prioritySelect?.value || 'global',
+  };
+  localStorage.setItem('globalMusicSettings', JSON.stringify(musicSettings));
+}
+
+// ============================================
+// Alle Live-Daten speichern (zentraler Button)
+// ============================================
+async function saveAllLiveDataSettings() {
+  const btn = document.getElementById('saveAllLiveDataSettings');
+  if (btn) { btn.disabled = true; btn.textContent = 'Speichere...'; }
+
+  const errors = [];
+
+  try { await saveTransitSettings(); } catch (e) { errors.push('ÖPNV'); console.error('ÖPNV-Save Fehler:', e); }
+  try { await saveTrafficSettings(); } catch (e) { errors.push('Verkehr'); console.error('Traffic-Save Fehler:', e); }
+  try { await saveWeatherSettings(); } catch (e) { errors.push('Wetter'); console.error('Weather-Save Fehler:', e); }
+  try { await saveNewsSettings(); } catch (e) { errors.push('Nachrichten'); console.error('News-Save Fehler:', e); }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Alle Live-Daten speichern'; }
+
+  if (errors.length === 0) {
+    showNotification('Alle Live-Daten-Einstellungen gespeichert!', 'success');
+  } else {
+    showNotification(`Fehler bei: ${errors.join(', ')}`, 'error');
+  }
+}
+
+// ============================================
+// Alle Einstellungen speichern (zentraler Button)
+// ============================================
+async function saveAllSettings() {
+  const btn = document.getElementById('saveAllSettings');
+  if (btn) { btn.disabled = true; btn.textContent = 'Speichere...'; }
+
+  const errors = [];
+
+  try { await saveDisplaySettings(); } catch (e) { errors.push('Display'); console.error('Display-Save Fehler:', e); }
+  try { await saveGlobalMusicSettings(); } catch (e) { errors.push('Musik'); console.error('Music-Save Fehler:', e); }
+  try { await saveAISettings(); } catch (e) { errors.push('KI'); console.error('AI-Save Fehler:', e); }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Alle Einstellungen speichern'; }
+
+  if (errors.length === 0) {
+    showNotification('Alle Einstellungen gespeichert!', 'success');
+  } else {
+    showNotification(`Fehler bei: ${errors.join(', ')}`, 'error');
   }
 }
 
@@ -7576,6 +7547,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initAIEventListeners();
   // Initial AI status laden (für Post-Form)
   loadAISettings();
+
+  // Zentraler Speichern-Button: Alle Live-Daten
+  document.getElementById('saveAllLiveDataSettings')?.addEventListener('click', saveAllLiveDataSettings);
+
+  // Zentraler Speichern-Button: Alle Einstellungen
+  document.getElementById('saveAllSettings')?.addEventListener('click', saveAllSettings);
 });
 
 // ============================================
