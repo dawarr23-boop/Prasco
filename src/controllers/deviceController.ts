@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { Display } from '../models';
+import { Display, Setting } from '../models';
 import { AppError } from '../middleware/errorHandler';
 import { logger, securityLogger } from '../utils/logger';
 import { DeviceRequest } from '../middleware/deviceAuth';
@@ -52,7 +52,19 @@ export const registerDevice = async (
       return;
     }
 
-    // New device - check license limit
+    // New device - check registration mode
+    const regModeSetting = await Setting.findOne({ where: { key: 'display.registrationMode' } });
+    const registrationMode = regModeSetting?.value === 'true';
+    if (!registrationMode) {
+      const ip = req.ip || req.socket.remoteAddress || 'unknown';
+      logger.warn(`Geräte-Registrierung abgelehnt (Registrierungsmodus nicht aktiv): SN=${serialNumber}, IP=${ip}`);
+      throw new AppError(
+        'Registrierungsmodus ist nicht aktiv. Bitte den Administrator bitten, den Registrierungsmodus zu aktivieren.',
+        403
+      );
+    }
+
+    // Check license limit
     const MAX_LICENSED_DISPLAYS = 2;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
