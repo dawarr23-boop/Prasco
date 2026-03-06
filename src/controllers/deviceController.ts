@@ -443,3 +443,27 @@ export const closeRegistration = async (
     next(error);
   }
 };
+
+/**
+ * Register a device via GET (Android WebView compatibility)
+ * GET /api/devices/register?serialNumber=...&displayIdentifier=...
+ * Android WebView's shouldInterceptRequest kann POST-Bodys nicht weiterleiten,
+ * daher bieten wir die gleiche Logik auch per GET mit Query-Parametern.
+ */
+export const registerDeviceGet = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  // Query-Parameter in req.body kopieren, damit registerDevice funktioniert
+  req.body = {
+    ...req.body,
+    serialNumber: req.query.serialNumber,
+    macAddress: req.query.macAddress,
+    deviceModel: req.query.deviceModel,
+    deviceOsVersion: req.query.deviceOsVersion,
+    appVersion: req.query.appVersion,
+    displayIdentifier: req.query.displayIdentifier,
+  };
+  return registerDevice(req, res, next);
+};

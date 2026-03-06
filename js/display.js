@@ -1363,22 +1363,18 @@ async function getOrCreateDeviceToken(displayIdentifier) {
   else if (ua.includes('Edge')) deviceModel = 'Edge';
 
   try {
-    const body = {
+    const params = new URLSearchParams({
       serialNumber: serialNumber,
       deviceModel: deviceModel + ' (' + navigator.platform + ')',
       deviceOsVersion: navigator.platform || 'Unknown',
       appVersion: 'web-1.0',
-    };
+    });
     if (displayIdentifier) {
-      body.displayIdentifier = displayIdentifier;
+      params.set('displayIdentifier', displayIdentifier);
     }
 
     console.log('Registriere Gerät:', serialNumber, displayIdentifier ? '→ Display: ' + displayIdentifier : '');
-    const response = await fetch('/api/devices/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const response = await fetch('/api/devices/register?' + params.toString());
 
     if (response.ok) {
       const data = await response.json();

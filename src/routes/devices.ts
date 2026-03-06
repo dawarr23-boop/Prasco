@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { body } from 'express-validator';
+import { body, query } from 'express-validator';
 import { validate } from '../middleware/validator';
 import { deviceAuth } from '../middleware/deviceAuth';
 import * as deviceController from '../controllers/deviceController';
@@ -19,6 +19,23 @@ router.post(
     validate,
   ],
   deviceController.registerDevice
+);
+
+// GET /api/devices/register - Register via query params (Android WebView compatibility)
+// shouldInterceptRequest in der Android App kann POST-Bodys nicht weiterleiten,
+// daher bieten wir auch einen GET-Endpunkt mit Query-Parametern an.
+router.get(
+  '/register',
+  [
+    query('serialNumber').notEmpty().trim().withMessage('Seriennummer ist erforderlich'),
+    query('macAddress').optional().trim(),
+    query('deviceModel').optional().trim(),
+    query('deviceOsVersion').optional().trim(),
+    query('appVersion').optional().trim(),
+    query('displayIdentifier').optional().trim().matches(/^[a-zA-Z0-9-_]+$/).withMessage('Ungültiger Display-Identifier'),
+    validate,
+  ],
+  deviceController.registerDeviceGet
 );
 
 // GET /api/devices/status - Get device authorization status (requires device token)
