@@ -1671,8 +1671,11 @@ async function loadDisplayInfo(identifier) {
         console.log('Display geladen:', data.data.name, '| Transit:', data.data.showTransitData, '| Traffic:', data.data.showTrafficData);
 
         // Prüfe ob Registrierung offen ist (vom Admin gestartet)
-        if (data.data.registrationOpen && !deviceToken) {
+        if (data.data.registrationOpen) {
           console.log('Registrierung offen für Display', identifier, '— registriere automatisch...');
+          // Alten Token löschen, damit eine frische Registrierung stattfindet
+          localStorage.removeItem('deviceToken');
+          deviceToken = null;
           const token = await getOrCreateDeviceToken(identifier);
           if (token) {
             console.log('Erfolgreich mit Display verknüpft! Lade Seite neu...');

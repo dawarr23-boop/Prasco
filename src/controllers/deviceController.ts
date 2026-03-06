@@ -24,42 +24,26 @@ export const registerDevice = async (
       throw new AppError('Seriennummer ist erforderlich', 400);
     }
 
-    // Check if device is already registered (by serialNumber on any display)
-    let display = await Display.findOne({
-      where: { serialNumber },
-    });
-
-    if (display) {
-      // Device already known - update info and return token
-      display.macAddress = macAddress || display.macAddress;
-      display.deviceModel = deviceModel || display.deviceModel;
-      display.deviceOsVersion = deviceOsVersion || display.deviceOsVersion;
-      display.appVersion = appVersion || display.appVersion;
-      display.lastSeenAt = new Date();
-      await display.save();
-
-      logger.info(`Gerät erneut registriert: ${serialNumber} (Display ${display.id}, Status: ${display.authorizationStatus})`);
-
-      res.json({
-        success: true,
-        data: {
-          deviceToken: display.deviceToken,
-          authorizationStatus: display.authorizationStatus,
-          displayId: display.id,
-          displayIdentifier: display.identifier,
-          displayName: display.name,
-        },
-      });
-      return;
-    }
-
-    // ===== Display-spezifische Registrierung =====
+    // ===== Display-spezifische Registrierung (Priorität!) =====
     // Wenn ein displayIdentifier mitgesendet wird, prüfe ob dieses Display
     // registration_open = true hat (vom Admin geöffnet).
+    // Dies hat Vorrang vor der serialNumber-Prüfung, damit ein Client
+    // auch dann verknüpft werden kann, wenn er vorher anderswo registriert war.
     if (displayIdentifier) {
       const targetDisplay = await Display.findOne({ where: { identifier: displayIdentifier } });
 
       if (targetDisplay && targetDisplay.registrationOpen) {
+        // Falls diese Seriennummer noch auf einem anderen Display liegt, dort entfernen
+        const oldDisplay = await Display.findOne({ where: { serialNumber } });
+        if (oldDisplay && oldDisplay.id !== targetDisplay.id) {
+          oldDisplay.serialNumber = null as any;
+          oldDisplay.deviceToken = null as any;
+          oldDisplay.macAddress = null as any;
+          oldDisplay.authorizationStatus = 'pending';
+          await oldDisplay.save();
+          logger.info(`Alte Verknüpfung entfernt: SN ${serialNumber} von Display ${oldDisplay.id}`);
+        }
+
         // Admin hat Registrierung für dieses Display geöffnet → Client direkt verknüpfen
         const deviceToken = crypto.randomUUID();
 
@@ -92,6 +76,35 @@ export const registerDevice = async (
         return;
       }
       // If display exists but registration not open, fall through to normal logic
+    }
+
+    // Check if device is already registered (by serialNumber on any display)
+    let display = await Display.findOne({
+      where: { serialNumber },
+    });
+
+    if (display) {
+      // Device already known - update info and return token
+      display.macAddress = macAddress || display.macAddress;
+      display.deviceModel = deviceModel || display.deviceModel;
+      display.deviceOsVersion = deviceOsVersion || display.deviceOsVersion;
+      display.appVersion = appVersion || display.appVersion;
+      display.lastSeenAt = new Date();
+      await display.save();
+
+      logger.info(`Gerät erneut registriert: ${serialNumber} (Display ${display.id}, Status: ${display.authorizationStatus})`);
+
+      res.json({
+        success: true,
+        data: {
+          deviceToken: display.deviceToken,
+          authorizationStatus: display.authorizationStatus,
+          displayId: display.id,
+          displayIdentifier: display.identifier,
+          displayName: display.name,
+        },
+      });
+      return;
     }
 
     // New device — check if global registration mode is enabled
