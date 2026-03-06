@@ -10,6 +10,7 @@
 .externalNativeBuild/
 .cxx/
 *.apk
+!release/*.apk
 *.aab
 *.ap_
 *.dex
