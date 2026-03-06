@@ -4297,8 +4297,12 @@ document.addEventListener('click', (e) => {
 (async function() {
   console.log('Display-Modus wird initialisiert...');
   
-  // 0. Device-Token laden/registrieren (für Secure-Mode)
-  await getOrCreateDeviceToken();
+  // 0. Device-Token aus localStorage laden (noch NICHT registrieren - das passiert ggf. in loadDisplayInfo)
+  const storedToken = localStorage.getItem('deviceToken');
+  if (storedToken) {
+    deviceToken = storedToken;
+    console.log('Device-Token aus localStorage geladen');
+  }
   
   // 1. Lade Display-Identifier
   currentDisplayIdentifier = getDisplayIdentifier();
