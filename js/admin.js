@@ -3988,25 +3988,45 @@ async function loadDisplays() {
           // Auth-Action-Buttons (nur für Superadmin)
           const _authUser = JSON.parse(localStorage.getItem('user') || '{}');
           let authActions = '';
-          if (isDevice && _authUser.role === 'super_admin') {
-            if (authStatus === 'pending') {
+          if (_authUser.role === 'super_admin') {
+            if (display.registrationOpen) {
+              // Registrierung ist offen — zeige "Registrierung stoppen"
               authActions = `
-                <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
-                <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
-            } else if (authStatus === 'authorized') {
-              authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
-            } else if (authStatus === 'rejected' || authStatus === 'revoked') {
-              authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
+                <button class="btn btn-warning btn-sm" data-action="close-registration" data-display-id="${display.id}" title="Registrierung schließen">
+                  ⏳ Wartet auf Client...
+                </button>`;
+            } else if (isDevice) {
+              if (authStatus === 'pending') {
+                authActions = `
+                  <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
+                  <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
+              } else if (authStatus === 'authorized') {
+                authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
+              } else if (authStatus === 'rejected' || authStatus === 'revoked') {
+                authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
+              }
+            } else {
+              // Kein Gerät verknüpft — zeige "Registrierung starten"
+              authActions = `
+                <button class="btn btn-primary btn-sm" data-action="open-registration" data-display-id="${display.id}" title="Registrierung starten — nächster Client wird verknüpft">
+                  📲 Registrierung starten
+                </button>`;
             }
           }
           
+          // Registration-Open Hinweis
+          const regOpenBanner = display.registrationOpen
+            ? '<div style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 6px; font-size: 0.82em; margin-top: 0.5rem;">⏳ Registrierung offen — wartet auf nächsten Client...</div>'
+            : '';
+
           return `
-        <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}" data-display-id="${display.id}">
+        <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}${display.registrationOpen ? ' registration-open' : ''}" data-display-id="${display.id}">
             <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
                 <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
                 <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
                 ${deviceInfo}
+                ${regOpenBanner}
                 <p style="font-size: 0.8em; margin-top: 0.4rem;">
                   ${display.showTransitData !== false ? '<span style="color: #28a745;" title="ÖPNV aktiv">🚌</span>' : '<span style="color: #6c757d;" title="ÖPNV deaktiviert">🚌</span>'}
                   ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
@@ -4189,6 +4209,34 @@ async function revokeDevice(displayId) {
     showNotification(t('displays.successRevoked'), 'warning');
   } catch (error) {
     showNotification('Fehler beim Widerrufen: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// Display-Registrierung (Client-Verknüpfung)
+// ============================================
+
+async function openDisplayRegistration(displayId) {
+  const display = displaysCache.find(d => d.id === parseInt(displayId));
+  const displayName = display ? display.name : `Display ${displayId}`;
+  if (!confirm(`Registrierung für "${displayName}" öffnen?\n\nDer nächste Client, der die Display-URL öffnet, wird automatisch mit diesem Display verknüpft und autorisiert.`)) return;
+  try {
+    await apiRequest(`/displays/${displayId}/open-registration`, { method: 'POST' });
+    await loadDisplays();
+    showNotification(`Registrierung für "${displayName}" geöffnet. Warte auf Client...`, 'success');
+  } catch (error) {
+    showNotification('Fehler beim Öffnen der Registrierung: ' + error.message, 'error');
+  }
+}
+
+async function closeDisplayRegistration(displayId) {
+  if (!confirm('Registrierung schließen?')) return;
+  try {
+    await apiRequest(`/displays/${displayId}/close-registration`, { method: 'POST' });
+    await loadDisplays();
+    showNotification('Registrierung geschlossen.', 'warning');
+  } catch (error) {
+    showNotification('Fehler beim Schließen der Registrierung: ' + error.message, 'error');
   }
 }
 
@@ -5671,6 +5719,10 @@ window.addEventListener('load', async () => {
         rejectDevice(displayId);
       } else if (action === 'revoke-device' && displayId) {
         revokeDevice(displayId);
+      } else if (action === 'open-registration' && displayId) {
+        openDisplayRegistration(displayId);
+      } else if (action === 'close-registration' && displayId) {
+        closeDisplayRegistration(displayId);
       }
     });
   }

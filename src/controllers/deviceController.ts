@@ -18,13 +18,13 @@ export const registerDevice = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { serialNumber, macAddress, deviceModel, deviceOsVersion, appVersion } = req.body;
+    const { serialNumber, macAddress, deviceModel, deviceOsVersion, appVersion, displayIdentifier } = req.body;
 
     if (!serialNumber) {
       throw new AppError('Seriennummer ist erforderlich', 400);
     }
 
-    // Check if device is already registered
+    // Check if device is already registered (by serialNumber on any display)
     let display = await Display.findOne({
       where: { serialNumber },
     });
@@ -53,7 +53,48 @@ export const registerDevice = async (
       return;
     }
 
-    // New device — check if registration mode is enabled
+    // ===== Display-spezifische Registrierung =====
+    // Wenn ein displayIdentifier mitgesendet wird, prüfe ob dieses Display
+    // registration_open = true hat (vom Admin geöffnet).
+    if (displayIdentifier) {
+      const targetDisplay = await Display.findOne({ where: { identifier: displayIdentifier } });
+
+      if (targetDisplay && targetDisplay.registrationOpen) {
+        // Admin hat Registrierung für dieses Display geöffnet → Client direkt verknüpfen
+        const deviceToken = crypto.randomUUID();
+
+        targetDisplay.serialNumber = serialNumber;
+        targetDisplay.macAddress = macAddress || undefined;
+        targetDisplay.deviceToken = deviceToken;
+        targetDisplay.deviceModel = deviceModel || undefined;
+        targetDisplay.deviceOsVersion = deviceOsVersion || undefined;
+        targetDisplay.appVersion = appVersion || undefined;
+        targetDisplay.authorizationStatus = 'authorized';
+        targetDisplay.lastSeenAt = new Date();
+        targetDisplay.registeredAt = new Date();
+        targetDisplay.registrationOpen = false;
+        await targetDisplay.save();
+
+        const ip = req.ip || req.socket.remoteAddress || 'unknown';
+        logger.info(`Client verknüpft mit Display ${targetDisplay.id} (${displayIdentifier}) via offene Registrierung. SN: ${serialNumber}, IP: ${ip}`);
+
+        res.status(201).json({
+          success: true,
+          data: {
+            deviceToken,
+            authorizationStatus: 'authorized',
+            displayId: targetDisplay.id,
+            displayIdentifier: targetDisplay.identifier,
+            displayName: targetDisplay.name,
+          },
+          message: 'Gerät erfolgreich mit Display verknüpft und autorisiert.',
+        });
+        return;
+      }
+      // If display exists but registration not open, fall through to normal logic
+    }
+
+    // New device — check if global registration mode is enabled
     const regModeSetting = await Setting.findOne({ where: { key: 'display.registrationMode' } });
     const registrationMode = regModeSetting?.value === 'true';
 
@@ -307,6 +348,83 @@ export const revokeDevice = async (
       success: true,
       data: display,
       message: `Autorisierung für Gerät ${display.serialNumber} wurde widerrufen.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Admin: Open registration on a display — next connecting client will be linked
+ * POST /api/displays/:id/open-registration
+ */
+export const openRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const display = await Display.findByPk(id);
+    if (!display) {
+      throw new AppError('Display nicht gefunden', 404);
+    }
+
+    // If already has a registered device, clear it first
+    if (display.serialNumber || display.deviceToken) {
+      display.serialNumber = undefined;
+      display.macAddress = undefined;
+      display.deviceToken = undefined;
+      display.deviceModel = undefined;
+      display.deviceOsVersion = undefined;
+      display.appVersion = undefined;
+      display.lastSeenAt = undefined;
+      display.registeredAt = undefined;
+      display.authorizationStatus = 'authorized';
+    }
+
+    display.registrationOpen = true;
+    await display.save();
+
+    logger.info(`Registrierung geöffnet für Display ${id} (${display.identifier})`);
+
+    res.json({
+      success: true,
+      data: display,
+      message: `Registrierung für Display "${display.name}" geöffnet. Der nächste Client wird verknüpft.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Admin: Close registration on a display
+ * POST /api/displays/:id/close-registration
+ */
+export const closeRegistration = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const display = await Display.findByPk(id);
+    if (!display) {
+      throw new AppError('Display nicht gefunden', 404);
+    }
+
+    display.registrationOpen = false;
+    await display.save();
+
+    logger.info(`Registrierung geschlossen für Display ${id} (${display.identifier})`);
+
+    res.json({
+      success: true,
+      data: display,
+      message: `Registrierung für Display "${display.name}" geschlossen.`,
     });
   } catch (error) {
     next(error);

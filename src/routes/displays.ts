@@ -122,4 +122,20 @@ router.post(
   deviceController.revokeDevice
 );
 
+// POST /api/displays/:id/open-registration - Open registration for next client (Superadmin only)
+router.post(
+  '/:id/open-registration',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.openRegistration
+);
+
+// POST /api/displays/:id/close-registration - Close registration (Superadmin only)
+router.post(
+  '/:id/close-registration',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.closeRegistration
+);
+
 export default router;

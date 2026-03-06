@@ -15,6 +15,7 @@ router.post(
     body('deviceModel').optional().trim(),
     body('deviceOsVersion').optional().trim(),
     body('appVersion').optional().trim(),
+    body('displayIdentifier').optional().trim().matches(/^[a-zA-Z0-9-_]+$/).withMessage('Ungültiger Display-Identifier'),
     validate,
   ],
   deviceController.registerDevice

@@ -1339,11 +1339,12 @@ function getClientId() {
 /**
  * Registriere dieses Gerät beim Server und erhalte einen Device-Token.
  * Falls bereits registriert, wird der bestehende Token zurückgegeben.
+ * @param {string} [displayIdentifier] - Optional: Display-Identifier für gezielte Registrierung
  */
-async function getOrCreateDeviceToken() {
+async function getOrCreateDeviceToken(displayIdentifier) {
   // 1. Prüfe localStorage auf vorhandenen Token
   const storedToken = localStorage.getItem('deviceToken');
-  if (storedToken) {
+  if (storedToken && !displayIdentifier) {
     deviceToken = storedToken;
     console.log('Device-Token aus localStorage geladen');
     return deviceToken;
@@ -1362,16 +1363,21 @@ async function getOrCreateDeviceToken() {
   else if (ua.includes('Edge')) deviceModel = 'Edge';
 
   try {
-    console.log('Registriere Gerät:', serialNumber);
+    const body = {
+      serialNumber: serialNumber,
+      deviceModel: deviceModel + ' (' + navigator.platform + ')',
+      deviceOsVersion: navigator.platform || 'Unknown',
+      appVersion: 'web-1.0',
+    };
+    if (displayIdentifier) {
+      body.displayIdentifier = displayIdentifier;
+    }
+
+    console.log('Registriere Gerät:', serialNumber, displayIdentifier ? '→ Display: ' + displayIdentifier : '');
     const response = await fetch('/api/devices/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        serialNumber: serialNumber,
-        deviceModel: deviceModel + ' (' + navigator.platform + ')',
-        deviceOsVersion: navigator.platform || 'Unknown',
-        appVersion: 'web-1.0',
-      }),
+      body: JSON.stringify(body),
     });
 
     if (response.ok) {
@@ -1663,6 +1669,19 @@ async function loadDisplayInfo(identifier) {
         currentDisplayName = data.data.name;
         currentDisplayInfo = data.data;
         console.log('Display geladen:', data.data.name, '| Transit:', data.data.showTransitData, '| Traffic:', data.data.showTrafficData);
+
+        // Prüfe ob Registrierung offen ist (vom Admin gestartet)
+        if (data.data.registrationOpen && !deviceToken) {
+          console.log('Registrierung offen für Display', identifier, '— registriere automatisch...');
+          const token = await getOrCreateDeviceToken(identifier);
+          if (token) {
+            console.log('Erfolgreich mit Display verknüpft! Lade Seite neu...');
+            // Kurze Verzögerung, damit der Server die Daten verarbeiten kann
+            setTimeout(() => window.location.reload(), 500);
+            return data.data;
+          }
+        }
+
         updateTicker();
         updateRefreshInfo();
         return data.data;

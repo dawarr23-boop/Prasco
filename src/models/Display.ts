@@ -23,6 +23,7 @@ interface DisplayAttributes {
   appVersion?: string;
   lastSeenAt?: Date;
   registeredAt?: Date;
+  registrationOpen: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -30,7 +31,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -58,6 +59,7 @@ class Display
   public appVersion?: string;
   public lastSeenAt?: Date;
   public registeredAt?: Date;
+  public registrationOpen!: boolean;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -179,6 +181,12 @@ Display.init(
       type: DataTypes.DATE,
       allowNull: true,
       field: 'registered_at',
+    },
+    registrationOpen: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'registration_open',
     },
   },
   {
