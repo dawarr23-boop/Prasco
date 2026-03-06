@@ -5,8 +5,10 @@ import { authenticate } from '../middleware/auth';
 import { requirePermission, requireSuperAdmin } from '../middleware/permissions';
 import * as displayController from '../controllers/displayController';
 import * as deviceController from '../controllers/deviceController';
+import multer from 'multer';
 
 const router = Router();
+const upload = multer({ dest: 'uploads/temp/' });
 
 // All routes require authentication except public endpoints
 router.use(authenticate);
@@ -32,7 +34,47 @@ router.get(
   displayController.getDisplayByIdentifier
 );
 
-// GET /api/displays/:id - Get single display
+// GET /api/displays/license - Get license info
+router.get(
+  '/license',
+  requirePermission('displays.read'),
+  displayController.getLicenseInfo
+);
+
+// PUT /api/displays/license - Update license limit (Superadmin only)
+router.put(
+  '/license',
+  requireSuperAdmin,
+  [
+    body('maxDisplays').isInt({ min: 1, max: 100 }).withMessage('maxDisplays muss zwischen 1 und 100 liegen'),
+    validate,
+  ],
+  displayController.updateLicenseLimit
+);
+
+// GET /api/displays/fleet - Get fleet overview with online/offline status
+router.get(
+  '/fleet',
+  requirePermission('displays.read'),
+  displayController.getFleetOverview
+);
+
+// GET /api/displays/apk/latest - Download latest APK
+router.get(
+  '/apk/latest',
+  requirePermission('displays.read'),
+  displayController.getLatestApk
+);
+
+// POST /api/displays/apk/upload - Upload APK (Superadmin only)
+router.post(
+  '/apk/upload',
+  requireSuperAdmin,
+  upload.single('apk'),
+  displayController.uploadApk
+);
+
+// GET /api/displays/:id - Get single display (MUST be after /license, /fleet, /apk)
 router.get(
   '/:id',
   requirePermission('displays.read'),
@@ -68,6 +110,14 @@ router.post(
     validate,
   ],
   displayController.createDisplay
+);
+
+// GET /api/displays/:id/registration-info - Get registration info with QR code data
+router.get(
+  '/:id/registration-info',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  displayController.getRegistrationInfo
 );
 
 // PUT /api/displays/:id - Update display (Admin/Superadmin only)

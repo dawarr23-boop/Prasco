@@ -2030,6 +2030,7 @@ function navigateTo(section) {
     if (section === 'displays') {
       loadDisplays();
       loadSecuritySettings();
+      initDisplayAdminPanels();
       // Auto-Refresh alle 10 Sekunden für neue Registrierungen
       displaysAutoRefreshInterval = setInterval(() => {
         loadDisplays();
@@ -3933,7 +3934,7 @@ async function handleCategoryFormSubmit(e) {
 // ============================================
 let displaysCache = [];
 let currentDisplayId = null;
-const MAX_LICENSED_DISPLAYS = 2;
+let MAX_LICENSED_DISPLAYS = 2; // Will be loaded from server
 let displaysAutoRefreshInterval = null;
 
 async function loadDisplays() {
@@ -3944,11 +3945,20 @@ async function loadDisplays() {
     const response = await apiRequest('/displays');
     displaysCache = response?.data || [];
 
+    // Update license limit from server response
+    if (response?.license) {
+      MAX_LICENSED_DISPLAYS = response.license.max || 2;
+    }
+
     if (displaysCache.length === 0) {
       displaysList.innerHTML =
         '<p style="text-align:center; color: #6c757d;">' + t('displays.empty') + '</p>';
+      updateDisplayLicenseInfo();
       return;
     }
+
+    const now = Date.now();
+    const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 
     displaysList.innerHTML = displaysCache
       .map(
@@ -3956,6 +3966,24 @@ async function loadDisplays() {
           const isDevice = !!display.serialNumber;
           const authStatus = display.authorizationStatus || 'authorized';
           
+          // Online/Offline status
+          const lastSeen = display.lastSeenAt ? new Date(display.lastSeenAt).getTime() : 0;
+          const isOnline = isDevice && lastSeen > 0 && (now - lastSeen) < ONLINE_THRESHOLD_MS;
+          const minutesAgo = lastSeen > 0 ? Math.floor((now - lastSeen) / 60000) : null;
+
+          // Online-Status indicator
+          let onlineIndicator = '';
+          if (isDevice) {
+            if (isOnline) {
+              onlineIndicator = '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#28a745; box-shadow: 0 0 4px #28a745; margin-right:6px;" title="Online"></span>';
+            } else {
+              const offlineText = minutesAgo !== null 
+                ? (minutesAgo < 60 ? `Offline seit ${minutesAgo} Min.` : minutesAgo < 1440 ? `Offline seit ${Math.floor(minutesAgo/60)} Std.` : `Offline seit ${Math.floor(minutesAgo/1440)} Tagen`)
+                : 'Offline';
+              onlineIndicator = `<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#dc3545; margin-right:6px;" title="${offlineText}"></span>`;
+            }
+          }
+
           // Status-Badge
           let statusBadge = '';
           if (isDevice) {
@@ -3982,6 +4010,9 @@ async function loadDisplays() {
               ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
               ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
               ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
+            </p>
+            <p style="font-size: 0.8em; margin-top: 0.2rem;">
+              ${onlineIndicator}<span style="color: ${isOnline ? '#28a745' : '#dc3545'}; font-weight: 600;">${isOnline ? 'Online' : (minutesAgo !== null ? (minutesAgo < 60 ? `Offline (${minutesAgo} Min.)` : minutesAgo < 1440 ? `Offline (${Math.floor(minutesAgo/60)} Std.)` : `Offline (${Math.floor(minutesAgo/1440)} Tage)`) : 'Noch nie gesehen')}</span>
             </p>`;
           }
           
@@ -4012,6 +4043,11 @@ async function loadDisplays() {
                   📲 Registrierung starten
                 </button>`;
             }
+            // QR-Code / Registrierungsinfo Button (immer für super_admin)
+            authActions += `
+              <button class="btn btn-sm" style="background: #6f42c1; color: #fff;" data-action="show-registration-info" data-display-id="${display.id}" title="QR-Code & Registrierungsinfo">
+                📋 Setup-Info
+              </button>`;
           }
           
           // Registration-Open Hinweis
@@ -4022,7 +4058,7 @@ async function loadDisplays() {
           return `
         <div class="list-item${isDevice && authStatus === 'pending' ? ' device-pending' : ''}${display.registrationOpen ? ' registration-open' : ''}" data-display-id="${display.id}">
             <div class="list-item-content clickable" data-action="edit-display" data-display-id="${display.id}" title="${t('displays.clickToEdit')}">
-                <h3>${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
+                <h3>${onlineIndicator}${escapeHtml(display.name)} ${display.isActive ? '<span style="color: #28a745;">●</span>' : '<span style="color: #6c757d;">○</span>'}${statusBadge}</h3>
                 <p style="color: #6c757d; font-family: monospace; font-size: 0.9em;">/ ${escapeHtml(display.identifier)}</p>
                 ${display.description ? `<p style="color: #6c757d; margin-top: 0.5rem;">${escapeHtml(display.description)}</p>` : ''}
                 ${deviceInfo}
@@ -4060,6 +4096,16 @@ function updateDisplayLicenseInfo() {
   const count = displaysCache.length;
   const licenseUsed = document.getElementById('display-license-used');
   if (licenseUsed) licenseUsed.textContent = count;
+
+  const licenseMax = document.getElementById('display-license-max');
+  if (licenseMax) licenseMax.textContent = MAX_LICENSED_DISPLAYS;
+
+  const licenseWarningMax = document.getElementById('license-warning-max');
+  if (licenseWarningMax) licenseWarningMax.textContent = MAX_LICENSED_DISPLAYS;
+
+  // Update license input field
+  const licenseInput = document.getElementById('license-max-input');
+  if (licenseInput && !licenseInput._userEdited) licenseInput.value = MAX_LICENSED_DISPLAYS;
 
   const licenseInfo = document.getElementById('display-license-info');
   if (licenseInfo) {
@@ -4237,6 +4283,306 @@ async function closeDisplayRegistration(displayId) {
     showNotification('Registrierung geschlossen.', 'warning');
   } catch (error) {
     showNotification('Fehler beim Schließen der Registrierung: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// Fleet Overview (Geräte-Flottenübersicht)
+// ============================================
+
+async function loadFleetOverview() {
+  const panel = document.getElementById('fleet-overview-panel');
+  if (!panel) return;
+  panel.style.display = 'block';
+
+  try {
+    const response = await apiRequest('/displays/fleet');
+    const fleet = response?.data || [];
+    const stats = response?.stats || {};
+
+    // Update stats cards
+    document.getElementById('fleet-total').textContent = stats.total || 0;
+    document.getElementById('fleet-online').textContent = stats.online || 0;
+    document.getElementById('fleet-offline').textContent = stats.offline || 0;
+    document.getElementById('fleet-unregistered').textContent = stats.unregistered || 0;
+    document.getElementById('fleet-pending').textContent = stats.pending || 0;
+
+    // Render device list
+    const listEl = document.getElementById('fleet-device-list');
+    if (fleet.length === 0) {
+      listEl.innerHTML = '<p style="text-align:center; color: #aaa;">Keine Displays vorhanden</p>';
+      return;
+    }
+
+    listEl.innerHTML = fleet.map(d => {
+      const onlineColor = d.isOnline ? '#28a745' : (d.isDevice ? '#dc3545' : '#6c757d');
+      const onlineText = d.isOnline ? 'Online' : (d.isDevice ? (d.minutesSinceLastSeen !== null ? (d.minutesSinceLastSeen < 60 ? `${d.minutesSinceLastSeen} Min. offline` : d.minutesSinceLastSeen < 1440 ? `${Math.floor(d.minutesSinceLastSeen/60)} Std. offline` : `${Math.floor(d.minutesSinceLastSeen/1440)} Tage offline`) : 'Nie gesehen') : 'Kein Gerät');
+      const statusBg = d.authorizationStatus === 'authorized' ? 'rgba(40,167,69,0.15)' : d.authorizationStatus === 'pending' ? 'rgba(255,170,0,0.15)' : 'rgba(108,117,125,0.1)';
+
+      return `<div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; margin-bottom:0.4rem; background:${statusBg}; border-radius:6px; border-left: 3px solid ${onlineColor};">
+        <div style="flex:1;">
+          <span style="font-weight:600; font-size:0.9rem;">${escapeHtml(d.name)}</span>
+          <span style="color:#aaa; font-size:0.8rem; margin-left:0.5rem;">/${escapeHtml(d.identifier)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.8rem;">
+          ${d.isDevice ? `<span style="color:#aaa;">${escapeHtml(d.deviceModel || '?')}</span>` : ''}
+          ${d.appVersion ? `<span style="color:#aaa;">v${escapeHtml(d.appVersion)}</span>` : ''}
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${onlineColor};"></span>
+          <span style="color:${onlineColor}; font-weight:500; min-width:80px;">${onlineText}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch (error) {
+    console.error('Fleet overview error:', error);
+    document.getElementById('fleet-device-list').innerHTML = `<p style="color:#dc3545;">Fehler: ${error.message}</p>`;
+  }
+}
+
+// ============================================
+// QR-Code / Registration Info
+// ============================================
+
+async function showRegistrationInfo(displayId) {
+  try {
+    const response = await apiRequest(`/displays/${displayId}/registration-info`);
+    const info = response?.data;
+    if (!info) throw new Error('Keine Daten');
+
+    const registeredBadge = info.isRegistered
+      ? '<span style="background:#28a745; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.8em;">Registriert</span>'
+      : '<span style="background:#6c757d; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.8em;">Nicht registriert</span>';
+
+    const regOpenBadge = info.registrationOpen
+      ? '<span style="background:#ffaa00; color:#000; padding:2px 8px; border-radius:4px; font-size:0.8em;">Registrierung offen</span>'
+      : '<span style="background:#6c757d; color:#fff; padding:2px 8px; border-radius:4px; font-size:0.8em;">Registrierung geschlossen</span>';
+
+    // Generate inline QR code using a simple API
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(info.qrData)}`;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'registration-info-overlay';
+    overlay.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center;';
+    overlay.innerHTML = `
+      <div style="background:#fff; border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <h2 style="margin:0; font-size:1.2rem;">📋 Setup: ${escapeHtml(info.displayName)}</h2>
+          <button onclick="document.getElementById('registration-info-overlay').remove()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6c757d;">✕</button>
+        </div>
+        
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <img src="${qrUrl}" alt="QR-Code" style="width:180px; height:180px; border:2px solid #eee; border-radius:8px;" />
+          <p style="color:#6c757d; font-size:0.8rem; margin-top:0.5rem;">QR-Code enthält Server + Display-Identifier</p>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+          ${registeredBadge} ${regOpenBadge}
+        </div>
+
+        <div style="background:#f8f9fa; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+          <h4 style="margin:0 0 0.75rem; font-size:0.9rem;">📱 Android TV App Konfiguration</h4>
+          <table style="width:100%; font-size:0.85rem;">
+            <tr><td style="padding:4px 0; color:#6c757d; width:130px;">Server-URL:</td><td style="font-family:monospace; word-break:break-all;">${escapeHtml(info.instructions.step2.replace('Server-URL: ', ''))}</td></tr>
+            <tr><td style="padding:4px 0; color:#6c757d;">Display-ID:</td><td style="font-family:monospace; font-weight:600;">${escapeHtml(info.identifier)}</td></tr>
+            <tr><td style="padding:4px 0; color:#6c757d;">Display-URL:</td><td style="font-family:monospace; word-break:break-all; font-size:0.8rem;">${escapeHtml(info.displayUrl)}</td></tr>
+          </table>
+        </div>
+
+        <div style="background:#e8f5e9; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+          <h4 style="margin:0 0 0.75rem; font-size:0.9rem;">📋 Einrichtungsschritte</h4>
+          <ol style="margin:0; padding-left:1.2rem; font-size:0.85rem; line-height:1.8;">
+            <li>Android TV App auf dem Gerät installieren</li>
+            <li>App öffnen → 5× Menü-Taste → Einstellungen</li>
+            <li>Server-URL eingeben: <code>${escapeHtml(info.instructions.step2.replace('Server-URL: ', ''))}</code></li>
+            <li>Display-Identifier eingeben: <code>${escapeHtml(info.identifier)}</code></li>
+            <li>Im Admin-Panel "Registrierung starten" klicken</li>
+            <li>App neu starten — Gerät wird automatisch verknüpft</li>
+          </ol>
+        </div>
+
+        <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+          <button onclick="navigator.clipboard.writeText('${escapeHtml(info.qrData).replace(/'/g, "\\'")}').then(()=>alert('QR-Daten kopiert!'))" class="btn btn-secondary btn-sm">📋 QR-Daten kopieren</button>
+          <button onclick="document.getElementById('registration-info-overlay').remove()" class="btn btn-primary btn-sm">Schließen</button>
+        </div>
+      </div>
+    `;
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    document.body.appendChild(overlay);
+  } catch (error) {
+    showNotification('Fehler beim Laden der Registrierungsinfo: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// License Management
+// ============================================
+
+async function saveLicenseLimit() {
+  const input = document.getElementById('license-max-input');
+  const statusEl = document.getElementById('license-save-status');
+  const newLimit = parseInt(input.value, 10);
+
+  if (isNaN(newLimit) || newLimit < 1 || newLimit > 100) {
+    statusEl.textContent = '⚠ Ungültig (1-100)';
+    statusEl.style.color = '#dc3545';
+    return;
+  }
+
+  try {
+    statusEl.textContent = 'Speichere...';
+    statusEl.style.color = '#aaa';
+
+    await apiRequest('/displays/license', {
+      method: 'PUT',
+      body: JSON.stringify({ maxDisplays: newLimit }),
+    });
+
+    MAX_LICENSED_DISPLAYS = newLimit;
+    updateDisplayLicenseInfo();
+
+    statusEl.textContent = '✓ Gespeichert';
+    statusEl.style.color = '#28a745';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+
+    showNotification(`Lizenzlimit auf ${newLimit} Displays geändert.`, 'success');
+  } catch (error) {
+    statusEl.textContent = '✕ Fehler';
+    statusEl.style.color = '#dc3545';
+    showNotification('Fehler beim Speichern: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// APK Distribution
+// ============================================
+
+async function uploadApk() {
+  const input = document.getElementById('apk-upload-input');
+  const statusEl = document.getElementById('apk-upload-status');
+
+  if (!input.files || input.files.length === 0) return;
+
+  const file = input.files[0];
+  if (!file.name.endsWith('.apk')) {
+    showNotification('Bitte eine .apk Datei auswählen', 'warning');
+    return;
+  }
+
+  statusEl.textContent = `Hochladen: ${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)...`;
+  statusEl.style.color = '#aaa';
+
+  try {
+    const formData = new FormData();
+    formData.append('apk', file);
+
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/displays/apk/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Upload fehlgeschlagen');
+
+    statusEl.textContent = '✓ ' + (data.message || 'Hochgeladen');
+    statusEl.style.color = '#28a745';
+    showNotification(data.message || 'APK hochgeladen', 'success');
+  } catch (error) {
+    statusEl.textContent = '✕ Fehler';
+    statusEl.style.color = '#dc3545';
+    showNotification('Upload-Fehler: ' + error.message, 'error');
+  }
+
+  input.value = '';
+}
+
+async function downloadApk() {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/displays/apk/latest', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Download fehlgeschlagen');
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'prasco-tv.apk';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    showNotification('Download-Fehler: ' + error.message, 'error');
+  }
+}
+
+// ============================================
+// Admin Panel Initialization for new features
+// ============================================
+
+function initDisplayAdminPanels() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Fleet Overview toggle
+  const fleetBtn = document.getElementById('showFleetOverviewBtn');
+  if (fleetBtn) {
+    fleetBtn.addEventListener('click', () => {
+      const panel = document.getElementById('fleet-overview-panel');
+      if (panel.style.display === 'none') {
+        loadFleetOverview();
+      } else {
+        panel.style.display = 'none';
+      }
+    });
+  }
+
+  const closeFleetBtn = document.getElementById('closeFleetOverviewBtn');
+  if (closeFleetBtn) {
+    closeFleetBtn.addEventListener('click', () => {
+      document.getElementById('fleet-overview-panel').style.display = 'none';
+    });
+  }
+
+  // License Management (super_admin only)
+  const licensePanel = document.getElementById('license-management-panel');
+  if (licensePanel) {
+    licensePanel.style.display = user.role === 'super_admin' ? 'block' : 'none';
+  }
+
+  const saveLicenseBtn = document.getElementById('saveLicenseLimitBtn');
+  if (saveLicenseBtn) {
+    saveLicenseBtn.addEventListener('click', saveLicenseLimit);
+  }
+
+  const licenseInput = document.getElementById('license-max-input');
+  if (licenseInput) {
+    licenseInput.addEventListener('input', () => { licenseInput._userEdited = true; });
+  }
+
+  // APK Distribution (super_admin only)
+  const apkPanel = document.getElementById('apk-distribution-panel');
+  if (apkPanel) {
+    apkPanel.style.display = user.role === 'super_admin' ? 'block' : 'none';
+  }
+
+  const apkInput = document.getElementById('apk-upload-input');
+  if (apkInput) {
+    apkInput.addEventListener('change', uploadApk);
+  }
+
+  const downloadApkBtn = document.getElementById('downloadApkBtn');
+  if (downloadApkBtn) {
+    downloadApkBtn.addEventListener('click', downloadApk);
   }
 }
 
@@ -5723,6 +6069,8 @@ window.addEventListener('load', async () => {
         openDisplayRegistration(displayId);
       } else if (action === 'close-registration' && displayId) {
         closeDisplayRegistration(displayId);
+      } else if (action === 'show-registration-info' && displayId) {
+        showRegistrationInfo(displayId);
       }
     });
   }
@@ -5754,6 +6102,7 @@ window.addEventListener('load', async () => {
   startFooterClock();
   await Promise.all([loadPosts(), loadCategories(), loadDisplays()]);
   loadSecuritySettings(); // Sicherheitseinstellungen laden (non-blocking)
+  initDisplayAdminPanels(); // Fleet, License, APK Panels initialisieren
   await updateDashboardStats();
 
   // Dashboard Statistik-Karten klickbar machen

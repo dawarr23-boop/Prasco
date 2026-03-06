@@ -1,9 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { Display, Post, PostDisplay, Category, Media } from '../models';
+import Setting from '../models/Setting';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../utils/logger';
 import { cacheService } from '../utils/cache';
 import { Op } from 'sequelize';
+import path from 'path';
+import fs from 'fs/promises';
 
 /**
  * Get all displays
@@ -59,9 +62,17 @@ export const getAllDisplays = async (
       ],
     });
 
+    // Include license info in response
+    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+
     res.json({
       success: true,
       data: displays,
+      license: {
+        used: displays.length,
+        max: maxLicensedDisplays,
+      },
     });
 
     logger.info(`Displays abgerufen: ${displays.length}`);
@@ -182,12 +193,13 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
-    // License check: max 2 displays
-    const MAX_LICENSED_DISPLAYS = 2;
+    // License check: dynamic limit from settings (default: 2)
+    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
+    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
-        `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter kontakt@it-westfalen.de, um weitere Display-Lizenzen zu erwerben.`,
+        `Display-Lizenzlimit erreicht (${displayCount}/${MAX_LICENSED_DISPLAYS}). Bitte kontaktieren Sie den Vertrieb unter kontakt@it-westfalen.de, um weitere Display-Lizenzen zu erwerben.`,
         403
       );
     }
@@ -555,6 +567,295 @@ export const getPublicDisplayPosts = async (
     res.json(response);
 
     logger.info(`Public posts für Display ${identifier} abgerufen: ${posts.length}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get license info
+ * GET /api/displays/license
+ */
+export const getLicenseInfo = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+    const displayCount = await Display.count();
+
+    res.json({
+      success: true,
+      data: {
+        used: displayCount,
+        max: maxLicensedDisplays,
+        available: Math.max(0, maxLicensedDisplays - displayCount),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Update license limit
+ * PUT /api/displays/license
+ */
+export const updateLicenseLimit = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { maxDisplays } = req.body;
+
+    if (!maxDisplays || isNaN(maxDisplays) || maxDisplays < 1 || maxDisplays > 100) {
+      throw new AppError('Ungültige Lizenzanzahl (1-100)', 400);
+    }
+
+    await Setting.upsert({
+      key: 'display.maxLicensedDisplays',
+      value: String(maxDisplays),
+      type: 'number',
+      category: 'display',
+      description: 'Maximale Anzahl lizenzierter Displays',
+    });
+
+    logger.info(`Lizenzlimit geändert auf ${maxDisplays}`);
+
+    res.json({
+      success: true,
+      data: { max: maxDisplays },
+      message: `Lizenzlimit auf ${maxDisplays} Displays geändert.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get device fleet overview with online/offline status
+ * GET /api/displays/fleet
+ */
+export const getFleetOverview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const where: any = {};
+    if (req.user?.organizationId) {
+      where.organizationId = req.user.organizationId;
+    }
+
+    const displays = await Display.findAll({
+      where,
+      order: [['name', 'ASC']],
+      attributes: [
+        'id', 'name', 'identifier', 'isActive',
+        'serialNumber', 'macAddress', 'authorizationStatus',
+        'deviceModel', 'deviceOsVersion', 'appVersion',
+        'lastSeenAt', 'registeredAt', 'registrationOpen',
+      ],
+    });
+
+    const now = new Date();
+    const ONLINE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
+
+    const fleet = displays.map(d => {
+      const lastSeen = d.lastSeenAt ? new Date(d.lastSeenAt).getTime() : 0;
+      const isOnline = lastSeen > 0 && (now.getTime() - lastSeen) < ONLINE_THRESHOLD_MS;
+      const minutesAgo = lastSeen > 0 ? Math.floor((now.getTime() - lastSeen) / 60000) : null;
+
+      return {
+        id: d.id,
+        name: d.name,
+        identifier: d.identifier,
+        isActive: d.isActive,
+        isDevice: !!d.serialNumber,
+        isOnline,
+        minutesSinceLastSeen: minutesAgo,
+        serialNumber: d.serialNumber,
+        macAddress: d.macAddress,
+        authorizationStatus: d.authorizationStatus,
+        deviceModel: d.deviceModel,
+        deviceOsVersion: d.deviceOsVersion,
+        appVersion: d.appVersion,
+        lastSeenAt: d.lastSeenAt,
+        registeredAt: d.registeredAt,
+        registrationOpen: d.registrationOpen,
+      };
+    });
+
+    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+
+    const stats = {
+      total: fleet.length,
+      online: fleet.filter(d => d.isOnline).length,
+      offline: fleet.filter(d => d.isDevice && !d.isOnline).length,
+      unregistered: fleet.filter(d => !d.isDevice).length,
+      pending: fleet.filter(d => d.authorizationStatus === 'pending').length,
+      authorized: fleet.filter(d => d.authorizationStatus === 'authorized' && d.isDevice).length,
+    };
+
+    res.json({
+      success: true,
+      data: fleet,
+      stats,
+      license: {
+        used: fleet.length,
+        max: maxLicensedDisplays,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get registration info for a display (QR code data)
+ * GET /api/displays/:id/registration-info
+ */
+export const getRegistrationInfo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const display = await Display.findByPk(id);
+
+    if (!display) {
+      throw new AppError('Display nicht gefunden', 404);
+    }
+
+    // Build registration URL
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+    const displayUrl = `${baseUrl}/public/display.html?id=${display.identifier}`;
+    const registerUrl = `${baseUrl}/api/devices/register`;
+
+    // QR code data: JSON with server info + display identifier
+    const qrData = JSON.stringify({
+      server: baseUrl,
+      displayIdentifier: display.identifier,
+      displayName: display.name,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        displayId: display.id,
+        displayName: display.name,
+        identifier: display.identifier,
+        registrationOpen: display.registrationOpen,
+        isRegistered: !!display.serialNumber,
+        displayUrl,
+        registerUrl,
+        qrData,
+        instructions: {
+          step1: 'QR-Code in der Android TV App scannen oder manuell konfigurieren',
+          step2: `Server-URL: ${baseUrl}`,
+          step3: `Display-Identifier: ${display.identifier}`,
+          step4: '"Registrierung starten" klicken, dann App starten',
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Serve latest APK for Android TV app
+ * GET /api/displays/apk/latest
+ */
+export const getLatestApk = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    // Check multiple possible APK locations
+    const apkPaths = [
+      path.join(__dirname, '../../uploads/apk/prasco-tv-latest.apk'),
+      path.join(__dirname, '../../android-tv-project/app/build/outputs/apk/debug/app-debug.apk'),
+      path.join(__dirname, '../../uploads/apk'),
+    ];
+
+    for (const apkPath of apkPaths) {
+      try {
+        const stat = await fs.stat(apkPath);
+        if (stat.isFile()) {
+          res.download(apkPath, 'prasco-tv.apk');
+          return;
+        }
+        if (stat.isDirectory()) {
+          // Find newest APK in directory
+          const files = await fs.readdir(apkPath);
+          const apkFiles = files.filter(f => f.endsWith('.apk'));
+          if (apkFiles.length > 0) {
+            // Sort by modification time, newest first
+            const withStats = await Promise.all(
+              apkFiles.map(async f => ({
+                name: f,
+                mtime: (await fs.stat(path.join(apkPath, f))).mtimeMs,
+              }))
+            );
+            withStats.sort((a, b) => b.mtime - a.mtime);
+            res.download(path.join(apkPath, withStats[0].name), withStats[0].name);
+            return;
+          }
+        }
+      } catch {
+        // Path doesn't exist, try next
+      }
+    }
+
+    throw new AppError('Keine APK-Datei gefunden. Bitte laden Sie eine APK hoch.', 404);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Upload APK for distribution
+ * POST /api/displays/apk/upload
+ */
+export const uploadApk = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      throw new AppError('Keine Datei hochgeladen', 400);
+    }
+
+    const uploadsDir = path.join(__dirname, '../../uploads/apk');
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const targetPath = path.join(uploadsDir, 'prasco-tv-latest.apk');
+    await fs.rename(req.file.path, targetPath);
+
+    // Also save with version name
+    const versionName = `prasco-tv-${new Date().toISOString().split('T')[0]}.apk`;
+    await fs.copyFile(targetPath, path.join(uploadsDir, versionName));
+
+    logger.info(`APK hochgeladen: ${versionName} (${req.file.size} bytes)`);
+
+    res.json({
+      success: true,
+      message: `APK erfolgreich hochgeladen (${(req.file.size / 1024 / 1024).toFixed(1)} MB)`,
+      data: {
+        filename: versionName,
+        size: req.file.size,
+      },
+    });
   } catch (error) {
     next(error);
   }

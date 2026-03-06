@@ -792,9 +792,80 @@
             <div class="section-header">
               <h2 data-translate="displays.title">Display-Verwaltung</h2>
               <div style="display: flex; align-items: center; gap: 1rem;">
-                <span id="display-license-info" class="license-info-badge">Lizenz: <strong><span id="display-license-used">0</span> / 2</strong> Displays</span>
+                <span id="display-license-info" class="license-info-badge">Lizenz: <strong><span id="display-license-used">0</span> / <span id="display-license-max">2</span></strong> Displays</span>
+                <button class="btn btn-secondary btn-sm" id="showFleetOverviewBtn" title="Geräte-Übersicht">📊 Flottenübersicht</button>
                 <button class="btn btn-primary" id="showDisplayFormBtn" data-translate="displays.newDisplay">+ Neues Display</button>
               </div>
+            </div>
+
+            <!-- Fleet Overview Panel -->
+            <div id="fleet-overview-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span style="font-size: 1.4rem;">📊</span>
+                  <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Geräte-Flottenübersicht</h3>
+                </div>
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 4px 12px; border-radius: 6px;" id="closeFleetOverviewBtn">✕</button>
+              </div>
+
+              <!-- Fleet Stats -->
+              <div id="fleet-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1.2rem;">
+                <div style="background: rgba(255,255,255,0.08); padding: 0.75rem; border-radius: 8px; text-align: center;">
+                  <div style="font-size: 1.6rem; font-weight: 700;" id="fleet-total">0</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Gesamt</div>
+                </div>
+                <div style="background: rgba(40,167,69,0.2); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(40,167,69,0.3);">
+                  <div style="font-size: 1.6rem; font-weight: 700; color: #28a745;" id="fleet-online">0</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Online</div>
+                </div>
+                <div style="background: rgba(220,53,69,0.2); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(220,53,69,0.3);">
+                  <div style="font-size: 1.6rem; font-weight: 700; color: #dc3545;" id="fleet-offline">0</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Offline</div>
+                </div>
+                <div style="background: rgba(108,117,125,0.2); padding: 0.75rem; border-radius: 8px; text-align: center;">
+                  <div style="font-size: 1.6rem; font-weight: 700; color: #6c757d;" id="fleet-unregistered">0</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Ohne Gerät</div>
+                </div>
+                <div style="background: rgba(255,170,0,0.2); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(255,170,0,0.3);">
+                  <div style="font-size: 1.6rem; font-weight: 700; color: #ffaa00;" id="fleet-pending">0</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Wartend</div>
+                </div>
+              </div>
+
+              <!-- Fleet Device List -->
+              <div id="fleet-device-list" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- License Management Panel (nur super_admin) -->
+            <div id="license-management-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <span style="font-size: 1.4rem;">🔑</span>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Lizenzverwaltung</h3>
+              </div>
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <label for="license-max-input" style="white-space: nowrap; font-weight: 500;">Max. Displays:</label>
+                <input type="number" id="license-max-input" min="1" max="100" value="2" style="width: 80px; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; font-size: 1rem; text-align: center;" />
+                <button class="btn btn-primary btn-sm" id="saveLicenseLimitBtn">Speichern</button>
+                <span id="license-save-status" style="font-size: 0.8rem; color: #aaa;"></span>
+              </div>
+              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Legt fest, wie viele Displays gleichzeitig verwendet werden können.</p>
+            </div>
+
+            <!-- APK Distribution Panel (nur super_admin) -->
+            <div id="apk-distribution-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #0d7377 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                <span style="font-size: 1.4rem;">📦</span>
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">APK-Verteilung</h3>
+              </div>
+              <div style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; flex-wrap: wrap;">
+                <div>
+                  <label for="apk-upload-input" style="cursor: pointer; padding: 6px 14px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.9rem;">📁 APK hochladen</label>
+                  <input type="file" id="apk-upload-input" accept=".apk" style="display: none;" />
+                </div>
+                <button class="btn btn-info btn-sm" id="downloadApkBtn" title="Aktuelle APK herunterladen">⬇ APK herunterladen</button>
+                <span id="apk-upload-status" style="font-size: 0.8rem; color: #aaa;"></span>
+              </div>
+              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Laden Sie die Android TV APK hoch, damit sie an Geräte verteilt werden kann.</p>
             </div>
 
             <!-- Display Security Panel (nur super_admin) -->
@@ -843,7 +914,7 @@
 
             <div id="display-license-warning" class="license-warning" style="display: none">
               <strong data-translate="displays.licenseWarning">Display-Lizenzlimit erreicht</strong>
-              <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst 2 Displays. Um weitere Displays hinzuzufügen, kontaktieren Sie bitte den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
+              <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst <span id="license-warning-max">2</span> Displays. Um weitere Displays hinzuzufügen, erhöhen Sie das Lizenzlimit in der Lizenzverwaltung oder kontaktieren Sie den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
             </div>
 
             <div id="display-form" class="form-container" style="display: none">

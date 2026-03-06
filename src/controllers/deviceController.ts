@@ -124,12 +124,13 @@ export const registerDevice = async (
       );
     }
 
-    // New device - check license limit
-    const MAX_LICENSED_DISPLAYS = 2;
+    // New device - check license limit (from settings, default: 2)
+    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
+    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
-        `Display-Lizenzlimit erreicht (${MAX_LICENSED_DISPLAYS}/${MAX_LICENSED_DISPLAYS}). Neue Geräte können nicht registriert werden.`,
+        `Display-Lizenzlimit erreicht (${displayCount}/${MAX_LICENSED_DISPLAYS}). Neue Geräte können nicht registriert werden.`,
         403
       );
     }
