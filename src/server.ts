@@ -242,9 +242,13 @@ const staticOptions = {
   etag: true,
   lastModified: true,
   setHeaders: (res: Response, path: string) => {
-    // Aggressive Caching für unveränderliche Assets
-    if (path.match(/\.(jpg|jpeg|png|gif|ico|css|js|woff|woff2)$/)) {
+    // Bilder & Fonts: langfristig cachen (unveränderlich)
+    if (path.match(/\.(jpg|jpeg|png|gif|ico|woff|woff2)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    // CSS/JS: kurzer Cache, da via ?v= versioniert
+    if (path.match(/\.(css|js)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
     // Video-Dateien: Cache + Accept-Ranges für schnelles Streaming
     if (path.match(/\.(mp4|webm|ogg|mov)$/)) {
@@ -342,6 +346,7 @@ app.get('/', (_req: Request, res: Response) => {
 });
 
 app.get('/public/display.html', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, '../views/public/display.html'));
 });
 
@@ -350,6 +355,7 @@ app.get('/admin', (_req: Request, res: Response) => {
 });
 
 app.get('/admin/dashboard', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.sendFile(path.join(__dirname, '../views/admin/dashboard.html'));
 });
 
