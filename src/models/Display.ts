@@ -1,6 +1,11 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
+/**
+ * Client-Typ: native = Android TV App, web = Browser/WebView
+ */
+export type ClientType = 'native' | 'web';
+
 interface DisplayAttributes {
   id: number;
   name: string;
@@ -13,11 +18,12 @@ interface DisplayAttributes {
   tickerTransit: boolean;
   tickerTraffic: boolean;
   organizationId?: number;
-  // Device Authorization
+  // Device Registration & Authorization
   serialNumber?: string;
   macAddress?: string;
   deviceToken?: string;
   authorizationStatus: 'pending' | 'authorized' | 'rejected' | 'revoked';
+  clientType?: ClientType;
   deviceModel?: string;
   deviceOsVersion?: string;
   appVersion?: string;
@@ -31,7 +37,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'clientType' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -49,11 +55,12 @@ class Display
   public tickerTransit!: boolean;
   public tickerTraffic!: boolean;
   public organizationId?: number;
-  // Device Authorization
+  // Device Registration & Authorization
   public serialNumber?: string;
   public macAddress?: string;
   public deviceToken?: string;
   public authorizationStatus!: 'pending' | 'authorized' | 'rejected' | 'revoked';
+  public clientType?: ClientType;
   public deviceModel?: string;
   public deviceOsVersion?: string;
   public appVersion?: string;
@@ -66,6 +73,13 @@ class Display
 
   // Associations
   public readonly posts?: any[];
+
+  /**
+   * Ist ein Gerät mit diesem Display verknüpft?
+   */
+  get isLinked(): boolean {
+    return !!this.serialNumber && !!this.deviceToken;
+  }
 }
 
 Display.init(
@@ -154,8 +168,16 @@ Display.init(
     authorizationStatus: {
       type: DataTypes.ENUM('pending', 'authorized', 'rejected', 'revoked'),
       allowNull: false,
-      defaultValue: 'authorized',
+      defaultValue: 'pending',
       field: 'authorization_status',
+    },
+    clientType: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+      field: 'client_type',
+      validate: {
+        isIn: [['native', 'web']],
+      },
     },
     deviceModel: {
       type: DataTypes.STRING(100),
@@ -168,7 +190,7 @@ Display.init(
       field: 'device_os_version',
     },
     appVersion: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING(50),
       allowNull: true,
       field: 'app_version',
     },
@@ -208,6 +230,9 @@ Display.init(
       },
       {
         fields: ['authorization_status'],
+      },
+      {
+        fields: ['client_type'],
       },
     ],
   }

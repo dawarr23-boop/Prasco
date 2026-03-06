@@ -51,6 +51,7 @@ export const getAllDisplays = async (
         'serialNumber',
         'macAddress',
         'authorizationStatus',
+        'clientType',
         'deviceModel',
         'deviceOsVersion',
         'appVersion',
@@ -64,7 +65,7 @@ export const getAllDisplays = async (
 
     // Include license info in response
     const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
-    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 5;
 
     res.json({
       success: true,
@@ -193,9 +194,9 @@ export const createDisplay = async (
   try {
     const { name, identifier, description, isActive } = req.body;
 
-    // License check: dynamic limit from settings (default: 2)
+    // License check: dynamic limit from settings (default: 5)
     const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
-    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 5;
     const displayCount = await Display.count();
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
       throw new AppError(
@@ -583,7 +584,7 @@ export const getLicenseInfo = async (
 ): Promise<void> => {
   try {
     const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
-    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 5;
     const displayCount = await Display.count();
 
     res.json({
@@ -655,7 +656,7 @@ export const getFleetOverview = async (
       order: [['name', 'ASC']],
       attributes: [
         'id', 'name', 'identifier', 'isActive',
-        'serialNumber', 'macAddress', 'authorizationStatus',
+        'serialNumber', 'macAddress', 'authorizationStatus', 'clientType',
         'deviceModel', 'deviceOsVersion', 'appVersion',
         'lastSeenAt', 'registeredAt', 'registrationOpen',
       ],
@@ -680,6 +681,7 @@ export const getFleetOverview = async (
         serialNumber: d.serialNumber,
         macAddress: d.macAddress,
         authorizationStatus: d.authorizationStatus,
+        clientType: d.clientType || null,
         deviceModel: d.deviceModel,
         deviceOsVersion: d.deviceOsVersion,
         appVersion: d.appVersion,
@@ -690,14 +692,14 @@ export const getFleetOverview = async (
     });
 
     const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
-    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
+    const maxLicensedDisplays = licenseSetting ? parseInt(licenseSetting.value, 10) : 5;
 
     const stats = {
       total: fleet.length,
       online: fleet.filter(d => d.isOnline).length,
       offline: fleet.filter(d => d.isDevice && !d.isOnline).length,
       unregistered: fleet.filter(d => !d.isDevice).length,
-      pending: fleet.filter(d => d.authorizationStatus === 'pending').length,
+      pending: fleet.filter(d => d.authorizationStatus === 'pending' && d.isDevice).length,
       authorized: fleet.filter(d => d.authorizationStatus === 'authorized' && d.isDevice).length,
     };
 

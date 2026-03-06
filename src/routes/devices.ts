@@ -11,6 +11,7 @@ router.post(
   '/register',
   [
     body('serialNumber').notEmpty().trim().withMessage('Seriennummer ist erforderlich'),
+    body('clientType').optional().trim().isIn(['native', 'web']).withMessage('clientType muss "native" oder "web" sein'),
     body('macAddress').optional().trim().matches(/^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/).withMessage('Ungültiges MAC-Adress-Format'),
     body('deviceModel').optional().trim(),
     body('deviceOsVersion').optional().trim(),
@@ -21,14 +22,13 @@ router.post(
   deviceController.registerDevice
 );
 
-// GET /api/devices/register - Register via query params (Android WebView compatibility)
-// shouldInterceptRequest in der Android App kann POST-Bodys nicht weiterleiten,
-// daher bieten wir auch einen GET-Endpunkt mit Query-Parametern an.
+// GET /api/devices/register - Register via query params (WebView compatibility)
 router.get(
   '/register',
   [
     query('serialNumber').notEmpty().trim().withMessage('Seriennummer ist erforderlich'),
-    query('macAddress').optional().trim(),
+    query('clientType').optional().trim().isIn(['native', 'web']).withMessage('clientType muss "native" oder "web" sein'),
+    query('macAddress').optional().trim().matches(/^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/).withMessage('Ungültiges MAC-Adress-Format'),
     query('deviceModel').optional().trim(),
     query('deviceOsVersion').optional().trim(),
     query('appVersion').optional().trim(),

@@ -29,6 +29,7 @@ class DeviceRegistrationManager(private val context: Context) {
         private const val PREF_DISPLAY_IDENTIFIER = "display_identifier"
         private const val PREF_CUSTOM_SERIAL = "custom_serial"
         private const val PREF_CUSTOM_MAC = "custom_mac"
+        private const val PREF_CONFIGURED_DISPLAY_IDENTIFIER = "configured_display_identifier"
         private const val APP_VERSION = "2.1.0"
 
         /** Polling-Intervall für Autorisierungsstatus (ms) */
@@ -94,6 +95,18 @@ class DeviceRegistrationManager(private val context: Context) {
     }
 
     /**
+     * Konfigurierter Display-Identifier für gezielte Registrierung
+     */
+    fun getConfiguredDisplayIdentifier(): String? {
+        val custom = prefs.getString(PREF_CONFIGURED_DISPLAY_IDENTIFIER, null)
+        return if (custom.isNullOrBlank()) null else custom
+    }
+
+    fun setConfiguredDisplayIdentifier(identifier: String?) {
+        prefs.edit().putString(PREF_CONFIGURED_DISPLAY_IDENTIFIER, identifier?.trim()).apply()
+    }
+
+    /**
      * Effektive Seriennummer (manuell oder automatisch)
      */
     fun getEffectiveSerial(): String {
@@ -121,12 +134,16 @@ class DeviceRegistrationManager(private val context: Context) {
             val model = DeviceIdentifier.getDeviceModel()
             val osVersion = DeviceIdentifier.getOsVersion()
 
+            val configuredDisplayId = getConfiguredDisplayIdentifier()
+
             val json = JSONObject().apply {
                 put("serialNumber", serial)
+                put("clientType", "native")
                 if (mac != null) put("macAddress", mac)
                 put("deviceModel", model)
                 put("deviceOsVersion", osVersion)
                 put("appVersion", APP_VERSION)
+                if (configuredDisplayId != null) put("displayIdentifier", configuredDisplayId)
             }
 
             val url = URL("$serverBaseUrl/api/devices/register")

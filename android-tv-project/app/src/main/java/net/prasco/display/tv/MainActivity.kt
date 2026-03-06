@@ -791,6 +791,7 @@ class MainActivity : FragmentActivity() {
         val autoMac = DeviceIdentifier.getMacAddress(this) ?: ""
         val customSerial = registrationManager.getCustomSerial() ?: ""
         val customMac = registrationManager.getCustomMac() ?: ""
+        val configuredDisplayId = registrationManager.getConfiguredDisplayIdentifier() ?: ""
 
         val scrollView = android.widget.ScrollView(this)
         val layout = LinearLayout(this).apply {
@@ -813,6 +814,23 @@ class MainActivity : FragmentActivity() {
             isSingleLine = true
             hint = "https://212.227.20.158"
             setSelection(text.length)
+        }
+
+        // --- Display Identifier ---
+        val displayIdLabel = TextView(this).apply {
+            text = "Display-Identifier (z.B. display01, leer = globale Registrierung):"
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setPadding(0, 24, 0, 0)
+        }
+
+        val displayIdInput = EditText(this).apply {
+            setText(configuredDisplayId)
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.GRAY)
+            textSize = 16f
+            isSingleLine = true
+            hint = "display01"
         }
 
         // --- Seriennummer ---
@@ -868,6 +886,8 @@ class MainActivity : FragmentActivity() {
 
         layout.addView(urlLabel)
         layout.addView(urlInput)
+        layout.addView(displayIdLabel)
+        layout.addView(displayIdInput)
         layout.addView(serialLabel)
         layout.addView(serialInput)
         layout.addView(macLabel)
@@ -880,12 +900,14 @@ class MainActivity : FragmentActivity() {
             .setView(scrollView)
             .setPositiveButton("Speichern & Registrieren") { _, _ ->
                 val newUrl = urlInput.text.toString().trim()
+                val newDisplayId = displayIdInput.text.toString().trim()
                 val newSerial = serialInput.text.toString().trim()
                 val newMac = macInput.text.toString().trim()
 
                 if (newUrl.isNotEmpty()) {
                     saveServerUrl(newUrl)
                 }
+                registrationManager.setConfiguredDisplayIdentifier(if (newDisplayId.isNotEmpty()) newDisplayId else null)
                 registrationManager.setCustomSerial(if (newSerial.isNotEmpty()) newSerial else null)
                 registrationManager.setCustomMac(if (newMac.isNotEmpty()) newMac else null)
                 registrationManager.clearRegistration()

@@ -3964,7 +3964,7 @@ async function loadDisplays() {
       .map(
         (display) => {
           const isDevice = !!display.serialNumber;
-          const authStatus = display.authorizationStatus || 'authorized';
+          const authStatus = display.authorizationStatus || 'pending';
           
           // Online/Offline status
           const lastSeen = display.lastSeenAt ? new Date(display.lastSeenAt).getTime() : 0;
@@ -4005,8 +4005,9 @@ async function loadDisplays() {
           // Device-Info
           let deviceInfo = '';
           if (isDevice) {
+            const clientBadge = display.clientType === 'native' ? '<span style="background:#6f42c1;color:white;padding:1px 5px;border-radius:3px;font-size:0.7rem;margin-right:4px;">Native</span>' : display.clientType === 'web' ? '<span style="background:#0d6efd;color:white;padding:1px 5px;border-radius:3px;font-size:0.7rem;margin-right:4px;">Web</span>' : '';
             deviceInfo = `<p style="font-size: 0.8em; color: #6c757d; margin-top: 0.4rem;">
-              📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
+              ${clientBadge}📱 ${escapeHtml(display.deviceModel || t('displays.unknownDevice'))} | SN: ${escapeHtml(display.serialNumber)}
               ${display.macAddress ? ` | MAC: ${escapeHtml(display.macAddress)}` : ''}
               ${display.appVersion ? ` | App v${escapeHtml(display.appVersion)}` : ''}
               ${display.lastSeenAt ? ` | ${t('displays.lastSeen')} ${new Date(display.lastSeenAt).toLocaleString('de-DE')}` : ''}
@@ -4030,11 +4031,14 @@ async function loadDisplays() {
               if (authStatus === 'pending') {
                 authActions = `
                   <button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
-                  <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>`;
+                  <button class="btn btn-danger btn-sm" data-action="reject-device" data-display-id="${display.id}" title="${t('displays.reject')}">${t('displays.reject')}</button>
+                  <button class="btn btn-sm" style="background:#6c757d;color:#fff;" data-action="unlink-device" data-display-id="${display.id}" title="Gerät trennen">🔗 Trennen</button>`;
               } else if (authStatus === 'authorized') {
-                authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>`;
+                authActions = `<button class="btn btn-warning btn-sm" data-action="revoke-device" data-display-id="${display.id}" title="${t('displays.revoke')}">${t('displays.revoke')}</button>
+                  <button class="btn btn-sm" style="background:#6c757d;color:#fff;" data-action="unlink-device" data-display-id="${display.id}" title="Gerät trennen">🔗 Trennen</button>`;
               } else if (authStatus === 'rejected' || authStatus === 'revoked') {
-                authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>`;
+                authActions = `<button class="btn btn-success btn-sm" data-action="authorize-device" data-display-id="${display.id}" title="${t('displays.authorize')}">${t('displays.authorize')}</button>
+                  <button class="btn btn-sm" style="background:#6c757d;color:#fff;" data-action="unlink-device" data-display-id="${display.id}" title="Gerät trennen">🔗 Trennen</button>`;
               }
             } else {
               // Kein Gerät verknüpft — zeige "Registrierung starten"
@@ -4258,6 +4262,19 @@ async function revokeDevice(displayId) {
   }
 }
 
+async function unlinkDevice(displayId) {
+  const display = displaysCache.find(d => d.id === parseInt(displayId));
+  const displayName = display ? display.name : `Display ${displayId}`;
+  if (!confirm(`Gerät von "${displayName}" trennen?\n\nDas Display bleibt bestehen, aber die Geräteverknüpfung wird entfernt.`)) return;
+  try {
+    await apiRequest(`/displays/${displayId}/unlink`, { method: 'POST' });
+    await loadDisplays();
+    showNotification(`Gerät von "${displayName}" getrennt.`, 'warning');
+  } catch (error) {
+    showNotification('Fehler beim Trennen: ' + error.message, 'error');
+  }
+}
+
 // ============================================
 // Display-Registrierung (Client-Verknüpfung)
 // ============================================
@@ -4318,11 +4335,13 @@ async function loadFleetOverview() {
       const onlineColor = d.isOnline ? '#28a745' : (d.isDevice ? '#dc3545' : '#6c757d');
       const onlineText = d.isOnline ? 'Online' : (d.isDevice ? (d.minutesSinceLastSeen !== null ? (d.minutesSinceLastSeen < 60 ? `${d.minutesSinceLastSeen} Min. offline` : d.minutesSinceLastSeen < 1440 ? `${Math.floor(d.minutesSinceLastSeen/60)} Std. offline` : `${Math.floor(d.minutesSinceLastSeen/1440)} Tage offline`) : 'Nie gesehen') : 'Kein Gerät');
       const statusBg = d.authorizationStatus === 'authorized' ? 'rgba(40,167,69,0.15)' : d.authorizationStatus === 'pending' ? 'rgba(255,170,0,0.15)' : 'rgba(108,117,125,0.1)';
+      const clientBadge = d.clientType === 'native' ? '<span style="background:#6f42c1;color:white;padding:1px 5px;border-radius:3px;font-size:0.7rem;">Native</span>' : d.clientType === 'web' ? '<span style="background:#0d6efd;color:white;padding:1px 5px;border-radius:3px;font-size:0.7rem;">Web</span>' : '';
 
       return `<div style="display:flex; align-items:center; justify-content:space-between; padding:0.5rem 0.75rem; margin-bottom:0.4rem; background:${statusBg}; border-radius:6px; border-left: 3px solid ${onlineColor};">
         <div style="flex:1;">
           <span style="font-weight:600; font-size:0.9rem;">${escapeHtml(d.name)}</span>
           <span style="color:#aaa; font-size:0.8rem; margin-left:0.5rem;">/${escapeHtml(d.identifier)}</span>
+          ${clientBadge ? ` ${clientBadge}` : ''}
         </div>
         <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.8rem;">
           ${d.isDevice ? `<span style="color:#aaa;">${escapeHtml(d.deviceModel || '?')}</span>` : ''}
@@ -6069,6 +6088,8 @@ window.addEventListener('load', async () => {
         openDisplayRegistration(displayId);
       } else if (action === 'close-registration' && displayId) {
         closeDisplayRegistration(displayId);
+      } else if (action === 'unlink-device' && displayId) {
+        unlinkDevice(displayId);
       } else if (action === 'show-registration-info' && displayId) {
         showRegistrationInfo(displayId);
       }

@@ -6,61 +6,117 @@ import { logger, securityLogger } from '../utils/logger';
 import { DeviceRequest } from '../middleware/deviceAuth';
 import crypto from 'crypto';
 import sequelize from '../config/database';
+import { Transaction } from 'sequelize';
+
+// ============================================
+// Unified Registration Contract
+// ============================================
+//
+// POST /api/devices/register
+// Body:
+//   serialNumber:      string  (required) — ANDROID_ID (native) oder "web-<uuid>" (web)
+//   clientType:        string  (required) — "native" | "web"
+//   deviceModel:       string  (required) — z.B. "Xiaomi MITV-MSSP1" oder "Chrome (Win32)"
+//   appVersion:        string  (required) — z.B. "2.1.0" (native) oder "web-1.0" (web)
+//   macAddress?:       string  (optional) — MAC-Adresse (nur native)
+//   deviceOsVersion?:  string  (optional) — z.B. "Android 12"
+//   displayIdentifier?: string (optional) — Ziel-Display für gezielte Registrierung
+//
+// Response:
+//   { success, data: { deviceToken, authorizationStatus, displayId, displayIdentifier, displayName }, message? }
+//
+// Status-Flow:
+//   Admin erstellt Display → pending (kein Gerät verknüpft)
+//   Admin öffnet Registrierung → pending, registrationOpen=true
+//   Client registriert sich → authorized (displayIdentifier) oder pending (global)
+//   Admin autorisiert → authorized
+//   Admin lehnt ab → rejected
+//   Admin widerruft → revoked
+// ============================================
 
 /**
- * Register a new device or return existing registration
+ * Determine clientType from serialNumber if not explicitly provided.
+ * Backward-compatible: detects "web-" prefix.
+ */
+function resolveClientType(serialNumber: string, clientType?: string): 'native' | 'web' {
+  if (clientType === 'native' || clientType === 'web') return clientType;
+  return serialNumber.startsWith('web-') ? 'web' : 'native';
+}
+
+/**
+ * Register a new device or return existing registration.
+ * Uses database transactions to prevent race conditions.
+ *
  * POST /api/devices/register
- * Body: { serialNumber, macAddress, deviceModel, deviceOsVersion, appVersion }
  */
 export const registerDevice = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  const t: Transaction = await sequelize.transaction();
+
   try {
     const { serialNumber, macAddress, deviceModel, deviceOsVersion, appVersion, displayIdentifier } = req.body;
+    const clientType = resolveClientType(serialNumber, req.body.clientType);
 
     if (!serialNumber) {
+      await t.rollback();
       throw new AppError('Seriennummer ist erforderlich', 400);
     }
 
-    // ===== Display-spezifische Registrierung (Priorität!) =====
-    // Wenn ein displayIdentifier mitgesendet wird, prüfe ob dieses Display
-    // registration_open = true hat (vom Admin geöffnet).
-    // Dies hat Vorrang vor der serialNumber-Prüfung, damit ein Client
-    // auch dann verknüpft werden kann, wenn er vorher anderswo registriert war.
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+
+    // ===== Pfad 1: Gezielte Registrierung (displayIdentifier) =====
     if (displayIdentifier) {
-      const targetDisplay = await Display.findOne({ where: { identifier: displayIdentifier } });
+      const targetDisplay = await Display.findOne({
+        where: { identifier: displayIdentifier },
+        lock: Transaction.LOCK.UPDATE,
+        transaction: t,
+      });
 
       if (targetDisplay && targetDisplay.registrationOpen) {
         // Falls diese Seriennummer noch auf einem anderen Display liegt, dort entfernen
-        const oldDisplay = await Display.findOne({ where: { serialNumber } });
+        const oldDisplay = await Display.findOne({
+          where: { serialNumber },
+          transaction: t,
+        });
         if (oldDisplay && oldDisplay.id !== targetDisplay.id) {
-          oldDisplay.serialNumber = null as any;
-          oldDisplay.deviceToken = null as any;
-          oldDisplay.macAddress = null as any;
-          oldDisplay.authorizationStatus = 'pending';
-          await oldDisplay.save();
+          await oldDisplay.update({
+            serialNumber: null as any,
+            deviceToken: null as any,
+            macAddress: null as any,
+            clientType: null as any,
+            deviceModel: null as any,
+            deviceOsVersion: null as any,
+            appVersion: null as any,
+            authorizationStatus: 'pending',
+            lastSeenAt: null as any,
+            registeredAt: null as any,
+          }, { transaction: t });
           logger.info(`Alte Verknüpfung entfernt: SN ${serialNumber} von Display ${oldDisplay.id}`);
         }
 
-        // Admin hat Registrierung für dieses Display geöffnet → Client direkt verknüpfen
+        // Client direkt verknüpfen und autorisieren
         const deviceToken = crypto.randomUUID();
 
-        targetDisplay.serialNumber = serialNumber;
-        targetDisplay.macAddress = macAddress || undefined;
-        targetDisplay.deviceToken = deviceToken;
-        targetDisplay.deviceModel = deviceModel || undefined;
-        targetDisplay.deviceOsVersion = deviceOsVersion || undefined;
-        targetDisplay.appVersion = appVersion || undefined;
-        targetDisplay.authorizationStatus = 'authorized';
-        targetDisplay.lastSeenAt = new Date();
-        targetDisplay.registeredAt = new Date();
-        targetDisplay.registrationOpen = false;
-        await targetDisplay.save();
+        await targetDisplay.update({
+          serialNumber,
+          macAddress: macAddress || null,
+          deviceToken,
+          clientType,
+          deviceModel: deviceModel || null,
+          deviceOsVersion: deviceOsVersion || null,
+          appVersion: appVersion || null,
+          authorizationStatus: 'authorized',
+          lastSeenAt: new Date(),
+          registeredAt: new Date(),
+          registrationOpen: false,
+        }, { transaction: t });
 
-        const ip = req.ip || req.socket.remoteAddress || 'unknown';
-        logger.info(`Client verknüpft mit Display ${targetDisplay.id} (${displayIdentifier}) via offene Registrierung. SN: ${serialNumber}, IP: ${ip}`);
+        await t.commit();
+
+        logger.info(`Client verknüpft mit Display ${targetDisplay.id} (${displayIdentifier}) via offene Registrierung. SN: ${serialNumber}, Typ: ${clientType}, IP: ${ip}`);
 
         res.status(201).json({
           success: true,
@@ -78,45 +134,50 @@ export const registerDevice = async (
       // If display exists but registration not open, fall through to normal logic
     }
 
-    // Check if device is already registered (by serialNumber on any display)
-    let display = await Display.findOne({
+    // ===== Pfad 2: Bekanntes Gerät (serialNumber bereits registriert) =====
+    const existingDisplay = await Display.findOne({
       where: { serialNumber },
+      transaction: t,
     });
 
-    if (display) {
-      // Device already known - update info and return token
-      display.macAddress = macAddress || display.macAddress;
-      display.deviceModel = deviceModel || display.deviceModel;
-      display.deviceOsVersion = deviceOsVersion || display.deviceOsVersion;
-      display.appVersion = appVersion || display.appVersion;
-      display.lastSeenAt = new Date();
-      await display.save();
+    if (existingDisplay) {
+      await existingDisplay.update({
+        macAddress: macAddress || existingDisplay.macAddress,
+        clientType,
+        deviceModel: deviceModel || existingDisplay.deviceModel,
+        deviceOsVersion: deviceOsVersion || existingDisplay.deviceOsVersion,
+        appVersion: appVersion || existingDisplay.appVersion,
+        lastSeenAt: new Date(),
+      }, { transaction: t });
 
-      logger.info(`Gerät erneut registriert: ${serialNumber} (Display ${display.id}, Status: ${display.authorizationStatus})`);
+      await t.commit();
+
+      logger.info(`Gerät erneut registriert: ${serialNumber} (Display ${existingDisplay.id}, Status: ${existingDisplay.authorizationStatus})`);
 
       res.json({
         success: true,
         data: {
-          deviceToken: display.deviceToken,
-          authorizationStatus: display.authorizationStatus,
-          displayId: display.id,
-          displayIdentifier: display.identifier,
-          displayName: display.name,
+          deviceToken: existingDisplay.deviceToken,
+          authorizationStatus: existingDisplay.authorizationStatus,
+          displayId: existingDisplay.id,
+          displayIdentifier: existingDisplay.identifier,
+          displayName: existingDisplay.name,
         },
       });
       return;
     }
 
-    // New device — check if global registration mode is enabled
-    const regModeSetting = await Setting.findOne({ where: { key: 'display.registrationMode' } });
+    // ===== Pfad 3: Neues Gerät — Globale Registrierung =====
+    const regModeSetting = await Setting.findOne({
+      where: { key: 'display.registrationMode' },
+      transaction: t,
+    });
     const registrationMode = regModeSetting?.value === 'true';
 
     if (!registrationMode) {
-      const ip = req.ip || req.socket.remoteAddress || 'unknown';
-      securityLogger.logSuspiciousActivity('Device registration attempted while registration mode is disabled', ip, {
-        serialNumber,
-        macAddress,
-        deviceModel,
+      await t.rollback();
+      securityLogger.logSuspiciousActivity('Device registration attempted while disabled', ip, {
+        serialNumber, macAddress, deviceModel, clientType,
       });
       throw new AppError(
         'Registrierung ist derzeit deaktiviert. Bitte den Administrator kontaktieren.',
@@ -124,21 +185,22 @@ export const registerDevice = async (
       );
     }
 
-    // New device - check license limit (from settings, default: 2)
-    const licenseSetting = await Setting.findOne({ where: { key: 'display.maxLicensedDisplays' } });
-    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 2;
-    const displayCount = await Display.count();
+    // Lizenzlimit prüfen
+    const licenseSetting = await Setting.findOne({
+      where: { key: 'display.maxLicensedDisplays' },
+      transaction: t,
+    });
+    const MAX_LICENSED_DISPLAYS = licenseSetting ? parseInt(licenseSetting.value, 10) : 5;
+    const displayCount = await Display.count({ transaction: t });
     if (displayCount >= MAX_LICENSED_DISPLAYS) {
+      await t.rollback();
       throw new AppError(
         `Display-Lizenzlimit erreicht (${displayCount}/${MAX_LICENSED_DISPLAYS}). Neue Geräte können nicht registriert werden.`,
         403
       );
     }
 
-    // Create new display for this device
-    const deviceToken = crypto.randomUUID();
-    
-    // Generate sequential identifier: display01, display02, ...
+    // Sequentiellen Identifier generieren
     const allDisplays = await Display.findAll({
       attributes: ['identifier'],
       where: sequelize.where(
@@ -146,8 +208,9 @@ export const registerDevice = async (
         'display'
       ),
       order: [['identifier', 'ASC']],
+      transaction: t,
     });
-    
+
     let nextNum = 1;
     const usedNums = new Set(
       allDisplays
@@ -157,32 +220,33 @@ export const registerDevice = async (
     while (usedNums.has(nextNum)) nextNum++;
     const uniqueIdentifier = `display${String(nextNum).padStart(2, '0')}`;
 
-    display = await Display.create({
-      name: `Display ${String(nextNum).padStart(2, '0')} — ${deviceModel || 'Android TV'}`,
+    const deviceToken = crypto.randomUUID();
+
+    const display = await Display.create({
+      name: `Display ${String(nextNum).padStart(2, '0')} — ${deviceModel || 'Unbekannt'}`,
       identifier: uniqueIdentifier,
       description: `Automatisch registriert: ${deviceModel || 'Unbekanntes Gerät'}`,
       isActive: true,
-      organizationId: 1, // Standard-Organisation
+      organizationId: 1,
       serialNumber,
       macAddress: macAddress || null,
       deviceToken,
+      clientType,
       authorizationStatus: 'pending',
       deviceModel: deviceModel || null,
       deviceOsVersion: deviceOsVersion || null,
       appVersion: appVersion || null,
       lastSeenAt: new Date(),
       registeredAt: new Date(),
-    });
+    }, { transaction: t });
 
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    await t.commit();
+
     securityLogger.logSuspiciousActivity('New device registered', ip, {
-      serialNumber,
-      macAddress,
-      deviceModel,
-      displayId: display.id,
+      serialNumber, macAddress, clientType, deviceModel, displayId: display.id,
     });
 
-    logger.info(`Neues Gerät registriert: ${serialNumber} → Display ${display.id} (${uniqueIdentifier}), Status: pending`);
+    logger.info(`Neues Gerät registriert: ${serialNumber} → Display ${display.id} (${uniqueIdentifier}), Typ: ${clientType}, Status: pending`);
 
     res.status(201).json({
       success: true,
@@ -196,6 +260,7 @@ export const registerDevice = async (
       message: 'Gerät registriert. Warten auf Autorisierung durch Administrator.',
     });
   } catch (error) {
+    try { await t.rollback(); } catch (_) { /* already committed/rolled back */ }
     next(error);
   }
 };
@@ -278,7 +343,7 @@ export const authorizeDevice = async (
     }
 
     if (!display.serialNumber) {
-      throw new AppError('Dieses Display ist kein registriertes Gerät', 400);
+      throw new AppError('Dieses Display hat kein verknüpftes Gerät', 400);
     }
 
     display.authorizationStatus = 'authorized';
@@ -314,7 +379,7 @@ export const rejectDevice = async (
     }
 
     if (!display.serialNumber) {
-      throw new AppError('Dieses Display ist kein registriertes Gerät', 400);
+      throw new AppError('Dieses Display hat kein verknüpftes Gerät', 400);
     }
 
     display.authorizationStatus = 'rejected';
@@ -350,7 +415,7 @@ export const revokeDevice = async (
     }
 
     if (!display.serialNumber) {
-      throw new AppError('Dieses Display ist kein registriertes Gerät', 400);
+      throw new AppError('Dieses Display hat kein verknüpftes Gerät', 400);
     }
 
     display.authorizationStatus = 'revoked';
@@ -369,7 +434,57 @@ export const revokeDevice = async (
 };
 
 /**
- * Admin: Open registration on a display — next connecting client will be linked
+ * Admin: Unlink device from display (keep display, clear device data)
+ * POST /api/displays/:id/unlink
+ */
+export const unlinkDevice = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const display = await Display.findByPk(id);
+    if (!display) {
+      throw new AppError('Display nicht gefunden', 404);
+    }
+
+    if (!display.serialNumber) {
+      throw new AppError('Dieses Display hat kein verknüpftes Gerät', 400);
+    }
+
+    const oldSerial = display.serialNumber;
+
+    await display.update({
+      serialNumber: null as any,
+      macAddress: null as any,
+      deviceToken: null as any,
+      clientType: null as any,
+      deviceModel: null as any,
+      deviceOsVersion: null as any,
+      appVersion: null as any,
+      authorizationStatus: 'pending',
+      lastSeenAt: null as any,
+      registeredAt: null as any,
+      registrationOpen: false,
+    });
+
+    logger.info(`Gerät getrennt von Display ${id}: SN ${oldSerial}`);
+
+    res.json({
+      success: true,
+      data: display,
+      message: `Gerät ${oldSerial} wurde von Display "${display.name}" getrennt.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Admin: Open registration on a display — next connecting client will be linked.
+ * Clears any existing device binding and sets registrationOpen = true.
  * POST /api/displays/:id/open-registration
  */
 export const openRegistration = async (
@@ -385,21 +500,20 @@ export const openRegistration = async (
       throw new AppError('Display nicht gefunden', 404);
     }
 
-    // If already has a registered device, clear it first
-    if (display.serialNumber || display.deviceToken) {
-      display.serialNumber = undefined;
-      display.macAddress = undefined;
-      display.deviceToken = undefined;
-      display.deviceModel = undefined;
-      display.deviceOsVersion = undefined;
-      display.appVersion = undefined;
-      display.lastSeenAt = undefined;
-      display.registeredAt = undefined;
-      display.authorizationStatus = 'authorized';
-    }
-
-    display.registrationOpen = true;
-    await display.save();
+    // Clear any existing device data and open for registration
+    await display.update({
+      serialNumber: null as any,
+      macAddress: null as any,
+      deviceToken: null as any,
+      clientType: null as any,
+      deviceModel: null as any,
+      deviceOsVersion: null as any,
+      appVersion: null as any,
+      authorizationStatus: 'pending',
+      lastSeenAt: null as any,
+      registeredAt: null as any,
+      registrationOpen: true,
+    });
 
     logger.info(`Registrierung geöffnet für Display ${id} (${display.identifier})`);
 
@@ -446,10 +560,11 @@ export const closeRegistration = async (
 };
 
 /**
- * Register a device via GET (Android WebView compatibility)
- * GET /api/devices/register?serialNumber=...&displayIdentifier=...
- * Android WebView's shouldInterceptRequest kann POST-Bodys nicht weiterleiten,
+ * Register a device via GET (WebView compatibility).
+ * WebView's shouldInterceptRequest kann POST-Bodys nicht weiterleiten,
  * daher bieten wir die gleiche Logik auch per GET mit Query-Parametern.
+ *
+ * GET /api/devices/register?serialNumber=...&clientType=web&...
  */
 export const registerDeviceGet = async (
   req: Request,
@@ -458,8 +573,8 @@ export const registerDeviceGet = async (
 ): Promise<void> => {
   // Query-Parameter in req.body kopieren, damit registerDevice funktioniert
   req.body = {
-    ...req.body,
     serialNumber: req.query.serialNumber,
+    clientType: req.query.clientType,
     macAddress: req.query.macAddress,
     deviceModel: req.query.deviceModel,
     deviceOsVersion: req.query.deviceOsVersion,

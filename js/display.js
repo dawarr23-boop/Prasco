@@ -1365,6 +1365,7 @@ async function getOrCreateDeviceToken(displayIdentifier) {
   try {
     const params = new URLSearchParams({
       serialNumber: serialNumber,
+      clientType: 'web',
       deviceModel: deviceModel + ' (' + navigator.platform + ')',
       deviceOsVersion: navigator.platform || 'Unknown',
       appVersion: 'web-1.0',

@@ -172,6 +172,14 @@ router.post(
   deviceController.revokeDevice
 );
 
+// POST /api/displays/:id/unlink - Unlink device from display (Superadmin only)
+router.post(
+  '/:id/unlink',
+  requireSuperAdmin,
+  [param('id').isInt().withMessage('Ungültige Display-ID'), validate],
+  deviceController.unlinkDevice
+);
+
 // POST /api/displays/:id/open-registration - Open registration for next client (Superadmin only)
 router.post(
   '/:id/open-registration',
