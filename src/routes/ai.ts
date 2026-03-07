@@ -516,7 +516,7 @@ router.post('/bulk-translate', authenticate, async (req: AuthRequest, res: Respo
         post.content ? translateTitle(post.content) : Promise.resolve(post.content),
       ]);
 
-      const postData = post.toJSON() as Record<string, unknown>;
+      const postData = post.toJSON() as unknown as Record<string, unknown>;
       delete postData.id;
       delete postData.createdAt;
       delete postData.updatedAt;
