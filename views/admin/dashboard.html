@@ -936,6 +936,12 @@
                 <span style="font-size: 1.4rem;">📦</span>
                 <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">APK-Verteilung</h3>
               </div>
+              <!-- APK-Status -->
+              <div id="apk-info-bar" style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1rem; background:rgba(255,255,255,0.07); border-radius:8px; margin-bottom:0.75rem; font-size:0.85rem; color:#ccc; flex-wrap:wrap;">
+                <span id="apk-availability-badge" style="padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:600; background:#6c757d; color:#fff;">Prüfe…</span>
+                <span id="apk-info-text" style="color:#ccc;"></span>
+              </div>
+              <!-- Aktionen -->
               <div style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; flex-wrap: wrap;">
                 <div>
                   <label for="apk-upload-input" style="cursor: pointer; padding: 6px 14px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.9rem;">📁 APK hochladen</label>
@@ -943,6 +949,14 @@
                 </div>
                 <button class="btn btn-info btn-sm" id="downloadApkBtn" title="Aktuelle APK herunterladen">⬇ APK herunterladen</button>
                 <span id="apk-upload-status" style="font-size: 0.8rem; color: #aaa;"></span>
+              </div>
+              <!-- Öffentlicher Download-Link -->
+              <div style="margin-top:0.75rem; padding:0.7rem 1rem; background:rgba(255,255,255,0.05); border-radius:8px;">
+                <div style="font-size:0.8rem; color:#aaa; margin-bottom:0.4rem;">Öffentlicher Download-Link (kein Login erforderlich):</div>
+                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                  <code id="apk-public-url" style="font-size:0.82rem; background:rgba(0,0,0,0.3); padding:4px 10px; border-radius:4px; color:#9fe; word-break:break-all;"></code>
+                  <button type="button" onclick="copyApkPublicUrl()" style="padding:4px 10px; background:rgba(255,255,255,0.15); border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; color:#fff;">📋 Kopieren</button>
+                </div>
               </div>
               <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Laden Sie die Android TV APK hoch, damit sie an Geräte verteilt werden kann.</p>
             </div>

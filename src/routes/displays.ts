@@ -66,6 +66,13 @@ router.get(
   displayController.getLatestApk
 );
 
+// GET /api/displays/apk/info - APK metadata (size, date, available)
+router.get(
+  '/apk/info',
+  requireSuperAdmin,
+  displayController.getApkInfo
+);
+
 // POST /api/displays/apk/upload - Upload APK (Superadmin only)
 router.post(
   '/apk/upload',

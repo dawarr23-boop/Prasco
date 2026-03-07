@@ -4564,6 +4564,7 @@ async function uploadApk() {
     statusEl.textContent = '✓ ' + (data.message || 'Hochgeladen');
     statusEl.style.color = '#28a745';
     showNotification(data.message || 'APK hochgeladen', 'success');
+    loadApkInfo(); // Status-Anzeige aktualisieren
   } catch (error) {
     statusEl.textContent = '✕ Fehler';
     statusEl.style.color = '#dc3545';
@@ -4595,6 +4596,45 @@ async function downloadApk() {
   } catch (error) {
     showNotification('Download-Fehler: ' + error.message, 'error');
   }
+}
+
+async function loadApkInfo() {
+  const badge = document.getElementById('apk-availability-badge');
+  const infoText = document.getElementById('apk-info-text');
+  const downloadBtn = document.getElementById('downloadApkBtn');
+  try {
+    const data = await apiRequest('/displays/apk/info');
+    if (data?.available) {
+      if (badge) { badge.textContent = '✓ Verfügbar'; badge.style.background = '#28a745'; }
+      if (infoText) {
+        const date = new Date(data.uploadedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        infoText.textContent = `${data.sizeMb} MB · hochgeladen am ${date}`;
+      }
+      if (downloadBtn) downloadBtn.disabled = false;
+    } else {
+      if (badge) { badge.textContent = '✕ Keine APK'; badge.style.background = '#dc3545'; }
+      if (infoText) infoText.textContent = 'Noch keine APK hochgeladen.';
+      if (downloadBtn) downloadBtn.disabled = true;
+    }
+  } catch {
+    if (badge) { badge.textContent = '? Unbekannt'; badge.style.background = '#6c757d'; }
+  }
+}
+
+function copyApkPublicUrl() {
+  const url = document.getElementById('apk-public-url')?.textContent || `${location.origin}/download/app`;
+  navigator.clipboard?.writeText(url).then(() => {
+    showNotification('Link kopiert!', 'success');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showNotification('Link kopiert!', 'success');
+  });
 }
 
 // ============================================
@@ -4644,6 +4684,13 @@ function initDisplayAdminPanels() {
   const apkPanel = document.getElementById('apk-distribution-panel');
   if (apkPanel) {
     apkPanel.style.display = user.role === 'super_admin' ? 'block' : 'none';
+  }
+
+  if (user.role === 'super_admin') {
+    loadApkInfo();
+    // Öffentliche Download-URL setzen
+    const urlEl = document.getElementById('apk-public-url');
+    if (urlEl) urlEl.textContent = `${location.origin}/download/app`;
   }
 
   const apkInput = document.getElementById('apk-upload-input');

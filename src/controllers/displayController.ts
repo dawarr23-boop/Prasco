@@ -825,6 +825,33 @@ export const getLatestApk = async (
 };
 
 /**
+ * Get APK info (size, upload date, available)
+ * GET /api/displays/apk/info
+ */
+export const getApkInfo = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const apkPath = path.join(__dirname, '../../uploads/apk/prasco-tv-latest.apk');
+    try {
+      const stat = await fs.stat(apkPath);
+      res.json({
+        available: true,
+        size: stat.size,
+        sizeMb: (stat.size / 1024 / 1024).toFixed(1),
+        uploadedAt: stat.mtime.toISOString(),
+      });
+    } catch {
+      res.json({ available: false });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Upload APK for distribution
  * POST /api/displays/apk/upload
  */

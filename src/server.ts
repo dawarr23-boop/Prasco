@@ -364,6 +364,18 @@ app.get('/admin/handbuch', (_req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../views/admin/handbuch.html'));
 });
 
+// Public APK download – no auth required, super admin can share this link
+app.get('/download/app', async (_req: Request, res: Response) => {
+  const apkPath = path.join(__dirname, '../uploads/apk/prasco-tv-latest.apk');
+  try {
+    await import('fs/promises').then(f => f.stat(apkPath));
+    res.setHeader('Cache-Control', 'no-store');
+    res.download(apkPath, 'prasco-tv.apk');
+  } catch {
+    res.status(404).send('Keine APK verfügbar. Bitte kontaktieren Sie Ihren Administrator.');
+  }
+});
+
 // Swagger API Documentation
 app.use(
   '/api/docs',
