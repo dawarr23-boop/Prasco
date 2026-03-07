@@ -167,6 +167,51 @@ export const registerDevice = async (
       return;
     }
 
+    // ===== Pfad 2b: Offenes Display suchen (registrationOpen=true, kein Gerät) =====
+    const openDisplay = await Display.findOne({
+      where: {
+        serialNumber: null as any,
+        registrationOpen: true,
+      },
+      lock: Transaction.LOCK.UPDATE,
+      transaction: t,
+    });
+
+    if (openDisplay) {
+      const deviceToken = crypto.randomUUID();
+
+      await openDisplay.update({
+        serialNumber,
+        macAddress: macAddress || null,
+        deviceToken,
+        clientType,
+        deviceModel: deviceModel || null,
+        deviceOsVersion: deviceOsVersion || null,
+        appVersion: appVersion || null,
+        authorizationStatus: 'authorized',
+        lastSeenAt: new Date(),
+        registeredAt: new Date(),
+        registrationOpen: false,
+      }, { transaction: t });
+
+      await t.commit();
+
+      logger.info(`Client auto-verknüpft mit offenem Display ${openDisplay.id} (${openDisplay.identifier}). SN: ${serialNumber}, Typ: ${clientType}, IP: ${ip}`);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          deviceToken,
+          authorizationStatus: 'authorized',
+          displayId: openDisplay.id,
+          displayIdentifier: openDisplay.identifier,
+          displayName: openDisplay.name,
+        },
+        message: 'Gerät erfolgreich mit offenem Display verknüpft und autorisiert.',
+      });
+      return;
+    }
+
     // ===== Pfad 3: Neues Gerät — Globale Registrierung =====
     const regModeSetting = await Setting.findOne({
       where: { key: 'display.registrationMode' },
@@ -467,10 +512,10 @@ export const unlinkDevice = async (
       authorizationStatus: 'pending',
       lastSeenAt: null as any,
       registeredAt: null as any,
-      registrationOpen: false,
+      registrationOpen: true,
     });
 
-    logger.info(`Gerät getrennt von Display ${id}: SN ${oldSerial}`);
+    logger.info(`Gerät getrennt von Display ${id}: SN ${oldSerial} — Display ist nun offen für neue Registrierung`);
 
     res.json({
       success: true,
