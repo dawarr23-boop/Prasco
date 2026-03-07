@@ -2031,9 +2031,9 @@ function navigateTo(section) {
       loadDisplays();
       loadSecuritySettings();
       initDisplayAdminPanels();
-      // Auto-Refresh alle 10 Sekunden für neue Registrierungen
+      // Auto-Refresh alle 10 Sekunden für neue Registrierungen (silent = kein Flicker)
       displaysAutoRefreshInterval = setInterval(() => {
-        loadDisplays();
+        loadDisplays(true);
       }, 10000);
     }
     if (section === 'users') loadUsers();
@@ -3937,13 +3937,25 @@ let currentDisplayId = null;
 let MAX_LICENSED_DISPLAYS = 2; // Will be loaded from server
 let displaysAutoRefreshInterval = null;
 
-async function loadDisplays() {
+let _displaysLastJson = '';
+
+async function loadDisplays(silent = false) {
   const displaysList = document.getElementById('displays-list');
-  displaysList.innerHTML = '<p style="text-align:center; color: #6c757d;">' + t('displays.loading') + '</p>';
+  if (!silent) {
+    displaysList.innerHTML = '<p style="text-align:center; color: #6c757d;">' + t('displays.loading') + '</p>';
+  }
 
   try {
     const response = await apiRequest('/displays');
-    displaysCache = response?.data || [];
+    const newData = response?.data || [];
+
+    // Beim silent-Refresh: nur neu rendern wenn sich Daten geändert haben
+    const newJson = JSON.stringify(newData);
+    if (silent && newJson === _displaysLastJson) {
+      return; // Keine Änderung → kein Re-Render
+    }
+    _displaysLastJson = newJson;
+    displaysCache = newData;
 
     // Update license limit from server response
     if (response?.license) {
