@@ -4652,8 +4652,8 @@ async function loadSecuritySettings() {
       apiRequest('/settings/display.registrationMode'),
     ]);
 
-    const secureMode = secureModeRes?.value === 'true' || secureModeRes?.data?.value === 'true';
-    const registrationMode = regModeRes?.value === 'true' || regModeRes?.data?.value === 'true';
+    const secureMode = secureModeRes?.value === true || secureModeRes?.value === 'true';
+    const registrationMode = regModeRes?.value === true || regModeRes?.value === 'true';
 
     updateSecurityToggleUI('secure-mode', secureMode);
     updateSecurityToggleUI('registration-mode', registrationMode);
