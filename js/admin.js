@@ -3358,7 +3358,7 @@ async function showPostPreview(id) {
 
   let html = '';
   const titleHtml = post.showTitle === true
-    ? `<h1 style="font-size:clamp(1.2rem,4vw,3rem);margin:0 0 0.5em;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.6);">${escapeHtml(post.title)}</h1>` : '';
+    ? `<h1 style="font-size:clamp(0.9rem,2.5vw,1.6rem);margin:0 0 0.8em;color:${isDark ? '#d0d0d0' : '#1a1a1a'};line-height:1.3;font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;border-left:4px solid ${isDark ? '#6a9fd8' : '#58585a'};padding-left:0.8rem;text-align:left;width:100%;">${escapeHtml(post.title)}</h1>` : '';
 
   switch (ct) {
     case 'text': {
