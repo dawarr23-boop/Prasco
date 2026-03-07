@@ -4497,7 +4497,7 @@ async function uploadApk() {
     const formData = new FormData();
     formData.append('apk', file);
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     const response = await fetch('/api/displays/apk/upload', {
       method: 'POST',
       headers: {
@@ -4523,7 +4523,7 @@ async function uploadApk() {
 
 async function downloadApk() {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     const response = await fetch('/api/displays/apk/latest', {
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -6590,6 +6590,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (card) card.classList.toggle('checked', e.target.checked);
     }
   });
+
+  // Prevent click on AI language select from triggering parent button
+  const aiLangSelect = document.getElementById('ai-target-language');
+  if (aiLangSelect) {
+    aiLangSelect.addEventListener('click', (e) => e.stopPropagation());
+  }
 
   // ============================================
   // Info-Tooltip (ⓘ) Toggle-Logik

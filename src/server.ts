@@ -86,6 +86,7 @@ app.use(
           'https://*.basemaps.cartocdn.com',
           'https://tilecache.rainviewer.com',
           'https://*.tile.openstreetmap.org',
+          'https://api.qrserver.com',
         ],
         mediaSrc: [
           "'self'",
@@ -108,7 +109,7 @@ app.use(
         formAction: ["'self'"],
         frameAncestors: ["'self'"],
         objectSrc: ["'none'"],
-        scriptSrcAttr: ["'none'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
         // Only upgrade insecure requests when SSL is enabled
         ...(SSL_ENABLED ? { upgradeInsecureRequests: [] } : {}),
       },
