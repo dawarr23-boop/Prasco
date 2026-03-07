@@ -140,6 +140,11 @@ export const conditionalDeviceAuth = async (
       return next();
     }
 
+    // Admin preview — bypass device auth (content is public by nature)
+    if (req.query.preview !== undefined) {
+      return next();
+    }
+
     // Secure mode — check for device token
     const authHeader = req.headers.authorization;
 

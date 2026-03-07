@@ -1442,6 +1442,10 @@ async function authenticatedFetch(url, options = {}) {
 
   // Behandle Auth-Fehler im Secure-Mode
   if (response.status === 401) {
+    if (isPreviewMode) {
+      // In preview mode never show auth screen or create device tokens
+      throw new Error('PREVIEW_NO_AUTH');
+    }
     const data = await response.clone().json().catch(() => ({}));
     if (data.requiresAuth) {
       console.warn('Secure-Mode aktiv — Authentifizierung erforderlich');
@@ -1709,7 +1713,7 @@ async function loadDisplayInfo(identifier) {
       }
     }
   } catch (error) {
-    if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED') {
+    if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED' || error.message === 'PREVIEW_NO_AUTH') {
       return null; // Auth-Screen wird bereits angezeigt
     }
     console.warn('Display-Info konnte nicht geladen werden:', error);
@@ -3262,7 +3266,7 @@ async function fetchPosts() {
     }
   } catch (apiError) {
     // Auth-Fehler — Status-Screen wird bereits angezeigt
-    if (apiError.message === 'AUTH_REQUIRED' || apiError.message === 'NOT_AUTHORIZED') {
+    if (apiError.message === 'AUTH_REQUIRED' || apiError.message === 'NOT_AUTHORIZED' || apiError.message === 'PREVIEW_NO_AUTH') {
       return;
     }
     // API nicht erreichbar, versuche LocalStorage
@@ -4344,7 +4348,7 @@ document.addEventListener('click', (e) => {
         }
       }
     } catch (error) {
-      if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED') {
+      if (error.message === 'AUTH_REQUIRED' || error.message === 'NOT_AUTHORIZED' || error.message === 'PREVIEW_NO_AUTH') {
         return; // Auth-Screen wird bereits angezeigt
       }
       console.warn('Konnte Displays nicht laden:', error);
