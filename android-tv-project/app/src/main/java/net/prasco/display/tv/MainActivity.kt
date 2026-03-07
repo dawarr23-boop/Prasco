@@ -553,6 +553,7 @@ class MainActivity : FragmentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         webView.webViewClient = PrascoWebViewClient()
+        webView.addJavascriptInterface(NativeBridge(), "PrascoNative")
         webView.webChromeClient = WebChromeClient()
 
         webView.settings.apply {
@@ -589,6 +590,14 @@ class MainActivity : FragmentActivity() {
 
         // Hardware-Beschleunigung für flüssige Blend-Effekte
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+    }
+
+    /**
+     * JavaScript-Bridge: Stellt nativen Device-Token dem WebView bereit
+     */
+    private inner class NativeBridge {
+        @android.webkit.JavascriptInterface
+        fun getDeviceToken(): String = registrationManager.getDeviceToken() ?: ""
     }
 
     /**

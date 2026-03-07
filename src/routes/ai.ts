@@ -5,6 +5,7 @@ import * as path from 'path';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import Setting from '../models/Setting';
 import Media from '../models/Media';
+import Post from '../models/Post';
 import logger from '../utils/logger';
 
 const router = Router();
@@ -464,6 +465,82 @@ Regeln: contentType immer "text". duration 5–60 Sekunden je nach Textlänge. S
     logger.error('AI suggest-post error:', err.message || error);
     res.status(500).json({ error: 'Vorschlag fehlgeschlagen: ' + (err.message || 'Unbekannter Fehler') });
   }
+});
+
+// ──────────────────────────────────────────────
+// Bulk-Übersetzung: mehrere Beiträge auf einmal
+// ──────────────────────────────────────────────
+router.post('/bulk-translate', authenticate, async (req: AuthRequest, res: Response) => {
+  const { postIds, targetLanguage } = req.body;
+
+  if (!Array.isArray(postIds) || postIds.length === 0 || postIds.length > 20) {
+    res.status(400).json({ error: 'postIds muss ein Array mit 1–20 Einträgen sein.' }); return;
+  }
+  if (!targetLanguage || typeof targetLanguage !== 'string' || targetLanguage.length > 60) {
+    res.status(400).json({ error: 'targetLanguage fehlt oder ist ungültig.' }); return;
+  }
+
+  const apiKey = await getOpenAIKey();
+  if (!apiKey) { res.status(400).json({ error: 'Kein OpenAI API-Key konfiguriert.' }); return; }
+
+  const results: { id: number; newPostId?: number; skipped?: boolean; error?: string }[] = [];
+
+  for (const rawId of postIds) {
+    const id = parseInt(rawId, 10);
+    if (isNaN(id)) { results.push({ id: rawId, error: 'Ungültige ID' }); continue; }
+
+    let post: Post | null = null;
+    try {
+      post = await Post.findByPk(id);
+    } catch {
+      results.push({ id, error: 'Datenbankfehler' }); continue;
+    }
+    if (!post) { results.push({ id, error: 'Beitrag nicht gefunden' }); continue; }
+    if (post.contentType !== 'text') { results.push({ id, skipped: true }); continue; }
+
+    try {
+      const translateTitle = async (text: string) => {
+        const r = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          { model: 'gpt-4o-mini', messages: [
+              { role: 'system', content: SYSTEM_PROMPTS.translate },
+              { role: 'user', content: `Zielsprache: ${targetLanguage}\n\n${text}` }
+            ], max_tokens: 200, temperature: 0.3 },
+          { headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' } }
+        );
+        return r.data?.choices?.[0]?.message?.content?.trim() || text;
+      };
+
+      const [translatedTitle, translatedContent] = await Promise.all([
+        translateTitle(post.title),
+        post.content ? translateTitle(post.content) : Promise.resolve(post.content),
+      ]);
+
+      const postData = post.toJSON() as Record<string, unknown>;
+      delete postData.id;
+      delete postData.createdAt;
+      delete postData.updatedAt;
+
+      const newPost = await Post.create({
+        ...postData,
+        title: translatedTitle,
+        content: translatedContent,
+        createdBy: req.user!.id,
+      } as Post);
+
+      results.push({ id, newPostId: newPost.id });
+      logger.info(`AI bulk-translate: post ${id} → new post ${newPost.id} (${targetLanguage}) by user ${req.user?.id}`);
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      results.push({ id, error: e.response?.data?.error?.message || e.message || 'Übersetzungsfehler' });
+    }
+  }
+
+  const translated = results.filter(r => r.newPostId).length;
+  const skipped = results.filter(r => r.skipped).length;
+  const errors = results.filter(r => r.error).length;
+
+  res.json({ success: true, results, translated, skipped, errors });
 });
 
 export default router;

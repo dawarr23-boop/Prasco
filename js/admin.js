@@ -2381,6 +2381,7 @@ async function loadPosts() {
 
           return `
         <div class="list-item draggable-post" draggable="true" data-post-id="${post.id}" data-index="${index}">
+            ${post.contentType === 'text' ? `<input type="checkbox" class="bulk-select-cb" data-post-id="${post.id}" style="display:none; width:18px; height:18px; margin:0 4px 0 0; cursor:pointer; flex-shrink:0; accent-color:#4a7c4a;" onclick="event.stopPropagation(); updateBulkSelectionCount();" />` : `<span style="display:none; width:18px; margin:0 4px 0 0; flex-shrink:0;" class="bulk-select-cb-placeholder"></span>`}
             <div class="drag-handle" title="Ziehen zum Sortieren">⋮⋮</div>
             <div class="list-item-content clickable" data-action="edit" data-post-id="${post.id}" title="Klicken zum Bearbeiten">
                 <h3>${escapeHtml(post.title)}</h3>
@@ -7808,6 +7809,21 @@ async function loadAISettings() {
       } catch (e) {
         // API-Key setting not found in DB yet
       }
+
+      // Feature-Flags laden
+      try {
+        const featureKeys = ['ai_feature_text', 'ai_feature_image_gen', 'ai_feature_image_analysis', 'ai_feature_assistant', 'ai_feature_bulk_translate'];
+        const featureIds  = ['ai-feature-text', 'ai-feature-image-gen', 'ai-feature-image-analysis', 'ai-feature-assistant', 'ai-feature-bulk-translate'];
+        const allFeatures = await fetch('/api/settings?category=ai', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+        }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+        for (let i = 0; i < featureKeys.length; i++) {
+          const el = document.getElementById(featureIds[i]);
+          if (!el) continue;
+          const val = allFeatures[featureKeys[i]];
+          if (val !== undefined) el.checked = (val === 'true' || val === true);
+        }
+      } catch (_) { /* feature-flags nicht kritisch */ }
     }
 
     // AI toolbar im Post-Form anzeigen/verstecken
@@ -7816,6 +7832,10 @@ async function loadAISettings() {
     // KI-Assistent-Button im Beiträge-Header
     const assistantBtn = document.getElementById('ai-assistant-btn');
     if (assistantBtn) assistantBtn.style.display = aiEnabled ? 'inline-block' : 'none';
+
+    // Bulk-Übersetzen-Button im Beiträge-Header
+    const bulkBtn = document.getElementById('bulk-translate-mode-btn');
+    if (bulkBtn) bulkBtn.style.display = aiEnabled ? 'inline-block' : 'none';
   } catch (e) {
     console.warn('AI-Einstellungen konnten nicht geladen werden:', e);
   }
@@ -8391,6 +8411,18 @@ async function saveAISettings() {
 
   aiEnabled = enabled;
   updateAIToolbarVisibility();
+
+  // Feature-Flags speichern
+  const featureIds = ['ai-feature-text', 'ai-feature-image-gen', 'ai-feature-image-analysis', 'ai-feature-assistant', 'ai-feature-bulk-translate'];
+  const featureKeys = ['ai_feature_text', 'ai_feature_image_gen', 'ai_feature_image_analysis', 'ai_feature_assistant', 'ai_feature_bulk_translate'];
+  for (let i = 0; i < featureIds.length; i++) {
+    const el = document.getElementById(featureIds[i]);
+    if (!el) continue;
+    await apiRequest('/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ key: featureKeys[i], value: el.checked ? 'true' : 'false', type: 'boolean', category: 'ai', description: `KI-Funktion: ${featureIds[i]}` }),
+    }).catch(() => {});
+  }
 }
 
 // ============================================
@@ -8555,6 +8587,77 @@ function initAIEventListeners() {
   const postType = document.getElementById('post-type');
   if (postType) {
     postType.addEventListener('change', () => updateAIToolbarVisibility());
+  }
+}
+
+// ============================================
+// Bulk-Übersetzung
+// ============================================
+let bulkTranslateModeActive = false;
+
+function toggleBulkTranslateMode() {
+  bulkTranslateModeActive = !bulkTranslateModeActive;
+  const btn = document.getElementById('bulk-translate-mode-btn');
+  const toolbar = document.getElementById('bulk-translate-toolbar');
+  const cbs = document.querySelectorAll('.bulk-select-cb, .bulk-select-cb-placeholder');
+
+  if (bulkTranslateModeActive) {
+    cbs.forEach(el => { el.style.display = ''; });
+    if (toolbar) { toolbar.style.display = 'flex'; }
+    if (btn) { btn.style.background = '#c9d4c9'; btn.textContent = '✕ Modus beenden'; }
+  } else {
+    clearBulkSelection();
+    cbs.forEach(el => { el.style.display = 'none'; });
+    if (toolbar) { toolbar.style.display = 'none'; }
+    if (btn) { btn.style.background = '#f0f4f0'; btn.textContent = '⇄ Übersetzen'; }
+  }
+  updateBulkSelectionCount();
+}
+
+function clearBulkSelection() {
+  document.querySelectorAll('.bulk-select-cb').forEach(cb => { cb.checked = false; });
+  updateBulkSelectionCount();
+}
+
+function updateBulkSelectionCount() {
+  const count = document.querySelectorAll('.bulk-select-cb:checked').length;
+  const label = document.getElementById('bulk-selected-count');
+  if (label) label.textContent = `${count} ausgewählt`;
+  const btn = document.getElementById('bulk-translate-btn');
+  if (btn) btn.disabled = count === 0;
+}
+
+async function handleBulkTranslate() {
+  const checkedBoxes = document.querySelectorAll('.bulk-select-cb:checked');
+  if (checkedBoxes.length === 0) { showNotification('Keine Beiträge ausgewählt.', 'error'); return; }
+
+  const postIds = Array.from(checkedBoxes).map(cb => parseInt(cb.dataset.postId, 10));
+  const lang = document.getElementById('bulk-translate-lang')?.value || 'Englisch';
+
+  const btn = document.getElementById('bulk-translate-btn');
+  const progress = document.getElementById('bulk-translate-progress');
+  if (btn) btn.disabled = true;
+  if (progress) { progress.style.display = 'inline'; progress.textContent = `⏳ Übersetze 0/${postIds.length}…`; }
+
+  try {
+    const result = await apiRequest('/ai/bulk-translate', {
+      method: 'POST',
+      body: JSON.stringify({ postIds, targetLanguage: lang }),
+    });
+
+    if (result?.success) {
+      const msg = `✓ ${result.translated} übersetzt${result.skipped ? `, ${result.skipped} übersprungen` : ''}${result.errors ? `, ${result.errors} Fehler` : ''}`;
+      showNotification(msg, 'success');
+      toggleBulkTranslateMode();
+      await loadPosts();
+    } else {
+      showNotification('Fehler bei der Bulk-Übersetzung.', 'error');
+    }
+  } catch (e) {
+    showNotification('Fehler: ' + (e.message || 'Unbekannter Fehler'), 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    if (progress) progress.style.display = 'none';
   }
 }
 
