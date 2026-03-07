@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 import { Display } from '../models';
 import Setting from '../models/Setting';
 import { AppError } from './errorHandler';
@@ -158,6 +159,16 @@ export const conditionalDeviceAuth = async (
     });
 
     if (!display) {
+      // Allow admin preview: accept valid user JWT when ?preview is set
+      if (req.query.preview !== undefined) {
+        try {
+          const secret = process.env.JWT_SECRET || 'change-this-in-production';
+          jwt.verify(token, secret);
+          return next();
+        } catch {
+          // Not a valid user JWT — fall through to 401
+        }
+      }
       const ip = req.ip || req.socket.remoteAddress || 'unknown';
       securityLogger.logSuspiciousActivity('Invalid device token (secure mode)', ip, {
         path: req.path,

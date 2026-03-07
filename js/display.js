@@ -1421,14 +1421,24 @@ async function getOrCreateDeviceToken(displayIdentifier) {
 async function authenticatedFetch(url, options = {}) {
   const fetchOptions = { ...options };
 
-  if (deviceToken) {
+  const activeToken = isPreviewMode
+    ? (localStorage.getItem('accessToken') || deviceToken)
+    : deviceToken;
+
+  if (activeToken) {
     fetchOptions.headers = {
       ...(fetchOptions.headers || {}),
-      'Authorization': 'Bearer ' + deviceToken,
+      'Authorization': 'Bearer ' + activeToken,
     };
   }
 
-  const response = await fetch(url, fetchOptions);
+  // Append ?preview so the backend middleware allows admin JWT in preview mode
+  let fetchUrl = url;
+  if (isPreviewMode && url.startsWith('/api/')) {
+    fetchUrl = url + (url.includes('?') ? '&' : '?') + 'preview=1';
+  }
+
+  const response = await fetch(fetchUrl, fetchOptions);
 
   // Behandle Auth-Fehler im Secure-Mode
   if (response.status === 401) {
