@@ -295,4 +295,175 @@ router.post('/generate-image', authenticate, async (req: AuthRequest, res: Respo
   }
 });
 
+// ──────────────────────────────────────────────
+// POST /api/ai/analyze-image
+// Body: { imageUrl }  — muss mit /uploads/ beginnen
+// Analysiert ein hochgeladenes Bild via GPT-4o Vision
+// Gibt zurück: { title, caption, description }
+// ──────────────────────────────────────────────
+router.post('/analyze-image', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { imageUrl } = req.body;
+
+    // Sicherheit: nur interne Upload-Pfade erlaubt (verhindert SSRF)
+    if (!imageUrl || typeof imageUrl !== 'string' || !imageUrl.startsWith('/uploads/')) {
+      res.status(400).json({ error: 'Nur interne Bild-URLs aus /uploads/ sind erlaubt.' });
+      return;
+    }
+    // Path-Traversal-Schutz
+    const normalizedUrl = path.posix.normalize(imageUrl);
+    if (!normalizedUrl.startsWith('/uploads/')) {
+      res.status(400).json({ error: 'Ungültige Bild-URL.' });
+      return;
+    }
+
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) {
+      res.status(400).json({ error: 'OpenAI API-Key nicht konfiguriert.' });
+      return;
+    }
+
+    const filePath = path.join(__dirname, '../../', normalizedUrl);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ error: 'Bilddatei nicht gefunden.' });
+      return;
+    }
+
+    // Datei als Base64 lesen (kein öffentlicher URL nötig)
+    const imgBuffer = fs.readFileSync(filePath);
+    const base64 = imgBuffer.toString('base64');
+    const lc = normalizedUrl.toLowerCase();
+    const mimeType = lc.endsWith('.jpg') || lc.endsWith('.jpeg') ? 'image/jpeg'
+      : lc.endsWith('.webp') ? 'image/webp'
+      : 'image/png';
+
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o',
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analysiere dieses Bild für eine digitale Anzeigetafel in einem Unternehmensumfeld.
+Gib zurück als reines JSON-Objekt (kein Markdown, keine Erklärungen):
+{"title":"Kurzer prägnanter Titel (max. 60 Zeichen, Deutsch)","caption":"Kurze Bildunterschrift (max. 120 Zeichen, Deutsch)","description":"Kurze sachliche Bildbeschreibung (max. 200 Zeichen, Deutsch)"}`,
+            },
+            {
+              type: 'image_url',
+              image_url: { url: `data:${mimeType};base64,${base64}` },
+            },
+          ],
+        }],
+        max_tokens: 300,
+      },
+      {
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        timeout: 30000,
+      }
+    );
+
+    const content = response.data?.choices?.[0]?.message?.content?.trim() || '';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('KI-Antwort konnte nicht geparst werden');
+
+    const result = JSON.parse(jsonMatch[0]);
+    logger.info(`AI analyze-image by user ${req.user?.id}: ${normalizedUrl}`);
+
+    res.json({
+      success: true,
+      title: result.title || '',
+      caption: result.caption || '',
+      description: result.description || '',
+      tokensUsed: response.data?.usage?.total_tokens || 0,
+    });
+
+  } catch (error: unknown) {
+    const err = error as { response?: { status?: number; data?: { error?: { message?: string } } }; message?: string };
+    if (err.response?.status === 401) { res.status(400).json({ error: 'Ungültiger OpenAI API-Key.' }); return; }
+    if (err.response?.status === 429) { res.status(429).json({ error: 'Zu viele Anfragen. Bitte kurz warten.' }); return; }
+    logger.error('AI analyze-image error:', err.message || error);
+    res.status(500).json({ error: 'Bildanalyse fehlgeschlagen: ' + (err.message || 'Unbekannter Fehler') });
+  }
+});
+
+// ──────────────────────────────────────────────
+// POST /api/ai/suggest-post
+// Body: { topic, context? }
+// Erstellt einen vollständigen Beitragsvorschlag
+// Gibt zurück: { contentType, title, content, duration, showTitle }
+// ──────────────────────────────────────────────
+router.post('/suggest-post', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { topic, context } = req.body;
+
+    if (!topic || typeof topic !== 'string' || topic.trim().length < 3) {
+      res.status(400).json({ error: 'Thema ist zu kurz (mindestens 3 Zeichen).' });
+      return;
+    }
+    if (topic.length > 500) {
+      res.status(400).json({ error: 'Thema darf maximal 500 Zeichen haben.' });
+      return;
+    }
+    if (context && typeof context === 'string' && context.length > 300) {
+      res.status(400).json({ error: 'Kontext darf maximal 300 Zeichen haben.' });
+      return;
+    }
+
+    const apiKey = await getOpenAIKey();
+    if (!apiKey) {
+      res.status(400).json({ error: 'OpenAI API-Key nicht konfiguriert.' });
+      return;
+    }
+
+    const systemPrompt = `Du bist Assistent für digitale Anzeigetafeln (Digital Signage) in einem Unternehmensumfeld.
+Erstelle einen vollständigen Beitragsvorschlag als reines JSON-Objekt (kein Markdown, keine Erklärungen):
+{"contentType":"text","title":"Kurzer Titel (max. 60 Zeichen)","content":"Beitragstext (plain text, Zeilenumbrüche mit \\n)","duration":10,"showTitle":true}
+Regeln: contentType immer "text". duration 5–60 Sekunden je nach Textlänge. Sprache: Deutsch. Sachlich und prägnant.`;
+
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Thema: ${topic.trim()}${context?.trim() ? '\nKontext: ' + context.trim() : ''}` },
+        ],
+        max_tokens: 1500,
+        temperature: 0.8,
+      },
+      {
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        timeout: 30000,
+      }
+    );
+
+    const content = response.data?.choices?.[0]?.message?.content?.trim() || '';
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('KI-Antwort konnte nicht geparst werden');
+
+    const result = JSON.parse(jsonMatch[0]);
+    logger.info(`AI suggest-post by user ${req.user?.id}: "${topic.slice(0, 50)}"`);
+
+    res.json({
+      success: true,
+      contentType: result.contentType || 'text',
+      title: result.title || '',
+      content: result.content || '',
+      duration: Math.min(60, Math.max(5, parseInt(result.duration) || 10)),
+      showTitle: result.showTitle !== false,
+      tokensUsed: response.data?.usage?.total_tokens || 0,
+    });
+
+  } catch (error: unknown) {
+    const err = error as { response?: { status?: number; data?: { error?: { message?: string } } }; message?: string };
+    if (err.response?.status === 401) { res.status(400).json({ error: 'Ungültiger OpenAI API-Key.' }); return; }
+    if (err.response?.status === 429) { res.status(429).json({ error: 'Zu viele Anfragen. Bitte kurz warten.' }); return; }
+    if (err.response?.status === 402) { res.status(402).json({ error: 'OpenAI Guthaben aufgebraucht.' }); return; }
+    logger.error('AI suggest-post error:', err.message || error);
+    res.status(500).json({ error: 'Vorschlag fehlgeschlagen: ' + (err.message || 'Unbekannter Fehler') });
+  }
+});
+
 export default router;

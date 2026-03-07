@@ -2082,6 +2082,8 @@ async function updateDashboardStats() {
 // ============================================
 let currentPostId = null;
 let aiGeneratedMediaId = null; // Von DALL-E 3 generiertes Media-Objekt
+let lastUploadedImageUrl = null; // Zuletzt hochgeladenes Bild für KI-Analyse
+let aiAssistantLastResult = null; // Letzter KI-Assistent-Vorschlag
 let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
@@ -2523,9 +2525,15 @@ async function showPostForm() {
   document.getElementById('post-form').style.display = 'block';
   currentPostId = null;
   aiGeneratedMediaId = null;
+  lastUploadedImageUrl = null;
   // KI-Bild-Vorschau ausblenden
   const aiPrev = document.getElementById('ai-image-preview');
   if (aiPrev) aiPrev.style.display = 'none';
+  // Analyse-Bereich ausblenden
+  const analyzeBtnW = document.getElementById('ai-analyze-btn-wrapper');
+  if (analyzeBtnW) analyzeBtnW.style.display = 'none';
+  const analyzeResult = document.getElementById('ai-analyze-result');
+  if (analyzeResult) analyzeResult.style.display = 'none';
   document.getElementById('postForm').reset();
 
   // Standard-Checkboxen setzen (nur für NEUE Posts!)
@@ -2739,12 +2747,18 @@ function hidePostForm() {
   currentPostId = null;
   currentBackgroundMusicUrl = null;
   aiGeneratedMediaId = null;
+  lastUploadedImageUrl = null;
 
   // KI-Bild-Vorschau ausblenden
   const aiPreview = document.getElementById('ai-image-preview');
   if (aiPreview) aiPreview.style.display = 'none';
   const aiPreviewImg = document.getElementById('ai-image-preview-img');
   if (aiPreviewImg) aiPreviewImg.src = '';
+  // Analyse-Bereich ausblenden
+  const analyzeBtnW = document.getElementById('ai-analyze-btn-wrapper');
+  if (analyzeBtnW) analyzeBtnW.style.display = 'none';
+  const analyzeResult = document.getElementById('ai-analyze-result');
+  if (analyzeResult) analyzeResult.style.display = 'none';
 
   // Hintergrundmusik-Info zurücksetzen
   const musicInfo = document.getElementById('current-music-info');
@@ -6610,6 +6624,18 @@ document.addEventListener('DOMContentLoaded', () => {
           URL.revokeObjectURL(objectUrl);
         });
       }
+
+      // KI-Analyse-Button anzeigen wenn Bilddatei gewählt und KI aktiv
+      const analyzeWrapper = document.getElementById('ai-analyze-btn-wrapper');
+      const analyzeResult = document.getElementById('ai-analyze-result');
+      const postType = document.getElementById('post-type')?.value;
+      if (analyzeWrapper) {
+        const showAnalyze = aiEnabled && file && file.type.startsWith('image/') && postType === 'image';
+        analyzeWrapper.style.display = showAnalyze ? 'block' : 'none';
+      }
+      if (analyzeResult && e.target.files.length === 0) analyzeResult.style.display = 'none';
+      // Beim neuen Datei-Wechsel: letzten Upload-Cache leeren
+      if (file) { lastUploadedImageUrl = null; aiGeneratedMediaId = null; }
     });
   }
 
@@ -7786,6 +7812,10 @@ async function loadAISettings() {
 
     // AI toolbar im Post-Form anzeigen/verstecken
     updateAIToolbarVisibility();
+
+    // KI-Assistent-Button im Beiträge-Header
+    const assistantBtn = document.getElementById('ai-assistant-btn');
+    if (assistantBtn) assistantBtn.style.display = aiEnabled ? 'inline-block' : 'none';
   } catch (e) {
     console.warn('AI-Einstellungen konnten nicht geladen werden:', e);
   }
@@ -7821,6 +7851,18 @@ function updateAIToolbarVisibility() {
   // KI-Bild-Button nur bei Typ 'image' und aktivierter KI
   const imageBtn = document.getElementById('ai-generate-image-btn');
   if (imageBtn) imageBtn.style.display = (aiEnabled && contentType === 'image') ? 'inline-block' : 'none';
+
+  // KI-Analyse-Button: nur wenn Bild-Typ, KI aktiv UND eine Bilddatei ausgewählt
+  const analyzeWrapper = document.getElementById('ai-analyze-btn-wrapper');
+  if (analyzeWrapper) {
+    const mediaFile = document.getElementById('media-file');
+    const hasImageFile = mediaFile?.files?.[0]?.type?.startsWith('image/');
+    analyzeWrapper.style.display = (aiEnabled && contentType === 'image' && hasImageFile) ? 'block' : 'none';
+  }
+
+  // KI-Assistent-Button global (nur AI enabled)
+  const assistantBtn = document.getElementById('ai-assistant-btn');
+  if (assistantBtn) assistantBtn.style.display = aiEnabled ? 'inline-block' : 'none';
 }
 
 async function handleAIAction(action) {
@@ -8033,10 +8075,194 @@ function updateAIImagePromptCount() {
 
 function removeAIImage() {
   aiGeneratedMediaId = null;
+  lastUploadedImageUrl = null;
   const preview = document.getElementById('ai-image-preview');
   if (preview) preview.style.display = 'none';
   const img = document.getElementById('ai-image-preview-img');
   if (img) img.src = '';
+}
+
+// ──────────────────────────────────────────────
+// KI Bildanalyse (GPT-4o Vision)
+// ──────────────────────────────────────────────
+async function handleAIAnalyzeImage() {
+  const fileInput = document.getElementById('media-file');
+  const file = fileInput?.files?.[0];
+
+  if (!file) {
+    showNotification('Bitte zuerst eine Bilddatei auswählen.', 'warning');
+    return;
+  }
+
+  const analyzeBtn = document.getElementById('ai-analyze-btn');
+  const resultDiv = document.getElementById('ai-analyze-result');
+  const loadingDiv = document.getElementById('ai-analyze-loading');
+  const contentDiv = document.getElementById('ai-analyze-content');
+  const errorDiv = document.getElementById('ai-analyze-error');
+
+  if (analyzeBtn) { analyzeBtn.disabled = true; analyzeBtn.textContent = '⏳ Analysiert...'; }
+  if (resultDiv) resultDiv.style.display = 'block';
+  if (loadingDiv) { loadingDiv.style.display = 'block'; loadingDiv.textContent = '⏳ Analyse läuft… (ca. 5 Sek.)'; }
+  if (contentDiv) contentDiv.style.display = 'none';
+  if (errorDiv) errorDiv.style.display = 'none';
+
+  try {
+    // Bild sofort hochladen (verhindert doppelten Upload beim Speichern)
+    if (!lastUploadedImageUrl) {
+      const uploadResult = await uploadFile(file);
+      lastUploadedImageUrl = uploadResult.url;
+      aiGeneratedMediaId = uploadResult.id;
+      // Preview anzeigen
+      const previewDiv = document.getElementById('ai-image-preview');
+      const previewImg = document.getElementById('ai-image-preview-img');
+      const previewName = document.getElementById('ai-image-preview-name');
+      if (previewImg) previewImg.src = lastUploadedImageUrl;
+      if (previewName) previewName.textContent = file.name;
+      if (previewDiv) previewDiv.style.display = 'block';
+      // Datei-Input leeren → kein doppelter Upload beim Formular-Speichern
+      fileInput.value = '';
+    }
+
+    const result = await apiRequest('/ai/analyze-image', {
+      method: 'POST',
+      body: JSON.stringify({ imageUrl: lastUploadedImageUrl }),
+    });
+
+    if (result?.title) {
+      document.getElementById('ai-analyze-title').textContent = result.title;
+      document.getElementById('ai-analyze-caption').textContent = result.caption || result.description || '';
+      if (loadingDiv) loadingDiv.style.display = 'none';
+      if (contentDiv) contentDiv.style.display = 'block';
+    } else {
+      throw new Error(result?.error || 'Keine Analyse erhalten');
+    }
+  } catch (e) {
+    if (loadingDiv) loadingDiv.style.display = 'none';
+    if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.textContent = '✗ ' + (e.message || 'Fehler bei der Analyse'); }
+  } finally {
+    if (analyzeBtn) { analyzeBtn.disabled = false; analyzeBtn.textContent = '🔍 KI: Titel & Beschreibung vorschlagen'; }
+  }
+}
+
+function applyAnalysisSuggestion(field) {
+  if (field === 'title') {
+    const title = document.getElementById('ai-analyze-title')?.textContent;
+    const titleInput = document.getElementById('post-title');
+    if (titleInput && title) {
+      titleInput.value = title;
+      showNotification('✓ Titel übernommen.', 'success');
+    }
+  }
+}
+
+// ──────────────────────────────────────────────
+// KI-Assistent (vollständiger Beitragsvorschlag)
+// ──────────────────────────────────────────────
+function openAIAssistantModal() {
+  const modal = document.getElementById('ai-assistant-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  // Zustand zurücksetzen
+  aiAssistantLastResult = null;
+  document.getElementById('ai-assistant-topic').value = '';
+  document.getElementById('ai-assistant-context').value = '';
+  document.getElementById('ai-assistant-result').style.display = 'none';
+  document.getElementById('ai-assistant-status').style.display = 'none';
+  document.getElementById('ai-assistant-retry-btn').style.display = 'none';
+  const applyBtn = document.getElementById('ai-assistant-apply-btn');
+  if (applyBtn) { applyBtn.textContent = '✨ Vorschlag erstellen'; applyBtn.onclick = handleAIAssistantSuggest; }
+  document.getElementById('ai-assistant-topic').focus();
+}
+
+function closeAIAssistantModal() {
+  const modal = document.getElementById('ai-assistant-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function handleAIAssistantSuggest() {
+  const topic = document.getElementById('ai-assistant-topic')?.value.trim() || '';
+  const context = document.getElementById('ai-assistant-context')?.value.trim() || '';
+
+  if (topic.length < 3) {
+    showNotification('Bitte ein Thema eingeben (mind. 3 Zeichen).', 'warning');
+    document.getElementById('ai-assistant-topic')?.focus();
+    return;
+  }
+
+  const statusDiv = document.getElementById('ai-assistant-status');
+  const statusText = document.getElementById('ai-assistant-status-text');
+  const applyBtn = document.getElementById('ai-assistant-apply-btn');
+  const retryBtn = document.getElementById('ai-assistant-retry-btn');
+  const resultDiv = document.getElementById('ai-assistant-result');
+
+  if (applyBtn) { applyBtn.disabled = true; applyBtn.textContent = '⏳ Wird erstellt...'; applyBtn.onclick = handleAIAssistantSuggest; }
+  if (statusDiv) { statusDiv.style.display = 'block'; statusDiv.style.background = '#e8f4e8'; statusDiv.style.color = '#3a5a3a'; }
+  if (statusText) statusText.textContent = '⏳ KI erstellt Vorschlag…';
+  if (resultDiv) resultDiv.style.display = 'none';
+
+  try {
+    const result = await apiRequest('/ai/suggest-post', {
+      method: 'POST',
+      body: JSON.stringify({ topic, context: context || undefined }),
+    });
+
+    if (result?.title && result?.content) {
+      aiAssistantLastResult = result;
+
+      document.getElementById('ai-result-type').textContent = result.contentType === 'html' ? 'HTML' : 'Text';
+      document.getElementById('ai-result-duration').textContent = (result.duration || 10) + ' Sek.';
+      document.getElementById('ai-result-show-title').textContent = result.showTitle !== false ? 'Ja' : 'Nein';
+      document.getElementById('ai-result-title-display').textContent = result.title;
+      document.getElementById('ai-result-content-display').textContent = result.content;
+      resultDiv.style.display = 'block';
+
+      if (statusText) statusText.textContent = '✓ Vorschlag bereit – prüfen und übernehmen!';
+      if (statusDiv) statusDiv.style.background = '#f0fff0';
+      if (retryBtn) retryBtn.style.display = 'inline-block';
+      if (applyBtn) { applyBtn.textContent = '✏️ Beitrag erstellen →'; applyBtn.onclick = applyAIAssistantToForm; }
+    } else {
+      throw new Error(result?.error || 'Kein Ergebnis erhalten');
+    }
+  } catch (e) {
+    if (statusDiv) { statusDiv.style.background = '#fdecea'; statusDiv.style.color = '#a94442'; }
+    if (statusText) statusText.textContent = '✗ ' + (e.message || 'Fehler');
+  } finally {
+    if (applyBtn) { applyBtn.disabled = false; if (!aiAssistantLastResult) applyBtn.textContent = '✨ Vorschlag erstellen'; }
+  }
+}
+
+function applyAIAssistantToForm() {
+  const result = aiAssistantLastResult;
+  if (!result) return;
+
+  const form = document.getElementById('post-form');
+  const wasHidden = form && form.style.display === 'none';
+  if (wasHidden) showPostForm();
+
+  const doApply = () => {
+    const titleInput = document.getElementById('post-title');
+    const contentTextarea = document.getElementById('post-content');
+    const typeSelect = document.getElementById('post-type');
+    const durationInput = document.getElementById('display-duration');
+    const showTitleCb = document.getElementById('show-title');
+
+    if (titleInput) titleInput.value = result.title || '';
+    if (contentTextarea) contentTextarea.value = result.content || '';
+    if (typeSelect && result.contentType) {
+      typeSelect.value = result.contentType;
+      updateUploadSectionVisibility(result.contentType);
+      updateAIToolbarVisibility();
+    }
+    if (durationInput) durationInput.value = result.duration || 10;
+    if (showTitleCb) showTitleCb.checked = result.showTitle !== false;
+
+    closeAIAssistantModal();
+    showNotification('✓ Beitrag vorbereitet – bitte prüfen und speichern.', 'success');
+    form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Kurze Verzögerung wenn Formular erst noch aufgebaut wird
+  setTimeout(doApply, wasHidden ? 400 : 0);
 }
 
 async function handleAIImageGenerate() {
@@ -8307,11 +8533,21 @@ function initAIEventListeners() {
   // KI-Bild Prompt Zeichenzähler
   document.getElementById('ai-image-prompt')?.addEventListener('input', updateAIImagePromptCount);
 
+  // KI-Assistent: Enter in Thema-Feld löst Vorschlag aus
+  document.getElementById('ai-assistant-topic')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!aiAssistantLastResult) handleAIAssistantSuggest();
+    }
+  });
+
   // AI-Image-Modal: Escape-Taste zum Schließen
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      const modal = document.getElementById('ai-image-modal');
-      if (modal && modal.style.display !== 'none') closeAIImageModal();
+      const imgModal = document.getElementById('ai-image-modal');
+      if (imgModal && imgModal.style.display !== 'none') { closeAIImageModal(); return; }
+      const assistModal = document.getElementById('ai-assistant-modal');
+      if (assistModal && assistModal.style.display !== 'none') closeAIAssistantModal();
     }
   });
 
