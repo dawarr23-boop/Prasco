@@ -24,7 +24,7 @@ const translations = {
     'dashboard.media': 'Medien',
     'dashboard.quickActions': 'Schnellaktionen',
     'dashboard.newPost': 'Neuer Beitrag',
-    'dashboard.openDisplay': 'Display öffnen',
+    'dashboard.manageDisplays': 'Displays verwalten',
     'dashboard.presentationMode': 'Vortragsmodus',
 
     // Common
@@ -455,7 +455,7 @@ const translations = {
     'dashboard.media': 'Media',
     'dashboard.quickActions': 'Quick Actions',
     'dashboard.newPost': 'New Post',
-    'dashboard.openDisplay': 'Open Display',
+    'dashboard.manageDisplays': 'Manage Displays',
     'dashboard.presentationMode': 'Presentation Mode',
 
     // Common
@@ -884,7 +884,7 @@ const translations = {
     'dashboard.media': 'Media',
     'dashboard.quickActions': 'Azioni Rapide',
     'dashboard.newPost': 'Nuovo Articolo',
-    'dashboard.openDisplay': 'Apri Display',
+    'dashboard.manageDisplays': 'Gestisci Display',
     'dashboard.presentationMode': 'Modalità Presentazione',
 
     // Common
@@ -5771,8 +5771,7 @@ window.addEventListener('load', async () => {
   }
   if (openDisplayBtn) {
     openDisplayBtn.addEventListener('click', () => {
-      // Öffne Display lokal im Browser
-      window.open('/public/display.html', '_blank');
+      navigateTo('displays');
     });
   }
 
