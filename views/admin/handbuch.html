@@ -70,7 +70,7 @@
 <div class="cover">
   <div class="logo">IT-<span>Westfalen</span></div>
   <div class="subtitle"><span data-t="cover_subtitle">Signature Screen &nbsp; Administrationshandbuch</span></div>
-  <div class="meta"><span data-t="cover_meta">Version 2.2 &nbsp;&nbsp; Februar 2026 &nbsp;&nbsp; Intern</span></div>
+  <div class="meta"><span data-t="cover_meta">Version 3.0 &nbsp;&nbsp; März 2026 &nbsp;&nbsp; Intern</span></div>
 </div>
 
 <div class="toc" id="toc">
@@ -91,11 +91,13 @@
     </li>
     <li><a href="#ch-posts" data-t="toc_3">Beiträge verwalten</a>
       <ol class="sub">
-        <li><a href="#ch-posts-types" data-t="toc_3_1">Beitrags-Typen</a></li>
+        <li><a href="#ch-posts-overview" data-t="toc_3_1">Beitrags-Übersicht</a></li>
         <li><a href="#ch-posts-create" data-t="toc_3_2">Beitrag erstellen</a></li>
-        <li><a href="#ch-posts-fields" data-t="toc_3_3">Felder im Detail</a></li>
-        <li><a href="#ch-posts-schedule" data-t="toc_3_4">Zeitsteuerung</a></li>
-        <li><a href="#ch-posts-ai" data-t="toc_3_5">KI-Unterstützung</a></li>
+        <li><a href="#ch-posts-edit" data-t="toc_3_3">Beitrag bearbeiten</a></li>
+        <li><a href="#ch-posts-delete" data-t="toc_3_4">Beitrag löschen</a></li>
+        <li><a href="#ch-posts-image" data-t="toc_3_5">Bilder &amp; Medien</a></li>
+        <li><a href="#ch-posts-schedule" data-t="toc_3_6">Zeitplanung</a></li>
+        <li><a href="#ch-posts-ai" data-t="toc_3_7">KI-Unterstützung</a></li>
       </ol>
     </li>
     <li><a href="#ch-categories" data-t="toc_4">Kategorien</a></li>
@@ -103,6 +105,12 @@
       <ol class="sub">
         <li><a href="#ch-displays-create" data-t="toc_5_1">Display anlegen</a></li>
         <li><a href="#ch-displays-url" data-t="toc_5_2">Display-URL &amp; Kiosk-Modus</a></li>
+        <li><a href="#ch-displays-config" data-t="toc_5_3">Display-Konfiguration</a></li>
+        <li><a href="#ch-displays-preview" data-t="toc_5_4">Vorschau</a></li>
+        <li><a href="#ch-displays-fleet" data-t="toc_5_5">Flottenübersicht</a></li>
+        <li><a href="#ch-displays-security" data-t="toc_5_6">Display-Sicherheit</a></li>
+        <li><a href="#ch-displays-license" data-t="toc_5_7">Lizenzverwaltung</a></li>
+        <li><a href="#ch-displays-apk" data-t="toc_5_8">APK-Verteilung</a></li>
       </ol>
     </li>
     <li><a href="#ch-users" data-t="toc_6">Benutzer &amp; Rollen</a>
@@ -122,10 +130,11 @@
     </li>
     <li><a href="#ch-settings" data-t="toc_8">Systemeinstellungen</a>
       <ol class="sub">
-        <li><a href="#ch-settings-display" data-t="toc_8_1">Anzeigeoptionen</a></li>
-        <li><a href="#ch-settings-music" data-t="toc_8_2">Hintergrundmusik</a></li>
-        <li><a href="#ch-settings-ai" data-t="toc_8_3">KI-Assistent</a></li>
-        <li><a href="#ch-settings-sso" data-t="toc_8_4">SSO / LDAP</a></li>
+        <li><a href="#ch-settings-general" data-t="toc_8_1">Allgemein</a></li>
+        <li><a href="#ch-settings-display" data-t="toc_8_2">Display-Standardwerte</a></li>
+        <li><a href="#ch-settings-sso" data-t="toc_8_3">SSO-Konfiguration</a></li>
+        <li><a href="#ch-settings-backup" data-t="toc_8_4">Backup &amp; Wiederherstellung</a></li>
+        <li><a href="#ch-settings-ai" data-t="toc_8_5">KI-Assistent</a></li>
       </ol>
     </li>
     <li><a href="#ch-troubleshoot" data-t="toc_9">Fehlerbehebung</a></li>
@@ -248,6 +257,41 @@
   <h3 id="ch-posts-schedule" data-t="ch3_6_h">3.6 Zeitplanung</h3>
   <p data-t="ch3_6_p">Mit <strong>Startdatum</strong> und <strong>Enddatum</strong> lässt sich ein Beitrag exakt terminieren. Beiträge außerhalb des gültigen Zeitrahmens werden auf dem Display nicht gezeigt, bleiben aber im System erhalten.</p>
   <div class="tip" data-t="ch3_tip">&#128161; Für Aushänge, die immer gelten sollen, beide Datumsfelder leer lassen.</div>
+
+  <h3 id="ch-posts-ai" data-t="ch3_7_h">3.7 KI-Unterstützung</h3>
+  <p data-t="ch3_7_p">Der KI-Assistent steht im Beitragsformular zur Verfügung, sobald er unter <em>Einstellungen → KI-Assistent</em> aktiviert wurde. Er nutzt OpenAI-Dienste (GPT-4o-mini für Text, DALL-E 3 für Bilder).</p>
+
+  <h4 data-t="ch3_7_1_h">Textassistent</h4>
+  <p data-t="ch3_7_1_p">Unterhalb des Inhaltsfeldes erscheinen folgende KI-Schaltflächen:</p>
+  <table>
+    <tr><th data-t="th_btn">Schaltfläche</th><th data-t="th_func">Funktion</th></tr>
+    <tr><td>✏️ <strong data-t="ai_generate">Generieren</strong></td><td data-t="ai_generate_d">Erstellt einen neuen Text auf Basis des vorhandenen Inhalts oder eines Stichworts</td></tr>
+    <tr><td>✨ <strong data-t="ai_improve">Verbessern</strong></td><td data-t="ai_improve_d">Verbessert Stil, Grammatik und Formulierung des Textes</td></tr>
+    <tr><td>✂️ <strong data-t="ai_shorten">Kürzen</strong></td><td data-t="ai_shorten_d">Fasst den Text prägnant in wenigen Zeilen zusammen</td></tr>
+    <tr><td>⇄ <strong data-t="ai_translate">Übersetzen</strong></td><td data-t="ai_translate_d">Übersetzt Titel und Text in DE / EN / FR / ES / IT / TR / PL / AR</td></tr>
+  </table>
+  <p data-t="ch3_7_title_p">Neben dem <em>Titel</em>-Feld: <strong>✨</strong>-Button schlägt einen passenden Titel basierend auf dem aktuellen Inhalt vor.</p>
+  <p data-t="ch3_7_dur_p">Neben dem Feld <em>Anzeigedauer</em>: <strong>💡</strong>-Button (<em>Smart Duration</em>) berechnet eine optimale Verweildauer anhand der Textlänge und des Medientyps.</p>
+  <div class="tip" data-t="ch3_7_tip1">&#128161; Für HTML-Beiträge steht zusätzlich der Button <strong>Layout generieren</strong> zur Verfügung. Eine Beschreibung des gewünschten Layouts eingeben – die KI erstellt daraus fertiges HTML.</div>
+
+  <h4 data-t="ch3_7_2_h">Bildgenerierung &amp; Bildanalyse</h4>
+  <table>
+    <tr><th data-t="th_ai_func">Funktion</th><th data-t="th_ai_model">Modell</th><th data-t="th_ai_where">Wo</th></tr>
+    <tr><td><strong data-t="ai_img_gen">✨ KI-Bild erstellen</strong></td><td>DALL-E 3</td><td data-t="ai_img_gen_where">Typ „Bild" – Button neben „Datei hochladen"</td></tr>
+    <tr><td><strong data-t="ai_img_analyze">🔍 Titel &amp; Text vorschlagen</strong></td><td>GPT-4o Vision</td><td data-t="ai_img_analyze_where">Wird nach Auswahl einer Bilddatei eingeblendet</td></tr>
+    <tr><td><strong data-t="ai_assistant">✨ KI-Assistent</strong></td><td>GPT-4o</td><td data-t="ai_assistant_where">Button in der Beitragsliste – erstellt vollständigen Beitragsvorschlag</td></tr>
+  </table>
+  <div class="tip" data-t="ch3_7_cost_tip">&#128161; Ungefähre API-Kosten: Text ~$0,001/Aufruf · Bildgenerierung ~$0,04/Bild · Bildanalyse ~$0,005/Bild · KI-Assistent ~$0,002/Vorschlag.</div>
+
+  <h4 data-t="ch3_7_3_h">Bulk-Übersetzung</h4>
+  <p data-t="ch3_7_3_p">Mehrere Beiträge auf einmal in eine andere Sprache übersetzen:</p>
+  <ol class="steps">
+    <li data-t="ch3_bulk1">In der Beitragsliste auf <strong>⇄ Bulk-Übersetzung</strong> klicken – Auswahlmodus wird aktiviert.</li>
+    <li data-t="ch3_bulk2">Gewünschte Beiträge per Checkbox markieren.</li>
+    <li data-t="ch3_bulk3">Zielsprache aus der Dropdown-Liste wählen.</li>
+    <li data-t="ch3_bulk4">Auf <strong>⇄ Übersetzen</strong> klicken. Der Fortschritt wird für jeden Beitrag angezeigt.</li>
+  </ol>
+  <div class="warning" data-t="ch3_bulk_warn">&#9888; Die Bulk-Übersetzung überschreibt den Originaltext. Soll das Original erhalten bleiben, den Beitrag vorher kopieren.</div>
 </div>
 
 <!-- 4. KATEGORIEN -->
@@ -295,6 +339,41 @@
   </table>
   <h3 id="ch-displays-preview" data-t="ch5_4_h">5.4 Vorschau</h3>
   <p data-t="ch5_4_p">Über den Button <strong>Vorschau</strong> in der Display-Zeile öffnet sich die Display-Ansicht in einem neuen Tab  ideal zur Kontrolle ohne physischen Bildschirm.</p>
+
+  <h3 id="ch-displays-fleet" data-t="ch5_5_h">5.5 Flottenübersicht</h3>
+  <p data-t="ch5_5_p">Der Button <strong>📊 Flottenübersicht</strong> öffnet ein Echtzeit-Dashboard mit dem Status aller registrierten Geräte:</p>
+  <table>
+    <tr><th data-t="th_status">Status</th><th data-t="th_meaning">Bedeutung</th></tr>
+    <tr><td><strong style="color:#28a745" data-t="fleet_online">Online</strong></td><td data-t="fleet_online_d">Gerät aktiv, Herzschlag wurde empfangen (letzte 5 Min.)</td></tr>
+    <tr><td><strong style="color:#dc3545" data-t="fleet_offline">Offline</strong></td><td data-t="fleet_offline_d">Kein Herzschlag seit mehr als 5 Minuten</td></tr>
+    <tr><td><strong style="color:#6c757d" data-t="fleet_unregistered">Ohne Gerät</strong></td><td data-t="fleet_unregistered_d">Display konfiguriert, aber noch kein Gerät registriert</td></tr>
+    <tr><td><strong style="color:#f39c12" data-t="fleet_pending">Wartend</strong></td><td data-t="fleet_pending_d">Gerät hat sich registriert und wartet auf Admin-Genehmigung</td></tr>
+  </table>
+  <div class="tip" data-t="ch5_5_tip">&#128161; Die Flottenübersicht aktualisiert sich automatisch. Geräteinfo (Modell, App-Version, letzte Verbindung) wird pro Gerät angezeigt.</div>
+
+  <h3 id="ch-displays-security" data-t="ch5_6_h">5.6 Display-Sicherheit <span style="font-size:.8rem;color:#999;font-weight:400">(Super-Admin)</span></h3>
+  <p data-t="ch5_6_p">Das Sicherheits-Panel enthält zwei Schalter zur Geräteauthentifizierung:</p>
+  <table>
+    <tr><th data-t="th_switch">Schalter</th><th data-t="th_on">EIN</th><th data-t="th_off">AUS</th></tr>
+    <tr><td><strong data-t="sec_secure_mode">Gesicherter Modus</strong></td><td data-t="sec_secure_on">Displays authentifizieren sich per Token</td><td data-t="sec_secure_off">Displays laden Inhalte ohne Anmeldung</td></tr>
+    <tr><td><strong data-t="sec_reg_mode">Registrierungsmodus</strong></td><td data-t="sec_reg_on">Neue Geräte können sich selbst registrieren</td><td data-t="sec_reg_off">Keine neuen Geräte werden akzeptiert</td></tr>
+  </table>
+  <div class="tip" data-t="ch5_6_tip">&#128161; Im gesicherten Modus zeigt ein nicht-autorisiertes Display einen Sperrbildschirm statt der Playlist. Geräte müssen über die Flottenübersicht oder das Display-Formular autorisiert werden.</div>
+  <div class="warning" data-t="ch5_6_warn">&#9888; Registrierungsmodus nur temporär einschalten, bis alle Geräte registriert sind – danach wieder deaktivieren.</div>
+
+  <h3 id="ch-displays-license" data-t="ch5_7_h">5.7 Lizenzverwaltung <span style="font-size:.8rem;color:#999;font-weight:400">(Super-Admin)</span></h3>
+  <p data-t="ch5_7_p">Das Panel <strong>🔑 Lizenzverwaltung</strong> legt die maximale Anzahl gleichzeitig nutzbarer Displays fest. Wird das Limit überschritten, erscheint eine Warnung und neue Displays können nicht mehr angelegt werden.</p>
+  <div class="warning" data-t="ch5_7_warn">&#9888; Das Lizenzlimit gilt nur für neue Displays. Bestehende Displays bleiben aktiv, auch wenn das Limit nachträglich gesenkt wird.</div>
+
+  <h3 id="ch-displays-apk" data-t="ch5_8_h">5.8 APK-Verteilung <span style="font-size:.8rem;color:#999;font-weight:400">(Super-Admin)</span></h3>
+  <p data-t="ch5_8_p">Das Panel <strong>📦 APK-Verteilung</strong> ermöglicht Upload und Verteilung der Android TV-App:</p>
+  <ol class="steps">
+    <li data-t="ch5_apk1">Auf <strong>📁 APK hochladen</strong> klicken und die <code>.apk</code>-Datei auswählen.</li>
+    <li data-t="ch5_apk2">Nach erfolgreichem Upload zeigt das Panel Dateigröße und Upload-Datum an.</li>
+    <li data-t="ch5_apk3">Mit <strong>⬇ APK herunterladen</strong> die Datei lokal speichern (für Admin-Nutzung).</li>
+    <li data-t="ch5_apk4">Den öffentlichen Download-Link per <strong>📋 Kopieren</strong> in die Zwischenablage kopieren und an Gerätebesitzer senden.</li>
+  </ol>
+  <div class="tip" data-t="ch5_apk_tip">&#128161; Der öffentliche Link (<code>/download/app</code>) erfordert keine Anmeldung – ideal für die Erstinstallation auf neuen Geräten.</div>
 </div>
 
 <!-- 6. BENUTZER -->
@@ -381,6 +460,24 @@
   <div class="code-block"><code>bash /opt/Prasco/pg_backup.sh</code></div>
   <p data-t="ch8_4_restore">Zur Wiederherstellung:</p>
   <div class="code-block"><code>psql -U prasco prasco &lt; /opt/backups/prasco_DATUM.sql</code></div>
+
+  <h3 id="ch-settings-ai" data-t="ch8_5_h">8.5 KI-Assistent-Einstellungen</h3>
+  <p data-t="ch8_5_p">Der KI-Assistent nutzt die OpenAI-API. Zur Aktivierung wird ein gültiger API-Key benötigt.</p>
+  <ol class="steps">
+    <li data-t="ch8_ai1">Unter <em>Einstellungen → KI-Assistent</em> den Schalter <strong>KI-Assistent aktivieren</strong> einschalten.</li>
+    <li data-t="ch8_ai2">Den <strong>OpenAI API-Key</strong> (beginnt mit <code>sk-…</code>) eingeben. Erstellen unter <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>.</li>
+    <li data-t="ch8_ai3">Gewünschte Funktionen per Häkchen aktivieren oder deaktivieren.</li>
+    <li data-t="ch8_ai4">Auf <strong>Alle Einstellungen speichern</strong> klicken.</li>
+  </ol>
+  <table>
+    <tr><th data-t="th_ai_feat">Funktion</th><th data-t="th_ai_desc">Beschreibung</th><th data-t="th_ai_cost">ca. Kosten</th></tr>
+    <tr><td>✏️ <span data-t="aifeat_text">Textassistent</span></td><td data-t="aifeat_text_d">Generieren, Verbessern, Kürzen, Übersetzen</td><td>~$0,001/Aufruf</td></tr>
+    <tr><td>🎨 <span data-t="aifeat_imggen">Bildgenerierung (DALL-E 3)</span></td><td data-t="aifeat_imggen_d">KI-Bild aus Textbeschreibung erstellen</td><td>~$0,04/Bild</td></tr>
+    <tr><td>🔍 <span data-t="aifeat_imgana">Bildanalyse (GPT-4o Vision)</span></td><td data-t="aifeat_imgana_d">Automatischer Titel- und Beschreibungsvorschlag für Bilder</td><td>~$0,005/Bild</td></tr>
+    <tr><td>✨ <span data-t="aifeat_asst">KI-Assistent</span></td><td data-t="aifeat_asst_d">Vollständige Beitragsvorschläge auf Knopfdruck</td><td>~$0,002/Vorschlag</td></tr>
+    <tr><td>⇄ <span data-t="aifeat_bulk">Bulk-Übersetzung</span></td><td data-t="aifeat_bulk_d">Mehrere Beiträge auf einmal übersetzen</td><td>~$0,001/Beitrag</td></tr>
+  </table>
+  <div class="warning" data-t="ch8_ai_warn">&#9888; Der API-Key gewährt Zugriff auf kostenpflichtige OpenAI-Dienste. Den Key niemals teilen und die Nutzung regelmäßig unter <a href="https://platform.openai.com/usage" target="_blank">platform.openai.com/usage</a> prüfen.</div>
 </div>
 
 <!-- 9. FEHLERBEHEBUNG -->
@@ -668,7 +765,71 @@ const T = {
     ch10_3_h: '10.3 Support &amp; Kontakt', th_channel: 'Kanal', th_details: 'Details',
     con_dev: 'Entwicklung', con_dev_d: 'IT-Westfalen  Christian Pöser', con_mail: 'E-Mail',
     con_docs: 'Dokumentation', con_docs_d: 'Dieses Handbuch + <code>README.md</code> im Projektverzeichnis',
-    ch10_4_h: '10.4 Versionshinweise', ch10_4_p: 'Die aktuelle Versionsnummer ist im Dashboard unten rechts sichtbar. Release-Notes befinden sich in der Datei <code>CHANGELOG.md</code> im Projektverzeichnis.'
+    ch10_4_h: '10.4 Versionshinweise', ch10_4_p: 'Die aktuelle Versionsnummer ist im Dashboard unten rechts sichtbar. Release-Notes befinden sich in der Datei <code>CHANGELOG.md</code> im Projektverzeichnis.',
+    cover_meta: 'Version 3.0 &middot; März 2026 &middot; Intern',
+    toc_3_1: '3.1 Beitrags-Übersicht', toc_3_3: '3.3 Beitrag bearbeiten', toc_3_4: '3.4 Beitrag löschen',
+    toc_3_6: '3.6 Zeitplanung', toc_3_7: '3.7 KI-Unterstützung',
+    toc_5_3: '5.3 Display-Konfiguration', toc_5_4: '5.4 Vorschau',
+    toc_5_5: '5.5 Flottenübersicht', toc_5_6: '5.6 Display-Sicherheit', toc_5_7: '5.7 Lizenzverwaltung', toc_5_8: '5.8 APK-Verteilung',
+    toc_8_1: '8.1 Allgemein', toc_8_2: '8.2 Display-Standardwerte', toc_8_3: '8.3 SSO-Konfiguration', toc_8_4: '8.4 Backup &amp; Wiederherstellung', toc_8_5: '8.5 KI-Assistent',
+    th_btn: 'Schaltfläche', th_func: 'Funktion', th_ai_func: 'Funktion', th_ai_model: 'Modell', th_ai_where: 'Wo',
+    th_status: 'Status', th_meaning: 'Bedeutung', th_switch: 'Schalter', th_on: 'EIN', th_off: 'AUS',
+    th_ai_feat: 'Funktion', th_ai_desc: 'Beschreibung', th_ai_cost: 'ca. Kosten',
+    ch3_7_h: '3.7 KI-Unterstützung',
+    ch3_7_p: 'Der KI-Assistent steht im Beitragsformular zur Verfügung, sobald er unter <em>Einstellungen → KI-Assistent</em> aktiviert wurde. Er nutzt OpenAI-Dienste (GPT-4o-mini für Text, DALL-E 3 für Bilder).',
+    ch3_7_1_h: 'Textassistent', ch3_7_1_p: 'Unterhalb des Inhaltsfeldes erscheinen folgende KI-Schaltflächen:',
+    ai_generate: 'Generieren', ai_generate_d: 'Erstellt neuen Text auf Basis des vorhandenen Inhalts oder eines Stichworts',
+    ai_improve: 'Verbessern', ai_improve_d: 'Verbessert Stil, Grammatik und Formulierung',
+    ai_shorten: 'Kürzen', ai_shorten_d: 'Fasst den Text prägnant in wenigen Zeilen zusammen',
+    ai_translate: 'Übersetzen', ai_translate_d: 'Übersetzt Titel und Text in DE / EN / FR / ES / IT / TR / PL / AR',
+    ch3_7_title_p: 'Neben dem <em>Titel</em>-Feld: <strong>✨</strong>-Button schlägt einen passenden Titel basierend auf dem aktuellen Inhalt vor.',
+    ch3_7_dur_p: 'Neben dem Feld <em>Anzeigedauer</em>: <strong>💡</strong>-Button (<em>Smart Duration</em>) berechnet eine optimale Verweildauer anhand der Textlänge und des Medientyps.',
+    ch3_7_tip1: '&#128161; Für HTML-Beiträge steht zusätzlich der Button <strong>Layout generieren</strong> zur Verfügung. Eine Beschreibung des gewünschten Layouts eingeben – die KI erstellt daraus fertiges HTML.',
+    ch3_7_2_h: 'Bildgenerierung &amp; Bildanalyse',
+    ai_img_gen: '✨ KI-Bild erstellen', ai_img_gen_where: 'Typ „Bild" – Button neben „Datei hochladen"',
+    ai_img_analyze: '🔍 Titel &amp; Text vorschlagen', ai_img_analyze_where: 'Wird nach Auswahl einer Bilddatei eingeblendet',
+    ai_assistant: '✨ KI-Assistent', ai_assistant_where: 'Button in der Beitragsliste – erstellt vollständigen Beitragsvorschlag',
+    ch3_7_cost_tip: '&#128161; Ungefähre API-Kosten: Text ~$0,001/Aufruf · Bildgenerierung ~$0,04/Bild · Bildanalyse ~$0,005/Bild · KI-Assistent ~$0,002/Vorschlag.',
+    ch3_7_3_h: 'Bulk-Übersetzung', ch3_7_3_p: 'Mehrere Beiträge auf einmal in eine andere Sprache übersetzen:',
+    ch3_bulk1: 'In der Beitragsliste auf <strong>⇄ Bulk-Übersetzung</strong> klicken – Auswahlmodus wird aktiviert.',
+    ch3_bulk2: 'Gewünschte Beiträge per Checkbox markieren.',
+    ch3_bulk3: 'Zielsprache aus der Dropdown-Liste wählen.',
+    ch3_bulk4: 'Auf <strong>⇄ Übersetzen</strong> klicken. Der Fortschritt wird für jeden Beitrag angezeigt.',
+    ch3_bulk_warn: '&#9888; Die Bulk-Übersetzung überschreibt den Originaltext. Soll das Original erhalten bleiben, den Beitrag vorher kopieren.',
+    ch5_5_h: '5.5 Flottenübersicht',
+    ch5_5_p: 'Der Button <strong>📊 Flottenübersicht</strong> öffnet ein Echtzeit-Dashboard mit dem Status aller registrierten Geräte:',
+    fleet_online: 'Online', fleet_online_d: 'Gerät aktiv, Herzschlag wurde empfangen (letzte 5 Min.)',
+    fleet_offline: 'Offline', fleet_offline_d: 'Kein Herzschlag seit mehr als 5 Minuten',
+    fleet_unregistered: 'Ohne Gerät', fleet_unregistered_d: 'Display konfiguriert, aber noch kein Gerät registriert',
+    fleet_pending: 'Wartend', fleet_pending_d: 'Gerät hat sich registriert und wartet auf Admin-Genehmigung',
+    ch5_5_tip: '&#128161; Die Flottenübersicht aktualisiert sich automatisch. Geräteinfo (Modell, App-Version, letzte Verbindung) wird pro Gerät angezeigt.',
+    ch5_6_h: '5.6 Display-Sicherheit', ch5_6_p: 'Das Sicherheits-Panel enthält zwei Schalter zur Geräteauthentifizierung:',
+    sec_secure_mode: 'Gesicherter Modus', sec_secure_on: 'Displays authentifizieren sich per Token', sec_secure_off: 'Displays laden Inhalte ohne Anmeldung',
+    sec_reg_mode: 'Registrierungsmodus', sec_reg_on: 'Neue Geräte können sich selbst registrieren', sec_reg_off: 'Keine neuen Geräte werden akzeptiert',
+    ch5_6_tip: '&#128161; Im gesicherten Modus zeigt ein nicht-autorisiertes Display einen Sperrbildschirm statt der Playlist. Geräte müssen über die Flottenübersicht oder das Display-Formular autorisiert werden.',
+    ch5_6_warn: '&#9888; Registrierungsmodus nur temporär einschalten, bis alle Geräte registriert sind – danach wieder deaktivieren.',
+    ch5_7_h: '5.7 Lizenzverwaltung',
+    ch5_7_p: 'Das Panel <strong>🔑 Lizenzverwaltung</strong> legt die maximale Anzahl gleichzeitig nutzbarer Displays fest. Wird das Limit überschritten, erscheint eine Warnung und neue Displays können nicht mehr angelegt werden.',
+    ch5_7_warn: '&#9888; Das Lizenzlimit gilt nur für neue Displays. Bestehende Displays bleiben aktiv, auch wenn das Limit nachträglich gesenkt wird.',
+    ch5_8_h: '5.8 APK-Verteilung',
+    ch5_8_p: 'Das Panel <strong>📦 APK-Verteilung</strong> ermöglicht Upload und Verteilung der Android TV-App:',
+    ch5_apk1: 'Auf <strong>📁 APK hochladen</strong> klicken und die <code>.apk</code>-Datei auswählen.',
+    ch5_apk2: 'Nach erfolgreichem Upload zeigt das Panel Dateigröße und Upload-Datum an.',
+    ch5_apk3: 'Mit <strong>⬇ APK herunterladen</strong> die Datei lokal speichern (für Admin-Nutzung).',
+    ch5_apk4: 'Den öffentlichen Download-Link per <strong>📋 Kopieren</strong> in die Zwischenablage kopieren und an Gerätebesitzer senden.',
+    ch5_apk_tip: '&#128161; Der öffentliche Link (<code>/download/app</code>) erfordert keine Anmeldung – ideal für die Erstinstallation auf neuen Geräten.',
+    ch8_5_h: '8.5 KI-Assistent-Einstellungen',
+    ch8_5_p: 'Der KI-Assistent nutzt die OpenAI-API. Zur Aktivierung wird ein gültiger API-Key benötigt.',
+    ch8_ai1: 'Unter <em>Einstellungen → KI-Assistent</em> den Schalter <strong>KI-Assistent aktivieren</strong> einschalten.',
+    ch8_ai2: 'Den <strong>OpenAI API-Key</strong> (beginnt mit <code>sk-…</code>) eingeben. Erstellen unter platform.openai.com/api-keys.',
+    ch8_ai3: 'Gewünschte Funktionen per Häkchen aktivieren oder deaktivieren.',
+    ch8_ai4: 'Auf <strong>Alle Einstellungen speichern</strong> klicken.',
+    aifeat_text: 'Textassistent', aifeat_text_d: 'Generieren, Verbessern, Kürzen, Übersetzen',
+    aifeat_imggen: 'Bildgenerierung (DALL-E 3)', aifeat_imggen_d: 'KI-Bild aus Textbeschreibung erstellen',
+    aifeat_imgana: 'Bildanalyse (GPT-4o Vision)', aifeat_imgana_d: 'Automatischer Titel- und Beschreibungsvorschlag für Bilder',
+    aifeat_asst: 'KI-Assistent', aifeat_asst_d: 'Vollständige Beitragsvorschläge auf Knopfdruck',
+    aifeat_bulk: 'Bulk-Übersetzung', aifeat_bulk_d: 'Mehrere Beiträge auf einmal übersetzen',
+    ch8_ai_warn: '&#9888; Der API-Key gewährt Zugriff auf kostenpflichtige OpenAI-Dienste. Den Key niemals teilen und die Nutzung regelmäßig unter platform.openai.com/usage prüfen.'
   },
   en: {
     nav_back: 'Back to Admin Panel',
@@ -835,7 +996,71 @@ const T = {
     ch10_3_h: '10.3 Support &amp; Contact', th_channel: 'Channel', th_details: 'Details',
     con_dev: 'Development', con_dev_d: 'IT-Westfalen · Christian Pöser', con_mail: 'Email',
     con_docs: 'Documentation', con_docs_d: 'This manual + <code>README.md</code> in the project directory',
-    ch10_4_h: '10.4 Version Notes', ch10_4_p: 'The current version number is visible in the dashboard (bottom right). Release notes are in <code>CHANGELOG.md</code> in the project directory.'
+    ch10_4_h: '10.4 Version Notes', ch10_4_p: 'The current version number is visible in the dashboard (bottom right). Release notes are in <code>CHANGELOG.md</code> in the project directory.',
+    cover_meta: 'Version 3.0 &middot; March 2026 &middot; Internal',
+    toc_3_1: '3.1 Posts Overview', toc_3_3: '3.3 Edit Post', toc_3_4: '3.4 Delete Post',
+    toc_3_6: '3.6 Scheduling', toc_3_7: '3.7 AI Assistant',
+    toc_5_3: '5.3 Display Configuration', toc_5_4: '5.4 Preview',
+    toc_5_5: '5.5 Fleet Overview', toc_5_6: '5.6 Display Security', toc_5_7: '5.7 License Management', toc_5_8: '5.8 APK Distribution',
+    toc_8_1: '8.1 General', toc_8_2: '8.2 Display Defaults', toc_8_3: '8.3 SSO Configuration', toc_8_4: '8.4 Backup &amp; Restore', toc_8_5: '8.5 AI Assistant',
+    th_btn: 'Button', th_func: 'Function', th_ai_func: 'Function', th_ai_model: 'Model', th_ai_where: 'Where',
+    th_status: 'Status', th_meaning: 'Meaning', th_switch: 'Switch', th_on: 'ON', th_off: 'OFF',
+    th_ai_feat: 'Feature', th_ai_desc: 'Description', th_ai_cost: 'Approx. Cost',
+    ch3_7_h: '3.7 AI Assistant',
+    ch3_7_p: 'The AI assistant is available in the post form once activated under <em>Settings → AI Assistant</em>. It uses OpenAI services (GPT-4o-mini for text, DALL-E 3 for images).',
+    ch3_7_1_h: 'Text Assistant', ch3_7_1_p: 'The following AI buttons appear below the content field:',
+    ai_generate: 'Generate', ai_generate_d: 'Creates new text based on existing content or a keyword',
+    ai_improve: 'Improve', ai_improve_d: 'Improves style, grammar and wording',
+    ai_shorten: 'Shorten', ai_shorten_d: 'Summarizes the text concisely in a few lines',
+    ai_translate: 'Translate', ai_translate_d: 'Translates title and text into DE / EN / FR / ES / IT / TR / PL / AR',
+    ch3_7_title_p: 'Next to the <em>Title</em> field: <strong>✨</strong> button suggests a fitting title based on the current content.',
+    ch3_7_dur_p: 'Next to the <em>Display Duration</em> field: <strong>💡</strong> button (<em>Smart Duration</em>) calculates an optimal display time based on text length and media type.',
+    ch3_7_tip1: '&#128161; For HTML posts, the additional button <strong>Generate Layout</strong> is available. Enter a description of the desired layout – the AI generates ready-to-use HTML.',
+    ch3_7_2_h: 'Image Generation &amp; Analysis',
+    ai_img_gen: '✨ Create AI Image', ai_img_gen_where: 'Type &ldquo;Image&rdquo; – button next to &ldquo;Upload File&rdquo;',
+    ai_img_analyze: '🔍 Suggest Title &amp; Description', ai_img_analyze_where: 'Appears after selecting an image file',
+    ai_assistant: '✨ AI Assistant', ai_assistant_where: 'Button in post list – creates a complete post suggestion',
+    ch3_7_cost_tip: '&#128161; Approximate API costs: Text ~$0.001/call · Image generation ~$0.04/image · Image analysis ~$0.005/image · AI assistant ~$0.002/suggestion.',
+    ch3_7_3_h: 'Bulk Translation', ch3_7_3_p: 'Translate multiple posts into another language at once:',
+    ch3_bulk1: 'Click <strong>⇄ Bulk Translation</strong> in the post list – selection mode is activated.',
+    ch3_bulk2: 'Select the desired posts using the checkboxes.',
+    ch3_bulk3: 'Choose the target language from the dropdown.',
+    ch3_bulk4: 'Click <strong>⇄ Translate</strong>. Progress is shown for each post.',
+    ch3_bulk_warn: '&#9888; Bulk translation overwrites the original text. Copy the post first if you want to keep the original.',
+    ch5_5_h: '5.5 Fleet Overview',
+    ch5_5_p: 'The <strong>📊 Fleet Overview</strong> button opens a real-time dashboard showing the status of all registered devices:',
+    fleet_online: 'Online', fleet_online_d: 'Device active, heartbeat received (last 5 min.)',
+    fleet_offline: 'Offline', fleet_offline_d: 'No heartbeat for more than 5 minutes',
+    fleet_unregistered: 'No Device', fleet_unregistered_d: 'Display configured but no device registered yet',
+    fleet_pending: 'Pending', fleet_pending_d: 'Device has registered and is waiting for admin approval',
+    ch5_5_tip: '&#128161; The fleet overview updates automatically. Device info (model, app version, last connection) is shown per device.',
+    ch5_6_h: '5.6 Display Security', ch5_6_p: 'The security panel contains two switches for device authentication:',
+    sec_secure_mode: 'Secure Mode', sec_secure_on: 'Displays authenticate with a token', sec_secure_off: 'Displays fetch content without login',
+    sec_reg_mode: 'Registration Mode', sec_reg_on: 'New devices can register themselves', sec_reg_off: 'No new devices are accepted',
+    ch5_6_tip: '&#128161; In secure mode, an unauthorized display shows a lock screen instead of the playlist. Devices must be authorized via the fleet overview or the display form.',
+    ch5_6_warn: '&#9888; Enable registration mode only temporarily until all devices are registered – then disable it again.',
+    ch5_7_h: '5.7 License Management',
+    ch5_7_p: 'The <strong>🔑 License Management</strong> panel sets the maximum number of simultaneously usable displays. If the limit is exceeded, a warning appears and no more displays can be created.',
+    ch5_7_warn: '&#9888; The license limit only applies to new displays. Existing displays remain active even if the limit is later reduced.',
+    ch5_8_h: '5.8 APK Distribution',
+    ch5_8_p: 'The <strong>📦 APK Distribution</strong> panel enables upload and distribution of the Android TV app:',
+    ch5_apk1: 'Click <strong>📁 Upload APK</strong> and select the <code>.apk</code> file.',
+    ch5_apk2: 'After a successful upload, the panel shows file size and upload date.',
+    ch5_apk3: 'Use <strong>⬇ Download APK</strong> to save the file locally (for admin use).',
+    ch5_apk4: 'Copy the public download link using <strong>📋 Copy</strong> and send it to device owners.',
+    ch5_apk_tip: '&#128161; The public link (<code>/download/app</code>) requires no login – ideal for first-time installation on new devices.',
+    ch8_5_h: '8.5 AI Assistant Settings',
+    ch8_5_p: 'The AI assistant uses the OpenAI API. A valid API key is required to activate it.',
+    ch8_ai1: 'Under <em>Settings → AI Assistant</em>, enable the <strong>Activate AI Assistant</strong> toggle.',
+    ch8_ai2: 'Enter the <strong>OpenAI API key</strong> (starts with <code>sk-…</code>). Create one at platform.openai.com/api-keys.',
+    ch8_ai3: 'Enable or disable individual features using checkboxes.',
+    ch8_ai4: 'Click <strong>Save All Settings</strong>.',
+    aifeat_text: 'Text Assistant', aifeat_text_d: 'Generate, Improve, Shorten, Translate',
+    aifeat_imggen: 'Image Generation (DALL-E 3)', aifeat_imggen_d: 'Create AI image from text description',
+    aifeat_imgana: 'Image Analysis (GPT-4o Vision)', aifeat_imgana_d: 'Automatic title and description suggestion for images',
+    aifeat_asst: 'AI Assistant', aifeat_asst_d: 'Complete post suggestions at the click of a button',
+    aifeat_bulk: 'Bulk Translation', aifeat_bulk_d: 'Translate multiple posts at once',
+    ch8_ai_warn: '&#9888; The API key grants access to paid OpenAI services. Never share the key and regularly check usage at platform.openai.com/usage.'
   },
   it: {
     nav_back: 'Torna al pannello admin',
@@ -1002,7 +1227,71 @@ const T = {
     ch10_3_h: '10.3 Supporto e contatto', th_channel: 'Canale', th_details: 'Dettagli',
     con_dev: 'Sviluppo', con_dev_d: 'IT-Westfalen · Christian Pöser', con_mail: 'E-mail',
     con_docs: 'Documentazione', con_docs_d: 'Questo manuale + <code>README.md</code> nella directory del progetto',
-    ch10_4_h: '10.4 Note di versione', ch10_4_p: 'Il numero di versione attuale è visibile nella dashboard in basso a destra. Le note di rilascio sono in <code>CHANGELOG.md</code> nella directory del progetto.'
+    ch10_4_h: '10.4 Note di versione', ch10_4_p: 'Il numero di versione attuale è visibile nella dashboard in basso a destra. Le note di rilascio sono in <code>CHANGELOG.md</code> nella directory del progetto.',
+    cover_meta: 'Versione 3.0 &middot; Marzo 2026 &middot; Interno',
+    toc_3_1: '3.1 Elenco post', toc_3_3: '3.3 Modifica post', toc_3_4: '3.4 Elimina post',
+    toc_3_6: '3.6 Pianificazione', toc_3_7: '3.7 Assistente IA',
+    toc_5_3: '5.3 Configurazione display', toc_5_4: '5.4 Anteprima',
+    toc_5_5: '5.5 Panoramica flotta', toc_5_6: '5.6 Sicurezza display', toc_5_7: '5.7 Gestione licenze', toc_5_8: '5.8 Distribuzione APK',
+    toc_8_1: '8.1 Generale', toc_8_2: '8.2 Impostazioni display predefinite', toc_8_3: '8.3 Configurazione SSO', toc_8_4: '8.4 Backup e ripristino', toc_8_5: '8.5 Assistente IA',
+    th_btn: 'Pulsante', th_func: 'Funzione', th_ai_func: 'Funzione', th_ai_model: 'Modello', th_ai_where: 'Dove',
+    th_status: 'Stato', th_meaning: 'Significato', th_switch: 'Interruttore', th_on: 'ON', th_off: 'OFF',
+    th_ai_feat: 'Funzione', th_ai_desc: 'Descrizione', th_ai_cost: 'Costo appross.',
+    ch3_7_h: '3.7 Assistente IA',
+    ch3_7_p: 'L\'assistente IA è disponibile nel modulo post una volta attivato in <em>Impostazioni → Assistente IA</em>. Utilizza i servizi OpenAI (GPT-4o-mini per testi, DALL-E 3 per immagini).',
+    ch3_7_1_h: 'Assistente di testo', ch3_7_1_p: 'Sotto il campo contenuto appaiono i seguenti pulsanti IA:',
+    ai_generate: 'Genera', ai_generate_d: 'Crea nuovo testo basandosi sul contenuto esistente o su una parola chiave',
+    ai_improve: 'Migliora', ai_improve_d: 'Migliora stile, grammatica e formulazione',
+    ai_shorten: 'Accorcia', ai_shorten_d: 'Riassume il testo in modo conciso in poche righe',
+    ai_translate: 'Traduci', ai_translate_d: 'Traduce titolo e testo in DE / EN / FR / ES / IT / TR / PL / AR',
+    ch3_7_title_p: 'Accanto al campo <em>Titolo</em>: il pulsante <strong>✨</strong> suggerisce un titolo adeguato basandosi sul contenuto attuale.',
+    ch3_7_dur_p: 'Accanto al campo <em>Durata visualizzazione</em>: il pulsante <strong>💡</strong> (<em>Smart Duration</em>) calcola una durata ottimale in base alla lunghezza del testo e al tipo di media.',
+    ch3_7_tip1: '&#128161; Per i post HTML è disponibile il pulsante aggiuntivo <strong>Genera layout</strong>. Inserire una descrizione del layout desiderato – l\'IA genera HTML pronto all\'uso.',
+    ch3_7_2_h: 'Generazione e analisi immagini',
+    ai_img_gen: '✨ Crea immagine IA', ai_img_gen_where: 'Tipo &ldquo;Immagine&rdquo; – pulsante accanto a &ldquo;Carica file&rdquo;',
+    ai_img_analyze: '🔍 Suggerisci titolo e descrizione', ai_img_analyze_where: 'Appare dopo la selezione di un file immagine',
+    ai_assistant: '✨ Assistente IA', ai_assistant_where: 'Pulsante nell\'elenco post – crea un suggerimento completo',
+    ch3_7_cost_tip: '&#128161; Costi API approssimativi: Testo ~$0,001/chiamata · Generazione immagine ~$0,04/immagine · Analisi immagine ~$0,005/immagine · Assistente IA ~$0,002/suggerimento.',
+    ch3_7_3_h: 'Traduzione in blocco', ch3_7_3_p: 'Tradurre più post in un\'altra lingua contemporaneamente:',
+    ch3_bulk1: 'Fare clic su <strong>⇄ Traduzione in blocco</strong> nell\'elenco post – la modalità selezione viene attivata.',
+    ch3_bulk2: 'Selezionare i post desiderati tramite le caselle di controllo.',
+    ch3_bulk3: 'Scegliere la lingua di destinazione dal menu a tendina.',
+    ch3_bulk4: 'Fare clic su <strong>⇄ Traduci</strong>. Il progresso viene mostrato per ogni post.',
+    ch3_bulk_warn: '&#9888; La traduzione in blocco sovrascrive il testo originale. Copiare il post prima se si desidera conservare l\'originale.',
+    ch5_5_h: '5.5 Panoramica flotta',
+    ch5_5_p: 'Il pulsante <strong>📊 Panoramica flotta</strong> apre una dashboard in tempo reale con lo stato di tutti i dispositivi registrati:',
+    fleet_online: 'Online', fleet_online_d: 'Dispositivo attivo, heartbeat ricevuto (ultimi 5 min.)',
+    fleet_offline: 'Offline', fleet_offline_d: 'Nessun heartbeat da più di 5 minuti',
+    fleet_unregistered: 'Senza dispositivo', fleet_unregistered_d: 'Display configurato ma nessun dispositivo ancora registrato',
+    fleet_pending: 'In attesa', fleet_pending_d: 'Il dispositivo si è registrato e attende l\'approvazione dell\'admin',
+    ch5_5_tip: '&#128161; La panoramica flotta si aggiorna automaticamente. Le informazioni del dispositivo (modello, versione app, ultima connessione) vengono mostrate per ciascun dispositivo.',
+    ch5_6_h: '5.6 Sicurezza display', ch5_6_p: 'Il pannello di sicurezza contiene due interruttori per l\'autenticazione dei dispositivi:',
+    sec_secure_mode: 'Modalità sicura', sec_secure_on: 'I display si autenticano con token', sec_secure_off: 'I display caricano i contenuti senza accesso',
+    sec_reg_mode: 'Modalità registrazione', sec_reg_on: 'I nuovi dispositivi possono registrarsi autonomamente', sec_reg_off: 'Nessun nuovo dispositivo viene accettato',
+    ch5_6_tip: '&#128161; In modalità sicura, un display non autorizzato mostra una schermata di blocco invece della playlist. I dispositivi devono essere autorizzati tramite la panoramica flotta o il modulo display.',
+    ch5_6_warn: '&#9888; Attivare la modalità registrazione solo temporaneamente finché tutti i dispositivi sono registrati – poi disattivarla.',
+    ch5_7_h: '5.7 Gestione licenze',
+    ch5_7_p: 'Il pannello <strong>🔑 Gestione licenze</strong> imposta il numero massimo di display utilizzabili contemporaneamente. Se il limite viene superato, appare un avviso e non è possibile creare altri display.',
+    ch5_7_warn: '&#9888; Il limite di licenza si applica solo ai nuovi display. I display esistenti rimangono attivi anche se il limite viene successivamente ridotto.',
+    ch5_8_h: '5.8 Distribuzione APK',
+    ch5_8_p: 'Il pannello <strong>📦 Distribuzione APK</strong> consente l\'upload e la distribuzione dell\'app Android TV:',
+    ch5_apk1: 'Fare clic su <strong>📁 Carica APK</strong> e selezionare il file <code>.apk</code>.',
+    ch5_apk2: 'Dopo un upload riuscito, il pannello mostra dimensione del file e data di caricamento.',
+    ch5_apk3: 'Usare <strong>⬇ Scarica APK</strong> per salvare il file localmente (per uso admin).',
+    ch5_apk4: 'Copiare il link di download pubblico con <strong>📋 Copia</strong> e inviarlo ai proprietari dei dispositivi.',
+    ch5_apk_tip: '&#128161; Il link pubblico (<code>/download/app</code>) non richiede accesso – ideale per la prima installazione su nuovi dispositivi.',
+    ch8_5_h: '8.5 Impostazioni assistente IA',
+    ch8_5_p: 'L\'assistente IA utilizza l\'API OpenAI. Per attivarlo è necessaria una chiave API valida.',
+    ch8_ai1: 'In <em>Impostazioni → Assistente IA</em>, attivare l\'interruttore <strong>Attiva assistente IA</strong>.',
+    ch8_ai2: 'Inserire la <strong>chiave API OpenAI</strong> (inizia con <code>sk-…</code>). Crearla su platform.openai.com/api-keys.',
+    ch8_ai3: 'Attivare o disattivare le singole funzioni tramite le caselle di controllo.',
+    ch8_ai4: 'Fare clic su <strong>Salva tutte le impostazioni</strong>.',
+    aifeat_text: 'Assistente di testo', aifeat_text_d: 'Genera, Migliora, Accorcia, Traduci',
+    aifeat_imggen: 'Generazione immagini (DALL-E 3)', aifeat_imggen_d: 'Crea immagine IA da descrizione testuale',
+    aifeat_imgana: 'Analisi immagini (GPT-4o Vision)', aifeat_imgana_d: 'Suggerimento automatico di titolo e descrizione per immagini',
+    aifeat_asst: 'Assistente IA', aifeat_asst_d: 'Suggerimenti completi di post con un clic',
+    aifeat_bulk: 'Traduzione in blocco', aifeat_bulk_d: 'Tradurre più post contemporaneamente',
+    ch8_ai_warn: '&#9888; La chiave API consente l\'accesso a servizi OpenAI a pagamento. Non condividere mai la chiave e verificare regolarmente l\'utilizzo su platform.openai.com/usage.'
   }
 };
 
