@@ -1016,6 +1016,12 @@ function setLang(l) {
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.trim().toLowerCase() === l);
   });
+  // Sprachspezifische Screenshots: /handbuch/en/ bzw. /handbuch/it/ (DE = Stammverzeichnis)
+  const prefix = l === 'de' ? '/handbuch/' : `/handbuch/${l}/`;
+  document.querySelectorAll('.screenshot-block img[src]').forEach(img => {
+    const filename = img.src.split('/handbuch/').pop()?.split('/').pop() || img.getAttribute('src').split('/').pop();
+    if (filename) img.src = prefix + filename;
+  });
 }
 
 const saved = localStorage.getItem('handbuchLang') || 'de';
