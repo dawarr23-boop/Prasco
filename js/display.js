@@ -1479,6 +1479,9 @@ async function authenticatedFetch(url, options = {}) {
  * Zeige Vollbild-Statusbildschirm wenn Gerät nicht autorisiert ist
  */
 function showAuthStatusScreen(status) {
+  // Never show auth screen in preview mode — admin is viewing content directly
+  if (isPreviewMode) return;
+
   // Entferne vorhandenes Overlay falls vorhanden
   const existing = document.getElementById('auth-status-overlay');
   if (existing) existing.remove();
@@ -4320,10 +4323,12 @@ document.addEventListener('click', (e) => {
   console.log('Display-Modus wird initialisiert...');
   
   // 0. Device-Token aus localStorage laden (noch NICHT registrieren - das passiert ggf. in loadDisplayInfo)
-  const storedToken = localStorage.getItem('deviceToken');
-  if (storedToken) {
-    deviceToken = storedToken;
-    console.log('Device-Token aus localStorage geladen');
+  if (!isPreviewMode) {
+    const storedToken = localStorage.getItem('deviceToken');
+    if (storedToken) {
+      deviceToken = storedToken;
+      console.log('Device-Token aus localStorage geladen');
+    }
   }
   
   // 1. Lade Display-Identifier
@@ -4355,8 +4360,8 @@ document.addEventListener('click', (e) => {
     }
   }
   
-  // 3. Lade Display-Info falls vorhanden
-  if (currentDisplayIdentifier) {
+  // 3. Lade Display-Info falls vorhanden (nicht im Preview-Modus)
+  if (currentDisplayIdentifier && !isPreviewMode) {
     await loadDisplayInfo(currentDisplayIdentifier);
   }
   
@@ -4373,7 +4378,9 @@ document.addEventListener('click', (e) => {
   startAutoRefresh();
   
   // 8. Starte Heartbeat (für Online-Status und Widerrufs-Erkennung)
-  startHeartbeat();
+  if (!isPreviewMode) {
+    startHeartbeat();
+  }
   
   console.log('Display-Modus gestartet 🚀');
 })();
