@@ -4385,7 +4385,7 @@ async function showRegistrationInfo(displayId) {
       <div style="background:#fff; border-radius:16px; padding:2rem; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
           <h2 style="margin:0; font-size:1.2rem;">📋 Setup: ${escapeHtml(info.displayName)}</h2>
-          <button onclick="document.getElementById('registration-info-overlay').remove()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6c757d;">✕</button>
+          <button data-action="close-overlay" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6c757d;">✕</button>
         </div>
         
         <div style="text-align:center; margin-bottom:1.5rem;">
@@ -4419,12 +4419,20 @@ async function showRegistrationInfo(displayId) {
         </div>
 
         <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
-          <button onclick="navigator.clipboard.writeText('${escapeHtml(info.qrData).replace(/'/g, "\\'")}').then(()=>alert('QR-Daten kopiert!'))" class="btn btn-secondary btn-sm">📋 QR-Daten kopieren</button>
-          <button onclick="document.getElementById('registration-info-overlay').remove()" class="btn btn-primary btn-sm">Schließen</button>
+          <button data-action="copy-qr" class="btn btn-secondary btn-sm">📋 QR-Daten kopieren</button>
+          <button data-action="close-overlay" class="btn btn-primary btn-sm">Schließen</button>
         </div>
       </div>
     `;
 
+    // Event listeners (no inline onclick)
+    const qrData = info.qrData;
+    overlay.querySelectorAll('[data-action="close-overlay"]').forEach(btn => {
+      btn.addEventListener('click', () => overlay.remove());
+    });
+    overlay.querySelector('[data-action="copy-qr"]').addEventListener('click', () => {
+      navigator.clipboard.writeText(qrData).then(() => showNotification('QR-Daten kopiert!', 'success'));
+    });
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) overlay.remove();
     });
