@@ -145,7 +145,10 @@
                         </div>
                       </div>
                     </div>
-                    <input type="text" id="post-title" name="title" required />
+                    <div style="display:flex;gap:0.4rem;">
+                      <input type="text" id="post-title" name="title" required style="flex:1;" />
+                      <button type="button" id="ai-suggest-title-btn" title="KI schlägt Titel vor" style="display:none;padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;" onclick="handleAISuggestTitle()">✨</button>
+                    </div>
                   </div>
 
                   <div class="form-group">
@@ -344,16 +347,16 @@
                   <!-- KI-Assistent -->
                   <div id="ai-assistant" class="ai-assistant" style="display: none;">
                     <div class="ai-toolbar">
-                      <button type="button" class="ai-btn" data-action="generate" title="Text aus Stichworten generieren">
+                      <button type="button" class="ai-btn ai-text-only" data-action="generate" title="Text aus Stichworten generieren">
                         <span class="ai-btn-icon">&#9998;</span> Generieren
                       </button>
-                      <button type="button" class="ai-btn" data-action="improve" title="Bestehenden Text verbessern">
+                      <button type="button" class="ai-btn ai-text-only" data-action="improve" title="Bestehenden Text verbessern">
                         <span class="ai-btn-icon">&#10038;</span> Verbessern
                       </button>
-                      <button type="button" class="ai-btn" data-action="shorten" title="Text kürzen">
+                      <button type="button" class="ai-btn ai-text-only" data-action="shorten" title="Text kürzen">
                         <span class="ai-btn-icon">&#9986;</span> Kürzen
                       </button>
-                      <button type="button" class="ai-btn ai-btn-translate" data-action="translate" title="Text übersetzen">
+                      <button type="button" class="ai-btn ai-text-only ai-btn-translate" data-action="translate" title="Text übersetzen">
                         <span class="ai-btn-icon">⇄</span> Übersetzen
                         <select id="ai-target-language" class="ai-lang-select">
                           <option value="Deutsch">DE</option>
@@ -365,6 +368,16 @@
                           <option value="Polnisch">PL</option>
                           <option value="Arabisch">AR</option>
                         </select>
+                      </button>
+                      <button type="button" class="ai-btn ai-html-only" data-action="generate_html" title="HTML-Layout aus Beschreibung generieren" style="display:none;">
+                        <span class="ai-btn-icon">&#9965;</span> Layout generieren
+                      </button>
+                    </div>
+                    <!-- HTML-Prompt-Eingabe (nur bei HTML-Typ) -->
+                    <div id="ai-html-prompt-area" style="display:none;margin-top:0.5rem;">
+                      <textarea id="ai-html-prompt" rows="2" placeholder="Beschreiben Sie das gewünschte Layout, z.B. ‚Schwarzer Hintergrund, großes Logo oben, darunter Wartezeit in Grün'" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #c9d4c9;border-radius:4px;resize:vertical;font-size:0.85rem;"></textarea>
+                      <button type="button" class="ai-btn" id="ai-html-generate-btn" onclick="handleAIGenerateHTML()" style="margin-top:0.3rem;width:100%;">
+                        <span class="ai-btn-icon">✨</span> HTML jetzt generieren
                       </button>
                     </div>
                     <div id="ai-status" class="ai-status" style="display: none;">
@@ -494,13 +507,17 @@
                         </div>
                       </span>
                     </label>
-                    <input
-                      type="number"
-                      id="display-duration"
-                      name="display_duration"
-                      value="60"
-                      min="1"
-                    />
+                    <div style="display:flex;gap:0.4rem;align-items:stretch;">
+                      <input
+                        type="number"
+                        id="display-duration"
+                        name="display_duration"
+                        value="60"
+                        min="1"
+                        style="flex:1;"
+                      />
+                      <button type="button" id="smart-duration-btn" title="Optimale Anzeigedauer berechnen" style="padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;">💡</button>
+                    </div>
                   </div>
 
                   <div class="form-group">

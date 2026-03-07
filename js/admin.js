@@ -7778,9 +7778,28 @@ function updateAIToolbarVisibility() {
   const toolbar = document.getElementById('ai-assistant');
   if (!toolbar) return;
   const contentType = document.getElementById('post-type')?.value;
-  // AI nur bei text und html anzeigen
-  const showAI = aiEnabled && (contentType === 'text' || contentType === 'html');
+  const isText = contentType === 'text';
+  const isHtml = contentType === 'html';
+  const showAI = aiEnabled && (isText || isHtml);
   toolbar.style.display = showAI ? 'block' : 'none';
+
+  // Text-only buttons (generate/improve/shorten/translate) nur bei text
+  document.querySelectorAll('.ai-text-only').forEach(btn => {
+    btn.style.display = isText ? '' : 'none';
+  });
+  // HTML-only button nur bei html
+  document.querySelectorAll('.ai-html-only').forEach(btn => {
+    btn.style.display = isHtml ? '' : 'none';
+  });
+  // HTML-Prompt-Area bei Typ-Wechsel schließen
+  if (!isHtml) {
+    const area = document.getElementById('ai-html-prompt-area');
+    if (area) area.style.display = 'none';
+  }
+
+  // Titel-Button sichtbar wenn KI aktiv
+  const titleBtn = document.getElementById('ai-suggest-title-btn');
+  if (titleBtn) titleBtn.style.display = aiEnabled ? '' : 'none';
 }
 
 async function handleAIAction(action) {
@@ -7848,6 +7867,154 @@ async function handleAIAction(action) {
   } finally {
     buttons.forEach(b => b.disabled = false);
   }
+}
+
+// ──────────────────────────────────────────────
+// KI: Titel aus Post-Inhalt vorschlagen
+// ──────────────────────────────────────────────
+async function handleAISuggestTitle() {
+  const textarea = document.getElementById('post-content');
+  const titleInput = document.getElementById('post-title');
+  const statusDiv = document.getElementById('ai-status');
+  const statusText = document.getElementById('ai-status-text');
+  if (!titleInput) return;
+
+  const text = textarea?.value?.trim() || titleInput.value.trim();
+  if (!text) {
+    showNotification('Bitte zuerst Inhalt oder Stichworte eingeben.', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('ai-suggest-title-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  if (statusDiv && statusText) {
+    statusDiv.style.display = 'flex';
+    statusDiv.className = 'ai-status';
+    statusText.textContent = 'KI erstellt Titel...';
+  }
+
+  try {
+    const response = await apiRequest('/ai/generate', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'generate_title', text }),
+    });
+    if (response?.result) {
+      titleInput.dataset.previousValue = titleInput.value;
+      titleInput.value = response.result.slice(0, 120); // Sicherheits-Cap
+      if (statusDiv && statusText) {
+        statusDiv.className = 'ai-status ai-success';
+        statusText.textContent = '✓ Titel vorgeschlagen';
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+      }
+    } else {
+      throw new Error(response?.error || 'Keine Antwort');
+    }
+  } catch (e) {
+    showNotification('Titel-KI Fehler: ' + (e.message || e), 'error');
+    if (statusDiv) statusDiv.style.display = 'none';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨'; }
+  }
+}
+
+// ──────────────────────────────────────────────
+// KI: HTML-Layout aus Beschreibung generieren
+// ──────────────────────────────────────────────
+function toggleAIHtmlPrompt() {
+  const area = document.getElementById('ai-html-prompt-area');
+  if (!area) return;
+  area.style.display = area.style.display === 'none' ? 'block' : 'none';
+  if (area.style.display === 'block') document.getElementById('ai-html-prompt')?.focus();
+}
+
+async function handleAIGenerateHTML() {
+  const promptInput = document.getElementById('ai-html-prompt');
+  const textarea = document.getElementById('post-content');
+  const statusDiv = document.getElementById('ai-status');
+  const statusText = document.getElementById('ai-status-text');
+  if (!promptInput || !textarea) return;
+
+  const text = promptInput.value.trim();
+  if (!text) {
+    showNotification('Bitte ein Layout beschreiben.', 'warning');
+    promptInput.focus();
+    return;
+  }
+
+  const btn = document.getElementById('ai-html-generate-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Wird generiert...(ca. 10s)'; }
+  if (statusDiv && statusText) {
+    statusDiv.style.display = 'flex';
+    statusDiv.className = 'ai-status';
+    statusText.textContent = 'KI generiert HTML-Layout...';
+  }
+
+  try {
+    const response = await apiRequest('/ai/generate', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'generate_html', text }),
+    });
+    if (response?.result) {
+      textarea.dataset.previousContent = textarea.value;
+      textarea.value = response.result;
+      // RTE aktualisieren falls aktiv
+      const rteEditor = document.getElementById('rte-editor');
+      if (rteEditor && document.getElementById('rte-container')?.style.display !== 'none') {
+        rteEditor.innerHTML = response.result;
+      }
+      document.getElementById('ai-html-prompt-area').style.display = 'none';
+      promptInput.value = '';
+      if (statusDiv && statusText) {
+        statusDiv.className = 'ai-status ai-success';
+        statusText.textContent = '✓ HTML generiert' + (response.tokensUsed ? ` (${response.tokensUsed} Tokens)` : '');
+        setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+      }
+    } else {
+      throw new Error(response?.error || 'Keine Antwort');
+    }
+  } catch (e) {
+    const msg = e.message || 'Unbekannter Fehler';
+    if (statusDiv && statusText) {
+      statusDiv.className = 'ai-status ai-error';
+      statusText.textContent = '✗ ' + msg;
+      setTimeout(() => { statusDiv.style.display = 'none'; }, 5000);
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ HTML jetzt generieren'; }
+  }
+}
+
+// ──────────────────────────────────────────────
+// Smart Duration: optimale Anzeigedauer berechnen
+// ──────────────────────────────────────────────
+function suggestDisplayDuration() {
+  const contentType = document.getElementById('post-type')?.value || 'text';
+  const content = document.getElementById('post-content')?.value || '';
+  const showTitle = document.getElementById('show-title')?.checked;
+  const titleText = document.getElementById('post-title')?.value || '';
+  const durationInput = document.getElementById('display-duration');
+  if (!durationInput) return;
+
+  const avgCharsPerSec = 15; // ~900 Zeichen/Min Leserate
+  let suggested;
+
+  if (contentType === 'text') {
+    const chars = content.length + (showTitle ? titleText.length : 0);
+    suggested = Math.min(60, Math.max(5, Math.ceil(chars / avgCharsPerSec) + 2));
+  } else if (contentType === 'html') {
+    const textOnly = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    suggested = Math.min(60, Math.max(8, Math.ceil(textOnly.length / avgCharsPerSec) + 3));
+  } else if (contentType === 'image') {
+    suggested = 10;
+  } else if (contentType === 'video') {
+    suggested = 30;
+  } else {
+    suggested = 12;
+  }
+
+  const prev = durationInput.value;
+  durationInput.value = suggested;
+  showNotification(`💡 Empfehlung: ${suggested}s (vorher: ${prev}s, Typ: ${contentType})`, 'info');
 }
 
 async function saveAISettings() {
@@ -8011,13 +8178,20 @@ function initAIEventListeners() {
   // Save button
   document.getElementById('saveAISettings')?.addEventListener('click', saveAISettings);
 
-  // AI action buttons (delegiert)
+  // AI action buttons (delegiert) — generate_html wird direkt per onclick behandelt
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.ai-btn');
     if (!btn || btn.disabled) return;
     const action = btn.dataset.action;
-    if (action) handleAIAction(action);
+    if (action === 'generate_html') {
+      toggleAIHtmlPrompt();
+    } else if (action) {
+      handleAIAction(action);
+    }
   });
+
+  // Smart Duration button
+  document.getElementById('smart-duration-btn')?.addEventListener('click', suggestDisplayDuration);
 
   // Content type change → toolbar visibility aktualisieren
   const postType = document.getElementById('post-type');

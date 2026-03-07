@@ -42,6 +42,20 @@ Antworte nur mit dem gekürzten Text, ohne Erklärungen.`,
 Übersetze den folgenden Text in die gewünschte Zielsprache.
 Behalte den Ton und Stil bei. Verwende kein Markdown. Nutze Zeilenumbrüche für Absätze.
 Antworte nur mit der Übersetzung, ohne Erklärungen.`,
+
+  generate_title: `Du bist Texter für digitale Anzeigetafeln (Digital Signage).
+Erstelle einen prägnanten, aussagekräftigen Titel (max. 60 Zeichen) für den folgenden Inhalt.
+Der Titel soll klar und direkt sein, gut lesbar auf einem großen Bildschirm.
+Antworte NUR mit dem Titel, ohne Anführungszeichen, Erklärungen oder zusätzlichen Text.`,
+
+  generate_html: `Du bist HTML/CSS-Experte für Digital Signage (Vollbild 1920×1080px).
+Erstelle ein vollständiges, eigenständiges HTML-Dokument mit Inline-CSS basierend auf der Beschreibung.
+Anforderungen:
+- Kein <script>, keine externen Ressourcen, keine Fonts via @import oder <link>
+- Schriftgröße mindestens 2rem (gut lesbar aus 3 Metern Entfernung)
+- Farben: #58585a (PRASCO Grau), #ffffff (Weiß), Akzentfarben nach Kontext
+- body: margin:0; padding:2rem; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:100vh; font-family:Arial,sans-serif; box-sizing:border-box;
+- Antworte NUR mit dem HTML-Code beginnend mit <!DOCTYPE html>, ohne Erklärungen oder Markdown.`,
 };
 
 // ──────────────────────────────────────────────
@@ -55,7 +69,7 @@ router.post('/generate', authenticate, async (req: AuthRequest, res: Response): 
 
     // Validierung
     if (!action || !SYSTEM_PROMPTS[action]) {
-      res.status(400).json({ error: 'Ungültige Aktion. Erlaubt: generate, improve, shorten, translate' });
+      res.status(400).json({ error: 'Ungültige Aktion. Erlaubt: generate, improve, shorten, translate, generate_title, generate_html' });
       return;
     }
 
@@ -96,8 +110,8 @@ router.post('/generate', authenticate, async (req: AuthRequest, res: Response): 
           { role: 'system', content: SYSTEM_PROMPTS[action] },
           { role: 'user', content: userPrompt },
         ],
-        max_tokens: 1000,
-        temperature: 0.7,
+        max_tokens: action === 'generate_html' ? 3000 : 1000,
+        temperature: action === 'generate_title' ? 0.5 : 0.7,
       },
       {
         headers: {
