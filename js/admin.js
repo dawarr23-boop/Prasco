@@ -2081,6 +2081,7 @@ async function updateDashboardStats() {
 // Posts Management (API)
 // ============================================
 let currentPostId = null;
+let aiGeneratedMediaId = null; // Von DALL-E 3 generiertes Media-Objekt
 let postsCache = [];
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
@@ -2521,6 +2522,10 @@ async function saveNewOrder() {
 async function showPostForm() {
   document.getElementById('post-form').style.display = 'block';
   currentPostId = null;
+  aiGeneratedMediaId = null;
+  // KI-Bild-Vorschau ausblenden
+  const aiPrev = document.getElementById('ai-image-preview');
+  if (aiPrev) aiPrev.style.display = 'none';
   document.getElementById('postForm').reset();
 
   // Standard-Checkboxen setzen (nur für NEUE Posts!)
@@ -2733,6 +2738,13 @@ function hidePostForm() {
   if (musicFileInput) musicFileInput.value = '';
   currentPostId = null;
   currentBackgroundMusicUrl = null;
+  aiGeneratedMediaId = null;
+
+  // KI-Bild-Vorschau ausblenden
+  const aiPreview = document.getElementById('ai-image-preview');
+  if (aiPreview) aiPreview.style.display = 'none';
+  const aiPreviewImg = document.getElementById('ai-image-preview-img');
+  if (aiPreviewImg) aiPreviewImg.src = '';
 
   // Hintergrundmusik-Info zurücksetzen
   const musicInfo = document.getElementById('current-music-info');
@@ -3455,6 +3467,11 @@ async function handlePostFormSubmit(e) {
       showNotification('Datei-Upload fehlgeschlagen: ' + error.message, 'error');
       return;
     }
+  }
+
+  // KI-generiertes Bild als Fallback verwenden falls keine Datei hochgeladen wurde
+  if (!mediaId && aiGeneratedMediaId) {
+    mediaId = aiGeneratedMediaId;
   }
 
   const categoryId = formData.get('category_id');
@@ -7800,6 +7817,10 @@ function updateAIToolbarVisibility() {
   // Titel-Button sichtbar wenn KI aktiv
   const titleBtn = document.getElementById('ai-suggest-title-btn');
   if (titleBtn) titleBtn.style.display = aiEnabled ? '' : 'none';
+
+  // KI-Bild-Button nur bei Typ 'image' und aktivierter KI
+  const imageBtn = document.getElementById('ai-generate-image-btn');
+  if (imageBtn) imageBtn.style.display = (aiEnabled && contentType === 'image') ? 'inline-block' : 'none';
 }
 
 async function handleAIAction(action) {
@@ -7981,6 +8002,96 @@ async function handleAIGenerateHTML() {
     }
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✨ HTML jetzt generieren'; }
+  }
+}
+
+// ──────────────────────────────────────────────
+// KI Bildgenerierung (DALL-E 3)
+// ──────────────────────────────────────────────
+function openAIImageModal() {
+  const modal = document.getElementById('ai-image-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  const prompt = document.getElementById('ai-image-prompt');
+  if (prompt) { prompt.value = ''; prompt.focus(); }
+  const status = document.getElementById('ai-image-status');
+  if (status) status.style.display = 'none';
+  // Zeichenzähler initialisieren
+  updateAIImagePromptCount();
+}
+
+function closeAIImageModal() {
+  const modal = document.getElementById('ai-image-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updateAIImagePromptCount() {
+  const prompt = document.getElementById('ai-image-prompt');
+  const counter = document.getElementById('ai-image-prompt-count');
+  if (prompt && counter) counter.textContent = prompt.value.length;
+}
+
+function removeAIImage() {
+  aiGeneratedMediaId = null;
+  const preview = document.getElementById('ai-image-preview');
+  if (preview) preview.style.display = 'none';
+  const img = document.getElementById('ai-image-preview-img');
+  if (img) img.src = '';
+}
+
+async function handleAIImageGenerate() {
+  const promptEl = document.getElementById('ai-image-prompt');
+  const prompt = promptEl?.value.trim() || '';
+  if (prompt.length < 5) {
+    showNotification('Bitte eine aussagekräftige Bildbeschreibung eingeben.', 'warning');
+    promptEl?.focus();
+    return;
+  }
+
+  const size = document.querySelector('input[name="ai-image-size"]:checked')?.value || '1792x1024';
+  const quality = document.getElementById('ai-image-quality')?.value || 'standard';
+  const statusDiv = document.getElementById('ai-image-status');
+  const statusText = document.getElementById('ai-image-status-text');
+  const btn = document.getElementById('ai-image-generate-submit');
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Wird erstellt...'; }
+  if (statusDiv) {
+    statusDiv.style.display = 'block';
+    statusDiv.style.background = '#e8f4e8';
+    statusDiv.style.color = '#3a5a3a';
+  }
+  if (statusText) statusText.textContent = '⏳ DALL-E 3 generiert Ihr Bild... (ca. 15–30 Sek.)';
+
+  try {
+    const result = await apiRequest('/ai/generate-image', {
+      method: 'POST',
+      body: JSON.stringify({ prompt, size, quality }),
+    });
+
+    if (result?.mediaId && result?.url) {
+      aiGeneratedMediaId = result.mediaId;
+
+      // Vorschau im Upload-Bereich anzeigen
+      const previewDiv = document.getElementById('ai-image-preview');
+      const previewImg = document.getElementById('ai-image-preview-img');
+      const previewName = document.getElementById('ai-image-preview-name');
+      if (previewImg) previewImg.src = result.url;
+      if (previewName) previewName.textContent = result.filename || 'KI-Bild';
+      if (previewDiv) previewDiv.style.display = 'block';
+
+      closeAIImageModal();
+      showNotification('✨ KI-Bild erstellt! Speichern Sie den Beitrag zum Übernehmen.', 'success');
+    } else {
+      throw new Error(result?.error || 'Kein Bild erhalten');
+    }
+  } catch (e) {
+    if (statusDiv) {
+      statusDiv.style.background = '#fdecea';
+      statusDiv.style.color = '#a94442';
+    }
+    if (statusText) statusText.textContent = '✗ ' + (e.message || 'Unbekannter Fehler');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Generieren'; }
   }
 }
 
@@ -8192,6 +8303,17 @@ function initAIEventListeners() {
 
   // Smart Duration button
   document.getElementById('smart-duration-btn')?.addEventListener('click', suggestDisplayDuration);
+
+  // KI-Bild Prompt Zeichenzähler
+  document.getElementById('ai-image-prompt')?.addEventListener('input', updateAIImagePromptCount);
+
+  // AI-Image-Modal: Escape-Taste zum Schließen
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('ai-image-modal');
+      if (modal && modal.style.display !== 'none') closeAIImageModal();
+    }
+  });
 
   // Content type change → toolbar visibility aktualisieren
   const postType = document.getElementById('post-type');

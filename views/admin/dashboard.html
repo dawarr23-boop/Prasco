@@ -402,13 +402,28 @@
 
                   <!-- Option 2: Datei hochladen (nur bei anderen Typen) -->
                   <div id="file-upload-section" style="display: none;">
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                       <button type="button" class="btn btn-secondary" id="trigger-file-upload" style="font-size: 0.9rem; display: inline-block;" data-translate="form.uploadFile">
                         ↑ Datei hochladen
+                      </button>
+                      <!-- KI-Bild-Button: nur bei Typ image sichtbar -->
+                      <button type="button" id="ai-generate-image-btn" onclick="openAIImageModal()" style="display:none;font-size:0.9rem;padding:0.4rem 0.8rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;color:#3a5a3a;" title="Bild mit KI erstellen">
+                        ✨ KI-Bild erstellen
                       </button>
                       <small style="color: #666; align-self: center;" data-translate="form.uploadFileHint">
                         Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 2 GB)
                       </small>
+                    </div>
+                    <!-- KI-Bild Vorschau (nach Generierung) -->
+                    <div id="ai-image-preview" style="display:none;margin-bottom:0.5rem;padding:0.5rem;background:#f9fdf9;border:1px solid #c9d4c9;border-radius:4px;">
+                      <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <img id="ai-image-preview-img" src="" alt="KI-Bild" style="width:80px;height:50px;object-fit:cover;border-radius:3px;border:1px solid #ddd;" />
+                        <div style="flex:1;">
+                          <small style="color:#4a7c4a;font-weight:600;">✨ KI-generiertes Bild</small><br>
+                          <small id="ai-image-preview-name" style="color:#666;"></small>
+                        </div>
+                        <button type="button" onclick="removeAIImage()" style="background:none;border:none;cursor:pointer;color:#dc3545;font-size:1.2rem;padding:0;" title="Entfernen">×</button>
+                      </div>
                     </div>
                     <input
                       type="file"
@@ -2116,6 +2131,65 @@
           </div>
         </footer>
       </main>
+    </div>
+
+    <!-- Modal: KI-Bild generieren (DALL-E 3) -->
+    <div id="ai-image-modal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="ai-image-modal-title">
+      <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+          <h3 id="ai-image-modal-title" style="margin:0;">✨ KI-Bild erstellen</h3>
+          <button class="modal-close" onclick="closeAIImageModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding:1.5rem;">
+          <div class="form-group">
+            <label for="ai-image-prompt" style="font-weight:600;">Bildbeschreibung <span style="color:#dc3545;">*</span></label>
+            <textarea
+              id="ai-image-prompt"
+              rows="3"
+              placeholder="z.B. 'Modernes Logistik-Lager, helles Tageslicht, Pakete auf Förderband, Business-Stil, horizontal'"
+              style="width:100%;padding:0.6rem;border:1px solid #c9d4c9;border-radius:4px;resize:vertical;font-size:0.9rem;box-sizing:border-box;"
+              maxlength="800"
+            ></textarea>
+            <small style="color:#888;"><span id="ai-image-prompt-count">0</span>/800 Zeichen</small>
+          </div>
+
+          <div class="form-group">
+            <label style="font-weight:600;">Format</label>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.4rem;">
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
+                <input type="radio" name="ai-image-size" value="1792x1024" checked style="margin:0;"> Querformat 16:9
+                <small style="color:#888;">(1792×1024)</small>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
+                <input type="radio" name="ai-image-size" value="1024x1024" style="margin:0;"> Quadrat 1:1
+                <small style="color:#888;">(1024×1024)</small>
+              </label>
+              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
+                <input type="radio" name="ai-image-size" value="1024x1792" style="margin:0;"> Hochformat 9:16
+                <small style="color:#888;">(1024×1792)</small>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ai-image-quality" style="font-weight:600;">Qualität</label>
+            <select id="ai-image-quality" style="padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;margin-top:0.3rem;">
+              <option value="standard">Standard (~€0,04 / Bild)</option>
+              <option value="hd">HD &mdash; höhere Details (~€0,08 / Bild)</option>
+            </select>
+          </div>
+
+          <div id="ai-image-status" style="display:none;padding:0.5rem 0.75rem;border-radius:4px;margin-top:0.5rem;background:#e8f4e8;color:#3a5a3a;font-size:0.9rem;">
+            <span id="ai-image-status-text">⏳ Bild wird erstellt... (ca. 15–30 Sek.)</span>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding:1rem 1.5rem;display:flex;gap:0.75rem;justify-content:flex-end;border-top:1px solid #eee;">
+          <button type="button" class="btn btn-secondary" onclick="closeAIImageModal()">Abbrechen</button>
+          <button type="button" id="ai-image-generate-submit" class="btn btn-success" onclick="handleAIImageGenerate()">
+            ✨ Generieren
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal: Eigenes Passwort ändern -->
