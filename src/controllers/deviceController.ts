@@ -3,7 +3,7 @@ import { Display } from '../models';
 import Setting from '../models/Setting';
 import { AppError } from '../middleware/errorHandler';
 import { logger, securityLogger } from '../utils/logger';
-import { DeviceRequest } from '../middleware/deviceAuth';
+import { DeviceRequest, getCachedSetting } from '../middleware/deviceAuth';
 import crypto from 'crypto';
 import sequelize from '../config/database';
 import { Transaction } from 'sequelize';
@@ -213,11 +213,7 @@ export const registerDevice = async (
     }
 
     // ===== Pfad 3: Neues Gerät — Globale Registrierung =====
-    const regModeSetting = await Setting.findOne({
-      where: { key: 'display.registrationMode' },
-      transaction: t,
-    });
-    const registrationMode = regModeSetting?.value === 'true';
+    const registrationMode = (await getCachedSetting('display.registrationMode', 'false')) === 'true';
 
     if (!registrationMode) {
       await t.rollback();

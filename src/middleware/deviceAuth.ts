@@ -23,7 +23,7 @@ interface SettingCacheEntry {
 const settingCache = new Map<string, SettingCacheEntry>();
 const SETTING_CACHE_TTL = 60_000; // 60 seconds
 
-async function getCachedSetting(key: string, defaultValue: string): Promise<string> {
+export async function getCachedSetting(key: string, defaultValue: string): Promise<string> {
   const cached = settingCache.get(key);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.value;
