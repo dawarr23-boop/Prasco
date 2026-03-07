@@ -1342,6 +1342,17 @@ function getClientId() {
  * @param {string} [displayIdentifier] - Optional: Display-Identifier für gezielte Registrierung
  */
 async function getOrCreateDeviceToken(displayIdentifier) {
+  // 0. Prüfe ob nativer Android-Layer Token bereitstellt (WebView in nativer App)
+  if (window.PrascoNative) {
+    const nativeToken = window.PrascoNative.getDeviceToken();
+    if (nativeToken) {
+      localStorage.setItem('deviceToken', nativeToken);
+      deviceToken = nativeToken;
+      console.log('Device-Token von nativer App übernommen');
+      return deviceToken;
+    }
+  }
+
   // 1. Prüfe localStorage auf vorhandenen Token
   const storedToken = localStorage.getItem('deviceToken');
   if (storedToken && !displayIdentifier) {
