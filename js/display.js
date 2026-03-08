@@ -1200,10 +1200,15 @@ async function updateTicker() {
   const text = await buildLiveTickerParts();
   if (!text) {
     bar.style.display = 'none';
+    tickerCurrentText = null;
     return;
   }
 
   bar.style.display = '';
+
+  // Kein Neuaufbau wenn Text unverändert — verhindert Sprung beim Live-Refresh
+  if (text === tickerCurrentText && track.children.length > 0) return;
+  tickerCurrentText = text;
 
   // Echte Span-Breite messen damit genug Kopien für Full-Screen-Scrolling vorhanden sind
   const probe = document.createElement('span');
@@ -1235,6 +1240,7 @@ async function updateTicker() {
 }
 
 let tickerLiveInterval = null;
+let tickerCurrentText = null;
 
 // Startet den Ticker und plant Live-Daten-Aktualisierung alle 60 s
 function startTickerRefresh() {
