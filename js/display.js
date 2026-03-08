@@ -1491,7 +1491,9 @@ async function authenticatedFetch(url, options = {}) {
         // Retry mit neuem Token
         return authenticatedFetch(url, options);
       }
-      showAuthStatusScreen('no_token');
+      // deviceAuthStatus wurde von getOrCreateDeviceToken gesetzt (z.B. 'registration_disabled')
+      // Zeige passenden Status statt generischem 'no_token'
+      showAuthStatusScreen(deviceAuthStatus || 'no_token');
       throw new Error('AUTH_REQUIRED');
     }
   }
