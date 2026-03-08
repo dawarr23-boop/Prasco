@@ -178,4 +178,21 @@ async function checkSSOStatus() {
   }
 }
 
+// Systemeinstellungen (Name, Logo) auf Login-Seite anwenden
+(async function applySystemBranding() {
+  try {
+    const res = await fetch('/api/settings?category=system');
+    if (!res.ok) return;
+    const settings = await res.json();
+    if (settings['system.name']) {
+      document.title = settings['system.name'] + ' – Admin Login';
+    }
+    if (settings['system.logoUrl']) {
+      const img = document.querySelector('.logo-image');
+      if (img) img.src = settings['system.logoUrl'];
+    }
+  } catch (_) {
+    // Branding-Fehler sind unkritisch
+  }
+})();
 

@@ -2066,6 +2066,7 @@ function navigateTo(section) {
     if (section === 'settings') {
       if (!ssoConfigLoaded) loadSSOConfiguration();
       loadSystemMode(); // Lade System-Modus Einstellungen
+      loadGeneralSettings(); // Lade allgemeine Systemeinstellungen
     }
   }
 }
@@ -8897,6 +8898,124 @@ async function handleBulkTranslate() {
   }
 }
 
+// ============================================
+// Allgemeine Systemeinstellungen (General)
+// ============================================
+
+function applyGeneralSettings(settings) {
+  const name = settings['system.name'];
+  const logoUrl = settings['system.logoUrl'];
+  if (name) {
+    document.title = name + ' – Admin';
+    const h2 = document.querySelector('.sidebar-header h2');
+    if (h2) h2.textContent = 'Admin Panel';
+  }
+  if (logoUrl) {
+    document.querySelectorAll('.logo-image').forEach(img => { img.src = logoUrl; });
+  }
+}
+
+async function loadGeneralSettings() {
+  try {
+    const data = await apiRequest('/settings?category=system');
+    const settings = data || {};
+
+    const nameEl = document.getElementById('system-name');
+    const langEl = document.getElementById('system-default-language');
+    const tzEl = document.getElementById('system-timezone');
+    const urlEl = document.getElementById('system-logo-url');
+    const previewEl = document.getElementById('system-logo-preview');
+
+    if (nameEl && settings['system.name']) nameEl.value = settings['system.name'];
+    if (langEl && settings['system.defaultLanguage']) langEl.value = settings['system.defaultLanguage'];
+    if (tzEl && settings['system.timezone']) tzEl.value = settings['system.timezone'];
+    if (urlEl && settings['system.logoUrl']) urlEl.value = settings['system.logoUrl'];
+    if (previewEl && settings['system.logoUrl']) previewEl.src = settings['system.logoUrl'];
+
+    applyGeneralSettings(settings);
+
+    // Logo-URL Feld: Live-Preview
+    if (urlEl) {
+      urlEl.addEventListener('input', () => {
+        const val = urlEl.value.trim();
+        if (previewEl && val) previewEl.src = val;
+      });
+    }
+
+    // Logo Datei-Upload
+    const fileInput = document.getElementById('system-logo-file');
+    if (fileInput) {
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById('system-logo-upload-status');
+        if (statusEl) { statusEl.style.color = '#888'; statusEl.textContent = '⏳ Wird hochgeladen…'; }
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          const res = await fetch('/api/media/upload', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+            body: formData,
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const result = await res.json();
+          const url = result.data?.url || result.data?.originalUrl || result.url;
+          if (!url) throw new Error('Keine URL in der Antwort');
+          if (urlEl) urlEl.value = url;
+          if (previewEl) previewEl.src = url;
+          if (statusEl) { statusEl.style.color = '#4a7c4a'; statusEl.textContent = '✓ Hochgeladen'; }
+          setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+        } catch (err) {
+          const statusEl = document.getElementById('system-logo-upload-status');
+          if (statusEl) { statusEl.style.color = '#dc3545'; statusEl.textContent = '❌ ' + err.message; }
+        }
+        fileInput.value = '';
+      });
+    }
+
+    // Speichern-Button
+    const saveBtn = document.getElementById('save-general-settings-btn');
+    if (saveBtn && !saveBtn.dataset.bound) {
+      saveBtn.dataset.bound = '1';
+      saveBtn.addEventListener('click', saveGeneralSettings);
+    }
+  } catch (err) {
+    console.warn('Fehler beim Laden der allgemeinen Einstellungen:', err);
+  }
+}
+
+async function saveGeneralSettings() {
+  const btn = document.getElementById('save-general-settings-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Speichert…'; }
+  try {
+    const systemName = document.getElementById('system-name')?.value?.trim() || '';
+    const defaultLang = document.getElementById('system-default-language')?.value || 'de';
+    const timezone = document.getElementById('system-timezone')?.value || 'Europe/Berlin';
+    const logoUrl = document.getElementById('system-logo-url')?.value?.trim() || '';
+
+    await apiRequest('/settings/bulk', 'POST', {
+      settings: {
+        'system.name': systemName,
+        'system.defaultLanguage': defaultLang,
+        'system.timezone': timezone,
+        'system.logoUrl': logoUrl,
+      },
+    });
+
+    applyGeneralSettings({
+      'system.name': systemName,
+      'system.logoUrl': logoUrl,
+    });
+
+    showNotification('Allgemeine Einstellungen gespeichert', 'success');
+  } catch (err) {
+    showNotification('Fehler beim Speichern: ' + (err.message || err), 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Einstellungen speichern'; }
+  }
+}
+
 // AI settings laden beim Settings-Section-Besuch
 let aiSettingsLoaded = false;
 document.querySelector('a[href="#settings"]')?.addEventListener('click', () => {
@@ -8979,6 +9098,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Zentraler Speichern-Button: Alle Einstellungen
   document.getElementById('saveAllSettings')?.addEventListener('click', saveAllSettings);
+
+  // Allgemeine Systemeinstellungen sofort anwenden (Branding beim Start)
+  (async () => {
+    try {
+      const res = await fetch('/api/settings?category=system');
+      if (res.ok) {
+        const settings = await res.json();
+        applyGeneralSettings(settings);
+      }
+    } catch (_) {}
+  })();
 });
 
 // ============================================

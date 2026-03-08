@@ -1552,6 +1552,68 @@
           <section id="settings-section" class="section">
             <h2>Einstellungen</h2>
 
+            <!-- Allgemeine Systemeinstellungen -->
+            <div class="settings-card" id="general-settings-card">
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg></span> Allgemein</h3>
+              <div class="settings-form">
+                <div class="form-group">
+                  <label for="system-name">Systemname</label>
+                  <input type="text" id="system-name" placeholder="z. B. IT-Westfalen Signature Screen" maxlength="80" />
+                  <small>Wird im Browser-Titel und in E-Mails angezeigt.</small>
+                </div>
+                <div class="form-group">
+                  <label for="system-default-language">Standardsprache</label>
+                  <select id="system-default-language">
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                  </select>
+                  <small>Sprache des Admin-Panels für neue Benutzer.</small>
+                </div>
+                <div class="form-group">
+                  <label for="system-timezone">Zeitzone</label>
+                  <select id="system-timezone">
+                    <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                    <option value="Europe/Vienna">Europe/Vienna</option>
+                    <option value="Europe/Zurich">Europe/Zurich</option>
+                    <option value="Europe/London">Europe/London (GMT/BST)</option>
+                    <option value="Europe/Paris">Europe/Paris</option>
+                    <option value="Europe/Rome">Europe/Rome</option>
+                    <option value="Europe/Madrid">Europe/Madrid</option>
+                    <option value="Europe/Amsterdam">Europe/Amsterdam</option>
+                    <option value="Europe/Warsaw">Europe/Warsaw</option>
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">America/New_York (EST/EDT)</option>
+                    <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                    <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                    <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+                    <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+                    <option value="Australia/Sydney">Australia/Sydney (AEDT)</option>
+                  </select>
+                  <small>Wichtig für korrekte Zeitplanung von Beiträgen.</small>
+                </div>
+                <div class="form-group">
+                  <label>Organisationslogo</label>
+                  <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+                    <img id="system-logo-preview" src="https://www.prasco.net/content/files/images/Prasco/logo-small.png" alt="Logo" style="max-height:48px;max-width:160px;object-fit:contain;border:1px solid #ddd;border-radius:4px;padding:4px;background:#f8f8f8;" />
+                    <div style="display:flex;flex-direction:column;gap:0.35rem;">
+                      <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <input type="text" id="system-logo-url" placeholder="URL des Logos" style="width:260px;" />
+                        <label style="cursor:pointer;padding:0.32rem 0.8rem;background:#4a7c4a;color:#fff;border-radius:4px;font-size:0.82rem;border:1px solid #4a7c4a;white-space:nowrap;">
+                          📁 Hochladen
+                          <input type="file" id="system-logo-file" accept="image/*" style="display:none;" />
+                        </label>
+                      </div>
+                      <div id="system-logo-upload-status" style="font-size:0.78rem;min-height:1.1em;"></div>
+                    </div>
+                  </div>
+                  <small>Organisationslogo – wird auf der Login-Seite und im Admin-Panel angezeigt.</small>
+                </div>
+                <button class="btn btn-primary" id="save-general-settings-btn">Einstellungen speichern</button>
+              </div>
+            </div>
+
             <!-- Spracheinstellungen -->
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="2" y1="8" x2="14" y2="8"/><path d="M8 2a9 4.5 0 0 1 0 12"/><path d="M8 2a9 4.5 0 0 0 0 12"/></svg></span> Spracheinstellungen</h3>
