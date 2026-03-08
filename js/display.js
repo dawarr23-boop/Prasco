@@ -1121,10 +1121,10 @@ async function buildLiveTickerParts() {
     const stationName = ts['transit.stationName'] || '';
     if (stationId) {
       try {
-        const res = await fetch(`/api/transit/departures/${stationId}?limit=20&duration=120`);
+        const res = await fetch(`/api/transit/departures/${stationId}?limit=5&duration=120`);
         if (res.ok) {
           const data = await res.json();
-          const allDeps = (data.data || []).slice(0, 8);
+          const allDeps = (data.data || []).slice(0, 5);
           if (allDeps.length > 0) {
             const items = allDeps.map(dep => {
               const line = dep.line?.name || dep.line?.fahrtNr || '?';
