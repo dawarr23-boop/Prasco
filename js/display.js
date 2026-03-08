@@ -1344,12 +1344,16 @@ function getClientId() {
 async function getOrCreateDeviceToken(displayIdentifier) {
   // 0. Prüfe ob nativer Android-Layer Token bereitstellt (WebView in nativer App)
   if (window.PrascoNative) {
-    const nativeToken = window.PrascoNative.getDeviceToken();
-    if (nativeToken) {
-      localStorage.setItem('deviceToken', nativeToken);
-      deviceToken = nativeToken;
-      console.log('Device-Token von nativer App übernommen');
-      return deviceToken;
+    try {
+      const nativeToken = window.PrascoNative.getDeviceToken();
+      if (nativeToken) {
+        localStorage.setItem('deviceToken', nativeToken);
+        deviceToken = nativeToken;
+        console.log('Device-Token von nativer App übernommen');
+        return deviceToken;
+      }
+    } catch (e) {
+      console.warn('getDeviceToken() nicht verfügbar:', e.message);
     }
   }
 
@@ -1449,13 +1453,13 @@ async function authenticatedFetch(url, options = {}) {
     const data = await response.clone().json().catch(() => ({}));
     if (data.requiresAuth) {
       console.warn('Secure-Mode aktiv — Authentifizierung erforderlich');
-      // Versuche Registrierung falls noch kein Token
-      if (!deviceToken) {
-        const token = await getOrCreateDeviceToken();
-        if (token) {
-          // Retry mit neuem Token
-          return authenticatedFetch(url, options);
-        }
+      // Token ungültig oder fehlt — alten Token löschen und neu registrieren
+      localStorage.removeItem('deviceToken');
+      deviceToken = null;
+      const token = await getOrCreateDeviceToken();
+      if (token) {
+        // Retry mit neuem Token
+        return authenticatedFetch(url, options);
       }
       showAuthStatusScreen('no_token');
       throw new Error('AUTH_REQUIRED');
