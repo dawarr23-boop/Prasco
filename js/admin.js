@@ -4116,7 +4116,7 @@ async function loadDisplays(silent = false) {
                   ${display.showTrafficData !== false ? '<span style="color: #28a745;" title="Verkehr aktiv">🚗</span>' : '<span style="color: #6c757d;" title="Verkehr deaktiviert">🚗</span>'}
                 </p>
                 <p style="color: #007bff; font-size: 0.85em; margin-top: 0.5rem;">
-                  ${t('displays.url')} <code>/public/display.html?id=${escapeHtml(display.identifier)}</code>
+                  ${t('displays.url')} <code>https://prasco.zapto.org/public/display.html?id=${escapeHtml(display.identifier)}</code>
                 </p>
             </div>
             <div class="list-item-actions">
@@ -4622,7 +4622,7 @@ async function loadApkInfo() {
 }
 
 function copyApkPublicUrl() {
-  const url = document.getElementById('apk-public-url')?.textContent || `${location.origin}/download/app`;
+  const url = document.getElementById('apk-public-url')?.textContent || 'https://prasco.zapto.org/download/app';
   navigator.clipboard?.writeText(url).then(() => {
     showNotification('Link kopiert!', 'success');
   }).catch(() => {
@@ -4694,7 +4694,7 @@ function initDisplayAdminPanels() {
     loadApkInfo();
     // Öffentliche Download-URL setzen
     const urlEl = document.getElementById('apk-public-url');
-    if (urlEl) urlEl.textContent = `${location.origin}/download/app`;
+    if (urlEl) urlEl.textContent = 'https://prasco.zapto.org/download/app';
   }
 
   const apkInput = document.getElementById('apk-upload-input');
