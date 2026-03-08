@@ -131,7 +131,22 @@ export const registerDevice = async (
         });
         return;
       }
-      // If display exists but registration not open, fall through to normal logic
+
+      // Display gefunden aber Registrierung nicht offen — prüfe ob Gerät schon verknüpft
+      if (targetDisplay) {
+        if (targetDisplay.serialNumber === serialNumber) {
+          // Selbes Gerät erneut → Token zurückgeben (Pfad 2 würde das auch abfangen)
+        } else {
+          // Anderes Gerät versucht sich zu verknüpfen, aber registrationOpen=false
+          await t.rollback();
+          res.status(403).json({
+            success: false,
+            authorizationStatus: 'registration_closed',
+            message: 'Registrierung für dieses Display ist derzeit nicht geöffnet. Bitte den Administrator kontaktieren.',
+          });
+          return;
+        }
+      }
     }
 
     // ===== Pfad 2: Bekanntes Gerät (serialNumber bereits registriert) =====

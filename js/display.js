@@ -1324,6 +1324,18 @@ function getDisplayIdentifier() {
  * Wird einmalig erzeugt und in localStorage gespeichert.
  */
 function getClientId() {
+  // Versuche zunächst aus nativer Bridge zu laden (überlebt App-Neustarts)
+  if (window.PrascoNative && typeof window.PrascoNative.getDeviceSerial === 'function') {
+    try {
+      const nativeSerial = window.PrascoNative.getDeviceSerial();
+      if (nativeSerial && nativeSerial.startsWith('web-')) {
+        const clientId = nativeSerial.replace('web-', '');
+        localStorage.setItem('deviceClientId', clientId);
+        return clientId;
+      }
+    } catch (e) { /* ignorieren */ }
+  }
+
   let clientId = localStorage.getItem('deviceClientId');
   if (!clientId) {
     // crypto.randomUUID() ist in allen modernen Browsern verfügbar
@@ -1337,6 +1349,10 @@ function getClientId() {
       });
     }
     localStorage.setItem('deviceClientId', clientId);
+    // Native persistieren für App-Neustarts
+    if (window.PrascoNative && typeof window.PrascoNative.setDeviceSerial === 'function') {
+      try { window.PrascoNative.setDeviceSerial('web-' + clientId); } catch (e) { /* ignorieren */ }
+    }
     console.log('Neue Client-ID generiert:', clientId);
   }
   return clientId;
@@ -1404,14 +1420,22 @@ async function getOrCreateDeviceToken(displayIdentifier) {
         deviceToken = data.data.deviceToken;
         deviceAuthStatus = data.data.authorizationStatus;
         localStorage.setItem('deviceToken', deviceToken);
+        // Nativ persistieren damit der Token App-Neustarts überlebt
+        if (window.PrascoNative && typeof window.PrascoNative.setDeviceToken === 'function') {
+          try { window.PrascoNative.setDeviceToken(deviceToken); } catch (e) { /* ignorieren */ }
+        }
         console.log('Gerät registriert, Status:', deviceAuthStatus);
         return deviceToken;
       }
     } else if (response.status === 403) {
-      // Registrierung deaktiviert
+      // Registrierung deaktiviert oder geschlossen
       const data = await response.json().catch(() => ({}));
-      console.warn('Registrierung deaktiviert:', data.message || 'Unbekannter Fehler');
-      deviceAuthStatus = 'registration_disabled';
+      console.warn('Registrierung abgelehnt:', data.message || 'Unbekannter Fehler');
+      // 'registration_closed' = Display belegt, Registrierung nicht offen → weiter warten
+      // 'registration_disabled' = Registrierung global deaktiviert
+      deviceAuthStatus = data.authorizationStatus === 'registration_closed'
+        ? 'registration_disabled'
+        : 'registration_disabled';
       return null;
     } else {
       console.warn('Registrierung fehlgeschlagen, Status:', response.status);
