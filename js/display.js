@@ -1173,9 +1173,19 @@ async function buildLiveTickerParts() {
             const warnings = td.warnings || [];
             const roadworks = td.roadworks || [];
             const closures = td.closures || [];
-            for (const w of warnings.slice(0, 2)) trafficItems.push(`⚠️ ${hw}: ${w.title || w.subtitle || ''}`);
-            for (const r of roadworks.slice(0, 2)) trafficItems.push(`🚧 ${hw}: ${r.title || ''}`);
-            for (const c of closures.slice(0, 1)) trafficItems.push(`🚫 ${hw}: ${c.title || ''}`);
+            const seenIds = new Set();
+            for (const w of warnings.slice(0, 2)) {
+              if (w.identifier) seenIds.add(w.identifier);
+              trafficItems.push(`⚠️ ${hw}: ${w.title || w.subtitle || ''}`);
+            }
+            for (const r of roadworks.slice(0, 2)) {
+              if (r.identifier && seenIds.has(r.identifier)) continue;
+              trafficItems.push(`🚧 ${hw}: ${r.title || ''}`);
+            }
+            for (const c of closures.slice(0, 1)) {
+              if (c.identifier && seenIds.has(c.identifier)) continue;
+              trafficItems.push(`🚫 ${hw}: ${c.title || ''}`);
+            }
             if (warnings.length === 0 && roadworks.length === 0 && closures.length === 0) {
               trafficItems.push(`✅ ${hw}: keine Meldungen`);
             }
