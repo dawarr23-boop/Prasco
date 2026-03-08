@@ -1789,40 +1789,51 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 async function refreshToken() {
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) {
+  // Verhindere parallele Refresh-Anfragen — alle warten auf dasselbe Promise
+  if (refreshToken._pending) {
+    return refreshToken._pending;
+  }
+
+  const refreshTokenValue = localStorage.getItem('refreshToken');
+  if (!refreshTokenValue) {
     console.warn('⚠️ No refresh token available');
     return false;
   }
 
-  try {
-    console.log('🔄 Attempting to refresh access token...');
-    const response = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
+  refreshToken._pending = (async () => {
+    try {
+      console.log('🔄 Attempting to refresh access token...');
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      });
 
-    if (!response.ok) {
-      console.error('❌ Token refresh failed:', response.status);
-      return false;
-    }
-
-    const data = await response.json();
-    if (data.data?.accessToken) {
-      localStorage.setItem('accessToken', data.data.accessToken);
-      if (data.data.refreshToken) {
-        localStorage.setItem('refreshToken', data.data.refreshToken);
+      if (!response.ok) {
+        console.error('❌ Token refresh failed:', response.status);
+        return false;
       }
-      console.log('✅ Access token refreshed successfully');
-      return true;
+
+      const data = await response.json();
+      if (data.data?.accessToken) {
+        localStorage.setItem('accessToken', data.data.accessToken);
+        if (data.data.refreshToken) {
+          localStorage.setItem('refreshToken', data.data.refreshToken);
+        }
+        console.log('✅ Access token refreshed successfully');
+        return true;
+      }
+      console.warn('⚠️ Token refresh response missing accessToken');
+      return false;
+    } catch (error) {
+      console.error('❌ Token refresh error:', error);
+      return false;
+    } finally {
+      refreshToken._pending = null;
     }
-    console.warn('⚠️ Token refresh response missing accessToken');
-    return false;
-  } catch (error) {
-    console.error('❌ Token refresh error:', error);
-    return false;
-  }
+  })();
+
+  return refreshToken._pending;
 }
 
 // ============================================
