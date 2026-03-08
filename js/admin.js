@@ -2100,6 +2100,71 @@ async function updateDashboardStats() {
 // ============================================
 // Posts Management (API)
 // ============================================
+
+/** Maximale Zeichenanzahl pro Text-Beitrag bevor auto-split greift */
+const MAX_TEXT_CHARS_PER_POST = 500;
+
+/** Extrahiert Klartext aus HTML-Inhalt (für Längen-Messung) */
+function getPlainTextFromContent(content) {
+  if (!content) return '';
+  if (!content.trimStart().startsWith('<')) return content;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = content;
+  return tmp.innerText || tmp.textContent || '';
+}
+
+/**
+ * Teilt langen Text in Teile von maximal maxChars Zeichen.
+ * Trennt bevorzugt an: Doppelzeilenumbruch → Zeilenumbruch → Satzende → Wortgrenze.
+ */
+function splitTextIntoParts(text, maxChars = MAX_TEXT_CHARS_PER_POST) {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxChars) return [trimmed];
+
+  const parts = [];
+  let remaining = trimmed;
+
+  while (remaining.length > maxChars) {
+    let splitAt = -1;
+    const min = Math.floor(maxChars * 0.25);
+
+    // 1. Doppelter Zeilenumbruch (Absatzgrenze)
+    const paraIdx = remaining.lastIndexOf('\n\n', maxChars);
+    if (paraIdx > min) { splitAt = paraIdx + 2; }
+
+    // 2. Einfacher Zeilenumbruch
+    if (splitAt === -1) {
+      const nlIdx = remaining.lastIndexOf('\n', maxChars);
+      if (nlIdx > min) { splitAt = nlIdx + 1; }
+    }
+
+    // 3. Satzende (.  !  ?  followed by space or newline)
+    if (splitAt === -1) {
+      let best = -1;
+      for (const end of ['. ', '! ', '? ', '.\n', '!\n', '?\n']) {
+        const idx = remaining.lastIndexOf(end, maxChars);
+        if (idx > min && idx + end.length > best) best = idx + end.length;
+      }
+      if (best > 0) splitAt = best;
+    }
+
+    // 4. Wortgrenze
+    if (splitAt === -1) {
+      const wordIdx = remaining.lastIndexOf(' ', maxChars);
+      if (wordIdx > min) { splitAt = wordIdx + 1; }
+    }
+
+    // 5. Harter Schnitt als letzter Ausweg
+    if (splitAt === -1) { splitAt = maxChars; }
+
+    parts.push(remaining.substring(0, splitAt).trim());
+    remaining = remaining.substring(splitAt).trim();
+  }
+
+  if (remaining.length > 0) parts.push(remaining);
+  return parts;
+}
+
 let currentPostId = null;
 let aiGeneratedMediaId = null; // Von DALL-E 3 generiertes Media-Objekt
 let lastUploadedImageUrl = null; // Zuletzt hochgeladenes Bild für KI-Analyse
@@ -3165,6 +3230,11 @@ function initRichTextEditor() {
   if (!editor || rteEditorEl) return;
   rteEditorEl = editor;
 
+  // Zeichenzähler auf RTE-Eingaben aktualieren
+  editor.addEventListener('input', () => {
+    if (window._updatePostCharCount) window._updatePostCharCount();
+  });
+
   // Formatblock-Select
   const blockSelect = document.getElementById('rte-block');
   if (blockSelect) {
@@ -3593,6 +3663,40 @@ async function handlePostFormSubmit(e) {
 
   if (mediaId) {
     postData.mediaId = mediaId;
+  }
+
+  // Auto-Split für lange Textbeiträge (nur bei neuen Posts)
+  if (!currentPostId && postData.contentType === 'text') {
+    const plainText = getPlainTextFromContent(postData.content);
+    if (plainText.length > MAX_TEXT_CHARS_PER_POST) {
+      const parts = splitTextIntoParts(plainText);
+      const confirmed = confirm(
+        `Der Text ist zu lang für einen Beitrag (${plainText.length} Zeichen).\n\n` +
+        `Automatisch in ${parts.length} Beiträge aufteilen?\n` +
+        `(je max. ${MAX_TEXT_CHARS_PER_POST} Zeichen)`
+      );
+      if (!confirmed) return;
+      try {
+        for (let i = 0; i < parts.length; i++) {
+          await apiRequest('/posts', {
+            method: 'POST',
+            body: JSON.stringify({
+              ...postData,
+              content: parts[i],
+              title: `${postData.title} (${i + 1}/${parts.length})`,
+            }),
+          });
+        }
+        showNotification(`Text in ${parts.length} Beiträge aufgeteilt und gespeichert!`, 'success');
+      } catch (splitError) {
+        showNotification('Fehler beim Aufteilen: ' + splitError.message, 'error');
+        return;
+      }
+      hidePostForm();
+      await loadPosts();
+      await updateDashboardStats();
+      return;
+    }
   }
 
   try {
@@ -5796,6 +5900,47 @@ window.addEventListener('load', async () => {
   const postForm = document.getElementById('postForm');
   if (postForm) {
     postForm.addEventListener('submit', handlePostFormSubmit);
+  }
+
+  // Zeichenzähler für Text-Beiträge
+  function updatePostCharCount() {
+    const typeEl = document.getElementById('post-type');
+    if (typeEl && typeEl.value !== 'text') {
+      const countEl = document.getElementById('post-content-charcount');
+      const hintEl = document.getElementById('post-content-split-hint');
+      if (countEl) countEl.closest('#post-content-info').style.display = 'none';
+      return;
+    }
+    const rteContainer = document.getElementById('rte-container');
+    const textarea = document.getElementById('post-content');
+    let raw = '';
+    if (rteEditorEl && rteContainer && rteContainer.style.display !== 'none') {
+      raw = rteEditorEl.innerText || rteEditorEl.textContent || '';
+    } else if (textarea) {
+      raw = textarea.value;
+    }
+    const len = raw.trim().length;
+    const countEl = document.getElementById('post-content-charcount');
+    const hintEl = document.getElementById('post-content-split-hint');
+    const infoEl = document.getElementById('post-content-info');
+    if (!countEl || !infoEl) return;
+    infoEl.style.display = 'block';
+    countEl.textContent = len;
+    countEl.style.color = len > MAX_TEXT_CHARS_PER_POST ? '#c0392b' : '#888';
+    if (hintEl) hintEl.style.display = len > MAX_TEXT_CHARS_PER_POST ? 'inline' : 'none';
+  }
+
+  const postContentTextarea = document.getElementById('post-content');
+  if (postContentTextarea) {
+    postContentTextarea.addEventListener('input', updatePostCharCount);
+  }
+  // Auch auf RTE-Änderungen reagieren – wird nach RTE-Init gesetzt
+  window._updatePostCharCount = updatePostCharCount;
+
+  // Post-Typ-Wechsel: Zähler ein-/ausblenden
+  const postTypeEl = document.getElementById('post-type');
+  if (postTypeEl) {
+    postTypeEl.addEventListener('change', updatePostCharCount);
   }
   
   // Media-URL Input: Zeige Offline-Download Option für externe Videos
