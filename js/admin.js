@@ -2013,13 +2013,17 @@ function initSessionManagement() {
 // Navigation
 // ============================================
 function navigateTo(section) {
-  document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
+  document.querySelectorAll('.section').forEach((s) => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
   const navLinks = document.querySelectorAll('.sidebar-menu a:not(#logout)');
   navLinks.forEach((link) => link.classList.remove('active'));
 
   const targetSection = document.getElementById(`${section}-section`);
   if (targetSection) {
     targetSection.classList.add('active');
+    targetSection.style.display = 'block';
     const activeLink = document.querySelector(`.sidebar-menu a[href="#${section}"]`);
     if (activeLink) {
       activeLink.classList.add('active');
@@ -6395,9 +6399,15 @@ window.addEventListener('load', async () => {
     });
   }
 
-  // Initial laden - Posts, Categories und Displays parallel für schnellere Ladezeit
+  // Initial laden - Posts und Categories; Displays nur bei Bedarf (lazy)
   startFooterClock();
-  await Promise.all([loadPosts(), loadCategories(), loadDisplays()]);
+  await Promise.all([loadPosts(), loadCategories()]);
+  // Displays-Cache für Dashboard-Stats vorab befüllen (kein DOM-Rendering)
+  try {
+    const _dres = await apiRequest('/displays');
+    displaysCache = _dres?.data || [];
+    if (_dres?.license) MAX_LICENSED_DISPLAYS = _dres.license.max || 2;
+  } catch (_) {}
   loadSecuritySettings(); // Sicherheitseinstellungen laden (non-blocking)
   initDisplayAdminPanels(); // Fleet, License, APK Panels initialisieren
   await updateDashboardStats();
