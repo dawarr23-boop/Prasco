@@ -58,6 +58,9 @@ import newsRoutes from './routes/news';
 import { swaggerSpec } from './config/swagger';
 
 const app: Application = express();
+// Trust the first proxy hop (Docker/nginx) so express-rate-limit can read
+// X-Forwarded-For correctly instead of throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 8443;
 const SSL_ENABLED = process.env.SSL_ENABLED === 'true';
 const SSL_KEY_PATH = process.env.SSL_KEY_PATH || './ssl/server.key';
