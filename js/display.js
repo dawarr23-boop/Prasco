@@ -1200,50 +1200,47 @@ async function buildLiveTickerParts() {
 
   // 4. Nachrichten im Ticker
   if (currentDisplayInfo && currentDisplayInfo.tickerNews) {
-    const ns = liveDataState.newsSettings || {};
-    if (ns['news.enabled'] === 'true') {
-      try {
-        const res = await fetch('/api/news');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.data) {
-            const allItems = [...(data.data.world || []), ...(data.data.local || [])].slice(0, 5);
-            const newsItems = allItems.map(n => `📰 ${n.title || ''}`).filter(Boolean);
-            if (newsItems.length > 0) parts.push(newsItems.join('  ·  '));
-          }
+    try {
+      const res = await fetch('/api/news');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.data) {
+          const allItems = [...(data.data.world || []), ...(data.data.local || [])].slice(0, 5);
+          const newsItems = allItems.map(n => `📰 ${n.title || ''}`).filter(Boolean);
+          if (newsItems.length > 0) parts.push(newsItems.join('  ·  '));
         }
-      } catch (e) {
-        console.log('Ticker Nachrichten Fehler:', e);
       }
+    } catch (e) {
+      console.log('Ticker Nachrichten Fehler:', e);
     }
   }
 
   // 5. Wetter im Ticker
   if (currentDisplayInfo && currentDisplayInfo.tickerWeather) {
     const ws = liveDataState.weatherSettings || {};
-    if (ws['weather.enabled'] === 'true') {
-      const lat = ws['weather.latitude'];
-      const lon = ws['weather.longitude'];
-      const locationName = ws['weather.locationName'] || 'Wetter';
-      if (lat && lon) {
-        try {
-          const res = await fetch(`/api/weather/current?lat=${lat}&lon=${lon}&name=${encodeURIComponent(locationName)}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.data) {
-              const c = data.data.current;
-              if (c) {
-                const temp = c.temperature !== undefined ? `${Math.round(c.temperature)}°C` : '';
-                const icon = c.icon || '🌤';
-                const desc = c.description || '';
-                parts.push(`${icon} ${locationName}: ${temp}${desc ? ' · ' + desc : ''}`);
-              }
+    const lat = ws['weather.latitude'];
+    const lon = ws['weather.longitude'];
+    const locationName = ws['weather.locationName'] || 'Wetter';
+    if (lat && lon) {
+      try {
+        const res = await fetch(`/api/weather/current?lat=${lat}&lon=${lon}&name=${encodeURIComponent(locationName)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+            const c = data.data.current;
+            if (c) {
+              const temp = c.temperature !== undefined ? `${Math.round(c.temperature)}°C` : '';
+              const icon = c.icon || '🌤';
+              const desc = c.description || '';
+              parts.push(`${icon} ${locationName}: ${temp}${desc ? ' · ' + desc : ''}`);
             }
           }
-        } catch (e) {
-          console.log('Ticker Wetter Fehler:', e);
         }
+      } catch (e) {
+        console.log('Ticker Wetter Fehler:', e);
       }
+    } else {
+      console.log('Ticker Wetter: Kein Standort konfiguriert (weather.latitude/longitude fehlen)');
     }
   }
 
