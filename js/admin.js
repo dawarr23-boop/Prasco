@@ -4846,6 +4846,7 @@ async function handleDisplayFormSubmit(e) {
     tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
     clockStyle: document.querySelector('input[name="clockStyle"]:checked')?.value || 'digital',
+  };
 
   try {
     if (currentDisplayId) {
