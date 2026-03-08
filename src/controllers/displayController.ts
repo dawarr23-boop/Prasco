@@ -45,6 +45,8 @@ export const getAllDisplays = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'tickerNews',
+        'tickerWeather',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -105,6 +107,8 @@ export const getDisplayById = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'tickerNews',
+        'tickerWeather',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -157,6 +161,8 @@ export const getDisplayByIdentifier = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'tickerNews',
+        'tickerWeather',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -235,6 +241,8 @@ export const createDisplay = async (
       tickerText: req.body.tickerText || null,
       tickerTransit: req.body.tickerTransit === true || req.body.tickerTransit === 'true',
       tickerTraffic: req.body.tickerTraffic === true || req.body.tickerTraffic === 'true',
+      tickerNews: req.body.tickerNews === true || req.body.tickerNews === 'true',
+      tickerWeather: req.body.tickerWeather === true || req.body.tickerWeather === 'true',
       clockStyle: req.body.clockStyle === 'analog' ? 'analog' : 'digital',
       organizationId: req.user?.organizationId,
     });
@@ -298,6 +306,8 @@ export const updateDisplay = async (
     if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
     if (req.body.tickerTransit !== undefined) display.tickerTransit = req.body.tickerTransit === true || req.body.tickerTransit === 'true';
     if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
+    if (req.body.tickerNews !== undefined) display.tickerNews = req.body.tickerNews === true || req.body.tickerNews === 'true';
+    if (req.body.tickerWeather !== undefined) display.tickerWeather = req.body.tickerWeather === true || req.body.tickerWeather === 'true';
     if (req.body.clockStyle !== undefined) display.clockStyle = req.body.clockStyle === 'analog' ? 'analog' : 'digital';
 
     await display.save();
