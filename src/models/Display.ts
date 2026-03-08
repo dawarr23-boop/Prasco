@@ -17,6 +17,8 @@ interface DisplayAttributes {
   tickerText?: string;
   tickerTransit: boolean;
   tickerTraffic: boolean;
+  tickerNews: boolean;
+  tickerWeather: boolean;
   clockStyle: 'digital' | 'analog';
   organizationId?: number;
   // Device Registration & Authorization
@@ -38,7 +40,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'clockStyle' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'clientType' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'tickerNews' | 'tickerWeather' | 'clockStyle' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'clientType' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -55,6 +57,8 @@ class Display
   public tickerText?: string;
   public tickerTransit!: boolean;
   public tickerTraffic!: boolean;
+  public tickerNews!: boolean;
+  public tickerWeather!: boolean;
   public clockStyle!: 'digital' | 'analog';
   public organizationId?: number;
   // Device Registration & Authorization
@@ -140,6 +144,18 @@ Display.init(
       allowNull: false,
       defaultValue: false,
       field: 'ticker_traffic',
+    },
+    tickerNews: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'ticker_news',
+    },
+    tickerWeather: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'ticker_weather',
     },
     clockStyle: {
       type: DataTypes.STRING(20),

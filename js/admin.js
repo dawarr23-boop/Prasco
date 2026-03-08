@@ -395,6 +395,8 @@ const translations = {
     'displays.tickerLiveTitle': 'Live-Daten im Ticker',
     'displays.tickerTransit': 'ÖPNV-Abfahrten im Ticker anzeigen',
     'displays.tickerTraffic': 'Verkehrsmeldungen im Ticker anzeigen',
+    'displays.tickerNews': 'Nachrichten im Ticker anzeigen',
+    'displays.tickerWeather': 'Wetter im Ticker anzeigen',
     'displays.tickerLiveHint': 'Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.',
     'displays.clockStyleTitle': 'Uhrendesign',
     'displays.clockStyleDigital': '🕐 Digital (Standard)',
@@ -827,6 +829,8 @@ const translations = {
     'displays.tickerLiveTitle': 'Live data in ticker',
     'displays.tickerTransit': 'Show ÖPNV departures in ticker',
     'displays.tickerTraffic': 'Show traffic warnings in ticker',
+    'displays.tickerNews': 'Show news in ticker',
+    'displays.tickerWeather': 'Show weather in ticker',
     'displays.tickerLiveHint': 'Live data is automatically updated every 60 seconds and appended to the static text.',
     'displays.clockStyleTitle': 'Clock Design',
     'displays.clockStyleDigital': '🕐 Digital (Default)',
@@ -1261,6 +1265,8 @@ const translations = {
     'displays.tickerLiveTitle': 'Dati live nel notiziario',
     'displays.tickerTransit': 'Mostra partenze trasporto nel notiziario',
     'displays.tickerTraffic': 'Mostra meldingen traffico nel notiziario',
+    'displays.tickerNews': 'Mostra notizie nel notiziario',
+    'displays.tickerWeather': 'Mostra meteo nel notiziario',
     'displays.tickerLiveHint': 'I dati live vengono aggiornati automaticamente ogni 60 secondi.',
     'displays.clockStyleTitle': 'Design Orologio',
     'displays.clockStyleDigital': '🕐 Digitale (Standard)',
@@ -4378,6 +4384,10 @@ async function editDisplay(id) {
   if (tickerTransitEl) tickerTransitEl.checked = display.tickerTransit === true;
   const tickerTrafficEl = document.getElementById('display-tickerTraffic');
   if (tickerTrafficEl) tickerTrafficEl.checked = display.tickerTraffic === true;
+  const tickerNewsEl = document.getElementById('display-tickerNews');
+  if (tickerNewsEl) tickerNewsEl.checked = display.tickerNews === true;
+  const tickerWeatherEl = document.getElementById('display-tickerWeather');
+  if (tickerWeatherEl) tickerWeatherEl.checked = display.tickerWeather === true;
 
   const clockStyleAnalog = document.getElementById('clock-style-analog');
   const clockStyleDigital = document.getElementById('clock-style-digital');
@@ -4965,6 +4975,8 @@ async function handleDisplayFormSubmit(e) {
     tickerText: (document.getElementById('display-tickerText')?.value || '').trim(),
     tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
+    tickerNews: document.getElementById('display-tickerNews')?.checked === true,
+    tickerWeather: document.getElementById('display-tickerWeather')?.checked === true,
     clockStyle: document.querySelector('input[name="clockStyle"]:checked')?.value || 'digital',
   };
 
