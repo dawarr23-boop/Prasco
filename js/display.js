@@ -1427,9 +1427,8 @@ async function getOrCreateDeviceToken(displayIdentifier) {
  * Authentifizierter Fetch-Wrapper.
  * Fügt Device-Token als Bearer-Header hinzu (wenn vorhanden).
  * Behandelt 401/403 Antworten für den Secure-Mode.
- * @param {boolean} [_retried=false] - Interner Guard gegen rekursive Retry-Schleifen
  */
-async function authenticatedFetch(url, options = {}, _retried = false) {
+async function authenticatedFetch(url, options = {}) {
   const fetchOptions = { ...options };
 
   const activeToken = isPreviewMode
@@ -1458,22 +1457,16 @@ async function authenticatedFetch(url, options = {}, _retried = false) {
       throw new Error('PREVIEW_NO_AUTH');
     }
     const data = await response.clone().json().catch(() => ({}));
-    if (data.requiresAuth && !_retried) {
-      console.warn('Secure-Mode aktiv — Token ungültig, versuche Neu-Registrierung...');
-      // Token ungültig — alten Token löschen und mit Display-Identifier neu registrieren
+    if (data.requiresAuth) {
+      console.warn('Secure-Mode aktiv — Authentifizierung erforderlich');
+      // Token ungültig oder fehlt — alten Token löschen und neu registrieren
       localStorage.removeItem('deviceToken');
       deviceToken = null;
-      const token = await getOrCreateDeviceToken(currentDisplayIdentifier || undefined);
+      const token = await getOrCreateDeviceToken(currentDisplayIdentifier);
       if (token) {
-        console.log('Neu-Registrierung erfolgreich, wiederhole Anfrage...');
-        // Einmaliger Retry mit neuem Token (kein weiterer Retry möglich)
-        return authenticatedFetch(url, options, true);
+        // Retry mit neuem Token
+        return authenticatedFetch(url, options);
       }
-      showAuthStatusScreen('no_token');
-      throw new Error('AUTH_REQUIRED');
-    } else if (data.requiresAuth && _retried) {
-      // Auch nach Neu-Registrierung abgelehnt → Auth-Screen anzeigen
-      console.warn('Auch nach Neu-Registrierung abgelehnt — zeige Auth-Screen');
       showAuthStatusScreen('no_token');
       throw new Error('AUTH_REQUIRED');
     }
@@ -1608,8 +1601,8 @@ function startAuthStatusPolling() {
 
   async function checkStatus() {
     if (!deviceToken) {
-      // Versuche erneut zu registrieren
-      const token = await getOrCreateDeviceToken();
+      // Versuche erneut zu registrieren — mit Display-Identifier damit registrationOpen greift
+      const token = await getOrCreateDeviceToken(currentDisplayIdentifier);
       if (token) {
         // Token erhalten, prüfe Status
         deviceToken = token;
