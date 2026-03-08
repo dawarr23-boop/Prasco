@@ -3385,15 +3385,15 @@ async function showPostPreview(id) {
 
   let html = '';
   const titleHtml = post.showTitle === true
-    ? `<h1 style="font-size:clamp(0.9rem,2.5vw,1.6rem);margin:0 0 0.8em;color:${isDark ? '#d0d0d0' : '#1a1a1a'};line-height:1.3;font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;border-left:4px solid ${isDark ? '#6a9fd8' : '#58585a'};padding-left:0.8rem;text-align:left;width:100%;">${escapeHtml(post.title)}</h1>` : '';
+    ? `<h1 style="font-size:clamp(1rem,3.5vw,3.2rem);margin:0 0 0.8em;color:${isDark ? '#d0d0d0' : '#1a1a1a'};line-height:1.3;font-family:'Roboto Condensed','Arial Narrow',sans-serif;font-weight:700;border-left:5px solid ${isDark ? '#6a9fd8' : '#58585a'};padding-left:1.2rem;text-align:left;width:100%;">${escapeHtml(post.title)}</h1>` : '';
 
   switch (ct) {
     case 'text': {
-      const isRteHtml = /<[a-zA-Z][^>]*>/.test(post.content || '');
+      const isRteHtml = (post.content || '').trimStart().startsWith('<');
       const previewBody = isRteHtml
         ? (post.content || '')
-        : escapeHtml(post.content || '').replace(/\n/g, '<br>');
-      html = `${titleHtml}<div style="font-size:clamp(0.9rem,2.5vw,1.8rem);text-align:center;max-width:90%;line-height:1.5;">${previewBody}</div>`;
+        : (post.content || '').replace(/\n/g, '<br>');
+      html = `${titleHtml}<div style="font-size:clamp(0.75rem,2vw,1.6rem);text-align:left;width:100%;line-height:1.9;color:${isDark ? '#e0e0e0' : '#2c2c2c'};">${previewBody}</div>`;
       break;
     }
     case 'image': {
@@ -4646,7 +4646,8 @@ function initDisplayAdminPanels() {
 
   // Fleet Overview toggle
   const fleetBtn = document.getElementById('showFleetOverviewBtn');
-  if (fleetBtn) {
+  if (fleetBtn && !fleetBtn._listenerAttached) {
+    fleetBtn._listenerAttached = true;
     fleetBtn.addEventListener('click', () => {
       const panel = document.getElementById('fleet-overview-panel');
       if (panel.style.display === 'none') {
@@ -4658,7 +4659,8 @@ function initDisplayAdminPanels() {
   }
 
   const closeFleetBtn = document.getElementById('closeFleetOverviewBtn');
-  if (closeFleetBtn) {
+  if (closeFleetBtn && !closeFleetBtn._listenerAttached) {
+    closeFleetBtn._listenerAttached = true;
     closeFleetBtn.addEventListener('click', () => {
       document.getElementById('fleet-overview-panel').style.display = 'none';
     });
@@ -4671,12 +4673,14 @@ function initDisplayAdminPanels() {
   }
 
   const saveLicenseBtn = document.getElementById('saveLicenseLimitBtn');
-  if (saveLicenseBtn) {
+  if (saveLicenseBtn && !saveLicenseBtn._listenerAttached) {
+    saveLicenseBtn._listenerAttached = true;
     saveLicenseBtn.addEventListener('click', saveLicenseLimit);
   }
 
   const licenseInput = document.getElementById('license-max-input');
-  if (licenseInput) {
+  if (licenseInput && !licenseInput._listenerAttached) {
+    licenseInput._listenerAttached = true;
     licenseInput.addEventListener('input', () => { licenseInput._userEdited = true; });
   }
 
@@ -4694,12 +4698,14 @@ function initDisplayAdminPanels() {
   }
 
   const apkInput = document.getElementById('apk-upload-input');
-  if (apkInput) {
+  if (apkInput && !apkInput._listenerAttached) {
+    apkInput._listenerAttached = true;
     apkInput.addEventListener('change', uploadApk);
   }
 
   const downloadApkBtn = document.getElementById('downloadApkBtn');
-  if (downloadApkBtn) {
+  if (downloadApkBtn && !downloadApkBtn._listenerAttached) {
+    downloadApkBtn._listenerAttached = true;
     downloadApkBtn.addEventListener('click', downloadApk);
   }
 }
@@ -6625,6 +6631,7 @@ async function switchSystemMode() {
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize translations on page load
   translatePage();
+  applyTranslations();
   
   // Radio button change events
   const radios = document.querySelectorAll('input[name="system-mode"]');
