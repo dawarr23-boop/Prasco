@@ -45,6 +45,7 @@ export const getAllDisplays = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'clockStyle',
         'showTransitData',
         'showTrafficData',
         'organizationId',
@@ -104,6 +105,7 @@ export const getDisplayById = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'clockStyle',
         'showTransitData',
         'showTrafficData',
         'organizationId',
@@ -155,6 +157,7 @@ export const getDisplayByIdentifier = async (
         'tickerText',
         'tickerTransit',
         'tickerTraffic',
+        'clockStyle',
         'showTransitData',
         'showTrafficData',
         'registrationOpen',
@@ -232,6 +235,7 @@ export const createDisplay = async (
       tickerText: req.body.tickerText || null,
       tickerTransit: req.body.tickerTransit === true || req.body.tickerTransit === 'true',
       tickerTraffic: req.body.tickerTraffic === true || req.body.tickerTraffic === 'true',
+      clockStyle: req.body.clockStyle === 'analog' ? 'analog' : 'digital',
       organizationId: req.user?.organizationId,
     });
 
@@ -294,6 +298,7 @@ export const updateDisplay = async (
     if (req.body.tickerText !== undefined) display.tickerText = req.body.tickerText || null;
     if (req.body.tickerTransit !== undefined) display.tickerTransit = req.body.tickerTransit === true || req.body.tickerTransit === 'true';
     if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
+    if (req.body.clockStyle !== undefined) display.clockStyle = req.body.clockStyle === 'analog' ? 'analog' : 'digital';
 
     await display.save();
 

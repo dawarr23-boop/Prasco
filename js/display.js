@@ -3922,6 +3922,36 @@ function generateQRCode(text) {
 
 
 // Uhr aktualisieren
+let analogClockInitialized = false;
+
+function initAnalogClockTicks() {
+  const tickGroup = document.getElementById('clock-ticks');
+  if (!tickGroup || tickGroup.children.length > 0) return;
+  for (let i = 0; i < 60; i++) {
+    const angle = i * 6; // 360/60
+    const isHour = i % 5 === 0;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    const r1 = isHour ? 38 : 43;
+    const r2 = 47;
+    const rad = (angle - 90) * Math.PI / 180;
+    line.setAttribute('x1', String(50 + r1 * Math.cos(rad)));
+    line.setAttribute('y1', String(50 + r1 * Math.sin(rad)));
+    line.setAttribute('x2', String(50 + r2 * Math.cos(rad)));
+    line.setAttribute('y2', String(50 + r2 * Math.sin(rad)));
+    line.setAttribute('stroke', '#111');
+    line.setAttribute('stroke-width', isHour ? '3' : '1');
+    line.setAttribute('stroke-linecap', 'round');
+    tickGroup.appendChild(line);
+  }
+  analogClockInitialized = true;
+}
+
+function setHandAngle(id, angleDeg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.setAttribute('transform', `rotate(${angleDeg}, 50, 50)`);
+}
+
 function startClock() {
   updateClock();
   setInterval(updateClock, 1000);
@@ -3933,9 +3963,33 @@ function updateClock() {
   const minutes = String(now.getMinutes()).padStart(2, '0');
   const seconds = String(now.getSeconds()).padStart(2, '0');
 
+  const useAnalog = currentDisplayInfo?.clockStyle === 'analog';
+
   const clockElement = document.getElementById('clock');
-  if (clockElement) {
-    clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+  const analogElement = document.getElementById('clock-analog');
+
+  if (useAnalog) {
+    if (clockElement) clockElement.style.display = 'none';
+    if (analogElement) {
+      analogElement.style.display = '';
+      if (!analogClockInitialized) initAnalogClockTicks();
+      const h = now.getHours() % 12;
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      // Stunden: 30° pro Stunde + 0.5° pro Minute
+      setHandAngle('hand-hour', h * 30 + m * 0.5);
+      // Minuten: 6° pro Minute + 0.1° pro Sekunde
+      setHandAngle('hand-minute', m * 6 + s * 0.1);
+      // Sekunden: 6° pro Sekunde, DB-Stil: gestoppt bei 59° für ~1s (vereinfacht: linear)
+      setHandAngle('hand-second', s * 6);
+      setHandAngle('hand-second-bob', s * 6);
+    }
+  } else {
+    if (clockElement) {
+      clockElement.style.display = '';
+      clockElement.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    if (analogElement) analogElement.style.display = 'none';
   }
 }
 

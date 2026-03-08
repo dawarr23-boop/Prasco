@@ -1116,7 +1116,19 @@
                   <small style="color: #6c757d; display: block; margin-top: 0.4rem;" data-translate="displays.tickerLiveHint">Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.</small>
                 </div>
 
-                <div class="form-actions">
+                <div class="form-group">
+                  <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;" data-translate="displays.clockStyleTitle">Uhrendesign</label>
+                  <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 0.25rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="clockStyle" id="clock-style-digital" value="digital" checked />
+                      <span data-translate="displays.clockStyleDigital">🕐 Digital (Standard)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                      <input type="radio" name="clockStyle" id="clock-style-analog" value="analog" />
+                      <span data-translate="displays.clockStyleAnalog">🕰 Analog (Bahnhofsuhr)</span>
+                    </label>
+                  </div>
+                </div>
                   <button type="submit" class="btn btn-primary" data-translate="displays.create">Display erstellen</button>
                   <button type="button" class="btn btn-secondary" id="hideDisplayFormBtn" data-translate="btn.cancel">
                     Abbrechen

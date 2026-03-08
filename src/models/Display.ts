@@ -17,6 +17,7 @@ interface DisplayAttributes {
   tickerText?: string;
   tickerTransit: boolean;
   tickerTraffic: boolean;
+  clockStyle: 'digital' | 'analog';
   organizationId?: number;
   // Device Registration & Authorization
   serialNumber?: string;
@@ -37,7 +38,7 @@ interface DisplayAttributes {
 interface DisplayCreationAttributes
   extends Optional<
     DisplayAttributes,
-    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'clientType' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
+    'id' | 'description' | 'tickerText' | 'tickerTransit' | 'tickerTraffic' | 'clockStyle' | 'isActive' | 'showTransitData' | 'showTrafficData' | 'authorizationStatus' | 'serialNumber' | 'macAddress' | 'deviceToken' | 'clientType' | 'deviceModel' | 'deviceOsVersion' | 'appVersion' | 'lastSeenAt' | 'registeredAt' | 'registrationOpen' | 'createdAt' | 'updatedAt'
   > {}
 
 class Display
@@ -54,6 +55,7 @@ class Display
   public tickerText?: string;
   public tickerTransit!: boolean;
   public tickerTraffic!: boolean;
+  public clockStyle!: 'digital' | 'analog';
   public organizationId?: number;
   // Device Registration & Authorization
   public serialNumber?: string;
@@ -138,6 +140,12 @@ Display.init(
       allowNull: false,
       defaultValue: false,
       field: 'ticker_traffic',
+    },
+    clockStyle: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: 'digital',
+      field: 'clock_style',
     },
     organizationId: {
       type: DataTypes.INTEGER,

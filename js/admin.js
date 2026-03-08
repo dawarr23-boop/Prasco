@@ -396,6 +396,9 @@ const translations = {
     'displays.tickerTransit': 'ÖPNV-Abfahrten im Ticker anzeigen',
     'displays.tickerTraffic': 'Verkehrsmeldungen im Ticker anzeigen',
     'displays.tickerLiveHint': 'Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.',
+    'displays.clockStyleTitle': 'Uhrendesign',
+    'displays.clockStyleDigital': '🕐 Digital (Standard)',
+    'displays.clockStyleAnalog': '🕰 Analog (Bahnhofsuhr)',
     'displays.liveDataHint': 'Steuert, ob Live-Daten-Widgets auf diesem Display eingeblendet werden',
     'displays.create': 'Display erstellen',
     'displays.saveChanges': 'Änderungen speichern',
@@ -825,6 +828,9 @@ const translations = {
     'displays.tickerTransit': 'Show ÖPNV departures in ticker',
     'displays.tickerTraffic': 'Show traffic warnings in ticker',
     'displays.tickerLiveHint': 'Live data is automatically updated every 60 seconds and appended to the static text.',
+    'displays.clockStyleTitle': 'Clock Design',
+    'displays.clockStyleDigital': '🕐 Digital (Default)',
+    'displays.clockStyleAnalog': '🕰 Analog (Station Clock)',
     'displays.liveDataHint': 'Controls whether live data widgets are shown on this display',
     'displays.create': 'Create Display',
     'displays.saveChanges': 'Save Changes',
@@ -1256,6 +1262,9 @@ const translations = {
     'displays.tickerTransit': 'Mostra partenze trasporto nel notiziario',
     'displays.tickerTraffic': 'Mostra meldingen traffico nel notiziario',
     'displays.tickerLiveHint': 'I dati live vengono aggiornati automaticamente ogni 60 secondi.',
+    'displays.clockStyleTitle': 'Design Orologio',
+    'displays.clockStyleDigital': '🕐 Digitale (Standard)',
+    'displays.clockStyleAnalog': '🕰 Analogico (Orologio Stazione)',
     'displays.liveDataHint': 'Controlla se i widget di dati in diretta vengono mostrati su questo display',
     'displays.create': 'Crea Display',
     'displays.saveChanges': 'Salva Modifiche',
@@ -4250,7 +4259,13 @@ async function editDisplay(id) {
   const tickerTrafficEl = document.getElementById('display-tickerTraffic');
   if (tickerTrafficEl) tickerTrafficEl.checked = display.tickerTraffic === true;
 
-  // Scrolle zum Formular
+  const clockStyleAnalog = document.getElementById('clock-style-analog');
+  const clockStyleDigital = document.getElementById('clock-style-digital');
+  if (clockStyleAnalog && clockStyleDigital) {
+    const isAnalog = display.clockStyle === 'analog';
+    clockStyleAnalog.checked = isAnalog;
+    clockStyleDigital.checked = !isAnalog;
+  }
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -4830,7 +4845,7 @@ async function handleDisplayFormSubmit(e) {
     tickerText: (document.getElementById('display-tickerText')?.value || '').trim(),
     tickerTransit: document.getElementById('display-tickerTransit')?.checked === true,
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
-  };
+    clockStyle: document.querySelector('input[name="clockStyle"]:checked')?.value || 'digital',
 
   try {
     if (currentDisplayId) {
