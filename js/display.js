@@ -1705,8 +1705,8 @@ async function loadDisplayInfo(identifier) {
         currentDisplayInfo = data.data;
         console.log('Display geladen:', data.data.name, '| Transit:', data.data.showTransitData, '| Traffic:', data.data.showTrafficData);
 
-        // Prüfe ob Registrierung offen ist (vom Admin gestartet)
-        if (data.data.registrationOpen) {
+        // Prüfe ob Registrierung offen ist (vom Admin gestartet) — nicht im Preview-Modus
+        if (data.data.registrationOpen && !isPreviewMode) {
           console.log('Registrierung offen für Display', identifier, '— registriere automatisch...');
           // Alten Token löschen, damit eine frische Registrierung stattfindet
           localStorage.removeItem('deviceToken');
@@ -4424,8 +4424,8 @@ document.addEventListener('click', (e) => {
     }
   }
   
-  // 3. Lade Display-Info falls vorhanden (nicht im Preview-Modus)
-  if (currentDisplayIdentifier && !isPreviewMode) {
+  // 3. Lade Display-Info falls vorhanden (inkl. Preview-Modus für korrekte Einstellungen wie clockStyle)
+  if (currentDisplayIdentifier) {
     await loadDisplayInfo(currentDisplayIdentifier);
   }
   
