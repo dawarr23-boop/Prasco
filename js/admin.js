@@ -397,6 +397,7 @@ const translations = {
     'displays.tickerTraffic': 'Verkehrsmeldungen im Ticker anzeigen',
     'displays.tickerNews': 'Nachrichten im Ticker anzeigen',
     'displays.tickerWeather': 'Wetter im Ticker anzeigen',
+    'displays.showRainRadar': 'Regenradar anzeigen',
     'displays.tickerLiveHint': 'Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.',
     'displays.clockStyleTitle': 'Uhrendesign',
     'displays.clockStyleDigital': '🕐 Digital (Standard)',
@@ -831,6 +832,7 @@ const translations = {
     'displays.tickerTraffic': 'Show traffic warnings in ticker',
     'displays.tickerNews': 'Show news in ticker',
     'displays.tickerWeather': 'Show weather in ticker',
+    'displays.showRainRadar': 'Show rain radar',
     'displays.tickerLiveHint': 'Live data is automatically updated every 60 seconds and appended to the static text.',
     'displays.clockStyleTitle': 'Clock Design',
     'displays.clockStyleDigital': '🕐 Digital (Default)',
@@ -1267,6 +1269,7 @@ const translations = {
     'displays.tickerTraffic': 'Mostra meldingen traffico nel notiziario',
     'displays.tickerNews': 'Mostra notizie nel notiziario',
     'displays.tickerWeather': 'Mostra meteo nel notiziario',
+    'displays.showRainRadar': 'Mostra radar pioggia',
     'displays.tickerLiveHint': 'I dati live vengono aggiornati automaticamente ogni 60 secondi.',
     'displays.clockStyleTitle': 'Design Orologio',
     'displays.clockStyleDigital': '🕐 Digitale (Standard)',
@@ -4388,6 +4391,8 @@ async function editDisplay(id) {
   if (tickerNewsEl) tickerNewsEl.checked = display.tickerNews === true;
   const tickerWeatherEl = document.getElementById('display-tickerWeather');
   if (tickerWeatherEl) tickerWeatherEl.checked = display.tickerWeather === true;
+  const showRainRadarEl = document.getElementById('display-showRainRadar');
+  if (showRainRadarEl) showRainRadarEl.checked = display.showRainRadar === true;
 
   const clockStyleAnalog = document.getElementById('clock-style-analog');
   const clockStyleDigital = document.getElementById('clock-style-digital');
@@ -4977,6 +4982,7 @@ async function handleDisplayFormSubmit(e) {
     tickerTraffic: document.getElementById('display-tickerTraffic')?.checked === true,
     tickerNews: document.getElementById('display-tickerNews')?.checked === true,
     tickerWeather: document.getElementById('display-tickerWeather')?.checked === true,
+    showRainRadar: document.getElementById('display-showRainRadar')?.checked === true,
     clockStyle: document.querySelector('input[name="clockStyle"]:checked')?.value || 'digital',
   };
 

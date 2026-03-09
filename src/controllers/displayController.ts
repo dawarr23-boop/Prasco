@@ -47,6 +47,7 @@ export const getAllDisplays = async (
         'tickerTraffic',
         'tickerNews',
         'tickerWeather',
+        'showRainRadar',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -109,6 +110,7 @@ export const getDisplayById = async (
         'tickerTraffic',
         'tickerNews',
         'tickerWeather',
+        'showRainRadar',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -163,6 +165,7 @@ export const getDisplayByIdentifier = async (
         'tickerTraffic',
         'tickerNews',
         'tickerWeather',
+        'showRainRadar',
         'clockStyle',
         'showTransitData',
         'showTrafficData',
@@ -243,6 +246,7 @@ export const createDisplay = async (
       tickerTraffic: req.body.tickerTraffic === true || req.body.tickerTraffic === 'true',
       tickerNews: req.body.tickerNews === true || req.body.tickerNews === 'true',
       tickerWeather: req.body.tickerWeather === true || req.body.tickerWeather === 'true',
+      showRainRadar: req.body.showRainRadar === true || req.body.showRainRadar === 'true',
       clockStyle: req.body.clockStyle === 'analog' ? 'analog' : 'digital',
       organizationId: req.user?.organizationId,
     });
@@ -308,6 +312,7 @@ export const updateDisplay = async (
     if (req.body.tickerTraffic !== undefined) display.tickerTraffic = req.body.tickerTraffic === true || req.body.tickerTraffic === 'true';
     if (req.body.tickerNews !== undefined) display.tickerNews = req.body.tickerNews === true || req.body.tickerNews === 'true';
     if (req.body.tickerWeather !== undefined) display.tickerWeather = req.body.tickerWeather === true || req.body.tickerWeather === 'true';
+    if (req.body.showRainRadar !== undefined) display.showRainRadar = req.body.showRainRadar === true || req.body.showRainRadar === 'true';
     if (req.body.clockStyle !== undefined) display.clockStyle = req.body.clockStyle === 'analog' ? 'analog' : 'digital';
 
     await display.save();

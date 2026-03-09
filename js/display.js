@@ -621,7 +621,7 @@ async function renderWeatherWidget() {
       </div>
     </div>`;
 
-    return [screen1, screen2, screen3];
+    return [screen1, screen2, ...(currentDisplayInfo?.showRainRadar === true ? [screen3] : [])];
   } catch (e) {
     console.warn('Wetter-Widget Fehler:', e);
     return [];
