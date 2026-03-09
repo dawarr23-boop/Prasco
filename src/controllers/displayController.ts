@@ -314,6 +314,7 @@ export const updateDisplay = async (
     if (req.body.tickerWeather !== undefined) display.tickerWeather = req.body.tickerWeather === true || req.body.tickerWeather === 'true';
     if (req.body.showRainRadar !== undefined) display.showRainRadar = req.body.showRainRadar === true || req.body.showRainRadar === 'true';
     if (req.body.clockStyle !== undefined) display.clockStyle = req.body.clockStyle === 'analog' ? 'analog' : 'digital';
+    if (req.body.registrationOpen !== undefined) display.registrationOpen = req.body.registrationOpen === true || req.body.registrationOpen === 'true';
 
     await display.save();
 
