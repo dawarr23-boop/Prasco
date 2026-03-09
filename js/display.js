@@ -591,10 +591,9 @@ async function renderWeatherWidget() {
       <div class="w-fc-grid">${forecastCardsHtml}</div>
     </div>`;
 
-    // ===== SCREEN 3: Niederschlagsvorhersage — nächste 2 Stunden =====
-    // Stündliche Niederschlagsdaten für die nächsten 2 Stunden (aus Open-Meteo)
-    const next2h = (w.hourlyRain || []).slice(0, 2);
-    const precipBarsHtml = next2h.map(h => {
+    // ===== SCREEN 3: Niederschlagsvorhersage — nächste 6 Stunden =====
+    const next6h = (w.hourlyRain || []).slice(0, 6);
+    const precipBarsHtml = next6h.map(h => {
       const pct = h.probability || 0;
       const mm  = h.precipitation || 0;
       const color = pct > 60 ? '#2e8fd4' : pct > 30 ? '#64b0d8' : '#a8d0e8';
@@ -643,6 +642,13 @@ function initRainRadar() {
   const mapEl = document.getElementById('rainradar-map');
   if (!mapEl || typeof L === 'undefined') return;
 
+  // Sicherstellen dass der Container bereits Dimensionen hat
+  const rect = mapEl.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {
+    setTimeout(() => initRainRadar(), 200);
+    return;
+  }
+
   const lat = parseFloat(mapEl.dataset.lat) || 51.76;
   const lon = parseFloat(mapEl.dataset.lon) || 7.89;
 
@@ -660,19 +666,22 @@ function initRainRadar() {
     touchZoom: false,
   });
 
-  // OpenStreetMap Basis-Karte (heller Stil)
+  // CartoDB Light Basis-Karte
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
   }).addTo(map);
 
   // Standort-Marker
   L.circleMarker([lat, lon], {
-    radius: 6,
+    radius: 7,
     fillColor: '#009640',
     color: '#fff',
-    weight: 2,
-    fillOpacity: 0.9,
+    weight: 2.5,
+    fillOpacity: 1,
   }).addTo(map);
+
+  // Karte nach Layout-Berechnung invalidieren
+  setTimeout(() => map.invalidateSize(), 200);
 
   // RainViewer Radar-Daten laden und animieren
   let animationTimer = null;
@@ -682,83 +691,86 @@ function initRainRadar() {
   fetch('https://api.rainviewer.com/public/weather-maps.json')
     .then(r => r.json())
     .then(data => {
-      // Nur Nowcast-Frames (Vorhersage), keine vergangenen Radardaten
-      const nowcast = data.radar?.nowcast || [];
-      // Falls keine Nowcast-Daten: letzten Past-Frame als Ausgangspunkt nehmen
+      const host = data.host || 'https://tilecache.rainviewer.com';
       const past = data.radar?.past || [];
-      const anchor = past.length > 0 ? [past[past.length - 1]] : [];
-      const frames = [...anchor, ...nowcast];
+      const nowcast = data.radar?.nowcast || [];
+
+      // Letzte 4 vergangene Frames + alle Nowcast-Frames
+      const recentPast = past.slice(-4);
+      const frames = [...recentPast, ...nowcast];
       if (frames.length === 0) return;
-      const nowcastOffset = anchor.length; // Index ab dem Frames Vorhersage sind
+      const nowcastOffset = recentPast.length;
 
       // Radar-Layer für jeden Frame erstellen
       radarLayers = frames.map(frame => {
         const layer = L.tileLayer(
-          `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
+          `${host}${frame.path}/256/{z}/{x}/{y}/4/1_1.png`,
           { opacity: 0, maxZoom: 19, zIndex: 10 }
         );
         layer._radarTime = frame.time;
+        layer._isForecast = false; // wird unten gesetzt
         layer.addTo(map);
         return layer;
       });
+      // Nowcast-Frames markieren
+      radarLayers.slice(nowcastOffset).forEach(l => { l._isForecast = true; });
 
       const progressEl = document.getElementById('radar-progress');
       const timestampEl = document.getElementById('radar-timestamp');
 
       function showFrame(idx) {
         radarLayers.forEach((layer, i) => {
-          layer.setOpacity(i === idx ? 0.6 : 0);
+          layer.setOpacity(i === idx ? 0.65 : 0);
         });
 
-        // Timeline aktualisieren
         if (progressEl) {
-          const pct = ((idx + 1) / radarLayers.length) * 100;
-          progressEl.style.width = pct + '%';
+          progressEl.style.width = ((idx + 1) / radarLayers.length * 100) + '%';
         }
 
-        // Zeitstempel anzeigen
         if (timestampEl && radarLayers[idx]) {
-          const t = new Date(radarLayers[idx]._radarTime * 1000);
+          const frameMs = radarLayers[idx]._radarTime * 1000;
+          const t = new Date(frameMs);
           const hh = String(t.getHours()).padStart(2, '0');
           const mm = String(t.getMinutes()).padStart(2, '0');
-          const isForecast = idx >= nowcastOffset;
-          const nowMs = Date.now();
-          const frameMs = radarLayers[idx]._radarTime * 1000;
-          const diffMin = Math.round((frameMs - nowMs) / 60000);
-          const relStr = isForecast
-            ? (diffMin >= 0 ? `+${diffMin} Min.` : `${diffMin} Min.`)
-            : 'Aktuell';
-          timestampEl.textContent = `${hh}:${mm}  ${isForecast ? '⟶ ' + relStr : relStr}`;
+          const isForecast = radarLayers[idx]._isForecast;
+          const diffMin = Math.round((frameMs - Date.now()) / 60000);
+          if (isForecast) {
+            timestampEl.textContent = `${hh}:${mm}  ⟶ +${Math.abs(diffMin)} Min.`;
+          } else {
+            const agoMin = Math.abs(diffMin);
+            timestampEl.textContent = agoMin < 3
+              ? `${hh}:${mm}  Jetzt`
+              : `${hh}:${mm}  vor ${agoMin} Min.`;
+          }
         }
 
         currentFrame = idx;
       }
 
-      // Erste Frame zeigen
       showFrame(0);
 
-      // Animation starten: 700ms pro Frame, 2s Pause auf letztem Frame
       function animate() {
         const nextIdx = (currentFrame + 1) % radarLayers.length;
         showFrame(nextIdx);
-
         const isLast = nextIdx === radarLayers.length - 1;
-        animationTimer = setTimeout(animate, isLast ? 2000 : 700);
+        animationTimer = setTimeout(animate, isLast ? 2500 : 650);
       }
 
-      animationTimer = setTimeout(animate, 1000);
+      animationTimer = setTimeout(animate, 1200);
     })
     .catch(err => {
       console.warn('RainViewer API Fehler:', err);
-      // Fallback: Windy-Iframe einbetten
-      mapEl.innerHTML = `<iframe src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=radar&product=radar&level=surface&lat=${lat}&lon=${lon}&width=100%25&height=100%25" frameborder="0" style="width:100%;height:100%;border:none;border-radius:1.5vh;"></iframe>`;
+      mapEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f5f8fb;border-radius:1.5vh;flex-direction:column;gap:1.2vh;color:#888;">
+        <span style="font-size:5vh">🌧️</span>
+        <span style="font-size:1.8vh;font-weight:600;">Radar-Daten momentan nicht verfügbar</span>
+      </div>`;
     });
 
   // Cleanup-Funktion registrieren
   rainRadarCleanup = () => {
-    clearTimeout(animationTimer);
-    radarLayers.forEach(l => map.removeLayer(l));
-    map.remove();
+    if (animationTimer) clearTimeout(animationTimer);
+    radarLayers.forEach(l => { try { map.removeLayer(l); } catch (e) {} });
+    try { map.remove(); } catch (e) {}
   };
 }
 
@@ -1021,7 +1033,7 @@ async function showLiveDataWidget(categoryFilter) {
 
     // Regenradar initialisieren wenn Radar-Slide angezeigt wird
     if (document.getElementById('rainradar-map')) {
-      setTimeout(() => initRainRadar(), 100);
+      setTimeout(() => initRainRadar(), 400);
     }
 
     clearTimeout(autoRotateTimer);
