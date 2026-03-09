@@ -4120,6 +4120,10 @@ function startAutoRefresh() {
   setInterval(
     async () => {
       console.log('Auto-Refresh: Posts werden neu geladen...');
+      // Display-Config mitaktualisieren (damit Einstellungsänderungen wie showRainRadar wirksam werden)
+      if (currentDisplayIdentifier) {
+        await loadDisplayInfo(currentDisplayIdentifier);
+      }
       const oldLength = posts.length;
       await fetchPosts();
 
