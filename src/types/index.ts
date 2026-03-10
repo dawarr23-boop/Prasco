@@ -17,7 +17,6 @@ export const POST_CONTENT_TYPES = [
   'html',
   'presentation',
   'pdf',
-  'word',
   'composite',
 ] as const;
 

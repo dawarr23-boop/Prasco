@@ -277,7 +277,6 @@ const translations = {
     'type.html': '🌐 HTML',
     'type.presentation': '📊 PowerPoint Präsentation',
     'type.pdf': '📄 PDF Dokument',
-    'type.word': '📝 Word Dokument',
     'type.composite': '🎨 Komposition (Layer)',
 
     // Buttons
@@ -713,7 +712,6 @@ const translations = {
     'type.html': '🌐 HTML',
     'type.presentation': '📊 PowerPoint Presentation',
     'type.pdf': '📄 PDF Document',
-    'type.word': '📝 Word Document',
     'type.composite': '🎨 Composition (Layer)',
 
     // Buttons
@@ -1151,7 +1149,6 @@ const translations = {
     'type.html': '🌐 HTML',
     'type.presentation': '📊 Presentazione PowerPoint',
     'type.pdf': '📄 Documento PDF',
-    'type.word': '📝 Documento Word',
     'type.composite': '🎨 Composizione (Layer)',
 
     // Buttons
@@ -3207,8 +3204,8 @@ function updateUploadSectionVisibility(contentType) {
     if (fileUploadSection) fileUploadSection.style.display = 'none';
     if (mediaUrlSection) mediaUrlSection.style.display = 'none';
   }
-  // Bei word/pdf: Datei hochladen UND Import-Button anzeigen
-  else if (contentType === 'word' || contentType === 'pdf') {
+  // Bei pdf: Datei hochladen UND Import-Button anzeigen
+  else if (contentType === 'pdf') {
     if (wordPdfImport) wordPdfImport.style.display = 'block';
     if (fileUploadSection) fileUploadSection.style.display = 'block';
     if (mediaUrlSection) mediaUrlSection.style.display = 'none';
@@ -6122,9 +6119,9 @@ window.addEventListener('load', async () => {
           const textarea = document.getElementById('post-content');
           const rteVisible = rteContainer && rteContainer.style.display !== 'none';
 
-          // Bei word/pdf-Typ: automatisch auf "text" umschalten
+          // Bei pdf-Typ: automatisch auf "text" umschalten
           let effectiveType = contentType;
-          if (contentType === 'word' || contentType === 'pdf') {
+          if (contentType === 'pdf') {
             const postTypeSelect = document.getElementById('post-type');
             if (postTypeSelect) postTypeSelect.value = 'text';
             updateUploadSectionVisibility('text');
