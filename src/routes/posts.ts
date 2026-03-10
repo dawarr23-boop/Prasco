@@ -4,6 +4,7 @@ import { validate } from '../middleware/validator';
 import { authenticate } from '../middleware/auth';
 import { requirePermission } from '../middleware/permissions';
 import * as postController from '../controllers/postController';
+import { POST_CONTENT_TYPES } from '../types';
 
 const router = Router();
 
@@ -252,21 +253,8 @@ router.get(
  *                 example: Das ist der Inhalt des Beitrags
  *               contentType:
  *                 type: string
- *                 enum: [text, image, video, html]
+ *                 enum: [text, image, video, html, presentation, pdf, word, composite]
  *                 example: text
- *               categoryId:
- *                 type: integer
- *                 example: 1
- *               mediaId:
- *                 type: integer
- *                 nullable: true
- *                 example: 5
- *               duration:
- *                 type: integer
- *                 minimum: 1
- *                 example: 10
- *                 description: Anzeigedauer in Sekunden
- *               priority:
  *                 type: integer
  *                 minimum: 0
  *                 maximum: 10
@@ -314,7 +302,7 @@ router.post(
     body('title').notEmpty().trim().withMessage('Titel erforderlich'),
     body('content').optional(),
     body('contentType')
-      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'])
+      .isIn([...POST_CONTENT_TYPES])
       .withMessage('Ungültiger Content-Type'),
     body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
     body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),
@@ -362,7 +350,7 @@ router.post(
  *                 type: string
  *               contentType:
  *                 type: string
- *                 enum: [text, image, video, html]
+ *                 enum: [text, image, video, html, presentation, pdf, word, composite]
  *               categoryId:
  *                 type: integer
  *               mediaId:
@@ -412,7 +400,7 @@ router.put(
     body('content').optional(),
     body('contentType')
       .optional({ values: 'null' })
-      .isIn(['text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'])
+      .isIn([...POST_CONTENT_TYPES])
       .withMessage('Ungültiger Content-Type'),
     body('categoryId').optional({ values: 'null' }).isInt().withMessage('Kategorie-ID muss eine Zahl sein'),
     body('mediaId').optional({ values: 'null' }).isInt().withMessage('Media-ID muss eine Zahl sein'),

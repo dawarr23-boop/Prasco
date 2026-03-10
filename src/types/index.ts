@@ -6,6 +6,29 @@ export interface UserRole {
 
 export type UserRoleType = 'super_admin' | 'admin' | 'editor' | 'viewer' | 'display';
 
+// ── Post domain types ────────────────────────────────────────────────────────
+
+/** All allowed content-type values – single source of truth used by the model,
+ *  route validators, and controller logic. */
+export const POST_CONTENT_TYPES = [
+  'text',
+  'image',
+  'video',
+  'html',
+  'presentation',
+  'pdf',
+  'word',
+  'composite',
+] as const;
+
+export type PostContentType = (typeof POST_CONTENT_TYPES)[number];
+
+export const POST_DISPLAY_MODES = ['all', 'specific'] as const;
+export type PostDisplayMode = (typeof POST_DISPLAY_MODES)[number];
+
+export const POST_BG_THEMES = ['light', 'dark'] as const;
+export type PostBgTheme = (typeof POST_BG_THEMES)[number];
+
 export interface JWTPayload {
   id: number;
   userId?: number; // Alias für id (backwards compatibility)

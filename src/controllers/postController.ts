@@ -8,6 +8,7 @@ import * as presentationService from '../services/presentationService';
 import { cacheService } from '../utils/cache';
 import { videoDownloadService } from '../services/videoDownloadService';
 import { deleteMediaFiles } from '../services/mediaService';
+import { PostContentType, PostDisplayMode } from '../types';
 
 /**
  * Get all posts with pagination, filtering, and sorting
@@ -209,6 +210,8 @@ export const createPost = async (
       titleFontSize,
       titleFontFamily,
     } = req.body;
+    const typedContentType = contentType as PostContentType;
+    const typedDisplayMode = (displayMode ?? 'all') as PostDisplayMode;
 
     // Validate priority range (0-100)
     if (priority !== undefined && (priority < 0 || priority > 100)) {
@@ -238,7 +241,7 @@ export const createPost = async (
     }
 
     // Background music only for non-video content
-    const musicUrl = contentType !== 'video' ? backgroundMusicUrl : null;
+    const musicUrl = typedContentType !== 'video' ? backgroundMusicUrl : null;
     const musicVolume =
       backgroundMusicVolume !== undefined ? Math.min(100, Math.max(0, backgroundMusicVolume)) : 50;
 
@@ -255,7 +258,7 @@ export const createPost = async (
     const post = await Post.create({
       title,
       content,
-      contentType,
+      contentType: typedContentType,
       categoryId: categoryId || null,
       mediaId: mediaId || null,
       organizationId: req.user?.organizationId,
@@ -266,7 +269,7 @@ export const createPost = async (
       priority: priority || 0,
       isActive: isActive !== undefined ? isActive : true,
       showTitle: showTitle !== undefined ? showTitle : true,
-      displayMode: displayMode || 'all',
+      displayMode: typedDisplayMode,
       backgroundMusicUrl: musicUrl || null,
       backgroundMusicVolume: musicVolume,
       blendEffect: blendEffect || null,
@@ -292,9 +295,9 @@ export const createPost = async (
 
     // Wenn es eine Präsentation ist UND ein Media-Objekt verknüpft ist, extrahiere Slides
     let createdPosts: any[] = [];
-    logger.info(`[createPost] contentType=${contentType}, content=${content}, mediaId=${mediaId}`);
+    logger.info(`[createPost] contentType=${typedContentType}, content=${content}, mediaId=${mediaId}`);
     
-    if (contentType === 'presentation' && content) {
+    if (typedContentType === 'presentation' && content) {
       // Der content enthält die presentationId
       const presentationId = content;
       logger.info(`[createPost] Präsentation erkannt, presentationId=${presentationId}`);
@@ -391,7 +394,7 @@ export const createPost = async (
     cacheService.delByPrefix('public:posts:');
 
     // Video-Download im Hintergrund starten (für Hotspot-Modus)
-    if (contentType === 'video' && content) {
+    if (typedContentType === 'video' && content) {
       const videoUrl = content;
       if (videoDownloadService.isYouTubeUrl(videoUrl)) {
         logger.info(`Starte YouTube-Video-Download im Hintergrund für Post ${post.id}`);
@@ -457,6 +460,8 @@ export const updatePost = async (
       titleFontSize,
       titleFontFamily,
     } = req.body;
+    const typedContentType = contentType as PostContentType | undefined;
+    const typedDisplayMode = displayMode as PostDisplayMode | undefined;
 
     const post = await Post.findByPk(id);
 
@@ -521,7 +526,7 @@ export const updatePost = async (
     // Update fields
     if (title !== undefined) post.title = title;
     if (content !== undefined) post.content = content;
-    if (contentType !== undefined) post.contentType = contentType;
+    if (typedContentType !== undefined) post.contentType = typedContentType;
     if (categoryId !== undefined) post.categoryId = categoryId === null ? undefined : categoryId;
     if (mediaId !== undefined) post.mediaId = mediaId === null ? undefined : mediaId;
     if (startDate !== undefined) post.startDate = startDate;
@@ -530,7 +535,7 @@ export const updatePost = async (
     if (priority !== undefined) post.priority = priority;
     if (isActive !== undefined) post.isActive = isActive;
     if (showTitle !== undefined) post.showTitle = showTitle;
-    if (displayMode !== undefined) post.displayMode = displayMode;
+    if (typedDisplayMode !== undefined) post.displayMode = typedDisplayMode;
     if (blendEffect !== undefined) post.blendEffect = blendEffect;
     if (soundEnabled !== undefined) post.soundEnabled = soundEnabled;
     if (bgTheme !== undefined) post.bgTheme = bgTheme;
@@ -538,7 +543,7 @@ export const updatePost = async (
     if (titleFontFamily !== undefined) post.titleFontFamily = titleFontFamily || undefined;
 
     // Background music fields (only for non-video content)
-    const effectiveContentType = contentType !== undefined ? contentType : post.contentType;
+    const effectiveContentType = typedContentType !== undefined ? typedContentType : post.contentType;
     if (backgroundMusicUrl !== undefined) {
       post.backgroundMusicUrl = effectiveContentType !== 'video' ? backgroundMusicUrl : undefined;
     }
@@ -546,7 +551,7 @@ export const updatePost = async (
       post.backgroundMusicVolume = Math.min(100, Math.max(0, backgroundMusicVolume));
     }
     // Clear music if switching to video
-    if (contentType === 'video') {
+    if (typedContentType === 'video') {
       post.backgroundMusicUrl = undefined;
     }
 
@@ -569,7 +574,7 @@ export const updatePost = async (
         await PostDisplay.bulkCreate(assignments);
         logger.info(`Post ${id}: ${displayIds.length} Display-Zuweisungen aktualisiert`);
       }
-    } else if (displayMode === 'all') {
+    } else if (typedDisplayMode === 'all') {
       // Clear all display assignments if switching to 'all'
       const { PostDisplay } = require('../models');
       await PostDisplay.destroy({ where: { postId: id } });

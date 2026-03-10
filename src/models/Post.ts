@@ -1,11 +1,18 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import {
+  PostContentType,
+  POST_CONTENT_TYPES,
+  PostDisplayMode,
+  POST_DISPLAY_MODES,
+  PostBgTheme,
+} from '../types';
 
 interface PostAttributes {
   id: number;
   title: string;
   content: string;
-  contentType: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word' | 'composite';
+  contentType: PostContentType;
   mediaId?: number;
   categoryId?: number;
   organizationId?: number;
@@ -16,13 +23,13 @@ interface PostAttributes {
   priority: number;
   isActive: boolean;
   showTitle: boolean;
-  displayMode: 'all' | 'specific';
+  displayMode: PostDisplayMode;
   viewCount: number;
   backgroundMusicUrl?: string;
   backgroundMusicVolume?: number;
   blendEffect?: string;
   soundEnabled?: boolean;
-  bgTheme?: 'light' | 'dark';
+  bgTheme?: PostBgTheme;
   titleFontSize?: string;
   titleFontFamily?: string;
   createdAt?: Date;
@@ -58,7 +65,7 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public id!: number;
   public title!: string;
   public content!: string;
-  public contentType!: 'text' | 'image' | 'video' | 'html' | 'presentation' | 'pdf' | 'word' | 'composite';
+  public contentType!: PostContentType;
   public mediaId?: number;
   public categoryId?: number;
   public organizationId?: number;
@@ -69,13 +76,13 @@ class Post extends Model<PostAttributes, PostCreationAttributes> implements Post
   public priority!: number;
   public isActive!: boolean;
   public showTitle!: boolean;
-  public displayMode!: 'all' | 'specific';
+  public displayMode!: PostDisplayMode;
   public viewCount!: number;
   public backgroundMusicUrl?: string;
   public backgroundMusicVolume?: number;
   public blendEffect?: string;
   public soundEnabled?: boolean;
-  public bgTheme?: 'light' | 'dark';
+  public bgTheme?: PostBgTheme;
   public titleFontSize?: string;
   public titleFontFamily?: string;
 
@@ -114,9 +121,9 @@ Post.init(
       allowNull: false,
     },
     contentType: {
-      type: DataTypes.ENUM('text', 'image', 'video', 'html', 'presentation', 'pdf', 'word', 'composite'),
+      type: DataTypes.ENUM(...POST_CONTENT_TYPES),
       allowNull: false,
-      defaultValue: 'text',
+      defaultValue: 'text' satisfies PostContentType,
     },
     mediaId: {
       type: DataTypes.INTEGER,
@@ -186,9 +193,9 @@ Post.init(
       comment: 'Whether to display the title on the display screen',
     },
     displayMode: {
-      type: DataTypes.ENUM('all', 'specific'),
+      type: DataTypes.ENUM(...POST_DISPLAY_MODES),
       allowNull: false,
-      defaultValue: 'all',
+      defaultValue: 'all' satisfies PostDisplayMode,
       comment: 'Show on all displays or specific displays only',
     },
     viewCount: {
