@@ -6108,10 +6108,12 @@ window.addEventListener('load', async () => {
 
           // Inhalt einfügen (RTE oder Textarea)
           const contentType = document.getElementById('post-type')?.value || 'text';
+          const rteContainer = document.getElementById('rte-container');
           const rteEditor = document.getElementById('rte-editor');
           const textarea = document.getElementById('post-content');
+          const rteVisible = rteContainer && rteContainer.style.display !== 'none';
 
-          if ((contentType === 'text' || contentType === 'html') && rteEditor && rteEditor.style.display !== 'none') {
+          if ((contentType === 'text' || contentType === 'html') && rteVisible && rteEditor) {
             rteEditor.innerHTML = html;
             if (textarea) textarea.value = html;
           } else if (textarea) {

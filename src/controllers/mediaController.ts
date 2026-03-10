@@ -8,9 +8,12 @@ import { Op } from 'sequelize';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import fs from 'fs';
 import mammoth from 'mammoth';
 
 const execAsync = promisify(exec);
+const readFileAsync = promisify(fs.readFile);
+const unlinkAsync = promisify(fs.unlink);
 
 // PowerPoint MIME types
 const PRESENTATION_MIME_TYPES = [
@@ -293,9 +296,13 @@ export const convertDocument = async (
     const ext = path.extname(file.originalname).toLowerCase();
     const baseName = path.basename(file.originalname, path.extname(file.originalname));
 
+    // Disk storage: read the temp file into a buffer then clean up
+    const fileBuffer = await readFileAsync(file.path);
+    await unlinkAsync(file.path).catch(() => {});
+
     if (file.mimetype === DOCX_MIME_TYPE || ext === '.docx') {
-      const htmlResult = await mammoth.convertToHtml({ buffer: file.buffer });
-      const textResult = await mammoth.extractRawText({ buffer: file.buffer });
+      const htmlResult = await mammoth.convertToHtml({ buffer: fileBuffer });
+      const textResult = await mammoth.extractRawText({ buffer: fileBuffer });
 
       res.json({
         success: true,
@@ -307,7 +314,7 @@ export const convertDocument = async (
       });
     } else if (file.mimetype === 'application/pdf' || ext === '.pdf') {
       // Basic PDF text extraction: scan for BT ... ET text blocks
-      const raw = file.buffer.toString('latin1');
+      const raw = fileBuffer.toString('latin1');
       const textChunks: string[] = [];
       const btEtRegex = /BT\s+([\s\S]*?)\s+ET/g;
       const tdRegex = /\(([^)]*)\)/g;
