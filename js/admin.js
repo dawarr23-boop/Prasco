@@ -237,8 +237,8 @@ const translations = {
     'form.noCategory': '-- Keine Kategorie --',
     'form.content': 'Inhalt',
     'form.uploadContent': 'Inhalte hochladen',
-    'form.importDocument': 'Word/PDF importieren',
-    'form.importDocumentHint': 'Importieren Sie .docx oder .pdf Dateien (max. 10MB)',
+    'form.importDocument': '↑ Text aus Word/PDF importieren',
+    'form.importDocumentHint': 'Dateiinhalt als bearbeitbaren Text übernehmen – Typ wechselt automatisch zu „Text"',
     'form.uploadFile': 'Datei hochladen',
     'form.uploadFileHint': 'Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)',
     'form.uploading': 'Uploading...',
@@ -673,8 +673,8 @@ const translations = {
     'form.noCategory': '-- No Category --',
     'form.content': 'Content',
     'form.uploadContent': 'Upload Content',
-    'form.importDocument': 'Import Word/PDF',
-    'form.importDocumentHint': 'Import .docx or .pdf files (max. 10MB)',
+    'form.importDocument': '↑ Import text from Word/PDF',
+    'form.importDocumentHint': 'Extract file content as editable text – type switches automatically to "Text"',
     'form.uploadFile': 'Upload File',
     'form.uploadFileHint': 'Images, Videos, Audio, PDFs, Word, PowerPoint (max. 100MB)',
     'form.uploading': 'Uploading...',
@@ -1111,8 +1111,8 @@ const translations = {
     'form.noCategory': '-- Nessuna Categoria --',
     'form.content': 'Contenuto',
     'form.uploadContent': 'Carica Contenuto',
-    'form.importDocument': 'Importa Word/PDF',
-    'form.importDocumentHint': 'Importa file .docx o .pdf (max. 10MB)',
+    'form.importDocument': '↑ Importa testo da Word/PDF',
+    'form.importDocumentHint': 'Estrai il contenuto come testo modificabile – il tipo passa automaticamente a "Testo"',
     'form.uploadFile': 'Carica File',
     'form.uploadFileHint': 'Immagini, Video, Audio, PDF, Word, PowerPoint (max. 100MB)',
     'form.uploading': 'Caricamento in corso...',
@@ -3205,6 +3205,12 @@ function updateUploadSectionVisibility(contentType) {
   if (contentType === 'text' || contentType === 'html') {
     if (wordPdfImport) wordPdfImport.style.display = 'block';
     if (fileUploadSection) fileUploadSection.style.display = 'none';
+    if (mediaUrlSection) mediaUrlSection.style.display = 'none';
+  }
+  // Bei word/pdf: Datei hochladen UND Import-Button anzeigen
+  else if (contentType === 'word' || contentType === 'pdf') {
+    if (wordPdfImport) wordPdfImport.style.display = 'block';
+    if (fileUploadSection) fileUploadSection.style.display = 'block';
     if (mediaUrlSection) mediaUrlSection.style.display = 'none';
   }
   // Bei anderen Typen: File Upload und URL anzeigen
@@ -6116,11 +6122,25 @@ window.addEventListener('load', async () => {
           const textarea = document.getElementById('post-content');
           const rteVisible = rteContainer && rteContainer.style.display !== 'none';
 
-          if ((contentType === 'text' || contentType === 'html') && rteVisible && rteEditor) {
-            rteEditor.innerHTML = html;
-            if (textarea) textarea.value = html;
-          } else if (textarea) {
-            textarea.value = contentType === 'html' ? html : text;
+          // Bei word/pdf-Typ: automatisch auf "text" umschalten
+          let effectiveType = contentType;
+          if (contentType === 'word' || contentType === 'pdf') {
+            const postTypeSelect = document.getElementById('post-type');
+            if (postTypeSelect) postTypeSelect.value = 'text';
+            updateUploadSectionVisibility('text');
+            effectiveType = 'text';
+          }
+
+          const rteContainerAfter = document.getElementById('rte-container');
+          const rteEditorAfter = document.getElementById('rte-editor');
+          const textareaAfter = document.getElementById('post-content');
+          const rteVisibleAfter = rteContainerAfter && rteContainerAfter.style.display !== 'none';
+
+          if ((effectiveType === 'text' || effectiveType === 'html') && rteVisibleAfter && rteEditorAfter) {
+            rteEditorAfter.innerHTML = html;
+            if (textareaAfter) textareaAfter.value = html;
+          } else if (textareaAfter) {
+            textareaAfter.value = effectiveType === 'html' ? html : text;
           }
 
           showNotification(t('form.importDocument') + ': OK', 'success');
