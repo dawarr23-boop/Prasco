@@ -239,6 +239,7 @@ export const createDisplay = async (
       identifier,
       description: description || null,
       isActive: isActive !== undefined ? isActive : true,
+      registrationOpen: true,
       showTransitData: req.body.showTransitData !== undefined ? req.body.showTransitData : true,
       showTrafficData: req.body.showTrafficData !== undefined ? req.body.showTrafficData : true,
       tickerText: req.body.tickerText || null,
