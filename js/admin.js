@@ -6064,6 +6064,74 @@ window.addEventListener('load', async () => {
     });
   }
 
+  // Word/PDF Import Button
+  const importDocumentBtn = document.getElementById('import-document-btn');
+  if (importDocumentBtn) {
+    importDocumentBtn.addEventListener('click', () => {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.docx,.pdf';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
+
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files && fileInput.files[0];
+        document.body.removeChild(fileInput);
+        if (!file) return;
+
+        importDocumentBtn.disabled = true;
+        const originalText = importDocumentBtn.textContent;
+        importDocumentBtn.textContent = '⏳ Importiere…';
+
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/media/convert-document', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` },
+            body: formData,
+          });
+
+          const result = await response.json();
+          if (!response.ok || !result.success) {
+            throw new Error(result.message || 'Import fehlgeschlagen');
+          }
+
+          const { html, text, filename } = result.data;
+
+          // Titel setzen falls leer
+          const titleInput = document.getElementById('post-title');
+          if (titleInput && !titleInput.value.trim()) {
+            titleInput.value = filename;
+          }
+
+          // Inhalt einfügen (RTE oder Textarea)
+          const contentType = document.getElementById('post-type')?.value || 'text';
+          const rteEditor = document.getElementById('rte-editor');
+          const textarea = document.getElementById('post-content');
+
+          if ((contentType === 'text' || contentType === 'html') && rteEditor && rteEditor.style.display !== 'none') {
+            rteEditor.innerHTML = html;
+            if (textarea) textarea.value = html;
+          } else if (textarea) {
+            textarea.value = contentType === 'html' ? html : text;
+          }
+
+          showNotification(t('form.importDocument') + ': OK', 'success');
+        } catch (err) {
+          console.error('[Import]', err);
+          showNotification(err.message || 'Import fehlgeschlagen', 'error');
+        } finally {
+          importDocumentBtn.disabled = false;
+          importDocumentBtn.textContent = originalText;
+        }
+      });
+
+      fileInput.click();
+    });
+  }
+
   // Hintergrundmusik-Steuerung initialisieren
   initBackgroundMusicControls();
 

@@ -267,4 +267,11 @@ router.post(
   mediaController.downloadExternalVideos
 );
 
+router.post(
+  '/convert-document',
+  requirePermission('media.upload'),
+  upload.single('file'),
+  mediaController.convertDocument
+);
+
 export default router;

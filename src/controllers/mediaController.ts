@@ -8,6 +8,7 @@ import { Op } from 'sequelize';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import mammoth from 'mammoth';
 
 const execAsync = promisify(exec);
 
@@ -271,6 +272,75 @@ export const downloadExternalVideos = async (
     });
   } catch (error) {
     logger.error('[Video Downloader] Error during manual download:', error);
+    next(error);
+  }
+};
+
+// DOCX/PDF to text/HTML conversion
+const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+export const convertDocument = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      throw new AppError('Keine Datei hochgeladen', 400);
+    }
+
+    const file = req.file;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const baseName = path.basename(file.originalname, path.extname(file.originalname));
+
+    if (file.mimetype === DOCX_MIME_TYPE || ext === '.docx') {
+      const htmlResult = await mammoth.convertToHtml({ buffer: file.buffer });
+      const textResult = await mammoth.extractRawText({ buffer: file.buffer });
+
+      res.json({
+        success: true,
+        data: {
+          html: htmlResult.value,
+          text: textResult.value,
+          filename: baseName,
+        },
+      });
+    } else if (file.mimetype === 'application/pdf' || ext === '.pdf') {
+      // Basic PDF text extraction: scan for BT ... ET text blocks
+      const raw = file.buffer.toString('latin1');
+      const textChunks: string[] = [];
+      const btEtRegex = /BT\s+([\s\S]*?)\s+ET/g;
+      const tdRegex = /\(([^)]*)\)/g;
+
+      let block: RegExpExecArray | null;
+      while ((block = btEtRegex.exec(raw)) !== null) {
+        let chunk: RegExpExecArray | null;
+        while ((chunk = tdRegex.exec(block[1])) !== null) {
+          textChunks.push(chunk[1]);
+        }
+      }
+
+      const text = textChunks
+        .join(' ')
+        .replace(/\\(\d{3})/g, (_, oct) => String.fromCharCode(parseInt(oct, 8)))
+        .replace(/\\n/g, '\n')
+        .replace(/\\r/g, '')
+        .replace(/\\\\/g, '\\')
+        .trim();
+
+      res.json({
+        success: true,
+        data: {
+          html: `<p>${text.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>')}</p>`,
+          text,
+          filename: baseName,
+        },
+      });
+    } else {
+      throw new AppError('Nur .docx und .pdf Dateien werden unterstützt', 400);
+    }
+  } catch (error) {
+    logger.error('[Document Converter] Error during conversion:', error);
     next(error);
   }
 };
