@@ -271,13 +271,14 @@ const translations = {
     'form.previewMusic': 'Vorschau',
 
     // Content Types
-    'type.text': 'Text',
-    'type.image': 'Bild',
-    'type.video': 'Video',
-    'type.html': 'HTML',
-    'type.presentation': 'PowerPoint Präsentation',
-    'type.pdf': 'PDF Dokument',
-    'type.word': 'Word Dokument',
+    'type.text': '✏️ Text',
+    'type.image': '🖼️ Bild',
+    'type.video': '🎬 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 PowerPoint Präsentation',
+    'type.pdf': '📄 PDF Dokument',
+    'type.word': '📝 Word Dokument',
+    'type.composite': '🎨 Komposition (Layer)',
 
     // Buttons
     'btn.save': 'Speichern',
@@ -706,13 +707,14 @@ const translations = {
     'form.previewMusic': 'Preview',
 
     // Content Types
-    'type.text': 'Text',
-    'type.image': 'Image',
-    'type.video': 'Video',
-    'type.html': 'HTML',
-    'type.presentation': 'PowerPoint Presentation',
-    'type.pdf': 'PDF Document',
-    'type.word': 'Word Document',
+    'type.text': '✏️ Text',
+    'type.image': '🖼️ Image',
+    'type.video': '🎬 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 PowerPoint Presentation',
+    'type.pdf': '📄 PDF Document',
+    'type.word': '📝 Word Document',
+    'type.composite': '🎨 Composition (Layer)',
 
     // Buttons
     'btn.save': 'Save',
@@ -1143,13 +1145,14 @@ const translations = {
     'form.previewMusic': 'Anteprima',
 
     // Content Types
-    'type.text': 'Testo',
-    'type.image': 'Immagine',
-    'type.video': 'Video',
-    'type.html': 'HTML',
-    'type.presentation': 'Presentazione PowerPoint',
-    'type.pdf': 'Documento PDF',
-    'type.word': 'Documento Word',
+    'type.text': '✏️ Testo',
+    'type.image': '🖼️ Immagine',
+    'type.video': '🎬 Video',
+    'type.html': '🌐 HTML',
+    'type.presentation': '📊 Presentazione PowerPoint',
+    'type.pdf': '📄 Documento PDF',
+    'type.word': '📝 Documento Word',
+    'type.composite': '🎨 Composizione (Layer)',
 
     // Buttons
     'btn.save': 'Salva',
