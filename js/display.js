@@ -4408,8 +4408,8 @@ function renderPDF(post) {
       <div style="text-align: center; padding: 60px;">
         <div style="font-size: 100px; margin-bottom: 30px;">📄</div>
         <h1>${escapeHtml(post.title)}</h1>
-        <p style="font-size: 24px; color: #666;">PDF Dokument</p>
-        <p style="color: #999; margin-top: 20px;">Keine PDF-Datei verfügbar</p>
+        <p style="font-size: 24px; color: #666;">Dokument</p>
+        <p style="color: #999; margin-top: 20px;">Keine Datei verfügbar</p>
       </div>
     `;
   }
@@ -4420,7 +4420,7 @@ function renderPDF(post) {
         <h2 style="margin: 0; color: #333; font-size: 24px;">📄 ${escapeHtml(post.title)}</h2>
       </div>` : ''}
       <div class="pdf-canvas-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 12px;" data-pdf-url="${escapeHtml(mediaUrl)}">
-        <p style="color: #ccc; font-size: 18px; margin-top: 40px;">⏳ PDF wird geladen…</p>
+        <p style="color: #ccc; font-size: 18px; margin-top: 40px;">⏳ Dokument wird geladen…</p>
       </div>
     </div>
   `;

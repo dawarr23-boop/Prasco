@@ -276,7 +276,7 @@ const translations = {
     'type.video': '🎬 Video',
     'type.html': '🌐 HTML',
     'type.presentation': '📊 PowerPoint Präsentation',
-    'type.pdf': '📄 PDF Dokument',
+    'type.pdf': '📄 Dokument',
     'type.composite': '🎨 Komposition (Layer)',
 
     // Buttons
@@ -711,7 +711,7 @@ const translations = {
     'type.video': '🎬 Video',
     'type.html': '🌐 HTML',
     'type.presentation': '📊 PowerPoint Presentation',
-    'type.pdf': '📄 PDF Document',
+    'type.pdf': '📄 Document',
     'type.composite': '🎨 Composition (Layer)',
 
     // Buttons
@@ -1148,7 +1148,7 @@ const translations = {
     'type.video': '🎬 Video',
     'type.html': '🌐 HTML',
     'type.presentation': '📊 Presentazione PowerPoint',
-    'type.pdf': '📄 Documento PDF',
+    'type.pdf': '📄 Documento',
     'type.composite': '🎨 Composizione (Layer)',
 
     // Buttons
