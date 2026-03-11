@@ -6118,6 +6118,12 @@ window.addEventListener('load', async () => {
             titleInput.value = filename;
           }
 
+          // Leertext-Warnung: wenn kein Text extrahiert werden konnte
+          if (!text || !text.trim()) {
+            showNotification('⚠️ Kein Text extrahierbar. Datei wird als PDF-Beitrag behalten.', 'warning');
+            return;
+          }
+
           // Inhalt einfügen (RTE oder Textarea)
           const contentType = document.getElementById('post-type')?.value || 'text';
           const rteContainer = document.getElementById('rte-container');

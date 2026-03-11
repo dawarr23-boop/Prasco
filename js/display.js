@@ -3681,6 +3681,9 @@ async function displayCurrentPost() {
   const compositeCanvas = container.querySelector('.composite-canvas');
   if (compositeCanvas) startCompositeLayerAnimations(compositeCanvas);
 
+  // PDF.js Viewer starten falls PDF-Post
+  initPdfViewer(container);
+
   // Update Post Counter
   updatePostCounter();
 
@@ -4390,10 +4393,16 @@ function updateHeaderCategory(categoryId) {
   headerCategory.innerHTML = `<div style="background: #58585a; color: white; padding: 0.75rem 1.5rem; border-radius: 25px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">◆ ${escapeHtml(category.name)}</div>`;
 }
 
+// PDF.js Worker konfigurieren
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
 // PDF Dokument rendern
 function renderPDF(post) {
   const mediaUrl = post.media?.url || post.content;
-  
+
   if (!mediaUrl) {
     return `
       <div style="text-align: center; padding: 60px;">
@@ -4406,19 +4415,46 @@ function renderPDF(post) {
   }
 
   return `
-    <div style="height: 100%; display: flex; flex-direction: column; background: #f5f5f5;">
+    <div style="height: 100%; display: flex; flex-direction: column; background: #525659;">
       ${post.showTitle === true ? `<div style="padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h2 style="margin: 0; color: #333; font-size: 24px;">📄 ${escapeHtml(post.title)}</h2>
       </div>` : ''}
-      <div style="flex: 1; position: relative; overflow: hidden;">
-        <iframe 
-          src="${escapeHtml(mediaUrl)}#view=FitH&toolbar=0&navpanes=0" 
-          style="width: 100%; height: 100%; border: none; background: white;"
-          title="${escapeHtml(post.title)}">
-        </iframe>
+      <div class="pdf-canvas-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 12px;" data-pdf-url="${escapeHtml(mediaUrl)}">
+        <p style="color: #ccc; font-size: 18px; margin-top: 40px;">⏳ PDF wird geladen…</p>
       </div>
     </div>
   `;
+}
+
+function initPdfViewer(container) {
+  const pdfContainer = container.querySelector('.pdf-canvas-container');
+  if (!pdfContainer) return;
+  const url = pdfContainer.dataset.pdfUrl;
+  if (!url || typeof pdfjsLib === 'undefined') return;
+
+  const loadingTask = pdfjsLib.getDocument(url);
+  loadingTask.promise.then(pdfDoc => {
+    pdfContainer.innerHTML = '';
+    const numPages = pdfDoc.numPages;
+
+    const renderPage = (pageNum) => pdfDoc.getPage(pageNum).then(page => {
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      canvas.style.cssText = 'max-width:100%;height:auto;box-shadow:0 4px 16px rgba(0,0,0,0.5);border-radius:4px;';
+      pdfContainer.appendChild(canvas);
+      return page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    });
+
+    let chain = Promise.resolve();
+    for (let i = 1; i <= numPages; i++) {
+      chain = chain.then(() => renderPage(i));
+    }
+    return chain;
+  }).catch(err => {
+    pdfContainer.innerHTML = `<p style="color:#f88;font-size:18px;padding:40px">PDF konnte nicht geladen werden: ${escapeHtml(err.message)}</p>`;
+  });
 }
 
 // Word Dokument rendern
