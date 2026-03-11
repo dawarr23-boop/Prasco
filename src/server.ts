@@ -106,6 +106,8 @@ app.use(
           'https://www.youtube-nocookie.com',
           'https://player.vimeo.com',
           'https://embed.windy.com',
+          'https://view.officeapps.live.com',
+          'https://docs.google.com',
         ],
         baseUri: ["'self'"],
         fontSrc: ["'self'", 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'data:'],
