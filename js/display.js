@@ -3627,8 +3627,8 @@ async function displayCurrentPost() {
       break;
 
     case 'pdf':
-      // PDF Dokument anzeigen
-      html = renderPDF(post);
+      // Dokument anzeigen (PDF, Word, Excel, ODF)
+      html = renderDocument(post);
       break;
 
     case 'word':
@@ -4399,9 +4399,31 @@ if (typeof pdfjsLib !== 'undefined') {
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// PDF Dokument rendern
-function renderPDF(post) {
+// Gibt die Viewer-URL für ein nicht-PDF Dokument zurück.
+// Office-Formate: Microsoft Office Online; sonstige (ODF, …): Google Docs Viewer.
+function getDocumentViewerUrl(mediaUrl, mimeType) {
+  const absoluteUrl = mediaUrl.startsWith('http')
+    ? mediaUrl
+    : window.location.origin + mediaUrl;
+  const encoded = encodeURIComponent(absoluteUrl);
+  const officeTypes = [
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ];
+  if (officeTypes.includes(mimeType)) {
+    return `https://view.officeapps.live.com/op/embed.aspx?src=${encoded}`;
+  }
+  return `https://docs.google.com/viewer?embedded=true&url=${encoded}`;
+}
+
+// Dokument rendern (PDF via PDF.js, Office/ODF via externen Viewer)
+function renderDocument(post) {
   const mediaUrl = post.media?.url || post.content;
+  const mimeType = post.media?.mimeType || '';
+  const isPdf = mimeType === 'application/pdf' ||
+    (!mimeType && (mediaUrl || '').toLowerCase().endsWith('.pdf'));
 
   if (!mediaUrl) {
     return `
@@ -4414,14 +4436,30 @@ function renderPDF(post) {
     `;
   }
 
+  if (isPdf) {
+    return `
+      <div style="height: 100%; display: flex; flex-direction: column; background: #525659;">
+        ${post.showTitle === true ? `<div style="padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h2 style="margin: 0; color: #333; font-size: 24px;">📄 ${escapeHtml(post.title)}</h2>
+        </div>` : ''}
+        <div class="pdf-canvas-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 12px;" data-pdf-url="${escapeHtml(mediaUrl)}">
+          <p style="color: #ccc; font-size: 18px; margin-top: 40px;">⏳ Dokument wird geladen…</p>
+        </div>
+      </div>
+    `;
+  }
+
+  // Office / ODF → externer Viewer (iframe)
+  const viewerUrl = getDocumentViewerUrl(mediaUrl, mimeType);
   return `
-    <div style="height: 100%; display: flex; flex-direction: column; background: #525659;">
+    <div style="height: 100%; display: flex; flex-direction: column; background: #f5f5f5;">
       ${post.showTitle === true ? `<div style="padding: 15px 30px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <h2 style="margin: 0; color: #333; font-size: 24px;">📄 ${escapeHtml(post.title)}</h2>
       </div>` : ''}
-      <div class="pdf-canvas-container" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 12px;" data-pdf-url="${escapeHtml(mediaUrl)}">
-        <p style="color: #ccc; font-size: 18px; margin-top: 40px;">⏳ Dokument wird geladen…</p>
-      </div>
+      <iframe src="${escapeHtml(viewerUrl)}"
+        style="flex: 1; width: 100%; border: none; background: white;"
+        title="${escapeHtml(post.title)}">
+      </iframe>
     </div>
   `;
 }

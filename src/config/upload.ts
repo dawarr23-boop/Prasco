@@ -35,6 +35,10 @@ export const ALLOWED_MIME_TYPES = {
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  // .xlsx
+    'application/vnd.ms-excel',                                            // .xls
+    'application/vnd.oasis.opendocument.spreadsheet',                      // .ods
+    'application/vnd.oasis.opendocument.text',                             // .odt
   ],
   PRESENTATION: [
     'application/vnd.ms-powerpoint',
@@ -116,6 +120,10 @@ const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFil
     '.pdf',
     '.doc',
     '.docx',
+    '.xlsx',
+    '.xls',
+    '.odt',
+    '.ods',
     '.pptx',
     '.ppt',
     '.odp',
