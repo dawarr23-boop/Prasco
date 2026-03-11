@@ -2739,6 +2739,62 @@ body.sidebar-open .sidebar-backdrop {
   color: #8b3a3a;
 }
 
+/* ============================================
+   Kreativ-Modus: Typ-Kacheln
+   ============================================ */
+.type-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .type-card-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .type-card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  background: var(--white);
+  transition: all 0.15s ease;
+  text-align: center;
+  user-select: none;
+  min-height: 60px;
+}
+
+.type-card:hover {
+  border-color: var(--prasco-green);
+  background: rgba(0, 150, 64, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 150, 64, 0.15);
+}
+
+.type-card.selected {
+  border-color: var(--prasco-green);
+  background: rgba(0, 150, 64, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 150, 64, 0.2);
+}
+
+.type-card-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--prasco-black);
+  line-height: 1.4;
+}
+
+.type-card.selected .type-card-label {
+  color: var(--prasco-green);
+}
+
 .ai-status.ai-success {
   background: #f0f9f0;
   border-color: #b4d8b4;

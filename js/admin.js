@@ -2676,6 +2676,10 @@ async function showPostForm() {
   const lbBuilder = document.getElementById('layer-builder');
   if (lbBuilder) lbBuilder.style.display = 'none';
 
+  // Kreativ-Modus anwenden
+  applyCreativeMode(isCreativeMode());
+  selectTypeCard('text');
+
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
 }
@@ -2896,6 +2900,8 @@ async function editPost(id) {
 
   document.getElementById('post-title').value = post.title || '';
   document.getElementById('post-type').value = post.contentType || 'text';
+  // Kreativ-Modus: passende Kachel markieren
+  if (isCreativeMode()) selectTypeCard(post.contentType || 'text');
   document.getElementById('post-content').value = post.content || '';
 
   // Display-Auswahl laden und setzen
@@ -6918,12 +6924,65 @@ async function switchSystemMode() {
   }
 }
 
+// ============================================
+// Kreativ-Modus
+// ============================================
+const CREATIVE_MODE_KEY = 'prasco_creative_mode';
+
+function isCreativeMode() {
+  return localStorage.getItem(CREATIVE_MODE_KEY) === '1';
+}
+
+function applyCreativeMode(enabled) {
+  localStorage.setItem(CREATIVE_MODE_KEY, enabled ? '1' : '0');
+  const toggle = document.getElementById('ui-creative-mode-toggle');
+  if (toggle) toggle.checked = !!enabled;
+  const cardPicker = document.getElementById('type-card-picker');
+  const typeFormGroup = document.getElementById('post-type-form-group');
+  if (cardPicker) cardPicker.style.display = enabled ? 'block' : 'none';
+  if (typeFormGroup) typeFormGroup.style.display = enabled ? 'none' : '';
+  if (enabled) {
+    const currentType = document.getElementById('post-type')?.value || 'text';
+    selectTypeCard(currentType);
+  }
+}
+
+function selectTypeCard(type) {
+  document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+  const card = document.querySelector('.type-card[data-type="' + type + '"]');
+  if (card) card.classList.add('selected');
+}
+
+function initTypeCardPicker() {
+  document.querySelectorAll('.type-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const type = card.dataset.type;
+      const select = document.getElementById('post-type');
+      if (select) {
+        select.value = type;
+        select.dispatchEvent(new Event('change'));
+      }
+      selectTypeCard(type);
+    });
+  });
+}
+
 // Event listeners for system mode
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize translations on page load
   translatePage();
   applyTranslations();
-  
+
+  // Kreativ-Modus initialisieren
+  initTypeCardPicker();
+  applyCreativeMode(isCreativeMode());
+  const creativeModeToggle = document.getElementById('ui-creative-mode-toggle');
+  if (creativeModeToggle) {
+    creativeModeToggle.addEventListener('change', () => {
+      applyCreativeMode(creativeModeToggle.checked);
+    });
+  }
+
   // Radio button change events
   const radios = document.querySelectorAll('input[name="system-mode"]');
   radios.forEach(radio => {
