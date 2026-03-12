@@ -157,6 +157,19 @@
 
             <div id="post-form" class="form-container" style="display: none">
               <form id="postForm">
+                <!-- Wizard Schrittanzeige (nur im Wizard-Modus) -->
+                <div id="wizard-indicator" class="wizard-indicator" style="display:none;">
+                  <div class="wz-step wz-active" data-step="1"><span class="wz-num">1</span><span class="wz-label">Typ</span></div>
+                  <div class="wz-connector"></div>
+                  <div class="wz-step" data-step="2"><span class="wz-num">2</span><span class="wz-label">Inhalt</span></div>
+                  <div class="wz-connector"></div>
+                  <div class="wz-step" data-step="3"><span class="wz-num">3</span><span class="wz-label">Einstellungen</span></div>
+                  <div class="wz-connector"></div>
+                  <div class="wz-step" data-step="4"><span class="wz-num">4</span><span class="wz-label">Vorschau</span></div>
+                </div>
+
+                <!-- SCHRITT 1: Typ wählen -->
+                <div class="wizard-step" data-step="1">
                 <!-- Typ-Kacheln -->
                 <div id="type-card-picker" style="display:none; margin-bottom:1.5rem;">
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
@@ -215,24 +228,6 @@
                     </div>
                   </div>
                 </div>
-                <div class="form-row">
-                  <div class="form-group">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
-                      <label for="post-title" data-translate="form.title" style="margin:0;">Titel *</label>
-                      <div style="display:flex;align-items:center;gap:0.5rem;">
-                        <span style="font-size:0.85rem;color:var(--text-secondary);">Titel anzeigen</span>
-                        <div class="toggle-switch" style="margin:0;">
-                          <input type="checkbox" name="show_title" id="show-title" class="toggle-input" />
-                          <label for="show-title" class="toggle-label"><span class="toggle-slider"></span></label>
-                        </div>
-                      </div>
-                    </div>
-                    <div style="display:flex;gap:0.4rem;">
-                      <input type="text" id="post-title" name="title" required style="flex:1;" />
-                      <button type="button" id="ai-suggest-title-btn" title="KI schlägt Titel vor" style="display:none;padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;" onclick="handleAISuggestTitle()">✨</button>
-                    </div>
-                  </div>
-
                   <div class="form-group" id="post-type-form-group">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
                       <label for="post-type" data-translate="form.type" style="margin:0;">Typ *
@@ -264,7 +259,26 @@
                       <option value="composite" data-translate="type.composite">🎨 Komposition (Layer)</option>
                     </select>
                   </div>
-                </div>
+                </div><!-- end wizard-step[1] -->
+
+                <!-- SCHRITT 2: Titel & Inhalt -->
+                <div class="wizard-step" data-step="2">
+                  <div class="form-group">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+                      <label for="post-title" data-translate="form.title" style="margin:0;">Titel *</label>
+                      <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <span style="font-size:0.85rem;color:var(--text-secondary);">Titel anzeigen</span>
+                        <div class="toggle-switch" style="margin:0;">
+                          <input type="checkbox" name="show_title" id="show-title" class="toggle-input" />
+                          <label for="show-title" class="toggle-label"><span class="toggle-slider"></span></label>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display:flex;gap:0.4rem;">
+                      <input type="text" id="post-title" name="title" required style="flex:1;" />
+                      <button type="button" id="ai-suggest-title-btn" title="KI schlägt Titel vor" style="display:none;padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;" onclick="handleAISuggestTitle()">✨</button>
+                    </div>
+                  </div>
 
                 <!-- Titel Schriftart & Schriftgröße -->
                 <div class="form-row" id="title-font-options">
@@ -621,7 +635,10 @@
                     </div>
                   </div>
                 </div>
+                </div><!-- end wizard-step[2] -->
 
+                <!-- SCHRITT 3: Einstellungen -->
+                <div class="wizard-step" data-step="3">
                 <div class="form-row">
                   <div class="form-group">
                     <label for="display-duration" data-translate="form.displayDuration">Anzeigedauer (Sek.)
@@ -780,7 +797,10 @@
                     </div>
                   </div>
                 </div>
+                </div><!-- end wizard-step[3] -->
 
+                <!-- SCHRITT 4: Vorschau & Speichern -->
+                <div class="wizard-step" data-step="4">
                 <!-- Live-Vorschau -->
                 <div id="live-preview-panel" style="margin-bottom:1rem;">
                   <button type="button" class="live-preview-toggle" id="toggle-preview-btn" onclick="toggleLivePreview()">
@@ -794,11 +814,19 @@
                   </div>
                 </div>
 
-                <div class="form-actions">
+                <div class="form-actions" id="post-form-actions">
                   <button type="submit" class="btn btn-primary" data-translate="btn.savePost">Beitrag speichern</button>
                   <button type="button" class="btn btn-secondary" id="hidePostFormBtn" data-translate="btn.cancel">
                     Abbrechen
                   </button>
+                </div>
+                </div><!-- end wizard-step[4] -->
+
+                <!-- Wizard Navigation (nur im Wizard-Modus) -->
+                <div id="wizard-nav" class="wizard-nav" style="display:none;">
+                  <button type="button" class="btn btn-secondary" id="wizard-prev-btn" onclick="wizardPrev()">← Zurück</button>
+                  <span class="wizard-nav-label" id="wizard-step-label">Schritt 1 von 4</span>
+                  <button type="button" class="btn btn-primary" id="wizard-next-btn" onclick="wizardNext()">Weiter →</button>
                 </div>
               </form>
             </div>
@@ -1739,6 +1767,16 @@
                   <div class="toggle-switch">
                     <input type="checkbox" id="ui-creative-mode-toggle" class="toggle-input" />
                     <label for="ui-creative-mode-toggle" class="toggle-label"><span class="toggle-slider"></span></label>
+                  </div>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
+                  <div>
+                    <strong style="display:block;margin-bottom:0.25rem;">Wizard-Modus</strong>
+                    <small style="color:var(--prasco-gray);">Beitragsformular als geführte Schritte (Typ → Inhalt → Einstellungen → Vorschau)</small>
+                  </div>
+                  <div class="toggle-switch">
+                    <input type="checkbox" id="ui-wizard-mode-toggle" class="toggle-input" />
+                    <label for="ui-wizard-mode-toggle" class="toggle-label"><span class="toggle-slider"></span></label>
                   </div>
                 </div>
               </div>
