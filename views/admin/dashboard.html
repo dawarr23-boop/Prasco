@@ -781,6 +781,19 @@
                   </div>
                 </div>
 
+                <!-- Live-Vorschau -->
+                <div id="live-preview-panel" style="margin-bottom:1rem;">
+                  <button type="button" class="live-preview-toggle" id="toggle-preview-btn" onclick="toggleLivePreview()">
+                    <span>👁</span> <span id="preview-btn-label">Vorschau anzeigen</span>
+                  </button>
+                  <div id="live-preview-box" style="display:none; margin-top:0.75rem;">
+                    <div class="lp-screen-outer">
+                      <div id="live-preview-inner" class="lp-post lp-light"></div>
+                    </div>
+                    <small style="display:block;text-align:center;margin-top:0.35rem;color:var(--prasco-gray);font-size:0.72rem;">Vorschau (vereinfacht, nicht 1:1)</small>
+                  </div>
+                </div>
+
                 <div class="form-actions">
                   <button type="submit" class="btn btn-primary" data-translate="btn.savePost">Beitrag speichern</button>
                   <button type="button" class="btn btn-secondary" id="hidePostFormBtn" data-translate="btn.cancel">

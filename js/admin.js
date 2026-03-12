@@ -7068,6 +7068,100 @@ function initTypeCardPicker() {
   });
 }
 
+// ============================================
+// Live-Vorschau (Phase 4)
+// ============================================
+let _previewTimer = null;
+
+function _escPreview(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function updateLivePreview() {
+  const panel = document.getElementById('live-preview-inner');
+  const box = document.getElementById('live-preview-box');
+  if (!panel || !box || box.style.display === 'none') return;
+
+  const title = document.getElementById('post-title')?.value?.trim() || '';
+  const showTitle = document.getElementById('show-title')?.checked ?? true;
+  const type = document.getElementById('post-type')?.value || 'text';
+  const isDark = (document.getElementById('bg-theme')?.value || 'light') === 'dark';
+
+  // Content: RTE if active, else textarea
+  const rteContainer = document.getElementById('rte-container');
+  const rteEditor = document.getElementById('rte-editor');
+  const rteActive = rteContainer && rteContainer.style.display !== 'none';
+  const rawContent = rteActive ? (rteEditor?.innerHTML || '') : (document.getElementById('post-content')?.value || '');
+  const isHtmlContent = rawContent.trimStart().startsWith('<');
+  const textBody = (type === 'html' || isHtmlContent) ? rawContent : rawContent.replace(/\n/g, '<br>');
+
+  // Image URL: prefer just-uploaded, else media-url input
+  const mediaUrlVal = document.getElementById('media-url')?.value?.trim() || '';
+  const imageUrl = lastUploadedImageUrl || mediaUrlVal || null;
+
+  let inner = '';
+  const titleHtml = showTitle && title ? `<div class="lp-title">${_escPreview(title)}</div>` : '';
+
+  switch (type) {
+    case 'text':
+    case 'html':
+      inner = `${titleHtml}<div class="lp-content">${textBody}</div>`;
+      break;
+    case 'image':
+      inner = `${titleHtml}${imageUrl ? `<img class="lp-img" src="${_escPreview(imageUrl)}" alt="">` : '<div class="lp-ph">🖼️</div>'}`;
+      break;
+    case 'video':
+      inner = `<div class="lp-ph">🎬<br>${_escPreview(title)}</div>`;
+      break;
+    case 'presentation':
+      inner = `<div class="lp-ph">📊<br>${_escPreview(title)}</div>`;
+      break;
+    case 'pdf':
+      inner = `<div class="lp-ph">📄<br>${_escPreview(title)}</div>`;
+      break;
+    case 'composite':
+      inner = `<div class="lp-ph">🎨<br>${_escPreview(title)}</div>`;
+      break;
+    default:
+      inner = `<div class="lp-ph">👁</div>`;
+  }
+
+  panel.className = 'lp-post ' + (isDark ? 'lp-dark' : 'lp-light');
+  panel.innerHTML = inner;
+}
+
+function _schedulePreviewUpdate() {
+  clearTimeout(_previewTimer);
+  _previewTimer = setTimeout(updateLivePreview, 250);
+}
+
+function toggleLivePreview() {
+  const box = document.getElementById('live-preview-box');
+  const label = document.getElementById('preview-btn-label');
+  if (!box) return;
+  const isOpen = box.style.display !== 'none';
+  if (isOpen) {
+    box.style.display = 'none';
+    if (label) label.textContent = 'Vorschau anzeigen';
+  } else {
+    box.style.display = '';
+    if (label) label.textContent = 'Vorschau ausblenden';
+    updateLivePreview();
+  }
+}
+
+function initLivePreview() {
+  const ids = ['post-title', 'post-content', 'rte-editor', 'media-url'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', _schedulePreviewUpdate);
+  });
+  ['post-type', 'bg-theme', 'show-title'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', updateLivePreview);
+  });
+}
+
 // Event listeners for system mode
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize translations on page load
@@ -7077,6 +7171,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Kreativ-Modus initialisieren
   initTypeCardPicker();
   applyCreativeMode(isCreativeMode());
+  initLivePreview();
   const creativeModeToggle = document.getElementById('ui-creative-mode-toggle');
   if (creativeModeToggle) {
     creativeModeToggle.addEventListener('change', () => {
@@ -7163,6 +7258,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (analyzeResult && e.target.files.length === 0) analyzeResult.style.display = 'none';
       // Beim neuen Datei-Wechsel: letzten Upload-Cache leeren
       if (file) { lastUploadedImageUrl = null; aiGeneratedMediaId = null; }
+      // Vorschau mit dem lokalen Objekt-URL für sofortige Bildvorschau
+      if (file && file.type.startsWith('image/')) {
+        const objectUrl = URL.createObjectURL(file);
+        lastUploadedImageUrl = objectUrl;
+        updateLivePreview();
+      } else {
+        updateLivePreview();
+      }
     });
   }
 
@@ -8658,7 +8761,7 @@ async function handleAIAnalyzeImage() {
       const uploadResult = await uploadFile(file);
       lastUploadedImageUrl = uploadResult.url;
       aiGeneratedMediaId = uploadResult.id;
-      // Preview anzeigen
+      updateLivePreview();
       const previewDiv = document.getElementById('ai-image-preview');
       const previewImg = document.getElementById('ai-image-preview-img');
       const previewName = document.getElementById('ai-image-preview-name');
