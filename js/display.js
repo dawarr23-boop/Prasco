@@ -4418,6 +4418,11 @@ function getDocumentViewerUrl(mediaUrl, mimeType) {
   return `https://docs.google.com/viewer?embedded=true&url=${encoded}`;
 }
 
+// Returns true if the URL is a local/relative upload URL (not an external HTTPS URL)
+function isLocalUrl(url) {
+  return !url || url.startsWith('/') || url.startsWith(window.location.origin) || /^https?:\/\/(?:localhost|127\.|192\.168\.|10\.|172\.)/.test(url);
+}
+
 // Dokument rendern (PDF via PDF.js, Office/ODF via externen Viewer)
 function renderDocument(post) {
   const mediaUrl = post.media?.url || post.content;
@@ -4449,7 +4454,23 @@ function renderDocument(post) {
     `;
   }
 
-  // Office / ODF → externer Viewer (iframe)
+  // Non-PDF: local files can't be opened by external viewers (require HTTPS public URL)
+  if (isLocalUrl(mediaUrl)) {
+    const ext = (mediaUrl.split('.').pop() || '').toUpperCase();
+    return `
+      <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f5f5f5; text-align: center; padding: 40px;">
+        <div style="font-size: 80px; margin-bottom: 20px;">📄</div>
+        <h2 style="color: #333; margin-bottom: 10px;">${escapeHtml(post.title)}</h2>
+        <p style="color: #666; font-size: 20px; margin-bottom: 30px;">${ext}-Dokument</p>
+        <p style="color: #999; font-size: 16px; max-width: 500px;">
+          Dieses Dokument kann im Admin-Panel als Bilder importiert werden:<br>
+          <strong>Typ „Dokument" wählen → Datei hochladen → wird automatisch als Bildbeiträge angelegt</strong>
+        </p>
+      </div>
+    `;
+  }
+
+  // Office / ODF → externer Viewer (iframe) — only for external HTTPS URLs
   const viewerUrl = getDocumentViewerUrl(mediaUrl, mimeType);
   return `
     <div style="height: 100%; display: flex; flex-direction: column; background: #f5f5f5;">
