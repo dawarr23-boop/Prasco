@@ -157,17 +157,62 @@
 
             <div id="post-form" class="form-container" style="display: none">
               <form id="postForm">
-                <!-- Typ-Kacheln (Kreativ-Modus) -->
+                <!-- Typ-Kacheln -->
                 <div id="type-card-picker" style="display:none; margin-bottom:1.5rem;">
-                  <label style="display:block;font-weight:600;font-size:0.875rem;color:var(--prasco-gray-dark);margin-bottom:0.75rem;">Was möchtest du erstellen?</label>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+                    <label style="font-weight:600;font-size:0.875rem;color:var(--prasco-gray-dark);margin:0;">Was möchtest du erstellen?</label>
+                    <button type="button" id="switch-to-dropdown-btn" onclick="applyCreativeMode(false)" style="font-size:0.78rem;color:var(--prasco-gray);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;" title="Zur einfachen Dropdown-Ansicht wechseln">Einfache Ansicht</button>
+                  </div>
                   <div class="type-card-grid">
-                    <div class="type-card" data-type="text"><span class="type-card-label" data-translate="type.text">✏️ Text</span></div>
-                    <div class="type-card" data-type="image"><span class="type-card-label" data-translate="type.image">🖼️ Bild</span></div>
-                    <div class="type-card" data-type="video"><span class="type-card-label" data-translate="type.video">🎬 Video</span></div>
-                    <div class="type-card" data-type="html"><span class="type-card-label" data-translate="type.html">🌐 HTML</span></div>
-                    <div class="type-card" data-type="presentation"><span class="type-card-label" data-translate="type.presentation">📊 PowerPoint</span></div>
-                    <div class="type-card" data-type="pdf"><span class="type-card-label" data-translate="type.pdf">📄 Dokument</span></div>
-                    <div class="type-card" data-type="composite"><span class="type-card-label" data-translate="type.composite">🎨 Komposition</span></div>
+                    <div class="type-card" data-type="text">
+                      <div class="type-card-icon">✏️</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.text">Text</span>
+                        <span class="type-card-desc">Formatierbarer Text, mehrzeilig</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="image">
+                      <div class="type-card-icon">🖼️</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.image">Bild</span>
+                        <span class="type-card-desc">Fotos &amp; Grafiken hochladen</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="video">
+                      <div class="type-card-icon">🎬</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.video">Video</span>
+                        <span class="type-card-desc">Datei oder YouTube / Vimeo</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="html">
+                      <div class="type-card-icon">🌐</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.html">HTML</span>
+                        <span class="type-card-desc">Freies HTML-Layout mit CSS</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="presentation">
+                      <div class="type-card-icon">📊</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.presentation">PowerPoint</span>
+                        <span class="type-card-desc">PPTX seitenweise anzeigen</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="pdf">
+                      <div class="type-card-icon">📄</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.pdf">Dokument</span>
+                        <span class="type-card-desc">PDF, Word, Excel als Bilder</span>
+                      </div>
+                    </div>
+                    <div class="type-card" data-type="composite">
+                      <div class="type-card-icon">🎨</div>
+                      <div class="type-card-body">
+                        <span class="type-card-label" data-translate="type.composite">Komposition</span>
+                        <span class="type-card-desc">Mehrere Layer übereinander</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="form-row">
@@ -189,23 +234,26 @@
                   </div>
 
                   <div class="form-group" id="post-type-form-group">
-                    <label for="post-type" data-translate="form.type">Typ *
-                      <span class="info-tooltip-wrapper tooltip-below">
-                        <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
-                        <div class="info-tooltip-content">
-                          <strong>Beitragstypen:</strong>
-                          <ul>
-                            <li><strong>Text</strong> – Einfache Textnachricht (Zeilenumbrüche werden übernommen)</li>
-                            <li><strong>Bild</strong> – Bild-Upload (JPG, PNG, GIF, WebP)</li>
-                            <li><strong>Video</strong> – Video-Datei oder YouTube/Vimeo-URL</li>
-                            <li><strong>HTML</strong> – Freie HTML-Gestaltung mit CSS</li>
-                            <li><strong>PowerPoint</strong> – PPTX wird als Folien angezeigt</li>
-                            <li><strong>Dokument</strong> – PDF, Word, Excel, ODF seitenweise anzeigen</li>
-                            <li><strong>🎨 Komposition</strong> – Mehrere Layer übereinander: Text, Bild, Laufschrift, HTML</li>
-                          </ul>
-                        </div>
-                      </span>
-                    </label>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+                      <label for="post-type" data-translate="form.type" style="margin:0;">Typ *
+                        <span class="info-tooltip-wrapper tooltip-below">
+                          <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
+                          <div class="info-tooltip-content">
+                            <strong>Beitragstypen:</strong>
+                            <ul>
+                              <li><strong>Text</strong> – Einfache Textnachricht (Zeilenumbrüche werden übernommen)</li>
+                              <li><strong>Bild</strong> – Bild-Upload (JPG, PNG, GIF, WebP)</li>
+                              <li><strong>Video</strong> – Video-Datei oder YouTube/Vimeo-URL</li>
+                              <li><strong>HTML</strong> – Freie HTML-Gestaltung mit CSS</li>
+                              <li><strong>PowerPoint</strong> – PPTX wird als Folien angezeigt</li>
+                              <li><strong>Dokument</strong> – PDF, Word, Excel, ODF seitenweise anzeigen</li>
+                              <li><strong>🎨 Komposition</strong> – Mehrere Layer übereinander: Text, Bild, Laufschrift, HTML</li>
+                            </ul>
+                          </div>
+                        </span>
+                      </label>
+                      <button type="button" onclick="applyCreativeMode(true)" style="font-size:0.78rem;color:var(--prasco-gray);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;" title="Zur Kachel-Ansicht wechseln">Kacheln anzeigen</button>
+                    </div>
                     <select id="post-type" name="content_type" required>
                       <option value="text" data-translate="type.text">Text</option>
                       <option value="image" data-translate="type.image">Bild</option>

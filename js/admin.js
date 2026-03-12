@@ -7030,7 +7030,8 @@ async function switchSystemMode() {
 const CREATIVE_MODE_KEY = 'prasco_creative_mode';
 
 function isCreativeMode() {
-  return localStorage.getItem(CREATIVE_MODE_KEY) === '1';
+  // Default ON — only OFF if user explicitly switched off
+  return localStorage.getItem(CREATIVE_MODE_KEY) !== '0';
 }
 
 function applyCreativeMode(enabled) {
