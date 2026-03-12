@@ -4,6 +4,7 @@ import { AppError } from '../middleware/errorHandler';
 import { processMedia, deleteMediaFiles } from '../services/mediaService';
 import { processPowerPoint, getSlideImages } from '../services/presentationService';
 import { logger } from '../utils/logger';
+import { UPLOAD_PATHS } from '../config/upload';
 import { Op } from 'sequelize';
 import path from 'path';
 import { exec } from 'child_process';
@@ -349,5 +350,149 @@ export const convertDocument = async (
   } catch (error) {
     logger.error('[Document Converter] Error during conversion:', error);
     next(error);
+  }
+};
+
+// Helper: find LibreOffice executable
+async function checkLibreOfficeCmd(): Promise<string | null> {
+  const possiblePaths = [
+    'C:\\Program Files\\LibreOffice\\program\\soffice.exe',
+    'C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe',
+    '/usr/bin/soffice',
+    '/usr/bin/libreoffice',
+    '/usr/local/bin/soffice',
+    '/Applications/LibreOffice.app/Contents/MacOS/soffice',
+  ];
+  try {
+    await execAsync('soffice --version');
+    return 'soffice';
+  } catch {
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) return `"${p}"`;
+    }
+  }
+  return null;
+}
+
+// Document (PDF/Word/Excel/ODF) → one PNG image per page
+export const convertDocumentToImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const tempDir = path.join(UPLOAD_PATHS.TEMP, `docimg_${Date.now()}`);
+  fs.mkdirSync(tempDir, { recursive: true });
+
+  try {
+    if (!req.file) {
+      throw new AppError('Keine Datei hochgeladen', 400);
+    }
+
+    const file = req.file;
+    const userId = req.user!.id;
+    const organizationId = req.user!.organizationId;
+    const ext = path.extname(file.originalname).toLowerCase();
+    const baseName = path.basename(file.originalname, ext);
+    const isPdf = file.mimetype === 'application/pdf' || ext === '.pdf';
+
+    let pdfPath = file.path;
+
+    // Step 1: Non-PDF → convert to PDF via LibreOffice
+    if (!isPdf) {
+      const soffice = await checkLibreOfficeCmd();
+      if (!soffice) {
+        throw new AppError(
+          'LibreOffice nicht verfügbar. Nur PDF-Dateien können direkt als Bilder importiert werden.',
+          400
+        );
+      }
+      await execAsync(`${soffice} --headless --convert-to pdf --outdir "${tempDir}" "${file.path}"`, {
+        timeout: 120000,
+      });
+      const pdfFile = fs.readdirSync(tempDir).find((f) => f.endsWith('.pdf'));
+      if (!pdfFile) throw new AppError('Konvertierung zu PDF fehlgeschlagen', 500);
+      pdfPath = path.join(tempDir, pdfFile);
+    }
+
+    // Step 2: PDF → PNG per page via pdftoppm (fallback: ImageMagick convert)
+    const pngPrefix = path.join(tempDir, 'page');
+    try {
+      await execAsync(`pdftoppm -png -r 150 "${pdfPath}" "${pngPrefix}"`, { timeout: 180000 });
+    } catch {
+      logger.info('[DocToImages] pdftoppm fehlgeschlagen, versuche ImageMagick convert...');
+      await execAsync(`convert -density 150 "${pdfPath}" "${path.join(tempDir, 'page-%03d.png')}"`, {
+        timeout: 180000,
+      });
+    }
+
+    // Step 3: Collect and sort PNG files
+    const pngFiles = fs
+      .readdirSync(tempDir)
+      .filter((f) => f.endsWith('.png'))
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+        const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+        return numA - numB;
+      });
+
+    if (pngFiles.length === 0) {
+      throw new AppError('Keine Seiten-Bilder konnten erzeugt werden', 500);
+    }
+
+    // Step 4: Move each PNG to uploads/temp, then let processMedia place it in originals
+    const results = [];
+    const safeBase = baseName.replace(/[^a-z0-9_-]/gi, '_').slice(0, 40);
+    const batchTs = Date.now();
+
+    for (let i = 0; i < pngFiles.length; i++) {
+      const pageNumber = i + 1;
+      const srcPath = path.join(tempDir, pngFiles[i]);
+      const newFilename = `${batchTs}_${pageNumber}_${safeBase}.png`;
+      const stagingPath = path.join(UPLOAD_PATHS.TEMP, newFilename);
+
+      fs.renameSync(srcPath, stagingPath);
+
+      const processed = await processMedia(stagingPath, newFilename, 'image/png');
+
+      const media = await Media.create({
+        filename: newFilename,
+        originalName: `${baseName}_seite_${pageNumber}.png`,
+        mimeType: 'image/png',
+        size: processed.size,
+        url: `/uploads/originals/${newFilename}`,
+        thumbnailUrl: processed.thumbnailPath
+          ? `/uploads/thumbnails/thumb_${newFilename}`
+          : undefined,
+        width: processed.width,
+        height: processed.height,
+        uploadedBy: userId,
+        organizationId: organizationId || undefined,
+      });
+
+      results.push({
+        id: media.id,
+        url: media.url,
+        thumbnailUrl: media.thumbnailUrl,
+        filename: newFilename,
+        pageNumber,
+      });
+    }
+
+    logger.info(`[DocToImages] ${results.length} Seiten konvertiert: ${file.originalname}`);
+
+    res.json({
+      success: true,
+      data: {
+        pages: results,
+        totalPages: results.length,
+        documentName: baseName,
+      },
+    });
+  } catch (error) {
+    logger.error('[DocToImages] Fehler:', error);
+    next(error);
+  } finally {
+    await unlinkAsync(req.file?.path ?? '').catch(() => {});
+    fs.rmSync(tempDir, { recursive: true, force: true });
   }
 };

@@ -274,4 +274,11 @@ router.post(
   mediaController.convertDocument
 );
 
+router.post(
+  '/document-to-images',
+  requirePermission('media.upload'),
+  upload.single('file'),
+  mediaController.convertDocumentToImages
+);
+
 export default router;

@@ -3210,9 +3210,9 @@ function updateUploadSectionVisibility(contentType) {
     if (fileUploadSection) fileUploadSection.style.display = 'none';
     if (mediaUrlSection) mediaUrlSection.style.display = 'none';
   }
-  // Bei pdf: Datei hochladen UND Import-Button anzeigen
+  // Bei pdf: Nur Datei hochladen anzeigen (kein Text-Import)
   else if (contentType === 'pdf') {
-    if (wordPdfImport) wordPdfImport.style.display = 'block';
+    if (wordPdfImport) wordPdfImport.style.display = 'none';
     if (fileUploadSection) fileUploadSection.style.display = 'block';
     if (mediaUrlSection) mediaUrlSection.style.display = 'none';
   }
@@ -3848,6 +3848,100 @@ async function uploadFile(file) {
     xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     xhr.send(formData);
   });
+}
+
+// ============================================
+// Document → Image Posts Import
+// ============================================
+async function importDocumentAsImages(file) {
+  const progressDiv = document.getElementById('upload-progress');
+  const progressBar = document.getElementById('upload-progress-bar');
+  const statusText = document.getElementById('upload-status');
+
+  if (progressDiv) {
+    progressDiv.style.display = 'block';
+    if (progressBar) progressBar.style.width = '10%';
+    if (statusText) statusText.textContent = 'Dokument wird konvertiert…';
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/media/document-to-images', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` },
+      body: formData,
+    });
+
+    if (progressBar) progressBar.style.width = '50%';
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Konvertierung fehlgeschlagen');
+    }
+
+    const { pages, totalPages, documentName } = result.data;
+    if (statusText) statusText.textContent = `${totalPages} Seiten werden als Beiträge erstellt…`;
+    if (progressBar) progressBar.style.width = '60%';
+
+    // Collect common post settings from the open form
+    const titleBase = document.getElementById('post-title')?.value?.trim() || documentName;
+    const formEl = document.getElementById('post-form');
+    const fd = formEl ? new FormData(formEl) : new FormData();
+
+    const displayMode = document.querySelector('input[name="display_mode"]:checked')?.value || 'all';
+    const displayIds = [];
+    if (displayMode === 'specific') {
+      document.querySelectorAll('input[name="display_ids"]:checked').forEach(cb => displayIds.push(parseInt(cb.value)));
+    }
+
+    const commonData = {
+      contentType: 'image',
+      categoryId: fd.get('category_id') ? parseInt(fd.get('category_id')) : null,
+      duration: parseInt(fd.get('display_duration')) || 10,
+      priority: parseInt(fd.get('priority')) || 0,
+      startDate: fd.get('start_date') ? new Date(fd.get('start_date')).toISOString() : null,
+      endDate: fd.get('end_date') ? new Date(fd.get('end_date')).toISOString() : null,
+      isActive: document.getElementById('is-active')?.checked ?? true,
+      bgTheme: document.getElementById('bg-theme')?.value || 'light',
+      displayMode,
+      displayIds,
+    };
+
+    let created = 0;
+    for (const page of pages) {
+      const title = totalPages > 1
+        ? `${titleBase} (${page.pageNumber}/${totalPages})`
+        : titleBase;
+      try {
+        await apiRequest('/posts', {
+          method: 'POST',
+          body: JSON.stringify({ ...commonData, title, content: page.url, mediaId: page.id }),
+        });
+        created++;
+      } catch (err) {
+        console.warn(`[DocToImages] Seite ${page.pageNumber} konnte nicht gespeichert werden:`, err);
+      }
+      if (progressBar) progressBar.style.width = `${60 + Math.round(40 * created / totalPages)}%`;
+    }
+
+    if (progressBar) progressBar.style.width = '100%';
+    if (statusText) { statusText.textContent = `✓ ${created} Beiträge erstellt!`; statusText.style.color = '#28a745'; }
+    setTimeout(() => {
+      if (progressDiv) progressDiv.style.display = 'none';
+      if (statusText) statusText.style.color = '#007bff';
+    }, 2000);
+
+    showNotification(`✅ ${created} Bild-Beiträge aus „${documentName}" erstellt!`, 'success');
+    hidePostForm();
+    await loadPosts();
+    await updateDashboardStats();
+  } catch (err) {
+    console.error('[DocToImages]', err);
+    showNotification('Dokument-Import fehlgeschlagen: ' + err.message, 'error');
+    if (progressDiv) progressDiv.style.display = 'none';
+  }
 }
 
 // ============================================
@@ -7020,8 +7114,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Auto-set display duration from video file length
   if (mediaFileInput) {
-    mediaFileInput.addEventListener('change', (e) => {
+    mediaFileInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
+
+      // Document files (PDF/Word/Excel/ODF) → convert pages to image posts
+      if (file) {
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        const docExts = ['pdf', 'docx', 'doc', 'xlsx', 'xls', 'odt', 'ods'];
+        const docMimes = [
+          'application/pdf',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/msword',
+          'application/vnd.ms-excel',
+          'application/vnd.oasis.opendocument.text',
+          'application/vnd.oasis.opendocument.spreadsheet',
+        ];
+        if (docExts.includes(ext) || docMimes.includes(file.type)) {
+          e.target.value = '';
+          await importDocumentAsImages(file);
+          return;
+        }
+      }
+
       if (file && file.type.startsWith('video/')) {
         const videoEl = document.createElement('video');
         videoEl.preload = 'metadata';
