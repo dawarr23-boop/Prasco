@@ -3887,7 +3887,7 @@ async function importDocumentAsImages(file) {
 
     // Collect common post settings from the open form
     const titleBase = document.getElementById('post-title')?.value?.trim() || documentName;
-    const formEl = document.getElementById('post-form');
+    const formEl = document.getElementById('postForm');
     const fd = formEl ? new FormData(formEl) : new FormData();
 
     const displayMode = document.querySelector('input[name="display_mode"]:checked')?.value || 'all';
