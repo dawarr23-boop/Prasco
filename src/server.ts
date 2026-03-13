@@ -53,6 +53,7 @@ import weatherRoutes from './routes/weather';
 import aiRoutes from './routes/ai';
 import deviceRoutes from './routes/devices';
 import newsRoutes from './routes/news';
+import backupRoutes from './routes/backup';
 
 // Import Swagger Config
 import { swaggerSpec } from './config/swagger';
@@ -422,6 +423,7 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/devices', displayLimiter, deviceRoutes);
+app.use('/api/backup', backupRoutes);
 
 // Health Check
 app.get('/api/health', (_req: Request, res: Response) => {

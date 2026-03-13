@@ -1782,6 +1782,30 @@
               </div>
             </div>
 
+            <!-- Datensicherung -->
+            <div class="settings-card">
+              <h3><span class="settings-icon">📦</span> Datensicherung</h3>
+              <div class="settings-form">
+                <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0;">
+                  <div>
+                    <strong style="display:block;margin-bottom:0.25rem;">Backup erstellen</strong>
+                    <small style="color:var(--prasco-gray);">Exportiert alle Beiträge als JSON-Datei zum Sichern oder Übertragen</small>
+                  </div>
+                  <button type="button" class="btn btn-secondary" onclick="exportPostsBackup()">⬇️ Backup herunterladen</button>
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
+                  <div>
+                    <strong style="display:block;margin-bottom:0.25rem;">Backup wiederherstellen</strong>
+                    <small style="color:var(--prasco-gray);">Importiert Beiträge aus einer Backup-Datei. Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen.</small>
+                  </div>
+                  <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()">⬆️ Backup importieren</button>
+                    <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="importPostsBackup(event)">
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- System-Modus (Raspberry Pi) — ausgeblendet, da Server nicht auf Pi läuft -->
             <div class="settings-card" id="system-mode-card" style="display: none;">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="2"/><path d="M5 11a4.5 4.5 0 0 1 0-6"/><path d="M11 11a4.5 4.5 0 0 0 0-6"/><line x1="8" y1="10" x2="8" y2="14"/></svg></span> System-Modus</h3>

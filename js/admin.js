@@ -7268,6 +7268,90 @@ function initLivePreview() {
   });
 }
 
+// ============================================
+// Datensicherung (Backup / Restore)
+// ============================================
+
+async function exportPostsBackup() {
+  try {
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const resp = await fetch('/api/backup/export', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({ message: resp.statusText }));
+      throw new Error(err.message || resp.statusText);
+    }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prasco-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Backup erfolgreich heruntergeladen', 'success');
+  } catch (err) {
+    showToast('Fehler beim Erstellen des Backups: ' + err.message, 'error');
+  }
+}
+
+async function importPostsBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = ''; // reset so same file can be re-selected
+
+  let backup;
+  try {
+    const text = await file.text();
+    backup = JSON.parse(text);
+  } catch {
+    showToast('Ungültige Backup-Datei (kein gültiges JSON)', 'error');
+    return;
+  }
+
+  if (!backup.posts || !Array.isArray(backup.posts)) {
+    showToast('Ungültige Backup-Datei (keine Beiträgsliste gefunden)', 'error');
+    return;
+  }
+
+  const dateStr = backup.createdAt
+    ? new Date(backup.createdAt).toLocaleString('de')
+    : 'unbekannt';
+  const count = backup.postCount || backup.posts.length;
+  const confirmed = confirm(
+    `Backup vom ${dateStr}\n` +
+    `${count} Beiträge\n\n` +
+    `Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen (Merge-Modus).\n\n` +
+    `Backup jetzt wiederherstellen?`
+  );
+  if (!confirmed) return;
+
+  try {
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const resp = await fetch('/api/backup/restore', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ backup, mode: 'merge' })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.message || resp.statusText);
+
+    const { created, skipped, errors } = data.data;
+    let msg = `Wiederhergestellt: ${created} erstellt, ${skipped} übersprungen`;
+    if (errors && errors.length) msg += `, ${errors.length} Fehler`;
+    showToast(msg, created > 0 ? 'success' : 'info');
+
+    if (created > 0) setTimeout(() => loadPosts(), 1000);
+  } catch (err) {
+    showToast('Fehler beim Importieren: ' + err.message, 'error');
+  }
+}
+
 // Event listeners for system mode
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize translations on page load
