@@ -150,9 +150,9 @@ router.post(
             backgroundMusicVolume: p.backgroundMusicVolume ?? 50,
             startDate: p.startDate ?? null,
             endDate: p.endDate ?? null,
-            mediaId: resolvedMediaId,
-            categoryId: resolvedCategoryId,
-            organizationId: orgId,
+            mediaId: resolvedMediaId ?? undefined,
+            categoryId: resolvedCategoryId ?? undefined,
+            organizationId: orgId ?? undefined,
             createdBy: req.user!.id,
           });
 
