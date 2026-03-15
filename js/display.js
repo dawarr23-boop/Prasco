@@ -3698,9 +3698,38 @@ async function displayCurrentPost() {
 
   if (!presentationModeState.isActive || !presentationModeState.isPaused) {
     const duration = (post.duration || displaySettings.defaultDuration) * 1000;
-    autoRotateTimer = setTimeout(() => {
-      nextPost();
-    }, duration);
+
+    // Für Bild-Posts: Timer erst starten wenn das Bild vollständig geladen ist
+    const img = post.content_type === 'image' ? container.querySelector('img') : null;
+    if (img && !img.complete) {
+      const MAX_WAIT = 8000; // nie länger als 8s warten
+      let timerStarted = false;
+      const startTimer = () => {
+        if (timerStarted) return;
+        timerStarted = true;
+        if (!presentationModeState.isActive || !presentationModeState.isPaused) {
+          autoRotateTimer = setTimeout(() => nextPost(), duration);
+        }
+      };
+      img.addEventListener('load',  startTimer, { once: true });
+      img.addEventListener('error', startTimer, { once: true });
+      setTimeout(startTimer, MAX_WAIT);
+    } else {
+      autoRotateTimer = setTimeout(() => {
+        nextPost();
+      }, duration);
+    }
+  }
+
+  // Nächstes Bild vorab laden (vermeidet Ladewartezeit beim nächsten Post)
+  const nextIdx = (currentIndex + 1) % posts.length;
+  const nextPost_ = posts[nextIdx];
+  if (nextPost_ && nextPost_.content_type === 'image') {
+    const preloadUrl = nextPost_.media_url || (nextPost_.content && nextPost_.content.startsWith('/uploads/') ? nextPost_.content : null);
+    if (preloadUrl) {
+      const preloadImg = new Image();
+      preloadImg.src = preloadUrl;
+    }
   }
 
   // Update Vortragsmodus-Counter
