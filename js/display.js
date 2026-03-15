@@ -629,148 +629,152 @@ async function renderWeatherWidget() {
 }
 
 /**
- * Regenradar-Animation initialisieren (RainViewer API + Leaflet)
- * Wird aufgerufen wenn der Radar-Slide sichtbar wird.
+ * Regenradar – img-tile-basiert, keine externe Kartenlib erforderlich.
+ * Basis: CartoDB Light Tiles | Radar: RainViewer API
  */
 function initRainRadar() {
-  // Vorherige Animation aufräumen
-  if (rainRadarCleanup) {
-    rainRadarCleanup();
-    rainRadarCleanup = null;
+  if (rainRadarCleanup) { rainRadarCleanup(); rainRadarCleanup = null; }
+
+  const wrap = document.getElementById('rainradar-map');
+  if (!wrap) return;
+
+  const lat = parseFloat(wrap.dataset.lat) || 51.5;
+  const lon = parseFloat(wrap.dataset.lon) || 9.5;
+  const ZOOM = 7;
+  const T = 256; // tile size px
+
+  // Mercator-Tile-Position (floating-point)
+  function tilePos(la, lo, z) {
+    const n = 1 << z;
+    const s = Math.sin(la * Math.PI / 180);
+    return {
+      x: (lo + 180) / 360 * n,
+      y: (1 - Math.log((1 + s) / (1 - s)) / (2 * Math.PI)) / 2 * n,
+    };
   }
 
-  const mapEl = document.getElementById('rainradar-map');
-  if (!mapEl || typeof L === 'undefined') return;
-
-  // Sicherstellen dass der Container bereits Dimensionen hat
-  const rect = mapEl.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) {
-    setTimeout(() => initRainRadar(), 200);
+  const W = wrap.offsetWidth;
+  const H = wrap.offsetHeight;
+  if (W === 0 || H === 0) {
+    // Container noch nicht gerendert – kurz warten
+    let t = setTimeout(() => initRainRadar(), 300);
+    rainRadarCleanup = () => clearTimeout(t);
     return;
   }
 
-  const lat = parseFloat(mapEl.dataset.lat) || 51.76;
-  const lon = parseFloat(mapEl.dataset.lon) || 7.89;
+  // Tile-Gitter rund um die Mitte berechnen
+  const c = tilePos(lat, lon, ZOOM);
+  const cols = Math.ceil(W / T) + 4;
+  const rows = Math.ceil(H / T) + 4;
+  const tx0  = Math.floor(c.x) - Math.floor(cols / 2);
+  const ty0  = Math.floor(c.y) - Math.floor(rows / 2);
+  const ox   = (tx0 - c.x) * T + W / 2;
+  const oy   = (ty0 - c.y) * T + H / 2;
 
-  // Leaflet-Karte erstellen
-  const map = L.map(mapEl, {
-    center: [lat, lon],
-    zoom: 8,
-    zoomControl: false,
-    attributionControl: false,
-    dragging: false,
-    scrollWheelZoom: false,
-    doubleClickZoom: false,
-    boxZoom: false,
-    keyboard: false,
-    touchZoom: false,
-  });
+  // Container aufbauen
+  wrap.innerHTML = '';
+  wrap.style.position = 'relative';
+  wrap.style.overflow = 'hidden';
+  wrap.style.background = '#e8ecf0';
 
-  // CartoDB Light Basis-Karte
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-  }).addTo(map);
+  // ── Basis-Kacheln (CartoDB Light) ───────────────────────────────
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const img = document.createElement('img');
+      img.style.cssText = `position:absolute;left:${Math.round(ox + col * T)}px;top:${Math.round(oy + row * T)}px;width:${T}px;height:${T}px;`;
+      img.src = `https://a.basemaps.cartocdn.com/light_all/${ZOOM}/${tx0 + col}/${ty0 + row}.png`;
+      img.alt = '';
+      wrap.appendChild(img);
+    }
+  }
 
-  // Standort-Marker
-  L.circleMarker([lat, lon], {
-    radius: 7,
-    fillColor: '#009640',
-    color: '#fff',
-    weight: 2.5,
-    fillOpacity: 1,
-  }).addTo(map);
+  // ── Standort-Marker ─────────────────────────────────────────────
+  const mx = Math.round((c.x - tx0) * T + ox);
+  const my = Math.round((c.y - ty0) * T + oy);
+  wrap.insertAdjacentHTML('beforeend', `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+    style="position:absolute;left:${mx - 11}px;top:${my - 11}px;z-index:10;pointer-events:none;">
+    <circle cx="11" cy="11" r="8" fill="#009640" stroke="white" stroke-width="2.5"/>
+  </svg>`);
 
-  // Karte nach Layout-Berechnung invalidieren
-  setTimeout(() => map.invalidateSize(), 200);
+  // ── Radar-Layer (ein Set img-Elemente, src wird pro Frame gesetzt) ──
+  const radarImgs = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const img = document.createElement('img');
+      img.style.cssText = `position:absolute;left:${Math.round(ox + col * T)}px;top:${Math.round(oy + row * T)}px;width:${T}px;height:${T}px;opacity:0.65;z-index:5;`;
+      img.alt = '';
+      img.dataset.tx = tx0 + col;
+      img.dataset.ty = ty0 + row;
+      wrap.appendChild(img);
+      radarImgs.push(img);
+    }
+  }
 
-  // RainViewer Radar-Daten laden und animieren
-  let animationTimer = null;
-  let radarLayers = [];
-  let currentFrame = 0;
+  let stopped = false, animTimer = null, frameIdx = 0;
+  let frames = []; // [{host, path, time, isForecast}]
+
+  function showFrame(idx) {
+    if (stopped) return;
+    const frame = frames[idx];
+    if (!frame) return;
+    radarImgs.forEach(img => {
+      img.src = `${frame.host}${frame.path}/256/${ZOOM}/${img.dataset.tx}/${img.dataset.ty}/4/1_1.png`;
+    });
+    frameIdx = idx;
+
+    // Timeline aktualisieren
+    const progressEl = document.getElementById('radar-progress');
+    if (progressEl) progressEl.style.width = ((idx + 1) / frames.length * 100) + '%';
+
+    const tsEl = document.getElementById('radar-timestamp');
+    if (tsEl) {
+      const t = new Date(frame.time * 1000);
+      const hh = String(t.getHours()).padStart(2, '0');
+      const mm = String(t.getMinutes()).padStart(2, '0');
+      const diffMin = Math.round((frame.time * 1000 - Date.now()) / 60000);
+      tsEl.textContent = frame.isForecast
+        ? `${hh}:${mm}  ▸ +${Math.abs(diffMin)} Min.`
+        : Math.abs(diffMin) < 4
+          ? `${hh}:${mm}  Jetzt`
+          : `${hh}:${mm}  vor ${Math.abs(diffMin)} Min.`;
+    }
+  }
+
+  function animate() {
+    if (stopped || frames.length === 0) return;
+    const next = (frameIdx + 1) % frames.length;
+    showFrame(next);
+    animTimer = setTimeout(animate, next === frames.length - 1 ? 2500 : 650);
+  }
 
   fetch('https://api.rainviewer.com/public/weather-maps.json')
     .then(r => r.json())
     .then(data => {
-      const host = data.host || 'https://tilecache.rainviewer.com';
-      const past = data.radar?.past || [];
+      if (stopped) return;
+      const host    = data.host || 'https://tilecache.rainviewer.com';
+      const past    = (data.radar?.past || []).slice(-4);
       const nowcast = data.radar?.nowcast || [];
-
-      // Letzte 4 vergangene Frames + alle Nowcast-Frames
-      const recentPast = past.slice(-4);
-      const frames = [...recentPast, ...nowcast];
-      if (frames.length === 0) return;
-      const nowcastOffset = recentPast.length;
-
-      // Radar-Layer für jeden Frame erstellen
-      radarLayers = frames.map(frame => {
-        const layer = L.tileLayer(
-          `${host}${frame.path}/256/{z}/{x}/{y}/4/1_1.png`,
-          { opacity: 0, maxZoom: 19, zIndex: 10 }
-        );
-        layer._radarTime = frame.time;
-        layer._isForecast = false; // wird unten gesetzt
-        layer.addTo(map);
-        return layer;
-      });
-      // Nowcast-Frames markieren
-      radarLayers.slice(nowcastOffset).forEach(l => { l._isForecast = true; });
-
-      const progressEl = document.getElementById('radar-progress');
-      const timestampEl = document.getElementById('radar-timestamp');
-
-      function showFrame(idx) {
-        radarLayers.forEach((layer, i) => {
-          layer.setOpacity(i === idx ? 0.65 : 0);
-        });
-
-        if (progressEl) {
-          progressEl.style.width = ((idx + 1) / radarLayers.length * 100) + '%';
-        }
-
-        if (timestampEl && radarLayers[idx]) {
-          const frameMs = radarLayers[idx]._radarTime * 1000;
-          const t = new Date(frameMs);
-          const hh = String(t.getHours()).padStart(2, '0');
-          const mm = String(t.getMinutes()).padStart(2, '0');
-          const isForecast = radarLayers[idx]._isForecast;
-          const diffMin = Math.round((frameMs - Date.now()) / 60000);
-          if (isForecast) {
-            timestampEl.textContent = `${hh}:${mm}  ⟶ +${Math.abs(diffMin)} Min.`;
-          } else {
-            const agoMin = Math.abs(diffMin);
-            timestampEl.textContent = agoMin < 3
-              ? `${hh}:${mm}  Jetzt`
-              : `${hh}:${mm}  vor ${agoMin} Min.`;
-          }
-        }
-
-        currentFrame = idx;
-      }
-
+      const nStart  = past.length;
+      frames = [...past, ...nowcast].map((f, i) => ({
+        host, path: f.path, time: f.time, isForecast: i >= nStart,
+      }));
+      if (!frames.length) return;
       showFrame(0);
-
-      function animate() {
-        const nextIdx = (currentFrame + 1) % radarLayers.length;
-        showFrame(nextIdx);
-        const isLast = nextIdx === radarLayers.length - 1;
-        animationTimer = setTimeout(animate, isLast ? 2500 : 650);
-      }
-
-      animationTimer = setTimeout(animate, 1200);
+      animTimer = setTimeout(animate, 1200);
     })
-    .catch(err => {
-      console.warn('RainViewer API Fehler:', err);
-      mapEl.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f5f8fb;border-radius:1.5vh;flex-direction:column;gap:1.2vh;color:#888;">
+    .catch(() => {
+      if (stopped) return;
+      wrap.insertAdjacentHTML('beforeend', `<div style="position:absolute;inset:0;display:flex;align-items:center;
+        justify-content:center;background:rgba(232,236,240,0.88);flex-direction:column;
+        gap:1.2vh;color:#888;z-index:20;">
         <span style="font-size:5vh">🌧️</span>
-        <span style="font-size:1.8vh;font-weight:600;">Radar-Daten momentan nicht verfügbar</span>
-      </div>`;
+        <span style="font-size:1.8vh;font-weight:600;">Radar-Daten nicht verfügbar</span>
+      </div>`);
     });
 
-  // Cleanup-Funktion registrieren
   rainRadarCleanup = () => {
-    if (animationTimer) clearTimeout(animationTimer);
-    radarLayers.forEach(l => { try { map.removeLayer(l); } catch (e) {} });
-    try { map.remove(); } catch (e) {}
+    stopped = true;
+    if (animTimer) clearTimeout(animTimer);
   };
 }
 

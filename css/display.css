@@ -2235,14 +2235,9 @@ body {
   white-space: nowrap;
 }
 
-/* Leaflet Container im Radar */
 #rainradar-map {
-  z-index: 1;
-}
-
-#rainradar-map .leaflet-tile-pane {
-  /* Radar-Tiles leicht sättigen */
-  filter: saturate(1.3);
+  position: relative;
+  overflow: hidden;
 }
 
 /* Legacy weather selectors — no longer rendered */
