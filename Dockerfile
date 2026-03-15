@@ -22,8 +22,8 @@ RUN npm run build
 # Production image
 FROM node:20-alpine AS production
 
-# LibreOffice + PDF-to-image tools for PowerPoint slide conversion
-RUN apk add --no-cache libreoffice poppler-utils font-noto font-noto-cjk ttf-dejavu ttf-freefont
+# LibreOffice + PDF-to-image tools for PowerPoint slide conversion + build tools for native modules
+RUN apk add --no-cache libreoffice poppler-utils font-noto font-noto-cjk ttf-dejavu ttf-freefont python3 make g++
 
 WORKDIR /app
 

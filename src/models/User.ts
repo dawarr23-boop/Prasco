@@ -1,6 +1,6 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 // SSO Provider Types
 export type SSOProviderType = 'azure_ad' | 'ldap' | 'adfs' | 'local' | null;
