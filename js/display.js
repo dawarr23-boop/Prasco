@@ -60,6 +60,11 @@ let displaySettings = {
 // Prüfe ob Vorschau-Modus aktiv ist (iframe im Admin-Panel)
 const isPreviewMode = new URLSearchParams(window.location.search).has('preview');
 
+// Im Vorschau-Modus alle Dauern auf max. 5 Sekunden kappen (Admin sieht alle Posts schnell)
+function previewDur(seconds) {
+  return isPreviewMode ? Math.min(seconds, 5) : seconds;
+}
+
 // Prüfe ob dieses Display extern ist (nicht localhost)
 let isExternalDisplay = false;
 
@@ -1054,7 +1059,7 @@ async function showLiveDataWidget(categoryFilter) {
         liveDataState.isWidgetActive = false;
         nextPost(); // nextPost() übernimmt eigenen Blend-Übergang
       }
-    }, displaySettings.liveDataSlideDuration * 1000);
+    }, previewDur(displaySettings.liveDataSlideDuration) * 1000);
   }
 
   // Erster Slide direkt zeigen (Blend wird beim Eintritt via nextPost() gemacht)
@@ -3064,7 +3069,7 @@ function toggleAutoRotation() {
     }
     // Starte Timer für aktuellen Post
     const post = posts[currentIndex];
-    const duration = (post?.duration || displaySettings.defaultDuration) * 1000;
+    const duration = previewDur(post?.duration || displaySettings.defaultDuration) * 1000;
     autoRotateTimer = setTimeout(() => nextPost(), duration);
   } else {
     // Pausiere Auto-Rotation
@@ -3092,7 +3097,7 @@ function exitPresentationMode() {
   // Starte normale Auto-Rotation
   clearTimeout(autoRotateTimer);
   const post = posts[currentIndex];
-  const duration = (post?.duration || displaySettings.defaultDuration) * 1000;
+  const duration = previewDur(post?.duration || displaySettings.defaultDuration) * 1000;
   autoRotateTimer = setTimeout(() => nextPost(), duration);
   
   console.log('📺 Vortragsmodus deaktiviert - Auto-Rotation gestartet');
@@ -3294,7 +3299,7 @@ async function init() {
     if (!presentationModeState.isActive) {
       // Displaymodus: Auto-Rotation starten
       const post = posts[currentIndex];
-      const duration = (post?.duration || displaySettings.defaultDuration) * 1000;
+      const duration = previewDur(post?.duration || displaySettings.defaultDuration) * 1000;
       autoRotateTimer = setTimeout(() => nextPost(), duration);
       console.log('📺 Displaymodus gestartet - Auto-Rotation aktiv (Umschalt+H = Vortragsmodus)');
     } else {
@@ -3701,7 +3706,7 @@ async function displayCurrentPost() {
   clearTimeout(autoRotateTimer);
 
   if (!presentationModeState.isActive || !presentationModeState.isPaused) {
-    const duration = (post.duration || displaySettings.defaultDuration) * 1000;
+    const duration = previewDur(post.duration || displaySettings.defaultDuration) * 1000;
 
     // Für Bild-Posts: Timer erst starten wenn das Bild vollständig geladen ist
     const img = post.content_type === 'image' ? container.querySelector('img') : null;
@@ -4190,7 +4195,7 @@ async function renderPresentation(post) {
     await preloadPresentationSlides(presentation.slides);
 
     // Erst NACH erfolgreichem Preload: Starte Slide-Rotation
-    startSlideRotation(post.duration || displaySettings.defaultDuration);
+    startSlideRotation(previewDur(post.duration || displaySettings.defaultDuration));
 
     return initialHtml;
   }
