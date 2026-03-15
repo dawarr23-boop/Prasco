@@ -26,14 +26,48 @@ const DEFAULT_THUMBNAIL_OPTIONS: ThumbnailOptions = {
     quality: 80,
 };
 
+// Max dimensions for stored originals (larger images are resized down)
+const MAX_IMAGE_WIDTH  = 1920;
+const MAX_IMAGE_HEIGHT = 1080;
+
 export const processMedia = async (
     tempFilePath: string,
     filename: string,
     mimeType: string
 ): Promise<ProcessedMedia> => {
     const originalPath = path.join(UPLOAD_PATHS.ORIGINALS, filename);
-    await fs.promises.rename(tempFilePath, originalPath);
-    
+
+    if (isImage(mimeType) && mimeType !== 'image/gif' && mimeType !== 'image/svg+xml') {
+        // Resize and compress before moving to originals
+        const meta = await sharp(tempFilePath).metadata();
+        const needsResize = (meta.width ?? 0) > MAX_IMAGE_WIDTH || (meta.height ?? 0) > MAX_IMAGE_HEIGHT;
+
+        let pipeline = sharp(tempFilePath).rotate(); // auto-rotate from EXIF
+
+        if (needsResize) {
+            pipeline = pipeline.resize(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT, {
+                fit: 'inside',
+                withoutEnlargement: true,
+            });
+        }
+
+        // Re-encode: JPEG/WebP → high-quality JPEG, PNG → compressed PNG
+        const ext = path.extname(filename).toLowerCase();
+        if (ext === '.png') {
+            pipeline = pipeline.png({ compressionLevel: 8, adaptiveFiltering: true });
+        } else if (ext === '.webp') {
+            pipeline = pipeline.webp({ quality: 85 });
+        } else {
+            pipeline = pipeline.jpeg({ quality: 85, mozjpeg: true });
+        }
+
+        await pipeline.toFile(originalPath);
+        await fs.promises.unlink(tempFilePath);
+    } else {
+        // Videos, PDFs, GIFs, SVGs – unverändert speichern
+        await fs.promises.rename(tempFilePath, originalPath);
+    }
+
     const stats = await fs.promises.stat(originalPath);
     const result: ProcessedMedia = {
         originalPath,
@@ -45,7 +79,7 @@ export const processMedia = async (
         result.width = metadata.width;
         result.height = metadata.height;
         result.thumbnailPath = await generateThumbnail(originalPath, filename);
-        logger.info(`Image processed: ${filename}`);
+        logger.info(`Image processed: ${filename} (${result.width}x${result.height}, ${Math.round(result.size / 1024)} KB)`);
     }
 
     return result;
