@@ -78,7 +78,7 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         styleSrcElem: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
-        scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://unpkg.com', 'https://cdnjs.cloudflare.com'],
         connectSrc: ["'self'", 'https://api.rainviewer.com', 'https://www.tagesschau.de', 'https://www.spiegel.de', 'https://www.wa.de'],
         imgSrc: [
           "'self'",

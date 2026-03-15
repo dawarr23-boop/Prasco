@@ -9583,13 +9583,16 @@ async function saveGeneralSettings() {
     const timezone = document.getElementById('system-timezone')?.value || 'Europe/Berlin';
     const logoUrl = document.getElementById('system-logo-url')?.value?.trim() || '';
 
-    await apiRequest('/settings/bulk', 'POST', {
-      settings: {
-        'system.name': systemName,
-        'system.defaultLanguage': defaultLang,
-        'system.timezone': timezone,
-        'system.logoUrl': logoUrl,
-      },
+    await apiRequest('/settings/bulk', {
+      method: 'POST',
+      body: JSON.stringify({
+        settings: {
+          'system.name': systemName,
+          'system.defaultLanguage': defaultLang,
+          'system.timezone': timezone,
+          'system.logoUrl': logoUrl,
+        },
+      }),
     });
 
     applyGeneralSettings({
