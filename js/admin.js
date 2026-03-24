@@ -9420,7 +9420,10 @@ function initMeetingSettingsEvents() {
     try {
       // Save first, then trigger test
       await saveMeetingSettings();
-      const res = await fetch('/api/settings/test-meeting-email', { method: 'POST' });
+      const res = await fetch('/api/settings/test-meeting-email', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` },
+      });
       if (res.ok) {
         showNotification('Test-E-Mail erfolgreich gesendet!', 'success');
       } else {
