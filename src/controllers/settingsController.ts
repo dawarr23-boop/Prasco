@@ -256,3 +256,32 @@ export const deleteSetting = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ error: 'Fehler beim Löschen der Einstellung' });
   }
 };
+
+/**
+ * Test-E-Mail für Meeting-Benachrichtigungen senden
+ * POST /api/settings/test-meeting-email
+ */
+export const testMeetingEmail = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { sendMeetingNotification } = await import('../services/emailService');
+    const user = (req as any).user;
+    const authorName = user
+      ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email
+      : 'Test-Benutzer';
+
+    await sendMeetingNotification(
+      {
+        postTitle: 'Test-Beitrag: Projektupdate Q2',
+        postContent: 'Dies ist eine Test-Benachrichtigung. Die SMTP-Konfiguration funktioniert korrekt.',
+        authorName,
+        postId: 0,
+      },
+      user?.organizationId
+    );
+
+    res.json({ success: true, message: 'Test-E-Mail gesendet' });
+  } catch (error: unknown) {
+    console.error('Test-Meeting-Email Fehler:', error);
+    res.status(500).json({ error: 'Fehler beim Senden der Test-E-Mail' });
+  }
+};

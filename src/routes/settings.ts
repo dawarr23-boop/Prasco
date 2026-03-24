@@ -7,6 +7,7 @@ import {
   setSetting,
   setBulkSettings,
   deleteSetting,
+  testMeetingEmail,
 } from '../controllers/settingsController';
 
 const router = Router();
@@ -45,5 +46,11 @@ router.put('/', authenticate, requirePermission('settings.write'), setSetting);
  * Lösche eine Einstellung
  */
 router.delete('/:key', authenticate, requirePermission('settings.write'), deleteSetting);
+
+/**
+ * POST /api/settings/test-meeting-email
+ * Sendet eine Test-E-Mail für Meeting-Benachrichtigungen
+ */
+router.post('/test-meeting-email', authenticate, requirePermission('settings.write'), testMeetingEmail);
 
 export default router;

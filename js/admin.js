@@ -9339,6 +9339,100 @@ async function saveAllLiveDataSettings() {
 }
 
 // ============================================
+// Meeting-Benachrichtigung Einstellungen
+// ============================================
+async function loadMeetingSettings() {
+  try {
+    const [smtpRes, meetingRes] = await Promise.all([
+      fetch('/api/settings?category=smtp'),
+      fetch('/api/settings?category=meeting'),
+    ]);
+    if (smtpRes.ok) {
+      const s = await smtpRes.json();
+      const el = (id) => document.getElementById(id);
+      if (el('smtp-host')) el('smtp-host').value = s['smtp.host'] || '';
+      if (el('smtp-port')) el('smtp-port').value = s['smtp.port'] || '587';
+      if (el('smtp-user')) el('smtp-user').value = s['smtp.user'] || '';
+      if (el('smtp-pass')) el('smtp-pass').value = s['smtp.pass'] || '';
+      if (el('smtp-from')) el('smtp-from').value = s['smtp.from'] || '';
+      if (el('smtp-secure')) el('smtp-secure').checked = s['smtp.secure'] === true || s['smtp.secure'] === 'true';
+    }
+    if (meetingRes.ok) {
+      const m = await meetingRes.json();
+      const recip = document.getElementById('meeting-recipients');
+      if (recip) recip.value = m['meeting.recipients'] || '';
+      const catName = document.getElementById('meeting-category-name');
+      if (catName) catName.value = m['meeting.category.name'] || 'Dienstagsmeeting';
+    }
+  } catch (e) {
+    console.error('Meeting-Einstellungen laden fehlgeschlagen:', e);
+  }
+}
+
+async function saveMeetingSettings() {
+  const el = (id) => document.getElementById(id);
+  const settings = [
+    { key: 'smtp.host',     value: el('smtp-host')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
+    { key: 'smtp.port',     value: el('smtp-port')?.value?.trim() || '587', type: 'number',  category: 'smtp' },
+    { key: 'smtp.secure',   value: el('smtp-secure')?.checked ? 'true' : 'false', type: 'boolean', category: 'smtp' },
+    { key: 'smtp.user',     value: el('smtp-user')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
+    { key: 'smtp.pass',     value: el('smtp-pass')?.value || '',             type: 'string',  category: 'smtp' },
+    { key: 'smtp.from',     value: el('smtp-from')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
+    { key: 'meeting.recipients', value: el('meeting-recipients')?.value?.trim() || '', type: 'string', category: 'meeting' },
+    { key: 'meeting.category.name', value: el('meeting-category-name')?.value?.trim() || 'Dienstagsmeeting', type: 'string', category: 'meeting' },
+  ];
+
+  const res = await fetch('/api/settings/bulk', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ settings }),
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const statusEl = document.getElementById('meeting-save-status');
+  if (statusEl) {
+    statusEl.textContent = '✓ Gespeichert';
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  }
+}
+
+function initMeetingSettingsEvents() {
+  document.getElementById('saveMeetingSettings')?.addEventListener('click', async () => {
+    const btn = document.getElementById('saveMeetingSettings');
+    if (btn) { btn.disabled = true; btn.textContent = 'Speichere...'; }
+    try {
+      await saveMeetingSettings();
+    } catch (e) {
+      showNotification('Fehler beim Speichern der Meeting-Einstellungen', 'error');
+      console.error(e);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Einstellungen speichern'; }
+    }
+  });
+
+  document.getElementById('testMeetingEmail')?.addEventListener('click', async () => {
+    const btn = document.getElementById('testMeetingEmail');
+    if (btn) { btn.disabled = true; btn.textContent = 'Sende...'; }
+    try {
+      // Save first, then trigger test
+      await saveMeetingSettings();
+      const res = await fetch('/api/settings/test-meeting-email', { method: 'POST' });
+      if (res.ok) {
+        showNotification('Test-E-Mail erfolgreich gesendet!', 'success');
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showNotification(data.error || 'Fehler beim Senden der Test-E-Mail', 'error');
+      }
+    } catch (e) {
+      showNotification('Verbindungsfehler beim Senden der Test-E-Mail', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Test-E-Mail senden'; }
+    }
+  });
+}
+
+// ============================================
 // Alle Einstellungen speichern (zentraler Button)
 // ============================================
 async function saveAllSettings() {
@@ -9350,6 +9444,7 @@ async function saveAllSettings() {
   try { await saveDisplaySettings(); } catch (e) { errors.push('Display'); console.error('Display-Save Fehler:', e); }
   try { await saveGlobalMusicSettings(); } catch (e) { errors.push('Musik'); console.error('Music-Save Fehler:', e); }
   try { await saveAISettings(); } catch (e) { errors.push('KI'); console.error('AI-Save Fehler:', e); }
+  try { await saveMeetingSettings(); } catch (e) { errors.push('Meeting'); console.error('Meeting-Save Fehler:', e); }
 
   if (btn) { btn.disabled = false; btn.textContent = 'Alle Einstellungen speichern'; }
 
@@ -9684,6 +9779,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initAIEventListeners();
   // Initial AI status laden (für Post-Form)
   loadAISettings();
+
+  // Meeting-Einstellungen laden und Events registrieren
+  loadMeetingSettings();
+  initMeetingSettingsEvents();
 
   // Zentraler Speichern-Button: Alle Live-Daten
   document.getElementById('saveAllLiveDataSettings')?.addEventListener('click', saveAllLiveDataSettings);

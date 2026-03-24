@@ -8,7 +8,9 @@ import * as presentationService from '../services/presentationService';
 import { cacheService } from '../utils/cache';
 import { videoDownloadService } from '../services/videoDownloadService';
 import { deleteMediaFiles } from '../services/mediaService';
+import { sendMeetingNotification } from '../services/emailService';
 import { PostContentType, PostDisplayMode } from '../types';
+import Setting from '../models/Setting';
 
 /**
  * Get all posts with pagination, filtering, and sorting
@@ -422,6 +424,19 @@ export const createPost = async (
     });
 
     logger.info(`Post erstellt: ${post.id} - ${title}`);
+
+    // Meeting-Benachrichtigung asynchron senden (nicht-blockierend)
+    if (createdPost && (createdPost as any).category) {
+      const meetingNameRow = await Setting.findOne({ where: { key: 'meeting.category.name' } });
+      const meetingName = meetingNameRow?.value || 'Dienstagsmeeting';
+      if ((createdPost as any).category.name === meetingName) {
+        const author = req.user ? `${(req.user as any).firstName || ''} ${(req.user as any).lastName || ''}`.trim() || req.user.email : 'Unbekannt';
+        sendMeetingNotification(
+          { postTitle: title, postContent: content, authorName: author, postId: post.id },
+          req.user?.organizationId
+        ).catch((err) => logger.error('Meeting-Benachrichtigung fehlgeschlagen:', err));
+      }
+    }
   } catch (error) {
     next(error);
   }
@@ -607,6 +622,19 @@ export const updatePost = async (
     });
 
     logger.info(`Post aktualisiert: ${id}`);
+
+    // Meeting-Benachrichtigung asynchron senden wenn Kategorie gesetzt/geändert wurde
+    if (updatedPost && (updatedPost as any).category && categoryId !== undefined) {
+      const meetingNameRow = await Setting.findOne({ where: { key: 'meeting.category.name' } });
+      const meetingName = meetingNameRow?.value || 'Dienstagsmeeting';
+      if ((updatedPost as any).category.name === meetingName) {
+        const author = req.user ? `${(req.user as any).firstName || ''} ${(req.user as any).lastName || ''}`.trim() || req.user.email : 'Unbekannt';
+        sendMeetingNotification(
+          { postTitle: updatedPost.title, postContent: updatedPost.content, authorName: author, postId: Number(id) },
+          req.user?.organizationId
+        ).catch((err) => logger.error('Meeting-Benachrichtigung fehlgeschlagen:', err));
+      }
+    }
   } catch (error) {
     next(error);
   }
