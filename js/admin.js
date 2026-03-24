@@ -9373,27 +9373,23 @@ async function loadMeetingSettings() {
 
 async function saveMeetingSettings() {
   const el = (id) => document.getElementById(id);
-  const settings = [
-    { key: 'smtp.host',     value: el('smtp-host')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
-    { key: 'smtp.port',     value: el('smtp-port')?.value?.trim() || '587', type: 'number',  category: 'smtp' },
-    { key: 'smtp.secure',   value: el('smtp-secure')?.checked ? 'true' : 'false', type: 'boolean', category: 'smtp' },
-    { key: 'smtp.user',     value: el('smtp-user')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
-    { key: 'smtp.pass',     value: el('smtp-pass')?.value || '',             type: 'string',  category: 'smtp' },
-    { key: 'smtp.from',     value: el('smtp-from')?.value?.trim() || '',    type: 'string',  category: 'smtp' },
-    { key: 'meeting.recipients', value: el('meeting-recipients')?.value?.trim() || '', type: 'string', category: 'meeting' },
-    { key: 'meeting.category.name', value: el('meeting-category-name')?.value?.trim() || 'Dienstagsmeeting', type: 'string', category: 'meeting' },
-  ];
+  const settings = {
+    'smtp.host':              el('smtp-host')?.value?.trim() || '',
+    'smtp.port':              el('smtp-port')?.value?.trim() || '587',
+    'smtp.secure':            el('smtp-secure')?.checked ? 'true' : 'false',
+    'smtp.user':              el('smtp-user')?.value?.trim() || '',
+    'smtp.pass':              el('smtp-pass')?.value || '',
+    'smtp.from':              el('smtp-from')?.value?.trim() || '',
+    'meeting.recipients':     el('meeting-recipients')?.value?.trim() || '',
+    'meeting.category.name':  el('meeting-category-name')?.value?.trim() || 'Dienstagsmeeting',
+  };
 
-  const res = await fetch('/api/settings/bulk', {
+  const result = await apiRequest('/settings/bulk', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-    },
     body: JSON.stringify({ settings }),
   });
 
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!result) throw new Error('Speichern fehlgeschlagen');
 
   const statusEl = document.getElementById('meeting-save-status');
   if (statusEl) {
