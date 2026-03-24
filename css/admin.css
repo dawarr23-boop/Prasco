@@ -3093,14 +3093,18 @@ body.sidebar-open .sidebar-backdrop {
 .rte-btn.active { background: #d0e8d0; border-color: var(--prasco-green); color: var(--prasco-dark-green); }
 .rte-btn svg { display: block; }
 
-.rte-select {
+.rte-toolbar .rte-select {
   height: 26px;
+  width: auto;
   padding: 0 4px;
   border: 1px solid #ccc;
   border-radius: 3px;
   font-size: 0.82rem;
+  font-family: var(--font-primary);
   background: #fff;
+  color: #333;
   cursor: pointer;
+  margin-top: 0;
 }
 
 .rte-color-lbl {
