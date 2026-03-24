@@ -9343,9 +9343,11 @@ async function saveAllLiveDataSettings() {
 // ============================================
 async function loadMeetingSettings() {
   try {
+    const token = localStorage.getItem('accessToken');
+    const headers = { 'Authorization': `Bearer ${token}` };
     const [smtpRes, meetingRes] = await Promise.all([
-      fetch('/api/settings?category=smtp'),
-      fetch('/api/settings?category=meeting'),
+      fetch('/api/settings?category=smtp', { headers }),
+      fetch('/api/settings?category=meeting', { headers }),
     ]);
     if (smtpRes.ok) {
       const s = await smtpRes.json();
