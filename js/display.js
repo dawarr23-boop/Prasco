@@ -3754,6 +3754,8 @@ function nextPost() {
     return;
   }
 
+  restoreHeaderFooter(); // Stelle Header/Footer wieder her (z.B. nach Video-Post)
+
   // Prüfe ob eine Live-Daten-Kategorie fällig ist
   const liveCategory = shouldInsertLiveDataWidget();
   if (liveCategory) {
@@ -3763,7 +3765,6 @@ function nextPost() {
     return;
   }
   
-  restoreHeaderFooter(); // Stelle Header/Footer wieder her
   const currentPost = posts[currentIndex];
   currentIndex = (currentIndex + 1) % posts.length;
   // Verwende Standard-Blendeffekt "fade" wenn keiner definiert ist
