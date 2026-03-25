@@ -2447,6 +2447,10 @@ function restoreHeaderFooter() {
   if (header) header.classList.remove('hidden-for-video');
   if (footer) footer.classList.remove('hidden-for-video');
 
+  // Body-Level Video-Container entfernen
+  const bodyVideoContainer = document.getElementById('body-video-fullscreen');
+  if (bodyVideoContainer) bodyVideoContainer.remove();
+
   // Beende Vollbild wenn aktiv
   if (document.fullscreenElement || document.webkitFullscreenElement) {
     if (document.exitFullscreen) {
@@ -3578,11 +3582,22 @@ async function displayCurrentPost() {
           </div>`;
         }
       }
-      // Video Vollbild - ohne Titel und Text
-      html = videoHtml;
+      // Video Vollbild - direkt an body hängen damit position:fixed korrekt funktioniert
+      // (.post hat transform:translateZ(0) + overflow:hidden, was position:fixed bricht)
+      html = '';
+
+      // Alten Body-Video-Container entfernen falls vorhanden
+      const oldFsContainer = document.getElementById('body-video-fullscreen');
+      if (oldFsContainer) oldFsContainer.remove();
 
       // Nur Header/Footer verstecken wenn tatsächlich ein Video vorhanden ist
       if (videoHtml) {
+        // Video-Container direkt an body hängen (umgeht transform/overflow des .post)
+        const fsWrapper = document.createElement('div');
+        fsWrapper.id = 'body-video-fullscreen';
+        fsWrapper.innerHTML = videoHtml;
+        document.body.appendChild(fsWrapper);
+
         // Verstecke Header für Video-Vollbild
         setTimeout(() => {
           const header = document.querySelector('.display-header');
@@ -3605,7 +3620,6 @@ async function displayCurrentPost() {
           // YouTube/Vimeo iframe: Versuche Vollbild auf dem Container
           const fsContainer = document.getElementById('video-fs-container');
           if (fsContainer && !video) {
-            // Kurz warten bis iframe geladen
             setTimeout(() => {
               tryEnterFullscreen(fsContainer);
             }, 500);
