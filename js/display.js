@@ -3451,9 +3451,6 @@ async function displayCurrentPost() {
     return;
   }
 
-  // Body-Video-Container vom vorherigen Post entfernen + Header/Footer wiederherstellen
-  restoreHeaderFooter();
-
   // Update Header-Kategorie
   updateHeaderCategory(post.category_id);
 
