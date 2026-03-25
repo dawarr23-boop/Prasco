@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IT-Westfalen Signature Screen - Admin Dashboard</title>
+    <title>IT-Westfalen Signage Display - Admin Dashboard</title>
     <link rel="stylesheet" href="/css/admin.css?v=4.5" />
     <link rel="icon" type="image/x-icon" href="https://www.prasco.net/favicon.ico" />
   </head>
@@ -21,32 +21,32 @@
         </div>
         <ul class="sidebar-menu">
           <li>
-            <a href="#dashboard" class="active"><span class="icon">◉</span> Dashboard</a>
+            <a href="#dashboard" class="active"><span class="icon">â—‰</span> Dashboard</a>
           </li>
           <li>
-            <a href="#posts"><span class="icon">▤</span> Beiträge</a>
+            <a href="#posts"><span class="icon">â–¤</span> BeitrÃ¤ge</a>
           </li>
           <li>
-            <a href="#categories"><span class="icon">◈</span> Kategorien</a>
+            <a href="#categories"><span class="icon">â—ˆ</span> Kategorien</a>
           </li>
           <li>
-            <a href="#displays"><span class="icon">▢</span> Displays</a>
+            <a href="#displays"><span class="icon">â–¢</span> Displays</a>
           </li>
           <li>
-            <a href="#users"><span class="icon">◎</span> Benutzer</a>
+            <a href="#users"><span class="icon">â—Ž</span> Benutzer</a>
           </li>
           <li>
-            <a href="#livedata"><span class="icon">◉</span> Live-Daten</a>
+            <a href="#livedata"><span class="icon">â—‰</span> Live-Daten</a>
           </li>
           <li>
-            <a href="#settings"><span class="icon">⚙</span> Einstellungen</a>
+            <a href="#settings"><span class="icon">âš™</span> Einstellungen</a>
           </li>
           <li>
             <a href="#hilfe"><span class="icon">?</span> Hilfe &amp; Dokumentation</a>
           </li>
         </ul>
         <div class="sidebar-logout">
-          <a href="#" id="logout"><span class="icon">⏻</span> Abmelden</a>
+          <a href="#" id="logout"><span class="icon">â»</span> Abmelden</a>
         </div>
       </nav>
 
@@ -55,7 +55,7 @@
 
       <main class="admin-content">
         <header class="admin-header">
-          <button class="hamburger-btn" id="hamburger-btn" aria-label="Menü öffnen">
+          <button class="hamburger-btn" id="hamburger-btn" aria-label="MenÃ¼ Ã¶ffnen">
             <span></span><span></span><span></span>
           </button>
           <h1 id="page-title">Dashboard</h1>
@@ -63,7 +63,7 @@
             <button
               class="btn btn-secondary btn-sm"
               id="changePasswordBtn"
-              title="Eigenes Passwort ändern"
+              title="Eigenes Passwort Ã¤ndern"
             >
               &#8942;
             </button>
@@ -77,11 +77,11 @@
           <section id="dashboard-section" class="section active">
             <div class="stats-grid">
               <div class="stat-card clickable" data-target="posts-section">
-                <h3 data-i18n="dashboard.activePosts">Aktive Beiträge</h3>
+                <h3 data-i18n="dashboard.activePosts">Aktive BeitrÃ¤ge</h3>
                 <p class="stat-number" id="active-posts">0</p>
               </div>
               <div class="stat-card clickable" data-target="posts-section">
-                <h3 data-i18n="dashboard.scheduledPosts">Geplante Beiträge</h3>
+                <h3 data-i18n="dashboard.scheduledPosts">Geplante BeitrÃ¤ge</h3>
                 <p class="stat-number" id="scheduled-posts">0</p>
               </div>
               <div class="stat-card clickable" data-target="categories-section">
@@ -124,35 +124,35 @@
           <!-- Posts Section -->
           <section id="posts-section" class="section">
             <div class="section-header">
-              <h2>Beiträge</h2>
+              <h2>BeitrÃ¤ge</h2>
               <div>
                 <button class="btn btn-success" id="showPostFormBtn">+ Neuer Beitrag</button>
-                <button id="ai-assistant-btn" type="button" onclick="openAIAssistantModal()" style="display:none;margin-left:8px;padding:0.4rem 0.85rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:0.9rem;color:#3a5a3a;" title="KI erstellt vollständigen Beitragsvorschlag">
-                  ✨ KI-Assistent
+                <button id="ai-assistant-btn" type="button" onclick="openAIAssistantModal()" style="display:none;margin-left:8px;padding:0.4rem 0.85rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:0.9rem;color:#3a5a3a;" title="KI erstellt vollstÃ¤ndigen Beitragsvorschlag">
+                  âœ¨ KI-Assistent
                 </button>
-                <button id="bulk-translate-mode-btn" type="button" onclick="toggleBulkTranslateMode()" style="display:none;margin-left:8px;padding:0.4rem 0.85rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:0.9rem;color:#3a5a3a;" title="Mehrere Beiträge gleichzeitig übersetzen">
-                  ⇄ Übersetzen
+                <button id="bulk-translate-mode-btn" type="button" onclick="toggleBulkTranslateMode()" style="display:none;margin-left:8px;padding:0.4rem 0.85rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:0.9rem;color:#3a5a3a;" title="Mehrere BeitrÃ¤ge gleichzeitig Ã¼bersetzen">
+                  â‡„ Ãœbersetzen
                 </button>
-                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">Alle löschen</button>
+                <button class="btn btn-danger" id="deleteAllPostsBtn" style="margin-left: 10px;">Alle lÃ¶schen</button>
               </div>
             </div>
 
-            <!-- Bulk-Übersetzungs-Toolbar (erscheint im Übersetzungs-Modus) -->
+            <!-- Bulk-Ãœbersetzungs-Toolbar (erscheint im Ãœbersetzungs-Modus) -->
             <div id="bulk-translate-toolbar" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; background:#f0f4f0; border:1px solid #c9d4c9; border-radius:6px; display:none; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-              <span id="bulk-selected-count" style="font-size:0.9rem; color:#555; min-width:100px;">0 ausgewählt</span>
+              <span id="bulk-selected-count" style="font-size:0.9rem; color:#555; min-width:100px;">0 ausgewÃ¤hlt</span>
               <select id="bulk-translate-lang" style="padding:0.4rem 0.6rem; border:1px solid #bbb; border-radius:4px; font-size:0.9rem;">
                 <option value="Englisch">Englisch</option>
-                <option value="Türkisch">Türkisch</option>
+                <option value="TÃ¼rkisch">TÃ¼rkisch</option>
                 <option value="Polnisch">Polnisch</option>
-                <option value="Französisch">Französisch</option>
+                <option value="FranzÃ¶sisch">FranzÃ¶sisch</option>
                 <option value="Arabisch">Arabisch</option>
                 <option value="Spanisch">Spanisch</option>
                 <option value="Russisch">Russisch</option>
                 <option value="Chinesisch">Chinesisch</option>
               </select>
-              <button type="button" id="bulk-translate-btn" onclick="handleBulkTranslate()" style="padding:0.4rem 1rem; background:#4a7c4a; color:white; border:none; border-radius:4px; cursor:pointer; font-size:0.9rem;">⇄ Übersetzen</button>
+              <button type="button" id="bulk-translate-btn" onclick="handleBulkTranslate()" style="padding:0.4rem 1rem; background:#4a7c4a; color:white; border:none; border-radius:4px; cursor:pointer; font-size:0.9rem;">â‡„ Ãœbersetzen</button>
               <button type="button" onclick="clearBulkSelection()" style="padding:0.4rem 0.8rem; background:transparent; border:1px solid #bbb; border-radius:4px; cursor:pointer; font-size:0.9rem; color:#555;">Auswahl aufheben</button>
-              <div id="bulk-translate-progress" style="display:none; font-size:0.9rem; color:#3a5a3a; margin-left:0.5rem;">⏳ Übersetze…</div>
+              <div id="bulk-translate-progress" style="display:none; font-size:0.9rem; color:#3a5a3a; margin-left:0.5rem;">â³ Ãœbersetzeâ€¦</div>
             </div>
 
             <div id="post-form" class="form-container" style="display: none">
@@ -168,62 +168,62 @@
                   <div class="wz-step" data-step="4"><span class="wz-num">4</span><span class="wz-label">Vorschau</span></div>
                 </div>
 
-                <!-- SCHRITT 1: Typ wählen -->
+                <!-- SCHRITT 1: Typ wÃ¤hlen -->
                 <div class="wizard-step" data-step="1">
                 <!-- Typ-Kacheln -->
                 <div id="type-card-picker" style="display:none; margin-bottom:1.5rem;">
                   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
-                    <label style="font-weight:600;font-size:0.875rem;color:var(--prasco-gray-dark);margin:0;">Was möchtest du erstellen?</label>
+                    <label style="font-weight:600;font-size:0.875rem;color:var(--prasco-gray-dark);margin:0;">Was mÃ¶chtest du erstellen?</label>
                     <button type="button" id="switch-to-dropdown-btn" onclick="applyCreativeMode(false)" style="font-size:0.78rem;color:var(--prasco-gray);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;" title="Zur einfachen Dropdown-Ansicht wechseln">Einfache Ansicht</button>
                   </div>
                   <div class="type-card-grid">
                     <div class="type-card" data-type="text">
-                      <div class="type-card-icon">✏️</div>
+                      <div class="type-card-icon">âœï¸</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.text">Text</span>
                         <span class="type-card-desc">Formatierbarer Text, mehrzeilig</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="image">
-                      <div class="type-card-icon">🖼️</div>
+                      <div class="type-card-icon">ðŸ–¼ï¸</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.image">Bild</span>
                         <span class="type-card-desc">Fotos &amp; Grafiken hochladen</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="video">
-                      <div class="type-card-icon">🎬</div>
+                      <div class="type-card-icon">ðŸŽ¬</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.video">Video</span>
                         <span class="type-card-desc">Datei oder YouTube / Vimeo</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="html">
-                      <div class="type-card-icon">🌐</div>
+                      <div class="type-card-icon">ðŸŒ</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.html">HTML</span>
                         <span class="type-card-desc">Freies HTML-Layout mit CSS</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="presentation">
-                      <div class="type-card-icon">📊</div>
+                      <div class="type-card-icon">ðŸ“Š</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.presentation">PowerPoint</span>
                         <span class="type-card-desc">PPTX seitenweise anzeigen</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="pdf">
-                      <div class="type-card-icon">📄</div>
+                      <div class="type-card-icon">ðŸ“„</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.pdf">Dokument</span>
                         <span class="type-card-desc">PDF, Word, Excel als Bilder</span>
                       </div>
                     </div>
                     <div class="type-card" data-type="composite">
-                      <div class="type-card-icon">🎨</div>
+                      <div class="type-card-icon">ðŸŽ¨</div>
                       <div class="type-card-body">
                         <span class="type-card-label" data-translate="type.composite">Komposition</span>
-                        <span class="type-card-desc">Mehrere Layer übereinander</span>
+                        <span class="type-card-desc">Mehrere Layer Ã¼bereinander</span>
                       </div>
                     </div>
                   </div>
@@ -236,13 +236,13 @@
                           <div class="info-tooltip-content">
                             <strong>Beitragstypen:</strong>
                             <ul>
-                              <li><strong>Text</strong> – Einfache Textnachricht (Zeilenumbrüche werden übernommen)</li>
-                              <li><strong>Bild</strong> – Bild-Upload (JPG, PNG, GIF, WebP)</li>
-                              <li><strong>Video</strong> – Video-Datei oder YouTube/Vimeo-URL</li>
-                              <li><strong>HTML</strong> – Freie HTML-Gestaltung mit CSS</li>
-                              <li><strong>PowerPoint</strong> – PPTX wird als Folien angezeigt</li>
-                              <li><strong>Dokument</strong> – PDF, Word, Excel, ODF seitenweise anzeigen</li>
-                              <li><strong>🎨 Komposition</strong> – Mehrere Layer übereinander: Text, Bild, Laufschrift, HTML</li>
+                              <li><strong>Text</strong> â€“ Einfache Textnachricht (ZeilenumbrÃ¼che werden Ã¼bernommen)</li>
+                              <li><strong>Bild</strong> â€“ Bild-Upload (JPG, PNG, GIF, WebP)</li>
+                              <li><strong>Video</strong> â€“ Video-Datei oder YouTube/Vimeo-URL</li>
+                              <li><strong>HTML</strong> â€“ Freie HTML-Gestaltung mit CSS</li>
+                              <li><strong>PowerPoint</strong> â€“ PPTX wird als Folien angezeigt</li>
+                              <li><strong>Dokument</strong> â€“ PDF, Word, Excel, ODF seitenweise anzeigen</li>
+                              <li><strong>ðŸŽ¨ Komposition</strong> â€“ Mehrere Layer Ã¼bereinander: Text, Bild, Laufschrift, HTML</li>
                             </ul>
                           </div>
                         </span>
@@ -254,9 +254,9 @@
                       <option value="image" data-translate="type.image">Bild</option>
                       <option value="video" data-translate="type.video">Video</option>
                       <option value="html" data-translate="type.html">HTML</option>
-                      <option value="presentation" data-translate="type.presentation">PowerPoint Präsentation</option>
+                      <option value="presentation" data-translate="type.presentation">PowerPoint PrÃ¤sentation</option>
                       <option value="pdf" data-translate="type.pdf">Dokument</option>
-                      <option value="composite" data-translate="type.composite">🎨 Komposition (Layer)</option>
+                      <option value="composite" data-translate="type.composite">ðŸŽ¨ Komposition (Layer)</option>
                     </select>
                   </div>
                 </div><!-- end wizard-step[1] -->
@@ -276,20 +276,20 @@
                     </div>
                     <div style="display:flex;gap:0.4rem;">
                       <input type="text" id="post-title" name="title" required style="flex:1;" />
-                      <button type="button" id="ai-suggest-title-btn" title="KI schlägt Titel vor" style="display:none;padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;" onclick="handleAISuggestTitle()">✨</button>
+                      <button type="button" id="ai-suggest-title-btn" title="KI schlÃ¤gt Titel vor" style="display:none;padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;" onclick="handleAISuggestTitle()">âœ¨</button>
                     </div>
                   </div>
 
-                <!-- Titel Schriftart & Schriftgröße -->
+                <!-- Titel Schriftart & SchriftgrÃ¶ÃŸe -->
                 <div class="form-row" id="title-font-options">
                   <div class="form-group">
-                    <label for="title-font-size">Titel Schriftgröße</label>
+                    <label for="title-font-size">Titel SchriftgrÃ¶ÃŸe</label>
                     <select id="title-font-size" name="title_font_size">
                       <option value="">Standard</option>
                       <option value="1.5rem">Klein (1.5rem)</option>
                       <option value="2rem">Mittel (2rem)</option>
-                      <option value="3rem">Groß (3rem)</option>
-                      <option value="4rem">Sehr groß (4rem)</option>
+                      <option value="3rem">GroÃŸ (3rem)</option>
+                      <option value="4rem">Sehr groÃŸ (4rem)</option>
                       <option value="5rem">Riesig (5rem)</option>
                     </select>
                   </div>
@@ -337,7 +337,7 @@
 
                   <!-- Display Selection Container -->
                   <div id="display-selection-container" class="display-selection-box" style="display: none">
-                    <div class="display-selection-box-header" data-translate="displays.selectDisplays">Displays auswählen:</div>
+                    <div class="display-selection-box-header" data-translate="displays.selectDisplays">Displays auswÃ¤hlen:</div>
                     <div id="displays-checkboxes">
                       <p class="text-muted" style="text-align: center; padding: 1rem;" data-translate="liveData.loadingDisplays">Lade Displays...</p>
                     </div>
@@ -351,9 +351,9 @@
                       <div class="info-tooltip-content">
                         <strong>Textformatierung:</strong>
                         <ul>
-                          <li><code>Enter</code> = Nächste Zeile / Absatz</li>
-                          <li>Bei Typ <strong>Text</strong>: Einfacher Text ohne HTML. Zeilenumbrüche werden automatisch übernommen.</li>
-                          <li>Bei Typ <strong>HTML</strong>: Sie können HTML-Tags verwenden, z.B. <code>&lt;br&gt;</code> für Zeilenumbruch, <code>&lt;b&gt;</code> für fett, <code>&lt;i&gt;</code> für kursiv.</li>
+                          <li><code>Enter</code> = NÃ¤chste Zeile / Absatz</li>
+                          <li>Bei Typ <strong>Text</strong>: Einfacher Text ohne HTML. ZeilenumbrÃ¼che werden automatisch Ã¼bernommen.</li>
+                          <li>Bei Typ <strong>HTML</strong>: Sie kÃ¶nnen HTML-Tags verwenden, z.B. <code>&lt;br&gt;</code> fÃ¼r Zeilenumbruch, <code>&lt;b&gt;</code> fÃ¼r fett, <code>&lt;i&gt;</code> fÃ¼r kursiv.</li>
                           <li>Bilder/Videos: Hier die Beschreibung eintragen. Die Mediendatei wird separat hochgeladen.</li>
                         </ul>
                       </div>
@@ -362,13 +362,13 @@
                   <textarea id="post-content" name="content" rows="5"></textarea>
                   <div id="post-content-info" style="display:none; font-size:0.78rem; text-align:right; margin-top:2px;">
                     <span id="post-content-charcount" style="color:#888;">0</span><span style="color:#888;"> Zeichen</span>
-                    <span id="post-content-split-hint" style="display:none; color:#e67e00; margin-left:8px;">⚠ Wird beim Speichern automatisch aufgeteilt</span>
+                    <span id="post-content-split-hint" style="display:none; color:#e67e00; margin-left:8px;">âš  Wird beim Speichern automatisch aufgeteilt</span>
                   </div>
-                  <!-- Rich-Text-Editor (für Typ Text / HTML) -->
+                  <!-- Rich-Text-Editor (fÃ¼r Typ Text / HTML) -->
                   <div id="rte-container" class="rte-wrapper" style="display:none;">
                     <div class="rte-toolbar" id="rte-toolbar">
                       <select class="rte-select" id="rte-font-family" title="Schriftart">
-                        <option value="">— Schriftart —</option>
+                        <option value="">â€” Schriftart â€”</option>
                         <option value="Arial, sans-serif">Arial</option>
                         <option value="Georgia, serif">Georgia</option>
                         <option value="'Courier New', monospace">Courier New</option>
@@ -378,8 +378,8 @@
                         <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
                         <option value="'Comic Sans MS', cursive">Comic Sans</option>
                       </select>
-                      <select class="rte-select" id="rte-font-size" title="Schriftgröße">
-                        <option value="">— Größe —</option>
+                      <select class="rte-select" id="rte-font-size" title="SchriftgrÃ¶ÃŸe">
+                        <option value="">â€” GrÃ¶ÃŸe â€”</option>
                         <option value="10px">10</option>
                         <option value="12px">12</option>
                         <option value="14px">14</option>
@@ -397,9 +397,9 @@
                       <div class="rte-sep"></div>
                       <select class="rte-select" id="rte-block" title="Absatzformat">
                         <option value="p">Normal</option>
-                        <option value="h1">Überschrift 1</option>
-                        <option value="h2">Überschrift 2</option>
-                        <option value="h3">Überschrift 3</option>
+                        <option value="h1">Ãœberschrift 1</option>
+                        <option value="h2">Ãœberschrift 2</option>
+                        <option value="h3">Ãœberschrift 3</option>
                         <option value="blockquote">Zitat</option>
                         <option value="pre">Code</option>
                       </select>
@@ -418,30 +418,30 @@
                         <input type="color" id="rte-bg" value="#ffff00">
                       </label>
                       <div class="rte-sep"></div>
-                      <button type="button" class="rte-btn" data-cmd="justifyLeft" title="Linksbündig">
+                      <button type="button" class="rte-btn" data-cmd="justifyLeft" title="LinksbÃ¼ndig">
                         <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect y="4.5" width="10" height="2"/><rect y="9" width="12" height="2"/></svg>
                       </button>
                       <button type="button" class="rte-btn" data-cmd="justifyCenter" title="Zentriert">
                         <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect x="2.5" y="4.5" width="10" height="2"/><rect x="1.5" y="9" width="12" height="2"/></svg>
                       </button>
-                      <button type="button" class="rte-btn" data-cmd="justifyRight" title="Rechtsbündig">
+                      <button type="button" class="rte-btn" data-cmd="justifyRight" title="RechtsbÃ¼ndig">
                         <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect x="5" y="4.5" width="10" height="2"/><rect x="3" y="9" width="12" height="2"/></svg>
                       </button>
                       <button type="button" class="rte-btn" data-cmd="justifyFull" title="Blocksatz">
                         <svg width="15" height="11" viewBox="0 0 15 11"><rect y="0" width="15" height="2"/><rect y="4.5" width="15" height="2"/><rect y="9" width="15" height="2"/></svg>
                       </button>
                       <div class="rte-sep"></div>
-                      <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Aufzählungsliste">
+                      <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="AufzÃ¤hlungsliste">
                         <svg width="15" height="12" viewBox="0 0 15 12"><circle cx="2" cy="2" r="1.5"/><rect x="6" y="1" width="9" height="2"/><circle cx="2" cy="6" r="1.5"/><rect x="6" y="5" width="9" height="2"/><circle cx="2" cy="10" r="1.5"/><rect x="6" y="9" width="9" height="2"/></svg>
                       </button>
                       <button type="button" class="rte-btn" data-cmd="insertOrderedList" title="Nummerierte Liste">
                         <svg width="15" height="12" viewBox="0 0 15 12"><text x="0" y="4.5" font-size="4.5" font-family="monospace" fill="#333">1.</text><rect x="6" y="1" width="9" height="2"/><text x="0" y="8.5" font-size="4.5" font-family="monospace" fill="#333">2.</text><rect x="6" y="5" width="9" height="2"/><text x="0" y="12.5" font-size="4.5" font-family="monospace" fill="#333">3.</text><rect x="6" y="9" width="9" height="2"/></svg>
                       </button>
                       <div class="rte-sep"></div>
-                      <button type="button" class="rte-btn" data-cmd="outdent" title="Einzug verringern" style="font-size:1.1rem">⇤</button>
-                      <button type="button" class="rte-btn" data-cmd="indent" title="Einzug erhöhen" style="font-size:1.1rem">⇥</button>
+                      <button type="button" class="rte-btn" data-cmd="outdent" title="Einzug verringern" style="font-size:1.1rem">â‡¤</button>
+                      <button type="button" class="rte-btn" data-cmd="indent" title="Einzug erhÃ¶hen" style="font-size:1.1rem">â‡¥</button>
                       <div class="rte-sep"></div>
-                      <button type="button" class="rte-btn" data-cmd="removeFormat" title="Formatierung entfernen" style="font-size:0.8rem">⊗ Frm</button>
+                      <button type="button" class="rte-btn" data-cmd="removeFormat" title="Formatierung entfernen" style="font-size:0.8rem">âŠ— Frm</button>
                     </div>
                     <div id="rte-editor" class="rte-content" contenteditable="true"></div>
                   </div>
@@ -454,18 +454,18 @@
                       <button type="button" class="ai-btn ai-text-only" data-action="improve" title="Bestehenden Text verbessern">
                         <span class="ai-btn-icon">&#10038;</span> Verbessern
                       </button>
-                      <button type="button" class="ai-btn ai-text-only" data-action="shorten" title="Text kürzen">
-                        <span class="ai-btn-icon">&#9986;</span> Kürzen
+                      <button type="button" class="ai-btn ai-text-only" data-action="shorten" title="Text kÃ¼rzen">
+                        <span class="ai-btn-icon">&#9986;</span> KÃ¼rzen
                       </button>
-                      <button type="button" class="ai-btn ai-text-only ai-btn-translate" data-action="translate" title="Text übersetzen">
-                        <span class="ai-btn-icon">⇄</span> Übersetzen
+                      <button type="button" class="ai-btn ai-text-only ai-btn-translate" data-action="translate" title="Text Ã¼bersetzen">
+                        <span class="ai-btn-icon">â‡„</span> Ãœbersetzen
                         <select id="ai-target-language" class="ai-lang-select">
                           <option value="Deutsch">DE</option>
                           <option value="Englisch" selected>EN</option>
-                          <option value="Französisch">FR</option>
+                          <option value="FranzÃ¶sisch">FR</option>
                           <option value="Spanisch">ES</option>
                           <option value="Italienisch">IT</option>
-                          <option value="Türkisch">TR</option>
+                          <option value="TÃ¼rkisch">TR</option>
                           <option value="Polnisch">PL</option>
                           <option value="Arabisch">AR</option>
                         </select>
@@ -476,9 +476,9 @@
                     </div>
                     <!-- HTML-Prompt-Eingabe (nur bei HTML-Typ) -->
                     <div id="ai-html-prompt-area" style="display:none;margin-top:0.5rem;">
-                      <textarea id="ai-html-prompt" rows="2" placeholder="Beschreiben Sie das gewünschte Layout, z.B. ‚Schwarzer Hintergrund, großes Logo oben, darunter Wartezeit in Grün'" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #c9d4c9;border-radius:4px;resize:vertical;font-size:0.85rem;"></textarea>
+                      <textarea id="ai-html-prompt" rows="2" placeholder="Beschreiben Sie das gewÃ¼nschte Layout, z.B. â€šSchwarzer Hintergrund, groÃŸes Logo oben, darunter Wartezeit in GrÃ¼n'" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #c9d4c9;border-radius:4px;resize:vertical;font-size:0.85rem;"></textarea>
                       <button type="button" class="ai-btn" id="ai-html-generate-btn" onclick="handleAIGenerateHTML()" style="margin-top:0.3rem;width:100%;">
-                        <span class="ai-btn-icon">✨</span> HTML jetzt generieren
+                        <span class="ai-btn-icon">âœ¨</span> HTML jetzt generieren
                       </button>
                     </div>
                     <div id="ai-status" class="ai-status" style="display: none;">
@@ -494,7 +494,7 @@
                   <!-- Option 1: Word/PDF Import (nur bei Text/HTML) -->
                   <div id="word-pdf-import" style="margin-bottom: 1rem;">
                     <button type="button" class="btn btn-secondary" id="import-document-btn" style="width: 100%; font-size: 0.95rem;" data-translate="form.importDocument">
-                      ↑ Word/PDF importieren
+                      â†‘ Word/PDF importieren
                     </button>
                     <small style="color: #666; display: block; margin-top: 0.5rem; text-align: center;" data-translate="form.importDocumentHint">
                       Importieren Sie .docx oder .pdf Dateien (max. 10MB)
@@ -505,11 +505,11 @@
                   <div id="file-upload-section" style="display: none;">
                     <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
                       <button type="button" class="btn btn-secondary" id="trigger-file-upload" style="font-size: 0.9rem; display: inline-block;" data-translate="form.uploadFile">
-                        ↑ Datei hochladen
+                        â†‘ Datei hochladen
                       </button>
                       <!-- KI-Bild-Button: nur bei Typ image sichtbar -->
                       <button type="button" id="ai-generate-image-btn" onclick="openAIImageModal()" style="display:none;font-size:0.9rem;padding:0.4rem 0.8rem;background:#f0f4f0;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;color:#3a5a3a;" title="Bild mit KI erstellen">
-                        ✨ KI-Bild erstellen
+                        âœ¨ KI-Bild erstellen
                       </button>
                       <small style="color: #666; align-self: center;" data-translate="form.uploadFileHint">
                         Bilder, Videos, Audio, PDFs, Word, PowerPoint (max. 2 GB)
@@ -520,10 +520,10 @@
                       <div style="display:flex;align-items:center;gap:0.75rem;">
                         <img id="ai-image-preview-img" src="" alt="KI-Bild" style="width:80px;height:50px;object-fit:cover;border-radius:3px;border:1px solid #ddd;" />
                         <div style="flex:1;">
-                          <small style="color:#4a7c4a;font-weight:600;">✨ KI-generiertes Bild</small><br>
+                          <small style="color:#4a7c4a;font-weight:600;">âœ¨ KI-generiertes Bild</small><br>
                           <small id="ai-image-preview-name" style="color:#666;"></small>
                         </div>
-                        <button type="button" onclick="removeAIImage()" style="background:none;border:none;cursor:pointer;color:#dc3545;font-size:1.2rem;padding:0;" title="Entfernen">×</button>
+                        <button type="button" onclick="removeAIImage()" style="background:none;border:none;cursor:pointer;color:#dc3545;font-size:1.2rem;padding:0;" title="Entfernen">Ã—</button>
                       </div>
                     </div>
                     <input
@@ -540,23 +540,23 @@
                       <small id="upload-status" style="color: #007bff" data-translate="form.uploading">Uploading...</small>
                     </div>
 
-                    <!-- KI-Bildanalyse: erscheint wenn Bilddatei ausgewählt -->
+                    <!-- KI-Bildanalyse: erscheint wenn Bilddatei ausgewÃ¤hlt -->
                     <div id="ai-analyze-btn-wrapper" style="display:none;margin-top:0.6rem;">
                       <button type="button" id="ai-analyze-btn" onclick="handleAIAnalyzeImage()"
                         style="font-size:0.9rem;padding:0.4rem 0.8rem;background:#f0f4f4;border:1px solid #b8cecd;border-radius:4px;cursor:pointer;color:#2a5454;">
-                        🔍 KI: Titel &amp; Beschreibung vorschlagen
+                        ðŸ” KI: Titel &amp; Beschreibung vorschlagen
                       </button>
                     </div>
                     <!-- Analyse-Ergebnis -->
                     <div id="ai-analyze-result" style="display:none;margin-top:0.6rem;padding:0.75rem;background:#f4f8f8;border:1px solid #b8cecd;border-radius:4px;font-size:0.9rem;">
-                      <div style="font-weight:600;color:#2a5454;margin-bottom:0.4rem;">🔍 KI-Bildanalyse</div>
-                      <div id="ai-analyze-loading" style="color:#666;">&#8203;⏳ Analyse läuft… (ca. 5 Sek.)</div>
+                      <div style="font-weight:600;color:#2a5454;margin-bottom:0.4rem;">ðŸ” KI-Bildanalyse</div>
+                      <div id="ai-analyze-loading" style="color:#666;">&#8203;â³ Analyse lÃ¤uftâ€¦ (ca. 5 Sek.)</div>
                       <div id="ai-analyze-content" style="display:none;">
                         <div style="margin-bottom:0.4rem;display:flex;align-items:baseline;gap:0.5rem;flex-wrap:wrap;">
                           <span style="color:#555;">Titel-Vorschlag:</span>
                           <strong id="ai-analyze-title" style="color:#2a5454;"></strong>
                           <button type="button" onclick="applyAnalysisSuggestion('title')"
-                            style="font-size:0.8rem;padding:0.1rem 0.5rem;background:#e8f4e8;border:1px solid #c9d4c9;border-radius:3px;cursor:pointer;">&#8594; Übernehmen</button>
+                            style="font-size:0.8rem;padding:0.1rem 0.5rem;background:#e8f4e8;border:1px solid #c9d4c9;border-radius:3px;cursor:pointer;">&#8594; Ãœbernehmen</button>
                         </div>
                         <div style="color:#555;">Beschreibung: <em id="ai-analyze-caption" style="color:#444;"></em></div>
                       </div>
@@ -579,25 +579,25 @@
                       YouTube/Vimeo URLs werden automatisch als Video eingebettet
                     </small>
                     
-                    <!-- Offline-Download Option (nur für externe Videos) -->
+                    <!-- Offline-Download Option (nur fÃ¼r externe Videos) -->
                     <div id="offline-download-section" style="margin-top: 1rem; display: none;">
                       <div class="checkbox-label" style="display: flex; align-items: center; gap: 0.5rem;">
                         <div class="toggle-switch">
                           <input type="checkbox" class="toggle-input" id="download-video-offline" />
                           <label class="toggle-label" for="download-video-offline"><span class="toggle-slider"></span></label>
                         </div>
-                        <span data-translate="form.offlineDownload">📥 Video offline verfügbar machen</span>
+                        <span data-translate="form.offlineDownload">ðŸ“¥ Video offline verfÃ¼gbar machen</span>
                       </div>
                       <small style="color: #666; display: block; margin-top: 0.25rem; margin-left: 1.5rem;" data-translate="form.offlineDownloadHint">
-                        Lädt das Video automatisch herunter für bessere Performance und Offline-Nutzung
+                        LÃ¤dt das Video automatisch herunter fÃ¼r bessere Performance und Offline-Nutzung
                       </small>
                     </div>
                   </div>
                 </div>
 
-                <!-- Layer-Builder (nur für Typ "composite") -->
+                <!-- Layer-Builder (nur fÃ¼r Typ "composite") -->
                 <div id="layer-builder" style="display:none;margin-top:0.25rem;">
-                  <label style="font-weight:600;margin-bottom:0.75rem;display:block;">🎨 Layer-Komposition</label>
+                  <label style="font-weight:600;margin-bottom:0.75rem;display:block;">ðŸŽ¨ Layer-Komposition</label>
 
                   <div class="lb-split">
                     <!-- Linke Spalte: Karten + Steuerung -->
@@ -616,22 +616,22 @@
 
                       <div style="display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;">
                         <select id="lb-new-type" style="padding:0.4rem 0.75rem;border:1px solid #ddd;border-radius:4px;background:#fff;flex:1;">
-                          <option value="text">📝 Text / HTML</option>
-                          <option value="image">🖼️ Bild</option>
-                          <option value="ticker">📢 Laufschrift</option>
-                          <option value="html">🔖 HTML-Block</option>
+                          <option value="text">ðŸ“ Text / HTML</option>
+                          <option value="image">ðŸ–¼ï¸ Bild</option>
+                          <option value="ticker">ðŸ“¢ Laufschrift</option>
+                          <option value="html">ðŸ”– HTML-Block</option>
                         </select>
-                        <button type="button" id="lb-add-btn" class="btn btn-secondary" style="white-space:nowrap;">＋ Hinzufügen</button>
+                        <button type="button" id="lb-add-btn" class="btn btn-secondary" style="white-space:nowrap;">ï¼‹ HinzufÃ¼gen</button>
                       </div>
                     </div>
 
                     <!-- Rechte Spalte: interaktiver Vorschau-Canvas -->
                     <div class="lb-split-right">
                       <label style="font-weight:500;font-size:0.85rem;margin-bottom:0.3rem;display:block;">
-                        Vorschau — Layer anklicken &amp; ziehen
+                        Vorschau â€” Layer anklicken &amp; ziehen
                       </label>
                       <div id="lb-preview-canvas" style="position:relative;padding-top:56.25%;border:2px solid #ddd;border-radius:6px;overflow:hidden;background:#1a1a2e;"></div>
-                      <div id="lb-coord-bar" class="lb-coord-bar">Layer anklicken zum Auswählen, dann ziehen oder Pfeiltasten</div>
+                      <div id="lb-coord-bar" class="lb-coord-bar">Layer anklicken zum AuswÃ¤hlen, dann ziehen oder Pfeiltasten</div>
                     </div>
                   </div>
                 </div>
@@ -645,7 +645,7 @@
                       <span class="info-tooltip-wrapper">
                         <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                         <div class="info-tooltip-content">
-                          Wie lange dieser Beitrag auf dem Display angezeigt wird, bevor zum nächsten gewechselt wird. Standard: 60 Sekunden. Bei Videos wird automatisch die Videolänge verwendet.
+                          Wie lange dieser Beitrag auf dem Display angezeigt wird, bevor zum nÃ¤chsten gewechselt wird. Standard: 60 Sekunden. Bei Videos wird automatisch die VideolÃ¤nge verwendet.
                         </div>
                       </span>
                     </label>
@@ -658,16 +658,16 @@
                         min="1"
                         style="flex:1;"
                       />
-                      <button type="button" id="smart-duration-btn" title="Optimale Anzeigedauer berechnen" style="padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;">💡</button>
+                      <button type="button" id="smart-duration-btn" title="Optimale Anzeigedauer berechnen" style="padding:0 0.6rem;background:none;border:1px solid #c9d4c9;border-radius:4px;cursor:pointer;font-size:1rem;color:#58585a;">ðŸ’¡</button>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label for="priority" data-translate="form.priority">Priorität (0-100)
+                    <label for="priority" data-translate="form.priority">PrioritÃ¤t (0-100)
                       <span class="info-tooltip-wrapper">
                         <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                         <div class="info-tooltip-content">
-                          Bestimmt die Reihenfolge der Beiträge. <strong>Höhere Zahlen = häufiger angezeigt</strong>. Beiträge mit Priorität 0 werden normal rotiert. Wert 100 = höchste Priorität.
+                          Bestimmt die Reihenfolge der BeitrÃ¤ge. <strong>HÃ¶here Zahlen = hÃ¤ufiger angezeigt</strong>. BeitrÃ¤ge mit PrioritÃ¤t 0 werden normal rotiert. Wert 100 = hÃ¶chste PrioritÃ¤t.
                         </div>
                       </span>
                     </label>
@@ -686,11 +686,11 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="blend-effect" data-translate="form.blendEffect">Übergangseffekt</label>
-                    <small style="color: #666; display: block; margin-bottom: 0.25rem" data-translate="form.blendEffectHint">Wählen Sie einen Übergangseffekt zum nächsten Beitrag</small>
+                    <label for="blend-effect" data-translate="form.blendEffect">Ãœbergangseffekt</label>
+                    <small style="color: #666; display: block; margin-bottom: 0.25rem" data-translate="form.blendEffectHint">WÃ¤hlen Sie einen Ãœbergangseffekt zum nÃ¤chsten Beitrag</small>
                     <select id="blend-effect" name="blend_effect">
                       <option value="" data-translate="form.blendEffectNone">Kein Effekt</option>
-                      <option value="fade" data-translate="form.blendEffectFade">Fade (Überblenden)</option>
+                      <option value="fade" data-translate="form.blendEffectFade">Fade (Ãœberblenden)</option>
                       <option value="slide-left" data-translate="form.blendEffectSlideLeft">Slide Left (Nach links)</option>
                       <option value="slide-right" data-translate="form.blendEffectSlideRight">Slide Right (Nach rechts)</option>
                       <option value="slide-up" data-translate="form.blendEffectSlideUp">Slide Up (Nach oben)</option>
@@ -707,7 +707,7 @@
                       <span class="info-tooltip-wrapper">
                         <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                         <div class="info-tooltip-content">
-                          <strong>Zeitsteuerung:</strong> Beitrag wird erst ab diesem Datum/Uhrzeit auf dem Display angezeigt. Leer lassen = sofort sichtbar. Zusammen mit End-Datum können Sie zeitlich begrenzte Beiträge planen.
+                          <strong>Zeitsteuerung:</strong> Beitrag wird erst ab diesem Datum/Uhrzeit auf dem Display angezeigt. Leer lassen = sofort sichtbar. Zusammen mit End-Datum kÃ¶nnen Sie zeitlich begrenzte BeitrÃ¤ge planen.
                         </div>
                       </span>
                     </label>
@@ -720,11 +720,11 @@
                   </div>
                 </div>
 
-                <!-- Hintergrundmusik (nur für nicht-Video-Inhalte) -->
+                <!-- Hintergrundmusik (nur fÃ¼r nicht-Video-Inhalte) -->
                 <div class="form-group background-music-section" id="background-music-section">
-                  <label> <span class="settings-icon">♪</span> <span data-translate="form.backgroundMusicSection">Hintergrundmusik (optional)</span> </label>
+                  <label> <span class="settings-icon">â™ª</span> <span data-translate="form.backgroundMusicSection">Hintergrundmusik (optional)</span> </label>
                   <small style="color: #666; display: block; margin-bottom: 0.5rem" data-translate="form.backgroundMusicHint">
-                    Nur für Text, Bild und HTML-Inhalte. Bei Videos wird der Original-Ton verwendet.
+                    Nur fÃ¼r Text, Bild und HTML-Inhalte. Bei Videos wird der Original-Ton verwendet.
                   </small>
                   <div class="form-row">
                     <div class="form-group" style="flex: 2">
@@ -735,10 +735,10 @@
                         name="background_music_file"
                         accept="audio/*,.mp3,.wav,.ogg,.m4a"
                       />
-                      <small style="color: #666">Unterstützt: MP3, WAV, OGG, M4A</small>
+                      <small style="color: #666">UnterstÃ¼tzt: MP3, WAV, OGG, M4A</small>
                     </div>
                     <div class="form-group" style="flex: 1">
-                      <label for="background-music-volume" data-translate="form.musicVolume">Lautstärke</label>
+                      <label for="background-music-volume" data-translate="form.musicVolume">LautstÃ¤rke</label>
                       <div class="volume-control">
                         <input
                           type="range"
@@ -754,7 +754,7 @@
                   </div>
                   <div id="current-music-info" style="display: none; margin-top: 0.5rem">
                     <small style="color: #28a745">
-                      <span class="btn-icon">♪</span> Aktuelle Musik:
+                      <span class="btn-icon">â™ª</span> Aktuelle Musik:
                       <span id="current-music-name"></span>
                       <button
                         type="button"
@@ -804,7 +804,7 @@
                 <!-- Live-Vorschau -->
                 <div id="live-preview-panel" style="margin-bottom:1rem;">
                   <button type="button" class="live-preview-toggle" id="toggle-preview-btn" onclick="toggleLivePreview()">
-                    <span>👁</span> <span id="preview-btn-label">Vorschau anzeigen</span>
+                    <span>ðŸ‘</span> <span id="preview-btn-label">Vorschau anzeigen</span>
                   </button>
                   <div id="live-preview-box" style="display:none; margin-top:0.75rem;">
                     <div class="lp-screen-outer">
@@ -824,15 +824,15 @@
 
                 <!-- Wizard Navigation (nur im Wizard-Modus) -->
                 <div id="wizard-nav" class="wizard-nav" style="display:none;">
-                  <button type="button" class="btn btn-secondary" id="wizard-prev-btn" onclick="wizardPrev()">← Zurück</button>
+                  <button type="button" class="btn btn-secondary" id="wizard-prev-btn" onclick="wizardPrev()">â† ZurÃ¼ck</button>
                   <span class="wizard-nav-label" id="wizard-step-label">Schritt 1 von 4</span>
-                  <button type="button" class="btn btn-primary" id="wizard-next-btn" onclick="wizardNext()">Weiter →</button>
+                  <button type="button" class="btn btn-primary" id="wizard-next-btn" onclick="wizardNext()">Weiter â†’</button>
                 </div>
               </form>
             </div>
 
             <div class="posts-list" id="posts-list">
-              <!-- Wird dynamisch gefüllt -->
+              <!-- Wird dynamisch gefÃ¼llt -->
             </div>
 
           </section>
@@ -862,84 +862,84 @@
                     <label for="category-icon" data-translate="category.icon">Icon</label>
                     <select id="category-icon" name="icon" class="icon-select">
                       <optgroup label="Geometrische Formen">
-                        <option value="●">● Kreis (gefüllt)</option>
-                        <option value="○">○ Kreis (leer)</option>
-                        <option value="◉">◉ Kreis mit Punkt</option>
-                        <option value="◎">◎ Doppelkreis</option>
-                        <option value="■" selected>■ Quadrat (gefüllt)</option>
-                        <option value="□">□ Quadrat (leer)</option>
-                        <option value="▪">▪ Kleines Quadrat</option>
-                        <option value="▫">▫ Kleines Quadrat (leer)</option>
-                        <option value="◆">◆ Raute (gefüllt)</option>
-                        <option value="◇">◇ Raute (leer)</option>
-                        <option value="◈">◈ Raute mit Punkt</option>
-                        <option value="▲">▲ Dreieck hoch</option>
-                        <option value="△">△ Dreieck hoch (leer)</option>
-                        <option value="▼">▼ Dreieck runter</option>
-                        <option value="▽">▽ Dreieck runter (leer)</option>
-                        <option value="◀">◀ Dreieck links</option>
-                        <option value="▶">▶ Dreieck rechts</option>
-                        <option value="⬟">⬟ Sechseck</option>
-                        <option value="⬢">⬢ Sechseck (gefüllt)</option>
+                        <option value="â—">â— Kreis (gefÃ¼llt)</option>
+                        <option value="â—‹">â—‹ Kreis (leer)</option>
+                        <option value="â—‰">â—‰ Kreis mit Punkt</option>
+                        <option value="â—Ž">â—Ž Doppelkreis</option>
+                        <option value="â– " selected>â–  Quadrat (gefÃ¼llt)</option>
+                        <option value="â–¡">â–¡ Quadrat (leer)</option>
+                        <option value="â–ª">â–ª Kleines Quadrat</option>
+                        <option value="â–«">â–« Kleines Quadrat (leer)</option>
+                        <option value="â—†">â—† Raute (gefÃ¼llt)</option>
+                        <option value="â—‡">â—‡ Raute (leer)</option>
+                        <option value="â—ˆ">â—ˆ Raute mit Punkt</option>
+                        <option value="â–²">â–² Dreieck hoch</option>
+                        <option value="â–³">â–³ Dreieck hoch (leer)</option>
+                        <option value="â–¼">â–¼ Dreieck runter</option>
+                        <option value="â–½">â–½ Dreieck runter (leer)</option>
+                        <option value="â—€">â—€ Dreieck links</option>
+                        <option value="â–¶">â–¶ Dreieck rechts</option>
+                        <option value="â¬Ÿ">â¬Ÿ Sechseck</option>
+                        <option value="â¬¢">â¬¢ Sechseck (gefÃ¼llt)</option>
                       </optgroup>
                       <optgroup label="Sterne & Symbole">
-                        <option value="★">★ Stern (gefüllt)</option>
-                        <option value="☆">☆ Stern (leer)</option>
-                        <option value="✦">✦ Stern 4-zackig</option>
-                        <option value="✧">✧ Stern 4-zackig (leer)</option>
-                        <option value="✪">✪ Stern im Kreis</option>
-                        <option value="✫">✫ Stern offen</option>
-                        <option value="✬">✬ Stern gefüllt</option>
-                        <option value="✭">✭ Stern umrandet</option>
-                        <option value="✮">✮ Stern 6-zackig</option>
-                        <option value="✯">✯ Stern 6-zackig (leer)</option>
+                        <option value="â˜…">â˜… Stern (gefÃ¼llt)</option>
+                        <option value="â˜†">â˜† Stern (leer)</option>
+                        <option value="âœ¦">âœ¦ Stern 4-zackig</option>
+                        <option value="âœ§">âœ§ Stern 4-zackig (leer)</option>
+                        <option value="âœª">âœª Stern im Kreis</option>
+                        <option value="âœ«">âœ« Stern offen</option>
+                        <option value="âœ¬">âœ¬ Stern gefÃ¼llt</option>
+                        <option value="âœ­">âœ­ Stern umrandet</option>
+                        <option value="âœ®">âœ® Stern 6-zackig</option>
+                        <option value="âœ¯">âœ¯ Stern 6-zackig (leer)</option>
                       </optgroup>
                       <optgroup label="Pfeile & Zeiger">
-                        <option value="▸">▸ Pfeil rechts</option>
-                        <option value="▹">▹ Pfeil rechts (leer)</option>
-                        <option value="►">► Pfeil rechts (groß)</option>
-                        <option value="▻">▻ Pfeil rechts (groß, leer)</option>
-                        <option value="→">→ Pfeil rechts (dünn)</option>
-                        <option value="⇒">⇒ Doppelpfeil</option>
-                        <option value="➤">➤ Pfeilspitze</option>
-                        <option value="➔">➔ Pfeil breit</option>
+                        <option value="â–¸">â–¸ Pfeil rechts</option>
+                        <option value="â–¹">â–¹ Pfeil rechts (leer)</option>
+                        <option value="â–º">â–º Pfeil rechts (groÃŸ)</option>
+                        <option value="â–»">â–» Pfeil rechts (groÃŸ, leer)</option>
+                        <option value="â†’">â†’ Pfeil rechts (dÃ¼nn)</option>
+                        <option value="â‡’">â‡’ Doppelpfeil</option>
+                        <option value="âž¤">âž¤ Pfeilspitze</option>
+                        <option value="âž”">âž” Pfeil breit</option>
                       </optgroup>
-                      <optgroup label="Häkchen & Kreuze">
-                        <option value="✓">✓ Häkchen</option>
-                        <option value="✔">✔ Häkchen (fett)</option>
-                        <option value="✕">✕ Kreuz</option>
-                        <option value="✖">✖ Kreuz (fett)</option>
-                        <option value="✗">✗ Kreuz (Ballot)</option>
-                        <option value="✘">✘ Kreuz (Ballot, fett)</option>
+                      <optgroup label="HÃ¤kchen & Kreuze">
+                        <option value="âœ“">âœ“ HÃ¤kchen</option>
+                        <option value="âœ”">âœ” HÃ¤kchen (fett)</option>
+                        <option value="âœ•">âœ• Kreuz</option>
+                        <option value="âœ–">âœ– Kreuz (fett)</option>
+                        <option value="âœ—">âœ— Kreuz (Ballot)</option>
+                        <option value="âœ˜">âœ˜ Kreuz (Ballot, fett)</option>
                       </optgroup>
                       <optgroup label="Info & Status">
-                        <option value="ℹ">ℹ Info</option>
-                        <option value="⚠">⚠ Warnung</option>
-                        <option value="⚡">⚡ Blitz</option>
-                        <option value="⚙">⚙ Zahnrad</option>
-                        <option value="⚑">⚑ Flagge</option>
-                        <option value="⚐">⚐ Flagge (leer)</option>
-                        <option value="♦">♦ Karo</option>
-                        <option value="♠">♠ Pik</option>
-                        <option value="♣">♣ Kreuz</option>
-                        <option value="♥">♥ Herz</option>
+                        <option value="â„¹">â„¹ Info</option>
+                        <option value="âš ">âš  Warnung</option>
+                        <option value="âš¡">âš¡ Blitz</option>
+                        <option value="âš™">âš™ Zahnrad</option>
+                        <option value="âš‘">âš‘ Flagge</option>
+                        <option value="âš">âš Flagge (leer)</option>
+                        <option value="â™¦">â™¦ Karo</option>
+                        <option value="â™ ">â™  Pik</option>
+                        <option value="â™£">â™£ Kreuz</option>
+                        <option value="â™¥">â™¥ Herz</option>
                       </optgroup>
                       <optgroup label="Weitere Symbole">
-                        <option value="☀">☀ Sonne</option>
-                        <option value="☁">☁ Wolke</option>
-                        <option value="☂">☂ Regenschirm</option>
-                        <option value="☎">☎ Telefon</option>
-                        <option value="☐">☐ Checkbox (leer)</option>
-                        <option value="☑">☑ Checkbox (angehakt)</option>
-                        <option value="☒">☒ Checkbox (gekreuzt)</option>
-                        <option value="☛">☛ Zeigefinger</option>
-                        <option value="☞">☞ Zeigefinger (leer)</option>
-                        <option value="♪">♪ Note</option>
-                        <option value="♫">♫ Noten</option>
-                        <option value="⌂">⌂ Haus</option>
-                        <option value="⌘">⌘ Command</option>
-                        <option value="⏱">⏱ Stoppuhr</option>
-                        <option value="⏰">⏰ Wecker</option>
+                        <option value="â˜€">â˜€ Sonne</option>
+                        <option value="â˜">â˜ Wolke</option>
+                        <option value="â˜‚">â˜‚ Regenschirm</option>
+                        <option value="â˜Ž">â˜Ž Telefon</option>
+                        <option value="â˜">â˜ Checkbox (leer)</option>
+                        <option value="â˜‘">â˜‘ Checkbox (angehakt)</option>
+                        <option value="â˜’">â˜’ Checkbox (gekreuzt)</option>
+                        <option value="â˜›">â˜› Zeigefinger</option>
+                        <option value="â˜ž">â˜ž Zeigefinger (leer)</option>
+                        <option value="â™ª">â™ª Note</option>
+                        <option value="â™«">â™« Noten</option>
+                        <option value="âŒ‚">âŒ‚ Haus</option>
+                        <option value="âŒ˜">âŒ˜ Command</option>
+                        <option value="â±">â± Stoppuhr</option>
+                        <option value="â°">â° Wecker</option>
                       </optgroup>
                     </select>
                   </div>
@@ -966,7 +966,7 @@
             </div>
 
             <div class="categories-list" id="categories-list">
-              <!-- Wird dynamisch gefüllt -->
+              <!-- Wird dynamisch gefÃ¼llt -->
             </div>
           </section>
 
@@ -976,7 +976,7 @@
               <h2 data-translate="displays.title">Display-Verwaltung</h2>
               <div style="display: flex; align-items: center; gap: 1rem;">
                 <span id="display-license-info" class="license-info-badge">Lizenz: <strong><span id="display-license-used">0</span> / <span id="display-license-max">2</span></strong> Displays</span>
-                <button class="btn btn-secondary btn-sm" id="showFleetOverviewBtn" title="Geräte-Übersicht">📊 Flottenübersicht</button>
+                <button class="btn btn-secondary btn-sm" id="showFleetOverviewBtn" title="GerÃ¤te-Ãœbersicht">ðŸ“Š FlottenÃ¼bersicht</button>
                 <button class="btn btn-primary" id="showDisplayFormBtn" data-translate="displays.newDisplay">+ Neues Display</button>
               </div>
             </div>
@@ -985,10 +985,10 @@
             <div id="fleet-overview-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <span style="font-size: 1.4rem;">📊</span>
-                  <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Geräte-Flottenübersicht</h3>
+                  <span style="font-size: 1.4rem;">ðŸ“Š</span>
+                  <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">GerÃ¤te-FlottenÃ¼bersicht</h3>
                 </div>
-                <button class="btn btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 4px 12px; border-radius: 6px;" id="closeFleetOverviewBtn">✕</button>
+                <button class="btn btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 4px 12px; border-radius: 6px;" id="closeFleetOverviewBtn">âœ•</button>
               </div>
 
               <!-- Fleet Stats -->
@@ -1007,7 +1007,7 @@
                 </div>
                 <div style="background: rgba(108,117,125,0.2); padding: 0.75rem; border-radius: 8px; text-align: center;">
                   <div style="font-size: 1.6rem; font-weight: 700; color: #6c757d;" id="fleet-unregistered">0</div>
-                  <div style="font-size: 0.75rem; color: #aaa;">Ohne Gerät</div>
+                  <div style="font-size: 0.75rem; color: #aaa;">Ohne GerÃ¤t</div>
                 </div>
                 <div style="background: rgba(255,170,0,0.2); padding: 0.75rem; border-radius: 8px; text-align: center; border: 1px solid rgba(255,170,0,0.3);">
                   <div style="font-size: 1.6rem; font-weight: 700; color: #ffaa00;" id="fleet-pending">0</div>
@@ -1022,7 +1022,7 @@
             <!-- License Management Panel (nur super_admin) -->
             <div id="license-management-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                <span style="font-size: 1.4rem;">🔑</span>
+                <span style="font-size: 1.4rem;">ðŸ”‘</span>
                 <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Lizenzverwaltung</h3>
               </div>
               <div style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
@@ -1031,44 +1031,44 @@
                 <button class="btn btn-primary btn-sm" id="saveLicenseLimitBtn">Speichern</button>
                 <span id="license-save-status" style="font-size: 0.8rem; color: #aaa;"></span>
               </div>
-              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Legt fest, wie viele Displays gleichzeitig verwendet werden können.</p>
+              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Legt fest, wie viele Displays gleichzeitig verwendet werden kÃ¶nnen.</p>
             </div>
 
             <!-- APK Distribution Panel (nur super_admin) -->
             <div id="apk-distribution-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #0d7377 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                <span style="font-size: 1.4rem;">📦</span>
+                <span style="font-size: 1.4rem;">ðŸ“¦</span>
                 <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">APK-Verteilung</h3>
               </div>
               <!-- APK-Status -->
               <div id="apk-info-bar" style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem 1rem; background:rgba(255,255,255,0.07); border-radius:8px; margin-bottom:0.75rem; font-size:0.85rem; color:#ccc; flex-wrap:wrap;">
-                <span id="apk-availability-badge" style="padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:600; background:#6c757d; color:#fff;">Prüfe…</span>
+                <span id="apk-availability-badge" style="padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:600; background:#6c757d; color:#fff;">PrÃ¼feâ€¦</span>
                 <span id="apk-info-text" style="color:#ccc;"></span>
               </div>
               <!-- Aktionen -->
               <div style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; flex-wrap: wrap;">
                 <div>
-                  <label for="apk-upload-input" style="cursor: pointer; padding: 6px 14px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.9rem;">📁 APK hochladen</label>
+                  <label for="apk-upload-input" style="cursor: pointer; padding: 6px 14px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.9rem;">ðŸ“ APK hochladen</label>
                   <input type="file" id="apk-upload-input" accept=".apk" style="display: none;" />
                 </div>
-                <button class="btn btn-info btn-sm" id="downloadApkBtn" title="Aktuelle APK herunterladen">⬇ APK herunterladen</button>
+                <button class="btn btn-info btn-sm" id="downloadApkBtn" title="Aktuelle APK herunterladen">â¬‡ APK herunterladen</button>
                 <span id="apk-upload-status" style="font-size: 0.8rem; color: #aaa;"></span>
               </div>
-              <!-- Öffentlicher Download-Link -->
+              <!-- Ã–ffentlicher Download-Link -->
               <div style="margin-top:0.75rem; padding:0.7rem 1rem; background:rgba(255,255,255,0.05); border-radius:8px;">
-                <div style="font-size:0.8rem; color:#aaa; margin-bottom:0.4rem;">Öffentlicher Download-Link (kein Login erforderlich):</div>
+                <div style="font-size:0.8rem; color:#aaa; margin-bottom:0.4rem;">Ã–ffentlicher Download-Link (kein Login erforderlich):</div>
                 <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                   <code id="apk-public-url" style="font-size:0.82rem; background:rgba(0,0,0,0.3); padding:4px 10px; border-radius:4px; color:#9fe; word-break:break-all;"></code>
-                  <button type="button" onclick="copyApkPublicUrl()" style="padding:4px 10px; background:rgba(255,255,255,0.15); border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; color:#fff;">📋 Kopieren</button>
+                  <button type="button" onclick="copyApkPublicUrl()" style="padding:4px 10px; background:rgba(255,255,255,0.15); border:none; border-radius:4px; cursor:pointer; font-size:0.82rem; color:#fff;">ðŸ“‹ Kopieren</button>
                 </div>
               </div>
-              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Laden Sie die Android TV APK hoch, damit sie an Geräte verteilt werden kann.</p>
+              <p style="font-size: 0.8rem; color: #aaa; margin: 0.5rem 0 0;">Laden Sie die Android TV APK hoch, damit sie an GerÃ¤te verteilt werden kann.</p>
             </div>
 
             <!-- Display Security Panel (nur super_admin) -->
             <div id="display-security-panel" class="form-container" style="display: none; margin-bottom: 1.5rem; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #fff; border: 1px solid rgba(255,255,255,0.1);">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.2rem;">
-                <span style="font-size: 1.4rem;">🔒</span>
+                <span style="font-size: 1.4rem;">ðŸ”’</span>
                 <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #fff;">Display-Sicherheit</h3>
               </div>
 
@@ -1084,7 +1084,7 @@
                       <label for="toggle-secure-mode" style="cursor: pointer; font-weight: 500; color: #fff;">Gesicherter Modus</label>
                     </div>
                     <p id="secure-mode-description" style="font-size: 0.8rem; color: #aaa; margin: 0.3rem 0 0 0;">
-                      Aus: Displays können ohne Anmeldung auf Inhalte zugreifen
+                      Aus: Displays kÃ¶nnen ohne Anmeldung auf Inhalte zugreifen
                     </p>
                   </div>
                   <span id="secure-mode-badge" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #6c757d; color: #fff;">AUS</span>
@@ -1101,7 +1101,7 @@
                       <label for="toggle-registration-mode" style="cursor: pointer; font-weight: 500; color: #fff;">Registrierungsmodus</label>
                     </div>
                     <p id="registration-mode-description" style="font-size: 0.8rem; color: #aaa; margin: 0.3rem 0 0 0;">
-                      Aus: Keine neuen Geräte können sich registrieren
+                      Aus: Keine neuen GerÃ¤te kÃ¶nnen sich registrieren
                     </p>
                   </div>
                   <span id="registration-mode-badge" style="padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: #6c757d; color: #fff;">AUS</span>
@@ -1111,7 +1111,7 @@
 
             <div id="display-license-warning" class="license-warning" style="display: none">
               <strong data-translate="displays.licenseWarning">Display-Lizenzlimit erreicht</strong>
-              <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst <span id="license-warning-max">2</span> Displays. Um weitere Displays hinzuzufügen, erhöhen Sie das Lizenzlimit in der Lizenzverwaltung oder kontaktieren Sie den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
+              <p style="margin: 0.5rem 0 0;">Ihre aktuelle Lizenz umfasst <span id="license-warning-max">2</span> Displays. Um weitere Displays hinzuzufÃ¼gen, erhÃ¶hen Sie das Lizenzlimit in der Lizenzverwaltung oder kontaktieren Sie den Vertrieb unter <a href="mailto:kontakt@it-westfalen.de" class="inline-link">kontakt@it-westfalen.de</a>.</p>
             </div>
 
             <div id="display-form" class="form-container" style="display: none">
@@ -1127,7 +1127,7 @@
                     <span class="info-tooltip-wrapper tooltip-below">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                       <div class="info-tooltip-content" data-translate="displays.identifierTooltip">
-                        Eindeutiger technischer Name für die Display-URL. Wird in der Adressleiste verwendet: <code>/display/mein-display</code>. Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche.
+                        Eindeutiger technischer Name fÃ¼r die Display-URL. Wird in der Adressleiste verwendet: <code>/display/mein-display</code>. Erlaubt: Buchstaben, Zahlen, Bindestriche, Unterstriche.
                       </div>
                     </span>
                   </label>
@@ -1141,7 +1141,7 @@
                     title="Nur Buchstaben, Zahlen, Bindestriche und Unterstriche"
                     data-translate-placeholder="displays.identifierPlaceholder"
                   />
-                  <small style="color: #6c757d;" data-translate="displays.identifierHint">Eindeutiger Identifier für die Display-URL (nur a-z, 0-9, -, _)</small>
+                  <small style="color: #6c757d;" data-translate="displays.identifierHint">Eindeutiger Identifier fÃ¼r die Display-URL (nur a-z, 0-9, -, _)</small>
                 </div>
 
                 <div class="form-group">
@@ -1163,7 +1163,7 @@
                     </div>
                     <label for="display-isActive" style="cursor: pointer;" data-translate="displays.isActive">Display ist aktiv</label>
                   </div>
-                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.isActiveHint">Inaktive Displays erhalten keine Beiträge</small>
+                  <small style="color: #6c757d; display: block; margin-top: 0.25rem;" data-translate="displays.isActiveHint">Inaktive Displays erhalten keine BeitrÃ¤ge</small>
                 </div>
 
                 <div class="form-group">
@@ -1174,7 +1174,7 @@
                         <input type="checkbox" class="toggle-input" id="display-showTransitData" name="showTransitData" checked />
                         <label class="toggle-label" for="display-showTransitData"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-showTransitData" style="cursor: pointer;" data-translate="displays.showTransitData">ÖPNV-Abfahrten anzeigen</label>
+                      <label for="display-showTransitData" style="cursor: pointer;" data-translate="displays.showTransitData">Ã–PNV-Abfahrten anzeigen</label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <div class="toggle-switch">
@@ -1193,7 +1193,7 @@
                     id="display-tickerText"
                     name="tickerText"
                     rows="2"
-                    placeholder="Optionaler Text, der unten am Bildschirm entlangläuft"
+                    placeholder="Optionaler Text, der unten am Bildschirm entlanglÃ¤uft"
                     data-translate-placeholder="displays.tickerTextPlaceholder"
                   ></textarea>
                   <small style="color: #6c757d;" data-translate="displays.tickerTextHint">Wird als scrollender Text am unteren Rand des Displays angezeigt. Leer lassen = kein Ticker.</small>
@@ -1207,38 +1207,38 @@
                         <input type="checkbox" class="toggle-input" id="display-tickerTransit" name="tickerTransit" />
                         <label class="toggle-label" for="display-tickerTransit"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-tickerTransit" style="cursor: pointer;" data-translate="displays.tickerTransit">🚌 ÖPNV-Abfahrten im Ticker anzeigen</label>
+                      <label for="display-tickerTransit" style="cursor: pointer;" data-translate="displays.tickerTransit">ðŸšŒ Ã–PNV-Abfahrten im Ticker anzeigen</label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <div class="toggle-switch">
                         <input type="checkbox" class="toggle-input" id="display-tickerTraffic" name="tickerTraffic" />
                         <label class="toggle-label" for="display-tickerTraffic"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-tickerTraffic" style="cursor: pointer;" data-translate="displays.tickerTraffic">🚧 Verkehrsmeldungen im Ticker anzeigen</label>
+                      <label for="display-tickerTraffic" style="cursor: pointer;" data-translate="displays.tickerTraffic">ðŸš§ Verkehrsmeldungen im Ticker anzeigen</label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <div class="toggle-switch">
                         <input type="checkbox" class="toggle-input" id="display-tickerNews" name="tickerNews" />
                         <label class="toggle-label" for="display-tickerNews"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-tickerNews" style="cursor: pointer;" data-translate="displays.tickerNews">📰 Nachrichten im Ticker anzeigen</label>
+                      <label for="display-tickerNews" style="cursor: pointer;" data-translate="displays.tickerNews">ðŸ“° Nachrichten im Ticker anzeigen</label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <div class="toggle-switch">
                         <input type="checkbox" class="toggle-input" id="display-tickerWeather" name="tickerWeather" />
                         <label class="toggle-label" for="display-tickerWeather"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-tickerWeather" style="cursor: pointer;" data-translate="displays.tickerWeather">🌤 Wetter im Ticker anzeigen</label>
+                      <label for="display-tickerWeather" style="cursor: pointer;" data-translate="displays.tickerWeather">ðŸŒ¤ Wetter im Ticker anzeigen</label>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
                       <div class="toggle-switch">
                         <input type="checkbox" class="toggle-input" id="display-showRainRadar" name="showRainRadar" />
                         <label class="toggle-label" for="display-showRainRadar"><span class="toggle-slider"></span></label>
                       </div>
-                      <label for="display-showRainRadar" style="cursor: pointer;" data-translate="displays.showRainRadar">🌧️ Regenradar anzeigen</label>
+                      <label for="display-showRainRadar" style="cursor: pointer;" data-translate="displays.showRainRadar">ðŸŒ§ï¸ Regenradar anzeigen</label>
                     </div>
                   </div>
-                  <small style="color: #6c757d; display: block; margin-top: 0.4rem;" data-translate="displays.tickerLiveHint">Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehängt.</small>
+                  <small style="color: #6c757d; display: block; margin-top: 0.4rem;" data-translate="displays.tickerLiveHint">Live-Daten werden automatisch alle 60 Sekunden aktualisiert und an den statischen Text angehÃ¤ngt.</small>
                 </div>
 
                 <div class="form-group">
@@ -1246,11 +1246,11 @@
                   <div style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-top: 0.25rem;">
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                       <input type="radio" name="clockStyle" id="clock-style-digital" value="digital" checked />
-                      <span data-translate="displays.clockStyleDigital">🕐 Digital (Standard)</span>
+                      <span data-translate="displays.clockStyleDigital">ðŸ• Digital (Standard)</span>
                     </label>
                     <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                       <input type="radio" name="clockStyle" id="clock-style-analog" value="analog" />
-                      <span data-translate="displays.clockStyleAnalog">🕰 Analog (Bahnhofsuhr)</span>
+                      <span data-translate="displays.clockStyleAnalog">ðŸ•° Analog (Bahnhofsuhr)</span>
                     </label>
                   </div>
                 </div>
@@ -1265,7 +1265,7 @@
             </div>
 
             <div class="displays-list" id="displays-list">
-              <!-- Wird dynamisch gefüllt -->
+              <!-- Wird dynamisch gefÃ¼llt -->
             </div>
           </section>
 
@@ -1312,7 +1312,7 @@
                     <label for="user-password" data-translate="users.password">Passwort *</label>
                     <input type="password" id="user-password" name="password" minlength="6" autocomplete="new-password" />
                     <small class="form-hint"
-                      >Min. 6 Zeichen (leer lassen für keine Änderung bei Bearbeitung)</small
+                      >Min. 6 Zeichen (leer lassen fÃ¼r keine Ã„nderung bei Bearbeitung)</small
                     >
                   </div>
 
@@ -1335,20 +1335,20 @@
             </div>
 
             <div class="users-list" id="users-list">
-              <!-- Wird dynamisch gefüllt -->
+              <!-- Wird dynamisch gefÃ¼llt -->
             </div>
           </section>
 
           <!-- Live-Daten Section -->
           <section id="livedata-section" class="section">
-            <h2 data-translate="liveData.sectionTitle">Live-Daten (ÖPNV, Verkehr, Wetter & Nachrichten)</h2>
+            <h2 data-translate="liveData.sectionTitle">Live-Daten (Ã–PNV, Verkehr, Wetter & Nachrichten)</h2>
 
             <div class="livedata-grid">
-            <!-- Transit / ÖPNV Konfiguration -->
+            <!-- Transit / Ã–PNV Konfiguration -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="9" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="11" x2="4" y2="14"/><line x1="11" y1="11" x2="12" y2="14"/></svg></span> <span data-translate="liveData.transit.title">ÖPNV-Abfahrten</span></h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="9" rx="2"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="11" x2="4" y2="14"/><line x1="11" y1="11" x2="12" y2="14"/></svg></span> <span data-translate="liveData.transit.title">Ã–PNV-Abfahrten</span></h3>
               <p class="settings-description" data-translate="liveData.transit.description">
-                Konfigurieren Sie die Anzeige von Live-Abfahrtszeiten für Busse und Bahnen in Ihrer Nähe.
+                Konfigurieren Sie die Anzeige von Live-Abfahrtszeiten fÃ¼r Busse und Bahnen in Ihrer NÃ¤he.
               </p>
               <div class="settings-form">
                 <div class="form-group">
@@ -1357,7 +1357,7 @@
                       <input type="checkbox" class="toggle-input" id="transit-enabled" />
                       <label class="toggle-label" for="transit-enabled"><span class="toggle-slider"></span></label>
                     </div>
-                    <span data-translate="liveData.transit.enable">ÖPNV-Abfahrten auf Display anzeigen</span>
+                    <span data-translate="liveData.transit.enable">Ã–PNV-Abfahrten auf Display anzeigen</span>
                   </div>
                 </div>
 
@@ -1376,7 +1376,7 @@
                     <div class="station-info">
                       <span class="station-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="2.5"/><path d="M8 15C8 15 3 10 3 6a5 5 0 0 1 10 0c0 4-5 9-5 9z"/></svg></span>
                       <div>
-                        <strong id="transit-station-name">–</strong>
+                        <strong id="transit-station-name">â€“</strong>
                         <small id="transit-station-id" class="text-muted"></small>
                       </div>
                     </div>
@@ -1408,7 +1408,7 @@
                       <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-tram" checked /><label class="toggle-label" for="filter-tram"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.tram">Tram</span></div>
                       <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-regional" checked /><label class="toggle-label" for="filter-regional"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.regional">Regionalzug</span></div>
                       <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-national" checked /><label class="toggle-label" for="filter-national"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.national">Fernzug</span></div>
-                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-ferry" /><label class="toggle-label" for="filter-ferry"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.ferry">Fähre</span></div>
+                      <div class="checkbox-label"><div class="toggle-switch"><input type="checkbox" class="toggle-input" id="filter-ferry" /><label class="toggle-label" for="filter-ferry"><span class="toggle-slider"></span></label></div><span data-translate="liveData.transit.ferry">FÃ¤hre</span></div>
                     </div>
                   </div>
 
@@ -1424,9 +1424,9 @@
               </div>
             </div>
 
-            <!-- Live-Vorschau ÖPNV -->
+            <!-- Live-Vorschau Ã–PNV -->
             <div id="transit-preview-card" class="settings-card" style="display: none">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.transit.previewTitle">ÖPNV-Vorschau</span></h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="8.5" x2="11" y2="8.5"/><line x1="5" y1="11" x2="8" y2="11"/></svg></span> <span data-translate="liveData.transit.previewTitle">Ã–PNV-Vorschau</span></h3>
               <div id="transit-preview-content" class="live-preview-container">
                 <p class="text-muted" data-translate="liveData.transit.previewHint">Klicken Sie auf "Vorschau" um Live-Abfahrten zu laden.</p>
               </div>
@@ -1436,7 +1436,7 @@
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M4 14L6 2M10 2L12 14"/><line x1="8" y1="4" x2="8" y2="6"/><line x1="8" y1="8" x2="8" y2="10"/></svg></span> <span data-translate="liveData.traffic.title">Autobahn-Verkehrslage</span></h3>
               <p class="settings-description" data-translate="liveData.traffic.description">
-                Zeigen Sie Staumeldungen, Baustellen und Verkehrswarnungen für ausgewählte Autobahnen an.
+                Zeigen Sie Staumeldungen, Baustellen und Verkehrswarnungen fÃ¼r ausgewÃ¤hlte Autobahnen an.
               </p>
               <div class="settings-form">
                 <div class="form-group">
@@ -1453,21 +1453,21 @@
                   <div class="form-group">
                     <label for="traffic-location-preset" data-translate="liveData.traffic.locationPreset">Standort-Vorauswahl</label>
                     <select id="traffic-location-preset">
-                      <option value="" data-translate="liveData.traffic.manualSelect">— Manuell auswählen —</option>
+                      <option value="" data-translate="liveData.traffic.manualSelect">â€” Manuell auswÃ¤hlen â€”</option>
                       <option value="ahlen" selected>Ahlen (A1, A2, A43, A44)</option>
-                      <option value="muenster">Münster (A1, A2, A43)</option>
+                      <option value="muenster">MÃ¼nster (A1, A2, A43)</option>
                       <option value="dortmund">Dortmund (A1, A2, A40, A44, A45)</option>
                       <option value="bielefeld">Bielefeld (A2, A33)</option>
                     </select>
                   </div>
 
                   <div class="form-group">
-                    <label for="traffic-highway-select" data-translate="liveData.traffic.highwaySelect">Autobahnen auswählen</label>
+                    <label for="traffic-highway-select" data-translate="liveData.traffic.highwaySelect">Autobahnen auswÃ¤hlen</label>
                     <div class="highway-select-wrapper">
                       <select id="traffic-highway-select" multiple size="6">
                         <option value="loading" disabled>Lade Autobahnen...</option>
                       </select>
-                      <small data-translate="liveData.traffic.multiSelectHint">Halten Sie Strg/Cmd gedrückt für Mehrfachauswahl oder nutzen Sie die Standort-Vorauswahl</small>
+                      <small data-translate="liveData.traffic.multiSelectHint">Halten Sie Strg/Cmd gedrÃ¼ckt fÃ¼r Mehrfachauswahl oder nutzen Sie die Standort-Vorauswahl</small>
                     </div>
                   </div>
 
@@ -1517,7 +1517,7 @@
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="7" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="11" x2="8" y2="13"/><line x1="2" y1="7" x2="4" y2="7"/><line x1="12" y1="7" x2="14" y2="7"/><line x1="3.5" y1="3.5" x2="5" y2="5"/><line x1="11" y1="9" x2="12.5" y2="10.5"/></svg></span> <span data-translate="liveData.weather.title">Wetter & Vorhersage</span></h3>
               <p class="settings-description" data-translate="liveData.weather.description">
-                Zeigen Sie aktuelles Wetter und eine mehrtägige Vorhersage auf Ihrem Display an. Daten von Open-Meteo (kostenlos, kein API-Key nötig).
+                Zeigen Sie aktuelles Wetter und eine mehrtÃ¤gige Vorhersage auf Ihrem Display an. Daten von Open-Meteo (kostenlos, kein API-Key nÃ¶tig).
               </p>
               <div class="settings-form">
                 <div class="form-group">
@@ -1534,7 +1534,7 @@
                   <div class="form-group">
                     <label for="weather-location-search" data-translate="liveData.weather.locationSearch">Ort suchen</label>
                     <div class="search-input-group">
-                      <input type="text" id="weather-location-search" placeholder="z.B. Ahlen, Münster, Berlin..." data-translate-placeholder="liveData.weather.locationPlaceholder" />
+                      <input type="text" id="weather-location-search" placeholder="z.B. Ahlen, MÃ¼nster, Berlin..." data-translate-placeholder="liveData.weather.locationPlaceholder" />
                       <button type="button" class="btn btn-secondary btn-sm" id="weather-search-btn" data-translate="common.search">Suchen</button>
                     </div>
                   </div>
@@ -1545,7 +1545,7 @@
                     <div class="station-info">
                       <span class="station-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16" aria-hidden="true"><circle cx="8" cy="6" r="2.5"/><path d="M8 15C8 15 3 10 3 6a5 5 0 0 1 10 0c0 4-5 9-5 9z"/></svg></span>
                       <div>
-                        <strong id="weather-location-name">–</strong>
+                        <strong id="weather-location-name">â€“</strong>
                         <small id="weather-location-coords" class="text-muted"></small>
                       </div>
                     </div>
@@ -1639,31 +1639,31 @@
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><polyline points="2,4 14,4"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M3 4l1 9a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-9"/></svg></span> <span data-translate="liveData.cache.title">Cache-Verwaltung</span></h3>
               <p class="settings-description" data-translate="liveData.cache.description">
-                Leeren Sie den Cache für ÖPNV-, Verkehrs- und Wetterdaten, um aktuelle Daten zu erzwingen.
+                Leeren Sie den Cache fÃ¼r Ã–PNV-, Verkehrs- und Wetterdaten, um aktuelle Daten zu erzwingen.
               </p>
               <div class="settings-form">
                 <div class="cache-stats" id="cache-stats">
                   <div class="cache-stat-item">
-                    <span class="cache-label" data-translate="liveData.cache.transit">ÖPNV-Cache:</span>
-                    <span id="transit-cache-count" class="cache-value">–</span>
+                    <span class="cache-label" data-translate="liveData.cache.transit">Ã–PNV-Cache:</span>
+                    <span id="transit-cache-count" class="cache-value">â€“</span>
                   </div>
                   <div class="cache-stat-item">
                     <span class="cache-label" data-translate="liveData.cache.traffic">Verkehr-Cache:</span>
-                    <span id="traffic-cache-count" class="cache-value">–</span>
+                    <span id="traffic-cache-count" class="cache-value">â€“</span>
                   </div>
                   <div class="cache-stat-item">
                     <span class="cache-label" data-translate="liveData.cache.weather">Wetter-Cache:</span>
-                    <span id="weather-cache-count" class="cache-value">–</span>
+                    <span id="weather-cache-count" class="cache-value">â€“</span>
                   </div>
                 </div>
-                <button class="btn btn-secondary" id="clearTransitCache" data-translate="liveData.cache.clearTransit">ÖPNV-Cache leeren</button>
+                <button class="btn btn-secondary" id="clearTransitCache" data-translate="liveData.cache.clearTransit">Ã–PNV-Cache leeren</button>
                 <button class="btn btn-secondary" id="clearTrafficCache" style="margin-left: 0.5rem" data-translate="liveData.cache.clearTraffic">Verkehr-Cache leeren</button>
                 <button class="btn btn-secondary" id="clearWeatherCache" style="margin-left: 0.5rem" data-translate="liveData.cache.clearWeather">Wetter-Cache leeren</button>
               </div>
             </div>
             </div><!-- /.livedata-grid -->
 
-            <!-- Zentraler Speichern-Button für alle Live-Daten -->
+            <!-- Zentraler Speichern-Button fÃ¼r alle Live-Daten -->
             <div style="margin-top: 1.5rem; padding: 1rem 0; border-top: 2px solid #e9ecef; text-align: right;">
               <button class="btn btn-primary" id="saveAllLiveDataSettings" style="padding: 0.6rem 2rem; font-size: 1rem;">
                 Alle Live-Daten speichern
@@ -1681,17 +1681,17 @@
               <div class="settings-form">
                 <div class="form-group">
                   <label for="system-name">Systemname</label>
-                  <input type="text" id="system-name" placeholder="z. B. IT-Westfalen Signature Screen" maxlength="80" />
+                  <input type="text" id="system-name" placeholder="z. B. IT-Westfalen Signage Display" maxlength="80" />
                   <small>Wird im Browser-Titel und in E-Mails angezeigt.</small>
                 </div>
                 <div class="form-group">
                   <label for="system-default-language">Standardsprache</label>
                   <select id="system-default-language">
-                    <option value="de">🇩🇪 Deutsch</option>
-                    <option value="en">🇬🇧 English</option>
-                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="de">ðŸ‡©ðŸ‡ª Deutsch</option>
+                    <option value="en">ðŸ‡¬ðŸ‡§ English</option>
+                    <option value="it">ðŸ‡®ðŸ‡¹ Italiano</option>
                   </select>
-                  <small>Sprache des Admin-Panels für neue Benutzer.</small>
+                  <small>Sprache des Admin-Panels fÃ¼r neue Benutzer.</small>
                 </div>
                 <div class="form-group">
                   <label for="system-timezone">Zeitzone</label>
@@ -1714,7 +1714,7 @@
                     <option value="Asia/Dubai">Asia/Dubai (GST)</option>
                     <option value="Australia/Sydney">Australia/Sydney (AEDT)</option>
                   </select>
-                  <small>Wichtig für korrekte Zeitplanung von Beiträgen.</small>
+                  <small>Wichtig fÃ¼r korrekte Zeitplanung von BeitrÃ¤gen.</small>
                 </div>
                 <div class="form-group">
                   <label>Organisationslogo</label>
@@ -1724,14 +1724,14 @@
                       <div style="display:flex;gap:0.5rem;align-items:center;">
                         <input type="text" id="system-logo-url" placeholder="URL des Logos" style="width:260px;" />
                         <label style="cursor:pointer;padding:0.32rem 0.8rem;background:#4a7c4a;color:#fff;border-radius:4px;font-size:0.82rem;border:1px solid #4a7c4a;white-space:nowrap;">
-                          📁 Hochladen
+                          ðŸ“ Hochladen
                           <input type="file" id="system-logo-file" accept="image/*" style="display:none;" />
                         </label>
                       </div>
                       <div id="system-logo-upload-status" style="font-size:0.78rem;min-height:1.1em;"></div>
                     </div>
                   </div>
-                  <small>Organisationslogo – wird auf der Login-Seite und im Admin-Panel angezeigt.</small>
+                  <small>Organisationslogo â€“ wird auf der Login-Seite und im Admin-Panel angezeigt.</small>
                 </div>
                 <button class="btn btn-primary" id="save-general-settings-btn">Einstellungen speichern</button>
               </div>
@@ -1744,20 +1744,20 @@
                 <div class="form-group">
                   <label for="app-language">Sprache / Language / Lingua</label>
                   <select id="app-language">
-                    <option value="de" data-flag="🇩🇪">🇩🇪 Deutsch</option>
-                    <option value="en" data-flag="🇬🇧">🇬🇧 English</option>
-                    <option value="it" data-flag="🇮🇹">🇮🇹 Italiano</option>
+                    <option value="de" data-flag="ðŸ‡©ðŸ‡ª">ðŸ‡©ðŸ‡ª Deutsch</option>
+                    <option value="en" data-flag="ðŸ‡¬ðŸ‡§">ðŸ‡¬ðŸ‡§ English</option>
+                    <option value="it" data-flag="ðŸ‡®ðŸ‡¹">ðŸ‡®ðŸ‡¹ Italiano</option>
                   </select>
                   <small id="language-hint"
-                    >Die Sprache wird für die gesamte Benutzeroberfläche verwendet.</small
+                    >Die Sprache wird fÃ¼r die gesamte BenutzeroberflÃ¤che verwendet.</small
                   >
                 </div>
               </div>
             </div>
 
-            <!-- Benutzeroberfläche -->
+            <!-- BenutzeroberflÃ¤che -->
             <div class="settings-card">
-              <h3><span class="settings-icon">🎨</span> Benutzeroberfläche</h3>
+              <h3><span class="settings-icon">ðŸŽ¨</span> BenutzeroberflÃ¤che</h3>
               <div class="settings-form">
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0;">
                   <div>
@@ -1772,7 +1772,7 @@
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
                   <div>
                     <strong style="display:block;margin-bottom:0.25rem;">Wizard-Modus</strong>
-                    <small style="color:var(--prasco-gray);">Beitragsformular als geführte Schritte (Typ → Inhalt → Einstellungen → Vorschau)</small>
+                    <small style="color:var(--prasco-gray);">Beitragsformular als gefÃ¼hrte Schritte (Typ â†’ Inhalt â†’ Einstellungen â†’ Vorschau)</small>
                   </div>
                   <div class="toggle-switch">
                     <input type="checkbox" id="ui-wizard-mode-toggle" class="toggle-input" />
@@ -1784,29 +1784,29 @@
 
             <!-- Datensicherung -->
             <div class="settings-card">
-              <h3><span class="settings-icon">📦</span> Datensicherung</h3>
+              <h3><span class="settings-icon">ðŸ“¦</span> Datensicherung</h3>
               <div class="settings-form">
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0;">
                   <div>
                     <strong style="display:block;margin-bottom:0.25rem;">Backup erstellen</strong>
-                    <small style="color:var(--prasco-gray);">Exportiert alle Beiträge als JSON-Datei zum Sichern oder Übertragen</small>
+                    <small style="color:var(--prasco-gray);">Exportiert alle BeitrÃ¤ge als JSON-Datei zum Sichern oder Ãœbertragen</small>
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="exportPostsBackup()">⬇️ Backup herunterladen</button>
+                  <button type="button" class="btn btn-secondary" onclick="exportPostsBackup()">â¬‡ï¸ Backup herunterladen</button>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
                   <div>
                     <strong style="display:block;margin-bottom:0.25rem;">Backup wiederherstellen</strong>
-                    <small style="color:var(--prasco-gray);">Importiert Beiträge aus einer Backup-Datei. Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen.</small>
+                    <small style="color:var(--prasco-gray);">Importiert BeitrÃ¤ge aus einer Backup-Datei. Vorhandene BeitrÃ¤ge mit gleichem Titel und Typ werden Ã¼bersprungen.</small>
                   </div>
                   <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()">⬆️ Backup importieren</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()">â¬†ï¸ Backup importieren</button>
                     <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="importPostsBackup(event)">
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- System-Modus (Raspberry Pi) — ausgeblendet, da Server nicht auf Pi läuft -->
+            <!-- System-Modus (Raspberry Pi) â€” ausgeblendet, da Server nicht auf Pi lÃ¤uft -->
             <div class="settings-card" id="system-mode-card" style="display: none;">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="2"/><path d="M5 11a4.5 4.5 0 0 1 0-6"/><path d="M11 11a4.5 4.5 0 0 0 0-6"/><line x1="8" y1="10" x2="8" y2="14"/></svg></span> System-Modus</h3>
               <p class="settings-description">
@@ -1869,7 +1869,7 @@
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                       <div class="info-tooltip-content">
-                        Wie oft das Display neue Beiträge vom Server abruft. Niedrigere Werte = schnellere Aktualisierung, aber mehr Netzwerkverkehr. Empfohlen: <strong>5 Minuten</strong>.
+                        Wie oft das Display neue BeitrÃ¤ge vom Server abruft. Niedrigere Werte = schnellere Aktualisierung, aber mehr Netzwerkverkehr. Empfohlen: <strong>5 Minuten</strong>.
                       </div>
                     </span>
                   </label>
@@ -1881,7 +1881,7 @@
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                       <div class="info-tooltip-content">
-                        Fallback-Anzeigedauer für Beiträge, bei denen keine individuelle Dauer eingestellt ist. Gilt für alle Displays.
+                        Fallback-Anzeigedauer fÃ¼r BeitrÃ¤ge, bei denen keine individuelle Dauer eingestellt ist. Gilt fÃ¼r alle Displays.
                       </div>
                     </span>
                   </label>
@@ -1894,10 +1894,10 @@
                       <input type="checkbox" class="toggle-input" id="blend-effects-enabled" />
                       <label class="toggle-label" for="blend-effects-enabled"><span class="toggle-slider"></span></label>
                     </div>
-                    <span data-translate="settings.blendEffectsEnable">Übergangseffekte aktivieren</span>
+                    <span data-translate="settings.blendEffectsEnable">Ãœbergangseffekte aktivieren</span>
                   </div>
                   <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.blendEffectsHint">
-                    Aktiviert animierte Übergänge zwischen Beiträgen (Fade, Slide, Zoom)
+                    Aktiviert animierte ÃœbergÃ¤nge zwischen BeitrÃ¤gen (Fade, Slide, Zoom)
                   </small>
                 </div>
 
@@ -1907,7 +1907,7 @@
                       <input type="checkbox" class="toggle-input" id="transitions-external-only" />
                       <label class="toggle-label" for="transitions-external-only"><span class="toggle-slider"></span></label>
                     </div>
-                    <span data-translate="settings.transitionsExternalOnly">Übergangseffekte nur auf externen Displays</span>
+                    <span data-translate="settings.transitionsExternalOnly">Ãœbergangseffekte nur auf externen Displays</span>
                   </div>
                   <small style="color: #666; display: block; margin-top: 0.25rem" data-translate="settings.transitionsExternalOnlyHint">
                     Spart Ressourcen: Raspberry Pi zeigt Posts ohne Animationen, externe Bildschirme mit Effekten
@@ -1923,7 +1923,7 @@
                     <span>Beitragsnummerierung anzeigen</span>
                   </div>
                   <small style="color: #666; display: block; margin-top: 0.25rem">
-                    Zeigt „1 / 5" auf dem Display an
+                    Zeigt â€ž1 / 5" auf dem Display an
                   </small>
                 </div>
 
@@ -1932,7 +1932,7 @@
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                       <div class="info-tooltip-content" data-translate="settings.liveDataIntervalTooltip">
-                        Wie häufig Live-Daten (ÖPNV, Wetter, Nachrichten) zwischen den Beiträgen eingeblendet werden. Empfohlen: <strong>5 Minuten</strong>.
+                        Wie hÃ¤ufig Live-Daten (Ã–PNV, Wetter, Nachrichten) zwischen den BeitrÃ¤gen eingeblendet werden. Empfohlen: <strong>5 Minuten</strong>.
                       </div>
                     </span>
                   </label>
@@ -1944,7 +1944,7 @@
                     <span class="info-tooltip-wrapper">
                       <button type="button" class="info-tooltip-btn" aria-label="Info">i</button>
                       <div class="info-tooltip-content" data-translate="settings.liveDataSlideDurationTooltip">
-                        Wie lange jeder Live-Daten-Slide angezeigt wird (ÖPNV, Wetter, Nachrichten). Empfohlen: <strong>20 Sekunden</strong>.
+                        Wie lange jeder Live-Daten-Slide angezeigt wird (Ã–PNV, Wetter, Nachrichten). Empfohlen: <strong>20 Sekunden</strong>.
                       </div>
                     </span>
                   </label>
@@ -1959,7 +1959,7 @@
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M6 13V4l7-2v9"/><circle cx="4.5" cy="13" r="2"/><circle cx="11.5" cy="11" r="2"/></svg></span> Globale Hintergrundmusik</h3>
               <p class="settings-description">
-                Musik die über alle Beiträge hinweg abgespielt wird. Videos werden automatisch stumm
+                Musik die Ã¼ber alle BeitrÃ¤ge hinweg abgespielt wird. Videos werden automatisch stumm
                 geschaltet.
               </p>
               <div class="settings-form">
@@ -1990,7 +1990,7 @@
 
                   <div class="form-group">
                     <label for="global-music-volume"
-                      >Lautstärke: <span id="global-volume-value">30</span>%</label
+                      >LautstÃ¤rke: <span id="global-volume-value">30</span>%</label
                     >
                     <input type="range" id="global-music-volume" min="0" max="100" value="30" />
                   </div>
@@ -2006,7 +2006,7 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="global-music-priority">Musik-Priorität</label>
+                    <label for="global-music-priority">Musik-PrioritÃ¤t</label>
                     <select id="global-music-priority">
                       <option value="global">Globale Musik hat Vorrang</option>
                       <option value="post">Post-spezifische Musik hat Vorrang</option>
@@ -2025,21 +2025,21 @@
             <div class="settings-card" id="meeting-settings-card">
               <h3>
                 <span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M5 4V2.5a.5.5 0 0 1 1 0V4M10 4V2.5a.5.5 0 0 1 1 0V4"/><line x1="1" y1="7" x2="15" y2="7"/></svg></span>
-                Dienstagsmeeting – Benachrichtigungen
+                Dienstagsmeeting â€“ Benachrichtigungen
               </h3>
               <p class="settings-description">
-                Wenn ein Beitrag mit der Kategorie <strong>Dienstagsmeeting</strong> gespeichert wird, erhalten die unten eingetragenen Empfänger automatisch eine E-Mail mit der Bitte, den Inhalt auf die Agenda zu setzen.
+                Wenn ein Beitrag mit der Kategorie <strong>Dienstagsmeeting</strong> gespeichert wird, erhalten die unten eingetragenen EmpfÃ¤nger automatisch eine E-Mail mit der Bitte, den Inhalt auf die Agenda zu setzen.
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label for="meeting-recipients">E-Mail-Empfänger <small style="color:#888;">(kommagetrennt)</small></label>
+                  <label for="meeting-recipients">E-Mail-EmpfÃ¤nger <small style="color:#888;">(kommagetrennt)</small></label>
                   <textarea id="meeting-recipients" rows="3" placeholder="max.mustermann@firma.de, anna.mueller@firma.de" style="width:100%;font-family:monospace;font-size:0.88rem;resize:vertical;"></textarea>
-                  <small>Alle hier eingetragenen Adressen erhalten eine Benachrichtigung, sobald ein neuer Beitrag mit der Kategorie „Dienstagsmeeting" angelegt oder geändert wird.</small>
+                  <small>Alle hier eingetragenen Adressen erhalten eine Benachrichtigung, sobald ein neuer Beitrag mit der Kategorie â€žDienstagsmeeting" angelegt oder geÃ¤ndert wird.</small>
                 </div>
                 <div class="form-group">
                   <label for="meeting-category-name">Name der Meeting-Kategorie</label>
                   <input type="text" id="meeting-category-name" placeholder="Dienstagsmeeting" />
-                  <small>Muss exakt mit dem Kategorienamen in PRASCO übereinstimmen.</small>
+                  <small>Muss exakt mit dem Kategorienamen in PRASCO Ã¼bereinstimmen.</small>
                 </div>
                 <hr style="margin:1.2rem 0;border-color:#e0e8e0;" />
                 <h4 style="margin:0 0 0.8rem;font-size:0.95rem;color:#3a5a3a;">SMTP-Konfiguration</h4>
@@ -2058,7 +2058,7 @@
                   </div>
                   <div class="form-group" style="margin:0;">
                     <label for="smtp-pass">Passwort</label>
-                    <input type="password" id="smtp-pass" placeholder="••••••••" autocomplete="new-password" />
+                    <input type="password" id="smtp-pass" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="new-password" />
                   </div>
                   <div class="form-group" style="margin:0;">
                     <label for="smtp-from">Absender (From)</label>
@@ -2084,7 +2084,7 @@
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 2l2 4h4l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4z"/></svg></span> <span data-translate="settings.ai">KI-Assistent</span></h3>
               <p class="settings-description" data-translate="settings.aiDescription">
-                Nutzen Sie KI-Unterstützung beim Erstellen von Beiträgen: Texte generieren, verbessern, kürzen oder übersetzen. Verwendet OpenAI GPT-4o-mini.
+                Nutzen Sie KI-UnterstÃ¼tzung beim Erstellen von BeitrÃ¤gen: Texte generieren, verbessern, kÃ¼rzen oder Ã¼bersetzen. Verwendet OpenAI GPT-4o-mini.
               </p>
               <div class="settings-form">
                 <div class="form-group">
@@ -2100,7 +2100,7 @@
                   <div class="form-group">
                     <label for="ai-api-key" data-translate="settings.aiApiKey">OpenAI API-Key</label>
                     <input type="text" id="ai-api-key" placeholder="sk-..." autocomplete="off" spellcheck="false" style="font-family: monospace;" />
-                    <small style="color: #666;">Erhältlich unter <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #58585a;">platform.openai.com/api-keys</a></small>
+                    <small style="color: #666;">ErhÃ¤ltlich unter <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #58585a;">platform.openai.com/api-keys</a></small>
                   </div>
                   <div id="ai-key-status" style="margin-bottom: 1rem;"></div>
                   <!-- KI-Funktionen -->
@@ -2109,27 +2109,27 @@
                     <div style="display:flex; flex-direction:column; gap:0.6rem;">
                       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ai-feature-text" checked style="width:16px;height:16px;" />
-                        <span>✏️ Textassistent</span>
+                        <span>âœï¸ Textassistent</span>
                         <small style="color:#888; margin-left:auto;">~$0.001/Aufruf</small>
                       </label>
                       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ai-feature-image-gen" checked style="width:16px;height:16px;" />
-                        <span>🎨 Bildgenerierung (DALL-E 3)</span>
+                        <span>ðŸŽ¨ Bildgenerierung (DALL-E 3)</span>
                         <small style="color:#888; margin-left:auto;">~$0.04/Bild</small>
                       </label>
                       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ai-feature-image-analysis" checked style="width:16px;height:16px;" />
-                        <span>🔍 Bildanalyse (GPT-4o Vision)</span>
+                        <span>ðŸ” Bildanalyse (GPT-4o Vision)</span>
                         <small style="color:#888; margin-left:auto;">~$0.005/Bild</small>
                       </label>
                       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ai-feature-assistant" checked style="width:16px;height:16px;" />
-                        <span>✨ KI-Assistent (Beitragsvorschläge)</span>
+                        <span>âœ¨ KI-Assistent (BeitragsvorschlÃ¤ge)</span>
                         <small style="color:#888; margin-left:auto;">~$0.002/Vorschlag</small>
                       </label>
                       <label style="display:flex; align-items:center; gap:0.6rem; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ai-feature-bulk-translate" checked style="width:16px;height:16px;" />
-                        <span>⇄ Bulk-Übersetzung</span>
+                        <span>â‡„ Bulk-Ãœbersetzung</span>
                         <small style="color:#888; margin-left:auto;">~$0.001/Beitrag</small>
                       </label>
                     </div>
@@ -2139,24 +2139,24 @@
               </div>
             </div>
 
-            <!-- Zentraler Speichern-Button für alle Einstellungen -->
+            <!-- Zentraler Speichern-Button fÃ¼r alle Einstellungen -->
             <div style="margin-top: 1.5rem; padding: 1rem 0; border-top: 2px solid #e9ecef; text-align: right;">
               <button class="btn btn-primary" id="saveAllSettings" style="padding: 0.6rem 2rem; font-size: 1rem;">
                 Alle Einstellungen speichern
               </button>
             </div>
 
-            <!-- SSO Einstellungen (nur für Super-Admin) -->
+            <!-- SSO Einstellungen (nur fÃ¼r Super-Admin) -->
             <div id="sso-settings-section" class="settings-card" style="display: none">
               <h3>
                 <span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="3" y="7" width="10" height="8" rx="1"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/><circle cx="8" cy="11" r="1" fill="currentColor"/></svg></span> Single Sign-On (SSO) Konfiguration
               </h3>
               <p class="settings-description">
-                Konfigurieren Sie Azure AD / Microsoft Entra ID für SSO-Authentifizierung.
+                Konfigurieren Sie Azure AD / Microsoft Entra ID fÃ¼r SSO-Authentifizierung.
                 <a
                   href="/SSO-SETUP.md"
                   target="_blank"
-                  title="Setup-Anleitung öffnen"
+                  title="Setup-Anleitung Ã¶ffnen"
                   class="help-link"
                   >Setup-Anleitung</a
                 >
@@ -2244,7 +2244,7 @@
                           name="redirectUri"
                           placeholder="http://localhost:3000/api/auth/sso/callback"
                         />
-                        <small>Muss mit Azure AD App Registration übereinstimmen</small>
+                        <small>Muss mit Azure AD App Registration Ã¼bereinstimmen</small>
                       </div>
 
                       <div class="form-group">
@@ -2261,8 +2261,8 @@
 
                   <!-- LDAP / Active Directory Konfiguration -->
                   <div id="ldap-config" class="sso-provider-config" style="display: none">
-                    <h4><span class="subsection-icon">⬡</span> LDAP / Active Directory</h4>
-                    <p class="form-help">Für Windows Server 2016/2019/2022 mit Active Directory</p>
+                    <h4><span class="subsection-icon">â¬¡</span> LDAP / Active Directory</h4>
+                    <p class="form-help">FÃ¼r Windows Server 2016/2019/2022 mit Active Directory</p>
 
                     <div class="form-row">
                       <div class="form-group">
@@ -2273,7 +2273,7 @@
                           name="ldapUrl"
                           placeholder="ldap://dc.firma.local:389"
                         />
-                        <small>Für SSL: ldaps://dc.firma.local:636</small>
+                        <small>FÃ¼r SSL: ldaps://dc.firma.local:636</small>
                       </div>
 
                       <div class="form-group">
@@ -2368,7 +2368,7 @@
                         <label class="toggle-label" for="ldap-tls-reject"><span class="toggle-slider"></span></label>
                       </div>
                       <span
-                        >Selbstsignierte Zertifikate ablehnen (für Produktionsumgebungen
+                        >Selbstsignierte Zertifikate ablehnen (fÃ¼r Produktionsumgebungen
                         empfohlen)</span
                       >
                     </div>
@@ -2392,7 +2392,7 @@
 
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="sso-default-role">Standard-Rolle für neue SSO-Benutzer</label>
+                      <label for="sso-default-role">Standard-Rolle fÃ¼r neue SSO-Benutzer</label>
                       <select id="sso-default-role" name="defaultRole">
                         <option value="viewer">Betrachter</option>
                         <option value="editor" selected>Editor</option>
@@ -2408,7 +2408,7 @@
                         name="allowedDomains"
                         placeholder="z.B. firma.de, firma.com"
                       />
-                      <small>Leer = alle Domains erlaubt, Komma-getrennt für mehrere</small>
+                      <small>Leer = alle Domains erlaubt, Komma-getrennt fÃ¼r mehrere</small>
                     </div>
                   </div>
                 </div>
@@ -2427,9 +2427,9 @@
               </div>
             </div>
 
-            <!-- Info / Über diese Anwendung -->
+            <!-- Info / Ãœber diese Anwendung -->
             <div class="settings-card">
-              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="5" r="0.5" fill="currentColor" stroke="none"/></svg></span> Über diese Anwendung</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="8" y1="7" x2="8" y2="12"/><circle cx="8" cy="5" r="0.5" fill="currentColor" stroke="none"/></svg></span> Ãœber diese Anwendung</h3>
               <div class="app-info-section">
                 <div class="app-info-logo">
                   <div class="app-logo-circle">
@@ -2437,9 +2437,9 @@
                   </div>
                 </div>
                 <div class="app-info-details">
-                  <h4>IT-Westfalen Signature Screen</h4>
+                  <h4>IT-Westfalen Signage Display</h4>
                   <p class="app-description">
-                    Signature Screen für Unternehmen und Organisationen
+                    Signage Display fÃ¼r Unternehmen und Organisationen
                   </p>
 
                   <div class="app-info-grid">
@@ -2449,7 +2449,7 @@
                     </div>
                     <div class="app-info-item">
                       <span class="info-label">Entwickler</span>
-                      <span class="info-value">Christian Pöser</span>
+                      <span class="info-value">Christian PÃ¶ser</span>
                     </div>
                     <div class="app-info-item">
                       <span class="info-label">Lizenz</span>
@@ -2470,15 +2470,15 @@
                   </div>
 
                   <div class="app-links">
-                    <a href="https://github.com" target="_blank" class="app-link"> → Repository </a>
-                    <a href="/api/docs" target="_blank" class="app-link"> → API Dokumentation </a>
+                    <a href="https://github.com" target="_blank" class="app-link"> â†’ Repository </a>
+                    <a href="/api/docs" target="_blank" class="app-link"> â†’ API Dokumentation </a>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- ═══ HILFE ═══ -->
+          <!-- â•â•â• HILFE â•â•â• -->
           <section id="hilfe-section" class="section">
             <div class="section-header">
               <h2>Hilfe &amp; Dokumentation</h2>
@@ -2488,36 +2488,36 @@
               <div class="settings-card" style="grid-column: 1 / -1;">
                 <h3><span class="settings-icon">?</span> <span data-translate="hilfe.manual">Administrationshandbuch</span></h3>
                 <p style="margin: 12px 0 20px; color: #555; max-width: 700px;" data-translate="hilfe.manualDesc">
-                  Das vollständige Handbuch erklärt alle Funktionen des Admin-Panels – von der Anmeldung über Beiträge, Displays und Live-Daten bis hin zu den Systemeinstellungen. Mit Screenshots und Schritt-für-Schritt-Anleitungen.
+                  Das vollstÃ¤ndige Handbuch erklÃ¤rt alle Funktionen des Admin-Panels â€“ von der Anmeldung Ã¼ber BeitrÃ¤ge, Displays und Live-Daten bis hin zu den Systemeinstellungen. Mit Screenshots und Schritt-fÃ¼r-Schritt-Anleitungen.
                 </p>
                 <a href="/admin/handbuch" target="_blank" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16" aria-hidden="true"><path d="M2 2h8l4 4v9H2z"/><polyline points="10 2 10 6 14 6"/><line x1="5" y1="9" x2="11" y2="9"/><line x1="5" y1="12" x2="9" y2="12"/></svg>
-                  <span data-translate="hilfe.openManual">Handbuch öffnen</span>
+                  <span data-translate="hilfe.openManual">Handbuch Ã¶ffnen</span>
                 </a>
               </div>
 
               <div class="settings-card">
-                <h3><span class="settings-icon">📋</span> <span data-translate="hilfe.chapters">Kapitelübersicht</span></h3>
+                <h3><span class="settings-icon">ðŸ“‹</span> <span data-translate="hilfe.chapters">KapitelÃ¼bersicht</span></h3>
                 <ol style="padding-left:1.4em;line-height:2;color:#555;">
                   <li data-translate="hilfe.ch1">Anmeldung &amp; Rollen</li>
-                  <li data-translate="hilfe.ch2">Dashboard – Übersicht</li>
-                  <li data-translate="hilfe.ch3">Beiträge verwalten</li>
+                  <li data-translate="hilfe.ch2">Dashboard â€“ Ãœbersicht</li>
+                  <li data-translate="hilfe.ch3">BeitrÃ¤ge verwalten</li>
                   <li data-translate="hilfe.ch4">Kategorien</li>
                   <li data-translate="hilfe.ch5">Displays konfigurieren</li>
                   <li data-translate="hilfe.ch6">Benutzer &amp; Rollen</li>
-                  <li data-translate="hilfe.ch7">Live-Daten (ÖPNV, Verkehr, Wetter)</li>
+                  <li data-translate="hilfe.ch7">Live-Daten (Ã–PNV, Verkehr, Wetter)</li>
                   <li data-translate="hilfe.ch8">Systemeinstellungen</li>
                   <li data-translate="hilfe.ch9">Schnellreferenz</li>
                 </ol>
               </div>
 
               <div class="settings-card">
-                <h3><span class="settings-icon">🔗</span> <span data-translate="hilfe.quickLinks">Direktlinks</span></h3>
+                <h3><span class="settings-icon">ðŸ”—</span> <span data-translate="hilfe.quickLinks">Direktlinks</span></h3>
                 <ul style="padding-left:0;list-style:none;line-height:2;">
-                  <li><a href="/api/docs" target="_blank" class="app-link" data-translate="hilfe.linkApi">→ API Dokumentation</a></li>
-                  <li><a href="/api/health" target="_blank" class="app-link" data-translate="hilfe.linkHealth">→ Health-Check</a></li>
-                  <li><a href="/admin/handbuch#ch-reference" target="_blank" class="app-link" data-translate="hilfe.linkReference">→ Schnellreferenz</a></li>
-                  <li><a href="/admin/handbuch#ch-settings" target="_blank" class="app-link" data-translate="hilfe.linkSettings">→ Einstellungen-Dokumentation</a></li>
+                  <li><a href="/api/docs" target="_blank" class="app-link" data-translate="hilfe.linkApi">â†’ API Dokumentation</a></li>
+                  <li><a href="/api/health" target="_blank" class="app-link" data-translate="hilfe.linkHealth">â†’ Health-Check</a></li>
+                  <li><a href="/admin/handbuch#ch-reference" target="_blank" class="app-link" data-translate="hilfe.linkReference">â†’ Schnellreferenz</a></li>
+                  <li><a href="/admin/handbuch#ch-settings" target="_blank" class="app-link" data-translate="hilfe.linkSettings">â†’ Einstellungen-Dokumentation</a></li>
                 </ul>
               </div>
             </div>
@@ -2526,7 +2526,7 @@
 
         <footer class="admin-footer">
           <div class="footer-left">
-            <span>© 2026 IT-Westfalen - Signature Screen</span>
+            <span>Â© 2026 IT-Westfalen - Signage Display</span>
           </div>
           <div class="footer-right">
             <span id="footer-clock" class="footer-clock">--:--:--</span>
@@ -2536,11 +2536,11 @@
       </main>
     </div>
 
-    <!-- Modal: KI-Assistent (vollständiger Beitragsvorschlag) -->
+    <!-- Modal: KI-Assistent (vollstÃ¤ndiger Beitragsvorschlag) -->
     <div id="ai-assistant-modal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="ai-assistant-modal-title">
       <div class="modal-content" style="max-width:660px;">
         <div class="modal-header">
-          <h3 id="ai-assistant-modal-title" style="margin:0;">✨ KI-Assistent &mdash; Beitrag erstellen</h3>
+          <h3 id="ai-assistant-modal-title" style="margin:0;">âœ¨ KI-Assistent &mdash; Beitrag erstellen</h3>
           <button class="modal-close" onclick="closeAIAssistantModal()">&times;</button>
         </div>
         <div class="modal-body" style="padding:1.5rem;">
@@ -2580,9 +2580,9 @@
           </div>
         </div>
         <div class="modal-footer" style="padding:1rem 1.5rem;display:flex;gap:0.75rem;justify-content:flex-end;border-top:1px solid #eee;">
-          <button type="button" class="btn btn-secondary" onclick="closeAIAssistantModal()">Schließen</button>
-          <button type="button" id="ai-assistant-retry-btn" class="btn btn-secondary" onclick="handleAIAssistantSuggest()" style="display:none;">↺ Neuer Vorschlag</button>
-          <button type="button" id="ai-assistant-apply-btn" class="btn btn-success" onclick="handleAIAssistantSuggest()">✨ Vorschlag erstellen</button>
+          <button type="button" class="btn btn-secondary" onclick="closeAIAssistantModal()">SchlieÃŸen</button>
+          <button type="button" id="ai-assistant-retry-btn" class="btn btn-secondary" onclick="handleAIAssistantSuggest()" style="display:none;">â†º Neuer Vorschlag</button>
+          <button type="button" id="ai-assistant-apply-btn" class="btn btn-success" onclick="handleAIAssistantSuggest()">âœ¨ Vorschlag erstellen</button>
         </div>
       </div>
     </div>
@@ -2591,7 +2591,7 @@
     <div id="ai-image-modal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="ai-image-modal-title">
       <div class="modal-content" style="max-width:560px;">
         <div class="modal-header">
-          <h3 id="ai-image-modal-title" style="margin:0;">✨ KI-Bild erstellen</h3>
+          <h3 id="ai-image-modal-title" style="margin:0;">âœ¨ KI-Bild erstellen</h3>
           <button class="modal-close" onclick="closeAIImageModal()">&times;</button>
         </div>
         <div class="modal-body" style="padding:1.5rem;">
@@ -2600,7 +2600,7 @@
             <textarea
               id="ai-image-prompt"
               rows="3"
-              placeholder="z.B. 'Modernes Logistik-Lager, helles Tageslicht, Pakete auf Förderband, Business-Stil, horizontal'"
+              placeholder="z.B. 'Modernes Logistik-Lager, helles Tageslicht, Pakete auf FÃ¶rderband, Business-Stil, horizontal'"
               style="width:100%;padding:0.6rem;border:1px solid #c9d4c9;border-radius:4px;resize:vertical;font-size:0.9rem;box-sizing:border-box;"
               maxlength="800"
             ></textarea>
@@ -2612,45 +2612,45 @@
             <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.4rem;">
               <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
                 <input type="radio" name="ai-image-size" value="1792x1024" checked style="margin:0;"> Querformat 16:9
-                <small style="color:#888;">(1792×1024)</small>
+                <small style="color:#888;">(1792Ã—1024)</small>
               </label>
               <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
                 <input type="radio" name="ai-image-size" value="1024x1024" style="margin:0;"> Quadrat 1:1
-                <small style="color:#888;">(1024×1024)</small>
+                <small style="color:#888;">(1024Ã—1024)</small>
               </label>
               <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;background:#f9f9f9;">
                 <input type="radio" name="ai-image-size" value="1024x1792" style="margin:0;"> Hochformat 9:16
-                <small style="color:#888;">(1024×1792)</small>
+                <small style="color:#888;">(1024Ã—1792)</small>
               </label>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="ai-image-quality" style="font-weight:600;">Qualität</label>
+            <label for="ai-image-quality" style="font-weight:600;">QualitÃ¤t</label>
             <select id="ai-image-quality" style="padding:0.4rem 0.75rem;border:1px solid #c9d4c9;border-radius:4px;margin-top:0.3rem;">
-              <option value="standard">Standard (~€0,04 / Bild)</option>
-              <option value="hd">HD &mdash; höhere Details (~€0,08 / Bild)</option>
+              <option value="standard">Standard (~â‚¬0,04 / Bild)</option>
+              <option value="hd">HD &mdash; hÃ¶here Details (~â‚¬0,08 / Bild)</option>
             </select>
           </div>
 
           <div id="ai-image-status" style="display:none;padding:0.5rem 0.75rem;border-radius:4px;margin-top:0.5rem;background:#e8f4e8;color:#3a5a3a;font-size:0.9rem;">
-            <span id="ai-image-status-text">⏳ Bild wird erstellt... (ca. 15–30 Sek.)</span>
+            <span id="ai-image-status-text">â³ Bild wird erstellt... (ca. 15â€“30 Sek.)</span>
           </div>
         </div>
         <div class="modal-footer" style="padding:1rem 1.5rem;display:flex;gap:0.75rem;justify-content:flex-end;border-top:1px solid #eee;">
           <button type="button" class="btn btn-secondary" onclick="closeAIImageModal()">Abbrechen</button>
           <button type="button" id="ai-image-generate-submit" class="btn btn-success" onclick="handleAIImageGenerate()">
-            ✨ Generieren
+            âœ¨ Generieren
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Modal: Eigenes Passwort ändern -->
+    <!-- Modal: Eigenes Passwort Ã¤ndern -->
     <div id="password-modal" class="modal" style="display: none">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Passwort ändern</h3>
+          <h3>Passwort Ã¤ndern</h3>
           <button class="modal-close" id="closePasswordModal">&times;</button>
         </div>
         <form id="changePasswordForm">
@@ -2665,7 +2665,7 @@
             <small class="form-hint">Mindestens 6 Zeichen</small>
           </div>
           <div class="form-group">
-            <label for="confirm-password">Passwort bestätigen *</label>
+            <label for="confirm-password">Passwort bestÃ¤tigen *</label>
             <input
               type="password"
               id="confirm-password"
@@ -2676,7 +2676,7 @@
             />
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Passwort ändern</button>
+            <button type="submit" class="btn btn-primary">Passwort Ã¤ndern</button>
             <button type="button" class="btn btn-secondary" id="cancelPasswordChange">
               Abbrechen
             </button>
@@ -2717,7 +2717,7 @@
     <div id="session-timeout-modal" class="modal" style="display: none" role="dialog" aria-modal="true" aria-labelledby="session-timeout-title">
       <div class="modal-content" style="max-width: 420px; text-align: center">
         <div class="modal-header">
-          <h3 id="session-timeout-title">&#9203; Sitzung läuft ab</h3>
+          <h3 id="session-timeout-title">&#9203; Sitzung lÃ¤uft ab</h3>
         </div>
         <p style="margin: 1rem 0">Sie werden in <strong><span id="session-timeout-counter">60</span> Sekunden</strong> automatisch abgemeldet.</p>
         <div class="form-actions" style="justify-content: center; gap: 0.75rem">
@@ -2730,3 +2730,4 @@
     <script src="/js/admin.js?v=5.29"></script>
   </body>
 </html>
+
