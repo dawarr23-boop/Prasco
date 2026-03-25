@@ -645,7 +645,7 @@ function initRainRadar() {
 
   const lat = parseFloat(wrap.dataset.lat) || 51.5;
   const lon = parseFloat(wrap.dataset.lon) || 9.5;
-  const ZOOM = 7;
+  const ZOOM = 9;
   const T = 256; // tile size px
 
   // Mercator-Tile-Position (floating-point)
