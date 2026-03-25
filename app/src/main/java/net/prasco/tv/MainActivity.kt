@@ -69,6 +69,10 @@ class MainActivity : AppCompatActivity(),
     private var backPressStartTime = 0L
     private val LONG_PRESS_THRESHOLD_MS = 3000L
 
+    // Doppelklick OK → Display neu laden
+    private var lastOkPressTime = 0L
+    private val DOUBLE_CLICK_THRESHOLD_MS = 600L
+
     // Settings-Overlay
     private lateinit var settingsOverlay: FrameLayout
     private var isSettingsVisible = false
@@ -486,6 +490,14 @@ class MainActivity : AppCompatActivity(),
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_CENTER -> {
                 if (!isSettingsVisible) {
+                    val now = System.currentTimeMillis()
+                    if (now - lastOkPressTime <= DOUBLE_CLICK_THRESHOLD_MS) {
+                        // Doppelklick: Display neu laden
+                        lastOkPressTime = 0L
+                        runOnUiThread { webView.reload() }
+                        return true
+                    }
+                    lastOkPressTime = now
                     injectDPadEvent(keyCode)
                     return true
                 }
