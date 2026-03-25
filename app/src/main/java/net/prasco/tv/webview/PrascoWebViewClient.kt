@@ -14,6 +14,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import net.prasco.tv.BuildConfig
 import net.prasco.tv.util.Logger
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -250,6 +251,20 @@ class PrascoWebViewClient(
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
+
+        // TV-Skalierung: Viewport-Breite aus BuildConfig (0 = kein Override)
+        // scale1x=1920px(1:1), scale1_5x=1280px(1.5×), scale2x=960px(2×)
+        if (BuildConfig.VIEWPORT_WIDTH > 0) {
+            val vpWidth = BuildConfig.VIEWPORT_WIDTH
+            view?.evaluateJavascript(
+                """(function(){
+                var m=document.querySelector('meta[name="viewport"]');
+                if(m){m.setAttribute('content','width=$vpWidth,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no');}
+            })();""",
+                null
+            )
+        }
+
         if (!hasError) {
             url?.let {
                 Logger.debug("Seite geladen: $it")

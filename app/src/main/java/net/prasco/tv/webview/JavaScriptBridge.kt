@@ -113,6 +113,45 @@ class JavaScriptBridge(
         listener.onDisplayReady()
     }
 
+    // === Geräte-Authentifizierung ===
+
+    /**
+     * Gibt den server-ausgestellten Device-Token zurück.
+     * Wird vom WebView beim Start abgefragt, um Re-Registrierung zu vermeiden.
+     */
+    @JavascriptInterface
+    fun getDeviceToken(): String {
+        return preferencesManager.deviceToken
+    }
+
+    /**
+     * Speichert den Device-Token nativ (überdauert App-Neustarts und localStorage-Leeren).
+     * Wird vom WebView nach erfolgreicher Registrierung aufgerufen.
+     */
+    @JavascriptInterface
+    fun setDeviceToken(token: String) {
+        preferencesManager.deviceToken = token
+        Logger.info("Device-Token nativ gespeichert")
+    }
+
+    /**
+     * Gibt die Geräte-Seriennummer zurück (z.B. "web-<uuid>").
+     */
+    @JavascriptInterface
+    fun getDeviceSerial(): String {
+        return preferencesManager.deviceSerial
+    }
+
+    /**
+     * Speichert die Geräte-Seriennummer nativ.
+     * Wird vom WebView nach Generierung der Client-ID aufgerufen.
+     */
+    @JavascriptInterface
+    fun setDeviceSerial(serial: String) {
+        preferencesManager.deviceSerial = serial
+        Logger.info("Geräte-Serial nativ gespeichert: $serial")
+    }
+
     // === Logging ===
 
     @JavascriptInterface

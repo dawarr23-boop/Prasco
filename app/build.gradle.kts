@@ -26,6 +26,32 @@ android {
         buildConfigField("long", "CACHE_TTL_HOURS", "24L")
     }
 
+    // --- Skalierungs-Varianten ---
+    // scale1x  = kein Viewport-Override (1920px = native TV-Auflösung)
+    // scale1_5x = 1280px Viewport → 1.5× Skalierung auf 1920px
+    // scale2x   = 960px Viewport  → 2.0× Skalierung (größerer Text, mehr Abstand)
+    flavorDimensions += "scale"
+    productFlavors {
+        create("scale1x") {
+            dimension = "scale"
+            applicationIdSuffix = ".s1"
+            versionNameSuffix = "-1x"
+            buildConfigField("int", "VIEWPORT_WIDTH", "0")  // 0 = kein Override
+        }
+        create("scale1_5x") {
+            dimension = "scale"
+            applicationIdSuffix = ".s15"
+            versionNameSuffix = "-1.5x"
+            buildConfigField("int", "VIEWPORT_WIDTH", "1280")
+        }
+        create("scale2x") {
+            dimension = "scale"
+            applicationIdSuffix = ".s2"
+            versionNameSuffix = "-2x"
+            buildConfigField("int", "VIEWPORT_WIDTH", "960")
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true

@@ -42,6 +42,9 @@ object WebViewPool {
             displayZoomControls = false
             setSupportZoom(false)
 
+            // System-Schriftgröße ignorieren (immer 100%)
+            textZoom = 100
+
             // Mixed Content erlauben (HTTP-Medien auf HTTPS-Seite)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW

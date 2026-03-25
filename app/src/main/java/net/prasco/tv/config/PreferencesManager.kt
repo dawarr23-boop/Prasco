@@ -77,6 +77,18 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_STATUS_OVERLAY, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_STATUS_OVERLAY, value).apply()
 
+    // === Geräte-Authentifizierung (WebView ↔ Native Bridge) ===
+
+    /** Server-ausgestellter Device-Token (UUID) — wird von WebView via PrascoNative.setDeviceToken() geschrieben */
+    var deviceToken: String
+        get() = prefs.getString(KEY_DEVICE_TOKEN, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_DEVICE_TOKEN, value).apply()
+
+    /** Gerätespezifische Client-ID (web-<uuid>) — wird von WebView via PrascoNative.setDeviceSerial() geschrieben */
+    var deviceSerial: String
+        get() = prefs.getString(KEY_DEVICE_SERIAL, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_DEVICE_SERIAL, value).apply()
+
     /**
      * Alle Einstellungen zurücksetzen
      */
@@ -101,5 +113,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_LAST_CACHE_UPDATE = "last_cache_update"
         private const val KEY_SCREEN_ALWAYS_ON = "screen_always_on"
         private const val KEY_SHOW_STATUS_OVERLAY = "show_status_overlay"
+        private const val KEY_DEVICE_TOKEN = "device_token"
+        private const val KEY_DEVICE_SERIAL = "device_serial"
     }
 }
