@@ -3268,31 +3268,12 @@ function setupKeyboardShortcuts() {
 
 // Initialisierung
 /**
- * Berechnet die optimale Post-Fläche dynamisch:
- * Verfügbare Höhe = Viewport − Header − Footer − Ticker (falls sichtbar)
- * Setzt CSS Custom Properties --post-area-w / --post-area-h auf #bulletin-board.
+ * Berechnet die optimale Post-Fläche dynamisch.
+ * Wird für autoScaleTextPost() benötigt; Post-Größe selbst läuft über Flexbox.
  */
 function recalcPostArea() {
-  const board    = document.getElementById('bulletin-board');
-  const header   = document.querySelector('.display-header');
-  const footer   = document.querySelector('.display-footer');
-  const ticker   = document.getElementById('ticker-bar');
-  if (!board) return;
-
-  const headerH  = header  ? header.offsetHeight  : 0;
-  const footerH  = footer  ? footer.offsetHeight  : 0;
-  const tickerH  = (ticker && ticker.style.display !== 'none') ? ticker.offsetHeight : 0;
-  const totalH   = window.innerHeight;
-  const totalW   = window.innerWidth;
-
-  const availH   = Math.max(0, totalH - headerH - footerH - tickerH);
-  const availW   = totalW;
-
-  // Kleiner Innenabstand (8px oben/unten, 12px links/rechts) damit Schatten sichtbar bleibt
-  const padV = 8;
-  const padH = 12;
-  board.style.setProperty('--post-area-h', (availH - padV * 2) + 'px');
-  board.style.setProperty('--post-area-w', (availW - padH * 2) + 'px');
+  // Kein CSS-Var-Ansatz mehr – Flexbox erledigt das Layout.
+  // Funktion bleibt für eventuelle künftige Berechnungen erhalten.
 }
 
 async function init() {
