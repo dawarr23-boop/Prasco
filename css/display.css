@@ -414,7 +414,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 0;
   position: relative;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   min-height: 0;
@@ -422,9 +422,8 @@ body {
 }
 
 .post-container {
-  width: 100%;
-  max-width: 1600px;
-  height: 100%;
+  width: var(--post-area-w, 100%);
+  height: var(--post-area-h, 100%);
   display: flex;
   justify-content: center;
   align-items: center;
