@@ -3950,16 +3950,13 @@ function displayCurrentPostWithBlend(blendEffect) {
 // Post-Counter aktualisieren
 function updatePostCounter() {
   const counterElement = document.getElementById('post-counter');
-  if (!counterElement) return;
-  const indicator = counterElement.parentElement;
-  if (!displaySettings.showPostCounter) {
-    if (indicator) indicator.style.display = 'none';
-    return;
-  }
-  if (indicator) indicator.style.display = '';
-  if (posts.length > 0) {
-    counterElement.textContent = `${currentIndex + 1} / ${posts.length}`;
-  }
+  const counterFooter = document.getElementById('post-counter-footer');
+  const text = posts.length > 0 ? `${currentIndex + 1} / ${posts.length}` : '';
+  if (counterElement) counterElement.textContent = text;
+  if (counterFooter) counterFooter.textContent = text;
+  const show = displaySettings.showPostCounter !== false;
+  if (counterElement) counterElement.style.visibility = show ? '' : 'hidden';
+  if (counterFooter) counterFooter.style.visibility = show ? '' : 'hidden';
 }
 
 // Keine Inhalte verfügbar
