@@ -684,6 +684,14 @@ body {
   color: var(--prasco-black);
 }
 
+/* Wrapper für Auto-Skalierung bei langen Text-Posts */
+.post-text-body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .post.type-text h1,
 .post.type-text p {
   color: var(--prasco-black);

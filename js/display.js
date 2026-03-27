@@ -3411,6 +3411,30 @@ async function fetchPosts() {
   }
 }
 
+/**
+ * Passt den Inhalt eines Text-Posts per CSS zoom automatisch ein,
+ * damit er vollständig im Container sichtbar ist (nie abgeschnitten).
+ */
+function autoScaleTextPost(container) {
+  const body = container.querySelector('.post-text-body');
+  if (!body) return;
+  body.style.zoom = '';
+  // Doppeltes rAF: sicherstellt dass Layout nach DOM-Insertion vollständig ist
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const cs = window.getComputedStyle(container);
+    const padH = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const padW = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const availH = container.clientHeight - padH;
+    const availW = container.clientWidth - padW;
+    const bodyH = body.scrollHeight;
+    const bodyW = body.scrollWidth;
+    if (bodyH > availH * 1.01 || bodyW > availW * 1.01) {
+      const scale = Math.min(availH / bodyH, availW / bodyW);
+      body.style.zoom = scale.toFixed(4);
+    }
+  }));
+}
+
 // Aktuellen Post anzeigen
 async function displayCurrentPost() {
   if (posts.length === 0) {
@@ -3469,10 +3493,10 @@ async function displayCurrentPost() {
       const textBody = isHtml
         ? (post.content || '')
         : (post.content || '').replace(/\n/g, '<br>');
-      html = `
+      html = `<div class="post-text-body">
                 ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <div>${textBody}</div>
-            `;
+              </div>`;
       break;
     }
 
@@ -3666,10 +3690,10 @@ async function displayCurrentPost() {
     }
 
     default:
-      html = `
+      html = `<div class="post-text-body">
                 ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <p>${escapeHtml(post.content || '')}</p>
-            `;
+              </div>`;
   }
 
   // Smooth Content-Update ohne weißen Blitz
@@ -3685,6 +3709,9 @@ async function displayCurrentPost() {
   while (tempDiv.firstChild) {
     container.appendChild(tempDiv.firstChild);
   }
+
+  // Auto-Skalierung: Text-Posts auf verfügbare Fläche einpassen
+  if (container.classList.contains('type-text')) autoScaleTextPost(container);
 
   // Composite Layer Animationen starten (Delay, Dauer, Übergang)
   const compositeCanvas = container.querySelector('.composite-canvas');
