@@ -17,14 +17,14 @@ services:
       DB_PORT: 5432
       DB_NAME: bulletin_board
       DB_USER: postgres
-      DB_PASSWORD: ${DB_PASSWORD:-secure_password_here}
-      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-this-refresh-secret}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD muss gesetzt sein}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET muss gesetzt sein}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET muss gesetzt sein}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_pw_here}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@prasco.net}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD muss gesetzt sein}
       DB_TIMETABLES_CLIENT_ID: ${DB_TIMETABLES_CLIENT_ID:-3650a67fa72275b1b7265168bbd3cf50}
       DB_TIMETABLES_API_KEY: ${DB_TIMETABLES_API_KEY:-413998968b792c74a2734722160e9979}
     volumes:

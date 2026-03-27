@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { logger } from '../utils/logger';
 
 export interface ApiError extends Error {
@@ -47,3 +47,14 @@ export class AppError extends Error implements ApiError {
 }
 
 export default errorHandler;
+
+/**
+ * Wraps an async route handler so that any rejected promise is forwarded to
+ * Express's next(err) error pipeline instead of causing an unhandled rejection.
+ * Usage: router.get('/path', asyncHandler(myController.method))
+ */
+export const asyncHandler =
+  (fn: RequestHandler): RequestHandler =>
+  (req: Request, res: Response, next: NextFunction): void => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };

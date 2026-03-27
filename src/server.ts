@@ -208,8 +208,11 @@ const displayLimiter = rateLimit({
 });
 
 // CORS Configuration
+if (!process.env.ALLOWED_ORIGINS && process.env.NODE_ENV === 'production') {
+  console.warn('⚠️  ALLOWED_ORIGINS nicht gesetzt – CORS blockiert alle externen Origins in production.');
+}
 const corsOptions = {
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+  origin: process.env.ALLOWED_ORIGINS?.split(',') ?? undefined,
   credentials: true,
   optionsSuccessStatus: 200,
 };

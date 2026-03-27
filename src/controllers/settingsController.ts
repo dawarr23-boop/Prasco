@@ -2,10 +2,24 @@ import { Request, Response } from 'express';
 import Setting from '../models/Setting';
 import { cacheService } from '../utils/cache';
 import { invalidateSettingCache } from '../middleware/deviceAuth';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawnSync } from 'child_process';
 
-const execAsync = promisify(exec);
+/**
+ * Schreibt den Boot-Modus-Wert sicher in die Boot-Mode-Datei.
+ * Verwendet spawnSync mit Array-Argumenten (kein Shell-Interpolation).
+ * Erlaubte Werte: 'normal' | 'hotspot' (bereits vor dem Aufruf validiert).
+ */
+function writeBootModeFile(mode: 'normal' | 'hotspot'): void {
+  const result = spawnSync('sudo', ['tee', '/etc/prasco/boot-mode'], {
+    input: `${mode}\n`,
+    encoding: 'utf8',
+    stdio: ['pipe', 'pipe', 'pipe'],
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(`tee exited with status ${result.status}: ${result.stderr}`);
+  }
+}
 
 /**
  * Hole alle Einstellungen oder spezifische nach Kategorie
@@ -115,7 +129,7 @@ export const setSetting = async (req: Request, res: Response): Promise<void> => 
     if (key === 'system.networkMode' && (stringValue === 'normal' || stringValue === 'hotspot')) {
       try {
         console.log(`🔄 Updating boot-mode file to: ${stringValue}`);
-        await execAsync(`echo "${stringValue}" | sudo tee /etc/prasco/boot-mode > /dev/null`);
+        writeBootModeFile(stringValue as 'normal' | 'hotspot');
         console.log(`✅ Boot-mode file updated to: ${stringValue}`);
       } catch (err: any) {
         console.error('⚠️ Failed to update boot-mode file:', err.message);
@@ -210,7 +224,7 @@ export const setBulkSettings = async (req: Request, res: Response): Promise<void
     if (networkModeChanged) {
       try {
         console.log(`🔄 Updating boot-mode file to: ${newNetworkMode}`);
-        await execAsync(`echo "${newNetworkMode}" | sudo tee /etc/prasco/boot-mode > /dev/null`);
+        writeBootModeFile(newNetworkMode as 'normal' | 'hotspot');
         console.log(`✅ Boot-mode file updated to: ${newNetworkMode}`);
       } catch (err: any) {
         console.error('⚠️ Failed to update boot-mode file:', err.message);
