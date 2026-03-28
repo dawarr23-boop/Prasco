@@ -3425,6 +3425,32 @@ async function fetchPosts() {
 }
 
 /**
+ * Teilt HTML-Inhalt in Spalten auf (Multi-Column Block Layout).
+ * Auslöser:
+ *   1. Explizit: <hr> Tags → jeder Abschnitt trennt eine Spalte
+ *   2. Automatisch: mindestens 2 <h2> oder <h3> Überschriften → pro Abschnitt eine Spalte
+ * Gibt HTML-String mit .text-column Divs zurück, oder null wenn keine Aufteilung.
+ */
+function splitTextIntoColumns(html) {
+  // Methode 1: Expliziter Spaltenumbruch über <hr>
+  if (/<hr\s*\/?>/i.test(html)) {
+    const parts = html.split(/<hr\s*\/?>/i).map(s => s.trim()).filter(s => s.length > 0);
+    if (parts.length >= 2 && parts.length <= 5) {
+      return parts.map(s => `<div class="text-column">${s}</div>`).join('');
+    }
+  }
+  // Methode 2: Automatisch bei mehreren h2/h3 Überschriften
+  const headingCount = (html.match(/<h[23][^>]*>/gi) || []).length;
+  if (headingCount >= 2) {
+    const parts = html.split(/(?=<h[23][^>]*>)/i).map(s => s.trim()).filter(s => s.length > 0);
+    if (parts.length >= 2 && parts.length <= 5) {
+      return parts.map(s => `<div class="text-column">${s}</div>`).join('');
+    }
+  }
+  return null;
+}
+
+/**
  * Passt den Inhalt eines Text-Posts per CSS zoom automatisch ein,
  * damit er vollständig im Container sichtbar ist (nie abgeschnitten).
  */
@@ -3503,13 +3529,27 @@ async function displayCurrentPost() {
     case 'text': {
       // RTE-Inhalt ist HTML; einfacher Text hat kein < → Fallback auf br-replace
       const isHtml = (post.content || '').trimStart().startsWith('<');
-      const textBody = isHtml
-        ? (post.content || '')
-        : (post.content || '').replace(/\n/g, '<br>');
-      html = `<div class="post-text-body">
-                ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
-                <div>${textBody}</div>
-              </div>`;
+      if (isHtml) {
+        const columns = splitTextIntoColumns(post.content);
+        if (columns) {
+          // Multi-Column Block-Layout
+          html = `<div class="post-text-body multi-column">
+                    ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
+                    ${columns}
+                  </div>`;
+        } else {
+          html = `<div class="post-text-body">
+                    ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
+                    <div>${post.content}</div>
+                  </div>`;
+        }
+      } else {
+        const textBody = (post.content || '').replace(/\n/g, '<br>');
+        html = `<div class="post-text-body">
+                  ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
+                  <div>${textBody}</div>
+                </div>`;
+      }
       break;
     }
 
