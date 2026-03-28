@@ -635,7 +635,7 @@ async function renderWeatherWidget() {
 
 /**
  * Regenradar – img-tile-basiert, keine externe Kartenlib erforderlich.
- * Basis: CartoDB Light Tiles | Radar: RainViewer API
+ * Basis: OpenStreetMap Tiles | Radar: RainViewer API
  */
 function initRainRadar() {
   if (rainRadarCleanup) { rainRadarCleanup(); rainRadarCleanup = null; }
@@ -687,7 +687,8 @@ function initRainRadar() {
     for (let col = 0; col < cols; col++) {
       const img = document.createElement('img');
       img.style.cssText = `position:absolute;left:${Math.round(ox + col * T)}px;top:${Math.round(oy + row * T)}px;width:${T}px;height:${T}px;`;
-      img.src = `https://a.basemaps.cartocdn.com/light_all/${ZOOM}/${tx0 + col}/${ty0 + row}.png`;
+      const sub = ['a','b','c'][(tx0 + col + ty0 + row) % 3];
+      img.src = `https://${sub}.tile.openstreetmap.org/${ZOOM}/${tx0 + col}/${ty0 + row}.png`;
       img.alt = '';
       wrap.appendChild(img);
     }
