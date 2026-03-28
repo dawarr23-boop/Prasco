@@ -358,7 +358,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 3px solid var(--prasco-green);
+  border-bottom: 1px solid rgba(0,0,0,0.12);
   gap: 1.5rem;
   flex-shrink: 0;
   z-index: 10;
@@ -652,7 +652,7 @@ body {
   color: rgba(255,255,255,0.85);
   padding: 0 1.5rem;
   height: 30px;
-  border-top: 3px solid var(--prasco-green);
+  border-top: 1px solid rgba(255,255,255,0.12);
   display: flex;
   align-items: center;
   justify-content: space-between;
