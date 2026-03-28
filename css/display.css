@@ -615,12 +615,21 @@ body {
   align-items: center;
   flex-shrink: 0;
   border-top: 3px solid var(--prasco-green);
+  /* Eigene GPU-Compositing-Ebene – verhindert Ruckeln durch Post-Wechsel */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  contain: strict;
 }
 .ticker-track {
   display: flex;
   white-space: nowrap;
   animation: ticker-scroll 22s linear infinite;
   will-change: transform;
+  /* translate3d erzwingt GPU-Compositing auf Android TV WebView */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .ticker-track span {
   display: inline-block;
@@ -631,8 +640,8 @@ body {
   font-weight: 500;
 }
 @keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 /* ============================================================
