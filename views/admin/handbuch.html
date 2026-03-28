@@ -98,6 +98,7 @@
         <li><a href="#ch-posts-image" data-t="toc_3_5">Bilder &amp; Medien</a></li>
         <li><a href="#ch-posts-schedule" data-t="toc_3_6">Zeitplanung</a></li>
         <li><a href="#ch-posts-ai" data-t="toc_3_7">KI-Unterstützung</a></li>
+        <li><a href="#ch-posts-multicolumn" data-t="toc_3_8">Mehrspalten-Layout</a></li>
       </ol>
     </li>
     <li><a href="#ch-categories" data-t="toc_4">Kategorien</a></li>
@@ -292,6 +293,46 @@
     <li data-t="ch3_bulk4">Auf <strong>⇄ Übersetzen</strong> klicken. Der Fortschritt wird für jeden Beitrag angezeigt.</li>
   </ol>
   <div class="warning" data-t="ch3_bulk_warn">&#9888; Die Bulk-Übersetzung überschreibt den Originaltext. Soll das Original erhalten bleiben, den Beitrag vorher kopieren.</div>
+
+  <h3 id="ch-posts-multicolumn" data-t="ch3_8_h">3.8 Mehrspalten-Layout (Block-Layout)</h3>
+  <p data-t="ch3_8_p">Text-Beiträge können automatisch als nebeneinanderstehende Inhaltskacheln dargestellt werden – ohne zusätzliche Konfiguration. Das System erkennt die Struktur des Textes und wählt das passende Layout.</p>
+
+  <h4 data-t="ch3_8_1_h">Methode 1 – Automatisch: Überschriften</h4>
+  <p data-t="ch3_8_1_p">Enthält ein Text-Beitrag mindestens zwei <strong>H2- oder H3-Überschriften</strong>, wird jeder Abschnitt automatisch als eigene Spalte dargestellt. Kein zusätzliches Markup notwendig.</p>
+  <div class="screenshot-block">
+    <img src="/handbuch/10_multicolumn_auto.png" alt="Mehrspalten Auto" />
+    <div class="caption" data-t="ch3_8_fig1">Abb. 3.2  Automatisches Mehrspalten-Layout – drei H2-Abschnitte werden als Kacheln nebeneinander dargestellt</div>
+  </div>
+  <p data-t="ch3_8_1_example_label"><strong>Beispiel im Editor:</strong></p>
+  <pre class="code-block">## Veranstaltung A
+Termin: 15. April, 18:00 Uhr
+Ort: Aula
+
+## Veranstaltung B
+Termin: 22. April, 14:00 Uhr
+Ort: Konferenzraum
+
+## Veranstaltung C
+Termin: 5. Mai, 10:00 Uhr
+Ort: Foyer</pre>
+
+  <h4 data-t="ch3_8_2_h">Methode 2 – Explizit: Horizontale Trennlinie</h4>
+  <p data-t="ch3_8_2_p">Mit einer <strong>horizontalen Trennlinie</strong> (im Editor über <kbd>---</kbd> oder die Toolbar einfügen) kann der Spaltenumbruch manuell gesetzt werden. Alles zwischen zwei Trennlinien wird zu einer eigenen Spalte.</p>
+  <div class="screenshot-block">
+    <img src="/handbuch/10b_multicolumn_hr.png" alt="Mehrspalten HR" />
+    <div class="caption" data-t="ch3_8_fig2">Abb. 3.3  Expliziter Spaltenumbruch mit horizontaler Trennlinie (---)</div>
+  </div>
+
+  <h4 data-t="ch3_8_3_h">Regeln &amp; Hinweise</h4>
+  <table>
+    <tr><th data-t="th_rule">Regel</th><th data-t="th_detail">Detail</th></tr>
+    <tr><td data-t="ch3_8_rule1_k">Maximale Spaltenanzahl</td><td data-t="ch3_8_rule1_v">5 Spalten – bei mehr Abschnitten wird normales Layout verwendet</td></tr>
+    <tr><td data-t="ch3_8_rule2_k">Mindestanzahl</td><td data-t="ch3_8_rule2_v">2 Abschnitte / Überschriften für Aktivierung</td></tr>
+    <tr><td data-t="ch3_8_rule3_k">Titel des Beitrags</td><td data-t="ch3_8_rule3_v">Wird als volle Breite über allen Spalten angezeigt (falls aktiviert)</td></tr>
+    <tr><td data-t="ch3_8_rule4_k">Dark-Theme</td><td data-t="ch3_8_rule4_v">Kacheln passen sich automatisch an (heller Text auf dunklem Hintergrund)</td></tr>
+    <tr><td data-t="ch3_8_rule5_k">Auto-Skalierung</td><td data-t="ch3_8_rule5_v">Greift weiterhin – der gesamte Block wird bei Bedarf verkleinert</td></tr>
+  </table>
+  <div class="tip" data-t="ch3_8_tip">&#128161; Das Mehrspalten-Layout eignet sich ideal für Veranstaltungsprogramme, Speisepläne, Ankündigungen mit mehreren Positionen oder strukturierte Informationen.</div>
 </div>
 
 <!-- 4. KATEGORIEN -->
@@ -796,7 +837,24 @@ const T = {
     ch3_bulk3: 'Zielsprache aus der Dropdown-Liste wählen.',
     ch3_bulk4: 'Auf <strong>⇄ Übersetzen</strong> klicken. Der Fortschritt wird für jeden Beitrag angezeigt.',
     ch3_bulk_warn: '&#9888; Die Bulk-Übersetzung überschreibt den Originaltext. Soll das Original erhalten bleiben, den Beitrag vorher kopieren.',
-    ch5_5_h: '5.5 Flottenübersicht',
+    toc_3_8: '3.8 Mehrspalten-Layout',
+    ch3_8_h: '3.8 Mehrspalten-Layout (Block-Layout)',
+    ch3_8_p: 'Text-Beiträge können automatisch als nebeneinanderstehende Inhaltskacheln dargestellt werden – ohne zusätzliche Konfiguration. Das System erkennt die Struktur des Textes und wählt das passende Layout.',
+    ch3_8_1_h: 'Methode 1 – Automatisch: Überschriften',
+    ch3_8_1_p: 'Enthält ein Text-Beitrag mindestens zwei <strong>H2- oder H3-Überschriften</strong>, wird jeder Abschnitt automatisch als eigene Spalte dargestellt. Kein zusätzliches Markup notwendig.',
+    ch3_8_fig1: 'Abb. 3.2  Automatisches Mehrspalten-Layout – drei H2-Abschnitte werden als Kacheln nebeneinander dargestellt',
+    ch3_8_1_example_label: '<strong>Beispiel im Editor:</strong>',
+    ch3_8_2_h: 'Methode 2 – Explizit: Horizontale Trennlinie',
+    ch3_8_2_p: 'Mit einer <strong>horizontalen Trennlinie</strong> (im Editor über <kbd>---</kbd> oder die Toolbar einfügen) kann der Spaltenumbruch manuell gesetzt werden. Alles zwischen zwei Trennlinien wird zu einer eigenen Spalte.',
+    ch3_8_fig2: 'Abb. 3.3  Expliziter Spaltenumbruch mit horizontaler Trennlinie (---)',
+    ch3_8_3_h: 'Regeln &amp; Hinweise',
+    th_rule: 'Regel', th_detail: 'Detail',
+    ch3_8_rule1_k: 'Maximale Spaltenanzahl', ch3_8_rule1_v: '5 Spalten – bei mehr Abschnitten wird normales Layout verwendet',
+    ch3_8_rule2_k: 'Mindestanzahl', ch3_8_rule2_v: '2 Abschnitte / Überschriften für Aktivierung',
+    ch3_8_rule3_k: 'Titel des Beitrags', ch3_8_rule3_v: 'Wird als volle Breite über allen Spalten angezeigt (falls aktiviert)',
+    ch3_8_rule4_k: 'Dark-Theme', ch3_8_rule4_v: 'Kacheln passen sich automatisch an (heller Text auf dunklem Hintergrund)',
+    ch3_8_rule5_k: 'Auto-Skalierung', ch3_8_rule5_v: 'Greift weiterhin – der gesamte Block wird bei Bedarf verkleinert',
+    ch3_8_tip: '&#128161; Das Mehrspalten-Layout eignet sich ideal für Veranstaltungsprogramme, Speisepläne, Ankündigungen mit mehreren Positionen oder strukturierte Informationen.',
     ch5_5_p: 'Der Button <strong>📊 Flottenübersicht</strong> öffnet ein Echtzeit-Dashboard mit dem Status aller registrierten Geräte:',
     fleet_online: 'Online', fleet_online_d: 'Gerät aktiv, Herzschlag wurde empfangen (letzte 5 Min.)',
     fleet_offline: 'Offline', fleet_offline_d: 'Kein Herzschlag seit mehr als 5 Minuten',
@@ -1027,7 +1085,24 @@ const T = {
     ch3_bulk3: 'Choose the target language from the dropdown.',
     ch3_bulk4: 'Click <strong>⇄ Translate</strong>. Progress is shown for each post.',
     ch3_bulk_warn: '&#9888; Bulk translation overwrites the original text. Copy the post first if you want to keep the original.',
-    ch5_5_h: '5.5 Fleet Overview',
+    toc_3_8: '3.8 Multi-Column Layout',
+    ch3_8_h: '3.8 Multi-Column Layout (Block Layout)',
+    ch3_8_p: 'Text posts can automatically be displayed as side-by-side content tiles – no extra configuration needed. The system detects the structure of the text and selects the appropriate layout.',
+    ch3_8_1_h: 'Method 1 – Automatic: Headings',
+    ch3_8_1_p: 'If a text post contains at least two <strong>H2 or H3 headings</strong>, each section is automatically displayed as its own column. No additional markup required.',
+    ch3_8_fig1: 'Fig. 3.2  Automatic multi-column layout – three H2 sections displayed as side-by-side tiles',
+    ch3_8_1_example_label: '<strong>Example in the editor:</strong>',
+    ch3_8_2_h: 'Method 2 – Explicit: Horizontal Rule',
+    ch3_8_2_p: 'A <strong>horizontal rule</strong> (insert via <kbd>---</kbd> or the toolbar) sets a manual column break. Everything between two rules becomes a separate column.',
+    ch3_8_fig2: 'Fig. 3.3  Explicit column break using a horizontal rule (---)',
+    ch3_8_3_h: 'Rules &amp; Notes',
+    th_rule: 'Rule', th_detail: 'Detail',
+    ch3_8_rule1_k: 'Maximum columns', ch3_8_rule1_v: '5 columns – more sections fall back to normal layout',
+    ch3_8_rule2_k: 'Minimum', ch3_8_rule2_v: '2 sections / headings to activate',
+    ch3_8_rule3_k: 'Post title', ch3_8_rule3_v: 'Displayed full-width above all columns (if enabled)',
+    ch3_8_rule4_k: 'Dark theme', ch3_8_rule4_v: 'Tiles adapt automatically (light text on dark background)',
+    ch3_8_rule5_k: 'Auto-scaling', ch3_8_rule5_v: 'Still active – the entire block is scaled down if needed',
+    ch3_8_tip: '&#128161; The multi-column layout is ideal for event programs, menus, announcements with multiple items, or structured information.',
     ch5_5_p: 'The <strong>📊 Fleet Overview</strong> button opens a real-time dashboard showing the status of all registered devices:',
     fleet_online: 'Online', fleet_online_d: 'Device active, heartbeat received (last 5 min.)',
     fleet_offline: 'Offline', fleet_offline_d: 'No heartbeat for more than 5 minutes',
@@ -1258,7 +1333,24 @@ const T = {
     ch3_bulk3: 'Scegliere la lingua di destinazione dal menu a tendina.',
     ch3_bulk4: 'Fare clic su <strong>⇄ Traduci</strong>. Il progresso viene mostrato per ogni post.',
     ch3_bulk_warn: '&#9888; La traduzione in blocco sovrascrive il testo originale. Copiare il post prima se si desidera conservare l\'originale.',
-    ch5_5_h: '5.5 Panoramica flotta',
+    toc_3_8: '3.8 Layout multicolonna',
+    ch3_8_h: '3.8 Layout multicolonna (Block Layout)',
+    ch3_8_p: 'I post di testo possono essere visualizzati automaticamente come riquadri affiancati – senza configurazione aggiuntiva. Il sistema rileva la struttura del testo e sceglie il layout appropriato.',
+    ch3_8_1_h: 'Metodo 1 – Automatico: Intestazioni',
+    ch3_8_1_p: 'Se un post di testo contiene almeno due <strong>intestazioni H2 o H3</strong>, ogni sezione viene automaticamente visualizzata come colonna separata. Nessun markup aggiuntivo necessario.',
+    ch3_8_fig1: 'Fig. 3.2  Layout multicolonna automatico – tre sezioni H2 visualizzate come riquadri affiancati',
+    ch3_8_1_example_label: '<strong>Esempio nell\'editor:</strong>',
+    ch3_8_2_h: 'Metodo 2 – Esplicito: Riga orizzontale',
+    ch3_8_2_p: 'Una <strong>riga orizzontale</strong> (inserita tramite <kbd>---</kbd> o la barra degli strumenti) imposta un\'interruzione di colonna manuale. Tutto tra due righe diventa una colonna separata.',
+    ch3_8_fig2: 'Fig. 3.3  Interruzione di colonna esplicita con riga orizzontale (---)',
+    ch3_8_3_h: 'Regole &amp; Note',
+    th_rule: 'Regola', th_detail: 'Dettaglio',
+    ch3_8_rule1_k: 'Numero massimo di colonne', ch3_8_rule1_v: '5 colonne – con più sezioni viene utilizzato il layout normale',
+    ch3_8_rule2_k: 'Minimo', ch3_8_rule2_v: '2 sezioni / intestazioni per l\'attivazione',
+    ch3_8_rule3_k: 'Titolo del post', ch3_8_rule3_v: 'Visualizzato a larghezza intera sopra tutte le colonne (se attivato)',
+    ch3_8_rule4_k: 'Tema scuro', ch3_8_rule4_v: 'I riquadri si adattano automaticamente (testo chiaro su sfondo scuro)',
+    ch3_8_rule5_k: 'Scalatura automatica', ch3_8_rule5_v: 'Rimane attiva – l\'intero blocco viene ridimensionato se necessario',
+    ch3_8_tip: '&#128161; Il layout multicolonna è ideale per programmi di eventi, menu, annunci con più voci o informazioni strutturate.',
     ch5_5_p: 'Il pulsante <strong>📊 Panoramica flotta</strong> apre una dashboard in tempo reale con lo stato di tutti i dispositivi registrati:',
     fleet_online: 'Online', fleet_online_d: 'Dispositivo attivo, heartbeat ricevuto (ultimi 5 min.)',
     fleet_offline: 'Offline', fleet_offline_d: 'Nessun heartbeat da più di 5 minuti',
