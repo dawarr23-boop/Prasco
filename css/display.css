@@ -614,7 +614,6 @@ body {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  border-top: 3px solid var(--prasco-green);
   /* Eigene GPU-Compositing-Ebene – verhindert Ruckeln durch Post-Wechsel */
   transform: translateZ(0);
   backface-visibility: hidden;
