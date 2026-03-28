@@ -1757,12 +1757,12 @@
 
             <!-- Benutzeroberfläche -->
             <div class="settings-card">
-              <h3><span class="settings-icon">🎨</span> Benutzeroberfläche</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="6" x2="5" y2="14"/></svg></span> <span data-i18n="settings.ui">Benutzeroberfläche</span></h3>
               <div class="settings-form">
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0;">
                   <div>
-                    <strong style="display:block;margin-bottom:0.25rem;">Kreativ-Modus</strong>
-                    <small style="color:var(--prasco-gray);">Beitragstypen als visuelle Kacheln statt Dropdown</small>
+                    <strong style="display:block;margin-bottom:0.25rem;" data-i18n="settings.ui.kreativMode">Kreativ-Modus</strong>
+                    <small style="color:var(--prasco-gray);" data-i18n="settings.ui.kreativModeDesc">Beitragstypen als visuelle Kacheln statt Dropdown</small>
                   </div>
                   <div class="toggle-switch">
                     <input type="checkbox" id="ui-creative-mode-toggle" class="toggle-input" />
@@ -1771,8 +1771,8 @@
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
                   <div>
-                    <strong style="display:block;margin-bottom:0.25rem;">Wizard-Modus</strong>
-                    <small style="color:var(--prasco-gray);">Beitragsformular als geführte Schritte (Typ → Inhalt → Einstellungen → Vorschau)</small>
+                    <strong style="display:block;margin-bottom:0.25rem;" data-i18n="settings.ui.wizardMode">Wizard-Modus</strong>
+                    <small style="color:var(--prasco-gray);" data-i18n="settings.ui.wizardModeDesc">Beitragsformular als geführte Schritte (Typ → Inhalt → Einstellungen → Vorschau)</small>
                   </div>
                   <div class="toggle-switch">
                     <input type="checkbox" id="ui-wizard-mode-toggle" class="toggle-input" />
@@ -1784,22 +1784,22 @@
 
             <!-- Datensicherung -->
             <div class="settings-card">
-              <h3><span class="settings-icon">📦</span> Datensicherung</h3>
+              <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 1v8M5 6l3 3 3-3"/><path d="M2 11v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2"/></svg></span> <span data-i18n="settings.backup">Datensicherung</span></h3>
               <div class="settings-form">
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0;">
                   <div>
-                    <strong style="display:block;margin-bottom:0.25rem;">Backup erstellen</strong>
-                    <small style="color:var(--prasco-gray);">Exportiert alle Beiträge als JSON-Datei zum Sichern oder Übertragen</small>
+                    <strong style="display:block;margin-bottom:0.25rem;" data-i18n="settings.backup.create">Backup erstellen</strong>
+                    <small style="color:var(--prasco-gray);" data-i18n="settings.backup.createDesc">Exportiert alle Beiträge als JSON-Datei zum Sichern oder Übertragen</small>
                   </div>
-                  <button type="button" class="btn btn-secondary" onclick="exportPostsBackup()">⬇️ Backup herunterladen</button>
+                  <button type="button" class="btn btn-secondary" onclick="exportPostsBackup()" data-i18n="settings.backup.download">⬇️ Backup herunterladen</button>
                 </div>
                 <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:0.75rem 0 0 0;padding-top:0.75rem;border-top:1px solid var(--border-color);">
                   <div>
-                    <strong style="display:block;margin-bottom:0.25rem;">Backup wiederherstellen</strong>
-                    <small style="color:var(--prasco-gray);">Importiert Beiträge aus einer Backup-Datei. Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen.</small>
+                    <strong style="display:block;margin-bottom:0.25rem;" data-i18n="settings.backup.restore">Backup wiederherstellen</strong>
+                    <small style="color:var(--prasco-gray);" data-i18n="settings.backup.restoreDesc">Importiert Beiträge aus einer Backup-Datei. Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen.</small>
                   </div>
                   <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()">⬆️ Backup importieren</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()" data-i18n="settings.backup.import">⬆️ Backup importieren</button>
                     <input type="file" id="backup-file-input" accept=".json" style="display:none" onchange="importPostsBackup(event)">
                   </div>
                 </div>
