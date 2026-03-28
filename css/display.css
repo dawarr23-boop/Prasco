@@ -343,7 +343,7 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f0f1f3;
+  background: #f4f5f7;
 }
 
 /* ============================================================
@@ -358,7 +358,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+  border-bottom: 1px solid rgba(0,0,0,0.18);
   gap: 1.5rem;
   flex-shrink: 0;
   z-index: 10;
@@ -607,7 +607,7 @@ body {
    ZONE 3 – TICKER / LAUFSCHRIFT
    ============================================================ */
 .ticker-bar {
-  background: #1c1c1e;
+  background: #2e2e30;
   color: rgba(255,255,255,0.92);
   height: 40px;
   overflow: hidden;
@@ -648,11 +648,11 @@ body {
    Dunkelgrau, 1 Zeile, grüne Oberlinie
    ============================================================ */
 .display-footer {
-  background: #2a2a2c;
+  background: #3a3a3c;
   color: rgba(255,255,255,0.85);
   padding: 0 1.5rem;
   height: 30px;
-  border-top: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.15);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -671,12 +671,12 @@ body {
 }
 
 .footer-info #post-counter {
-  color: var(--prasco-green);
+  color: rgba(255,255,255,0.9);
   font-weight: 700;
 }
 
 .footer-counter {
-  color: var(--prasco-green);
+  color: rgba(255,255,255,0.9);
   font-size: 0.72rem;
   font-weight: 700;
   font-family: var(--font-primary);
