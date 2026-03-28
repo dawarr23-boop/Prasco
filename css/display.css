@@ -885,6 +885,14 @@ body {
   overflow: hidden;
 }
 
+/* Live-Data, HTML, Composite: kein max-width auf direkten div-Kindern */
+.post.type-livedata > div,
+.post.type-html > div,
+.post.type-composite > div {
+  max-width: none;
+  width: 100%;
+}
+
 /* Basis-Layer: absolut positioniert, Koordinaten in % */
 .composite-layer {
   position: absolute;
