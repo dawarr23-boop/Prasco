@@ -1521,7 +1521,10 @@ function applyTranslations() {
       h3.innerHTML = `<span class="settings-icon">◈</span> ${t('settings.sso')}`;
     } else if (text.includes('Über') || text.includes('About') || text.includes('Informazioni')) {
       h3.innerHTML = `<span class="settings-icon">ℹ</span> ${t('settings.about')}`;
-    }
+    } else if (text.includes('Benutzeroberfl') || text.includes('User Interface') || text.includes('Interfaccia')) {
+      h3.innerHTML = `<span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="1" y="2" width="14" height="12" rx="2"/><line x1="1" y1="6" x2="15" y2="6"/><line x1="5" y1="6" x2="5" y2="14"/></svg></span> <span data-i18n="settings.ui">${t('settings.ui')}</span>`;
+    } else if (text.includes('Datensicherung') || text.includes('Data Backup') || text.includes('Backup dei')) {
+      h3.innerHTML = `<span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M8 1v8M5 6l3 3 3-3"/><path d="M2 11v2a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-2"/></svg></span> <span data-i18n="settings.backup">${t('settings.backup')}</span>`;
   });
 
   // Update form labels in settings
