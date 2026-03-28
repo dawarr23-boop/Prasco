@@ -509,14 +509,12 @@ body {
   padding-left: 1.25rem;
   text-align: left;
   width: 100%;
-  max-width: 1300px;
 }
 
 .post p {
   font-size: 1.6rem;
   line-height: 1.9;
   color: #2c2c2c;
-  max-width: 1300px;
   font-family: var(--font-primary);
   font-weight: 400;
   text-align: left;
@@ -527,7 +525,6 @@ body {
   font-size: 1.6rem;
   line-height: 1.9;
   color: #2c2c2c;
-  max-width: 1300px;
   font-family: var(--font-primary);
   font-weight: 400;
   text-align: left;
@@ -541,7 +538,6 @@ body {
 
 .post table {
   width: 100%;
-  max-width: 1300px;
   margin: 1rem 0;
   border-collapse: collapse;
 }
@@ -883,14 +879,6 @@ body {
 .post.type-livedata {
   padding: 0;
   overflow: hidden;
-}
-
-/* Live-Data, HTML, Composite: kein max-width auf direkten div-Kindern */
-.post.type-livedata > div,
-.post.type-html > div,
-.post.type-composite > div {
-  max-width: none;
-  width: 100%;
 }
 
 /* Basis-Layer: absolut positioniert, Koordinaten in % */
@@ -2392,10 +2380,9 @@ body {
   .clock-analog { width: 62px; height: 62px; }
 
   .display-main { padding: 3.5rem; }
-  .post-container { max-width: 1800px; }
   .post { padding: 5rem 6rem; border-radius: 20px; }
   .post h1 { font-size: 4.5rem; margin-bottom: 3rem; padding-left: 2.5rem; border-left-width: 6px; }
-  .post p, .post div { font-size: 2rem; line-height: 2; max-width: 1600px; }
+  .post p, .post div { font-size: 2rem; line-height: 2; }
   .post img, .post video { max-height: 70vh; border-radius: 16px; }
   .post iframe { width: 1600px; max-height: 70vh; border-radius: 16px; }
 
