@@ -879,6 +879,12 @@ body {
   transform: none;
 }
 
+/* Kein Padding für Live-Data-Widget – füllt den gesamten Post-Bereich */
+.post.type-livedata {
+  padding: 0;
+  overflow: hidden;
+}
+
 /* Basis-Layer: absolut positioniert, Koordinaten in % */
 .composite-layer {
   position: absolute;
