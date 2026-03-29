@@ -7284,20 +7284,34 @@ function wizardPrev() {
 
 function initWizardMode() {
   const toggle = document.getElementById('ui-wizard-mode-toggle');
-  if (toggle) toggle.checked = isWizardMode();
-  applyWizardMode(isWizardMode());
 
-  // Server als Quelle der Wahrheit: async abrufen und ggf. korrigieren
+  // Wenn der Benutzer bereits eine explizite Wahl getroffen hat (localStorage gesetzt),
+  // diese bevorzugen – kein Überschreiben durch den Server.
+  const localValue = localStorage.getItem(WIZARD_MODE_KEY);
+  if (localValue !== null) {
+    const enabled = localValue === '1';
+    if (toggle) toggle.checked = enabled;
+    applyWizardMode(enabled);
+    return;
+  }
+
+  // Noch nie gesetzt (neuer Browser/Gerät) → Server als Startwert holen
   apiRequest('/settings/ui.wizardMode')
     .then(data => {
       if (data && typeof data.value !== 'undefined') {
         const serverEnabled = data.value === 'true' || data.value === true;
-        // Server-Wert hat Vorrang vor localStorage
         localStorage.setItem(WIZARD_MODE_KEY, serverEnabled ? '1' : '0');
+        if (toggle) toggle.checked = serverEnabled;
         applyWizardMode(serverEnabled);
+      } else {
+        localStorage.setItem(WIZARD_MODE_KEY, '0');
+        applyWizardMode(false);
       }
     })
-    .catch(() => { /* kein Server-Eintrag vorhanden, localStorage-Wert behalten */ });
+    .catch(() => {
+      localStorage.setItem(WIZARD_MODE_KEY, '0');
+      applyWizardMode(false);
+    });
 }
 
 // ============================================
