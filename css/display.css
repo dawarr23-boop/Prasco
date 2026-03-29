@@ -780,10 +780,22 @@ body {
 
 .post.type-image {
   background: var(--white);
+  /* Titel oben verankern: justify-content:center clippt h1 wenn Bild zu groß */
+  justify-content: flex-start;
 }
 
 .post.type-image h1 {
   color: var(--prasco-black);
+  flex-shrink: 0;
+}
+
+.post.type-html {
+  justify-content: flex-start;
+}
+
+.post.type-html h1 {
+  color: var(--prasco-black);
+  flex-shrink: 0;
 }
 
 .post.type-video {
