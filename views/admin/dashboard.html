@@ -1958,7 +1958,7 @@
             <!-- Globale Hintergrundmusik -->
             <div class="settings-card">
               <h3><span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M6 13V4l7-2v9"/><circle cx="4.5" cy="13" r="2"/><circle cx="11.5" cy="11" r="2"/></svg></span> Globale Hintergrundmusik</h3>
-              <p class="settings-description">
+              <p class="settings-description" data-translate="settings.globalMusicDescription">
                 Musik die über alle Beiträge hinweg abgespielt wird. Videos werden automatisch stumm
                 geschaltet.
               </p>
@@ -1969,13 +1969,13 @@
                       <input type="checkbox" class="toggle-input" id="global-music-enabled" />
                       <label class="toggle-label" for="global-music-enabled"><span class="toggle-slider"></span></label>
                     </div>
-                    <span>Globale Hintergrundmusik aktivieren</span>
+                    <span data-translate="settings.globalMusicEnable">Globale Hintergrundmusik aktivieren</span>
                   </div>
                 </div>
 
                 <div id="global-music-config" style="display: none">
                   <div class="form-group">
-                    <label for="global-music-url">Musik-URL</label>
+                    <label for="global-music-url" data-translate="settings.globalMusicUrl">Musik-URL</label>
                     <input
                       type="url"
                       id="global-music-url"
@@ -1984,13 +1984,13 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="global-music-file">Oder Musik-Datei hochladen</label>
+                    <label for="global-music-file" data-translate="settings.globalMusicUpload">Oder Musik-Datei hochladen</label>
                     <input type="file" id="global-music-file" accept="audio/*" />
                   </div>
 
                   <div class="form-group">
                     <label for="global-music-volume"
-                      >Lautstärke: <span id="global-volume-value">30</span>%</label
+                      ><span data-translate="settings.globalMusicVolume">Lautstärke</span>: <span id="global-volume-value">30</span>%</label
                     >
                     <input type="range" id="global-music-volume" min="0" max="100" value="30" />
                   </div>
@@ -2001,21 +2001,21 @@
                         <input type="checkbox" class="toggle-input" id="global-music-mute-videos" checked />
                         <label class="toggle-label" for="global-music-mute-videos"><span class="toggle-slider"></span></label>
                       </div>
-                      <span>Videos automatisch stumm schalten</span>
+                      <span data-translate="settings.globalMusicMuteVideos">Videos automatisch stumm schalten</span>
                     </div>
                   </div>
 
                   <div class="form-group">
-                    <label for="global-music-priority">Musik-Priorität</label>
+                    <label for="global-music-priority" data-translate="settings.globalMusicPriority">Musik-Priorität</label>
                     <select id="global-music-priority">
-                      <option value="global">Globale Musik hat Vorrang</option>
-                      <option value="post">Post-spezifische Musik hat Vorrang</option>
+                      <option value="global" data-translate="settings.globalMusicPriorityGlobal">Globale Musik hat Vorrang</option>
+                      <option value="post" data-translate="settings.globalMusicPriorityPost">Post-spezifische Musik hat Vorrang</option>
                     </select>
-                    <small>Bestimmt, welche Musik abgespielt wird, wenn sowohl globale als auch post-spezifische Musik konfiguriert sind.</small>
+                    <small data-translate="settings.globalMusicPriorityHint">Bestimmt, welche Musik abgespielt wird, wenn sowohl globale als auch post-spezifische Musik konfiguriert sind.</small>
                   </div>
                 </div>
 
-                <button class="btn btn-secondary" id="testGlobalMusic">
+                <button class="btn btn-secondary" id="testGlobalMusic" data-translate="settings.globalMusicTest">
                   Test
                 </button>
               </div>
@@ -2027,22 +2027,22 @@
                 <span class="settings-icon"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14" aria-hidden="true"><rect x="1" y="4" width="14" height="10" rx="1.5"/><path d="M5 4V2.5a.5.5 0 0 1 1 0V4M10 4V2.5a.5.5 0 0 1 1 0V4"/><line x1="1" y1="7" x2="15" y2="7"/></svg></span>
                 Dienstagsmeeting – Benachrichtigungen
               </h3>
-              <p class="settings-description">
+              <p class="settings-description" data-translate="settings.meetingDesc">
                 Wenn ein Beitrag mit der Kategorie <strong>Dienstagsmeeting</strong> gespeichert wird, erhalten die unten eingetragenen Empfänger automatisch eine E-Mail mit der Bitte, den Inhalt auf die Agenda zu setzen.
               </p>
               <div class="settings-form">
                 <div class="form-group">
-                  <label for="meeting-recipients">E-Mail-Empfänger <small style="color:#888;">(kommagetrennt)</small></label>
+                  <label for="meeting-recipients" data-translate="settings.meetingRecipients">E-Mail-Empfänger</label>
                   <textarea id="meeting-recipients" rows="3" placeholder="max.mustermann@firma.de, anna.mueller@firma.de" style="width:100%;font-family:monospace;font-size:0.88rem;resize:vertical;"></textarea>
-                  <small>Alle hier eingetragenen Adressen erhalten eine Benachrichtigung, sobald ein neuer Beitrag mit der Kategorie „Dienstagsmeeting" angelegt oder geändert wird.</small>
+                  <small data-translate="settings.meetingRecipientsHint">Alle hier eingetragenen Adressen erhalten eine Benachrichtigung, sobald ein neuer Beitrag mit der Kategorie „Dienstagsmeeting" angelegt oder geändert wird.</small>
                 </div>
                 <div class="form-group">
-                  <label for="meeting-category-name">Name der Meeting-Kategorie</label>
+                  <label for="meeting-category-name" data-translate="settings.meetingCategoryName">Name der Meeting-Kategorie</label>
                   <input type="text" id="meeting-category-name" placeholder="Dienstagsmeeting" />
-                  <small>Muss exakt mit dem Kategorienamen in PRASCO übereinstimmen.</small>
+                  <small data-translate="settings.meetingCategoryHint">Muss exakt mit dem Kategorienamen in PRASCO übereinstimmen.</small>
                 </div>
                 <hr style="margin:1.2rem 0;border-color:#e0e8e0;" />
-                <h4 style="margin:0 0 0.8rem;font-size:0.95rem;color:#3a5a3a;">SMTP-Konfiguration</h4>
+                <h4 style="margin:0 0 0.8rem;font-size:0.95rem;color:#3a5a3a;" data-translate="settings.meetingSmtp">SMTP-Konfiguration</h4>
                 <form autocomplete="off" onsubmit="return false;" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                   <div class="form-group" style="margin:0;">
                     <label for="smtp-host">SMTP-Host</label>
@@ -2053,15 +2053,15 @@
                     <input type="number" id="smtp-port" placeholder="587" min="1" max="65535" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label for="smtp-user">Benutzername / E-Mail</label>
+                    <label for="smtp-user" data-translate="settings.meetingSmtpUser">Benutzername / E-Mail</label>
                     <input type="text" id="smtp-user" placeholder="absender@firma.de" autocomplete="off" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label for="smtp-pass">Passwort</label>
+                    <label for="smtp-pass" data-translate="settings.meetingSmtpPass">Passwort</label>
                     <input type="password" id="smtp-pass" placeholder="••••••••" autocomplete="new-password" />
                   </div>
                   <div class="form-group" style="margin:0;">
-                    <label for="smtp-from">Absender (From)</label>
+                    <label for="smtp-from" data-translate="settings.meetingSmtpFrom">Absender (From)</label>
                     <input type="text" id="smtp-from" placeholder="PRASCO &lt;absender@firma.de&gt;" />
                   </div>
                   <div class="form-group" style="margin:0; display:flex; align-items:center; gap:0.6rem; padding-top:1.5rem;">
@@ -2073,8 +2073,8 @@
                   </div>
                 </form>
                 <div style="margin-top:1rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
-                  <button class="btn btn-primary" id="saveMeetingSettings">Einstellungen speichern</button>
-                  <button class="btn btn-secondary" id="testMeetingEmail" style="font-size:0.85rem;">Test-E-Mail senden</button>
+                  <button class="btn btn-primary" id="saveMeetingSettings" data-translate="settings.saveSettings">Einstellungen speichern</button>
+                  <button class="btn btn-secondary" id="testMeetingEmail" style="font-size:0.85rem;" data-translate="settings.meetingTestEmail">Test-E-Mail senden</button>
                   <span id="meeting-save-status" style="font-size:0.85rem;color:#4a7c4a;"></span>
                 </div>
               </div>
