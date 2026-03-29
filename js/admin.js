@@ -151,8 +151,6 @@ const translations = {
     'settings.ui': 'Benutzeroberfläche',
     'settings.ui.kreativMode': 'Kreativ-Modus',
     'settings.ui.kreativModeDesc': 'Beitragstypen als visuelle Kacheln statt Dropdown',
-    'settings.ui.wizardMode': 'Wizard-Modus',
-    'settings.ui.wizardModeDesc': 'Beitragsformular als geführte Schritte (Typ → Inhalt → Einstellungen → Vorschau)',
     'settings.backup': 'Datensicherung',
     'settings.backup.create': 'Backup erstellen',
     'settings.backup.createDesc': 'Exportiert alle Beiträge als JSON-Datei zum Sichern oder Übertragen',
@@ -617,8 +615,6 @@ const translations = {
     'settings.ui': 'User Interface',
     'settings.ui.kreativMode': 'Creative Mode',
     'settings.ui.kreativModeDesc': 'Post types as visual tiles instead of dropdown',
-    'settings.ui.wizardMode': 'Wizard Mode',
-    'settings.ui.wizardModeDesc': 'Post form as guided steps (Type → Content → Settings → Preview)',
     'settings.backup': 'Data Backup',
     'settings.backup.create': 'Create Backup',
     'settings.backup.createDesc': 'Exports all posts as a JSON file for backup or transfer',
@@ -1081,8 +1077,6 @@ const translations = {
     'settings.ui': 'Interfaccia Utente',
     'settings.ui.kreativMode': 'Modalità Creativa',
     'settings.ui.kreativModeDesc': 'Tipi di articolo come tessere visive invece del menu a tendina',
-    'settings.ui.wizardMode': 'Modalità Guidata',
-    'settings.ui.wizardModeDesc': 'Modulo articolo come passi guidati (Tipo → Contenuto → Impostazioni → Anteprima)',
     'settings.backup': 'Backup dei Dati',
     'settings.backup.create': 'Crea Backup',
     'settings.backup.createDesc': 'Esporta tutti gli articoli come file JSON per la salvaguardia o il trasferimento',
@@ -2171,7 +2165,6 @@ function navigateTo(section) {
       if (!ssoConfigLoaded) loadSSOConfiguration();
       loadSystemMode(); // Lade System-Modus Einstellungen
       loadGeneralSettings(); // Lade allgemeine Systemeinstellungen
-      initWizardMode(); // Wizard-Toggle mit aktuellem Server-Zustand synchronisieren
     }
   }
 }
@@ -2775,8 +2768,6 @@ async function showPostForm() {
   // Kreativ-Modus anwenden
   applyCreativeMode(isCreativeMode());
   selectTypeCard('text');
-  // Wizard-Modus vollständig neu initialisieren (behebt "noch aktiv nach Deaktivierung")
-  applyWizardMode(isWizardMode());
 
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
@@ -3000,16 +2991,6 @@ async function editPost(id) {
   document.getElementById('post-type').value = post.contentType || 'text';
   // Kreativ-Modus: passende Kachel markieren
   if (isCreativeMode()) selectTypeCard(post.contentType || 'text');
-  // Beim Bearbeiten: Wizard IMMER ausblenden – alle Felder direkt anzeigen
-  {
-    const indicator = document.getElementById('wizard-indicator');
-    const nav = document.getElementById('wizard-nav');
-    const formActions = document.getElementById('post-form-actions');
-    if (indicator) indicator.style.display = 'none';
-    if (nav) nav.style.display = 'none';
-    if (formActions) formActions.style.display = '';
-    document.querySelectorAll('.wizard-step').forEach(s => { s.style.display = ''; });
-  }
   document.getElementById('post-content').value = post.content || '';
 
   // Display-Auswahl laden und setzen
@@ -7186,134 +7167,6 @@ function initTypeCardPicker() {
 }
 
 // ============================================
-// Wizard-Modus (Phase 3)
-// ============================================
-const WIZARD_MODE_KEY = 'prasco_wizard_mode';
-const WIZARD_TOTAL_STEPS = 4;
-let _wizardCurrentStep = 1;
-
-function isWizardMode() {
-  return localStorage.getItem(WIZARD_MODE_KEY) === '1';
-}
-
-function applyWizardMode(enabled) {
-  localStorage.setItem(WIZARD_MODE_KEY, enabled ? '1' : '0');
-  const toggle = document.getElementById('ui-wizard-mode-toggle');
-  if (toggle) toggle.checked = !!enabled;
-
-  const indicator = document.getElementById('wizard-indicator');
-  const nav = document.getElementById('wizard-nav');
-  const formActions = document.getElementById('post-form-actions');
-
-  if (enabled) {
-    if (indicator) indicator.style.display = '';
-    if (nav) nav.style.display = '';
-    if (formActions) formActions.style.display = 'none';
-    wizardGotoStep(1);
-  } else {
-    if (indicator) indicator.style.display = 'none';
-    if (nav) nav.style.display = 'none';
-    if (formActions) formActions.style.display = '';
-    document.querySelectorAll('.wizard-step').forEach(s => { s.style.display = ''; });
-  }
-}
-
-function wizardGotoStep(step) {
-  _wizardCurrentStep = Math.max(1, Math.min(step, WIZARD_TOTAL_STEPS));
-
-  // Show only the active step
-  document.querySelectorAll('.wizard-step').forEach(s => {
-    s.style.display = (parseInt(s.dataset.step) === _wizardCurrentStep) ? '' : 'none';
-  });
-
-  // Update step indicator dots
-  document.querySelectorAll('.wz-step').forEach(s => {
-    const n = parseInt(s.dataset.step);
-    s.classList.toggle('wz-active', n === _wizardCurrentStep);
-    s.classList.toggle('wz-done', n < _wizardCurrentStep);
-    s.classList.remove(n > _wizardCurrentStep ? 'wz-active' : '');
-  });
-
-  // Update connectors
-  document.querySelectorAll('.wz-connector').forEach((c, i) => {
-    c.classList.toggle('wz-connector-done', i < _wizardCurrentStep - 1);
-  });
-
-  // Update nav buttons
-  const prevBtn = document.getElementById('wizard-prev-btn');
-  const nextBtn = document.getElementById('wizard-next-btn');
-  const label = document.getElementById('wizard-step-label');
-
-  if (prevBtn) prevBtn.style.visibility = _wizardCurrentStep === 1 ? 'hidden' : '';
-  if (nextBtn) {
-    nextBtn.textContent = _wizardCurrentStep === WIZARD_TOTAL_STEPS ? '💾 Speichern' : 'Weiter →';
-  }
-  if (label) label.textContent = `Schritt ${_wizardCurrentStep} von ${WIZARD_TOTAL_STEPS}`;
-
-  // Auto-open live preview on step 4
-  if (_wizardCurrentStep === 4) {
-    const box = document.getElementById('live-preview-box');
-    const btnLabel = document.getElementById('preview-btn-label');
-    if (box && box.style.display === 'none') {
-      box.style.display = '';
-      if (btnLabel) btnLabel.textContent = 'Vorschau ausblenden';
-      updateLivePreview();
-    }
-  }
-
-  // Scroll form to top
-  const postFormEl = document.getElementById('post-form');
-  if (postFormEl) postFormEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function wizardNext() {
-  if (_wizardCurrentStep < WIZARD_TOTAL_STEPS) {
-    wizardGotoStep(_wizardCurrentStep + 1);
-  } else {
-    // Last step → submit form
-    const form = document.getElementById('postForm');
-    if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-  }
-}
-
-function wizardPrev() {
-  if (_wizardCurrentStep > 1) {
-    wizardGotoStep(_wizardCurrentStep - 1);
-  }
-}
-
-function initWizardMode() {
-  const toggle = document.getElementById('ui-wizard-mode-toggle');
-
-  // Wenn der Benutzer bereits eine explizite Wahl getroffen hat (localStorage gesetzt),
-  // diese bevorzugen – kein Überschreiben durch den Server.
-  const localValue = localStorage.getItem(WIZARD_MODE_KEY);
-  if (localValue !== null) {
-    const enabled = localValue === '1';
-    if (toggle) toggle.checked = enabled;
-    applyWizardMode(enabled);
-    return;
-  }
-
-  // Noch nie gesetzt (neuer Browser/Gerät) → Server als Startwert holen
-  apiRequest('/settings/ui.wizardMode')
-    .then(data => {
-      if (data && typeof data.value !== 'undefined') {
-        const serverEnabled = data.value === 'true' || data.value === true;
-        localStorage.setItem(WIZARD_MODE_KEY, serverEnabled ? '1' : '0');
-        if (toggle) toggle.checked = serverEnabled;
-        applyWizardMode(serverEnabled);
-      } else {
-        localStorage.setItem(WIZARD_MODE_KEY, '0');
-        applyWizardMode(false);
-      }
-    })
-    .catch(() => {
-      localStorage.setItem(WIZARD_MODE_KEY, '0');
-      applyWizardMode(false);
-    });
-}
-
 // ============================================
 // Live-Vorschau (Phase 4)
 // ============================================
@@ -7502,26 +7355,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initTypeCardPicker();
   applyCreativeMode(isCreativeMode());
   initLivePreview();
-  initWizardMode();
   const creativeModeToggle = document.getElementById('ui-creative-mode-toggle');
   if (creativeModeToggle) {
     creativeModeToggle.addEventListener('change', () => {
       applyCreativeMode(creativeModeToggle.checked);
-    });
-  }
-  const wizardModeToggle = document.getElementById('ui-wizard-mode-toggle');
-  if (wizardModeToggle) {
-    wizardModeToggle.addEventListener('change', async () => {
-      applyWizardMode(wizardModeToggle.checked);
-      // Auf Server speichern damit der Zustand nach Reload erhalten bleibt
-      try {
-        await apiRequest('/settings/bulk', {
-          method: 'POST',
-          body: JSON.stringify({ settings: { 'ui.wizardMode': wizardModeToggle.checked ? 'true' : 'false' } })
-        });
-      } catch (e) {
-        console.warn('Wizard-Modus konnte nicht auf Server gespeichert werden:', e);
-      }
     });
   }
 
