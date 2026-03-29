@@ -2572,16 +2572,23 @@ async function loadPosts() {
             ${post.contentType === 'text' ? `<input type="checkbox" class="bulk-select-cb" data-post-id="${post.id}" style="display:none; width:18px; height:18px; margin:0 4px 0 0; cursor:pointer; flex-shrink:0; accent-color:#4a7c4a;" onclick="event.stopPropagation(); updateBulkSelectionCount();" />` : `<span style="display:none; width:18px; margin:0 4px 0 0; flex-shrink:0;" class="bulk-select-cb-placeholder"></span>`}
             <div class="drag-handle" title="Ziehen zum Sortieren">⋮⋮</div>
             <div class="list-item-content clickable" data-action="edit" data-post-id="${post.id}" title="Klicken zum Bearbeiten">
-                <h3>${escapeHtml(post.title)}</h3>
-                <p>Typ: ${post.contentType} | Dauer: ${post.duration || 10}s | Priorität: ${post.priority || 0} | Status: ${post.isActive !== false ? t('common.active') : t('common.inactive')}</p>
-                <p style="font-size: 12px; color: #666;">▸ Zeitraum: ${zeitraum}</p>
-                <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  ${post.category ? `<span style="background: ${post.category.color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${post.category.icon || ''} ${post.category.name}</span>` : ''}
-                  ${post.displayMode === 'all' 
-                    ? '<span style="background: #007bff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Alle Displays</span>' 
+                <div class="post-item-header">
+                  <h3>${escapeHtml(post.title)}</h3>
+                  <span class="post-status-badge ${post.isActive !== false ? 'post-status-active' : 'post-status-inactive'}">${post.isActive !== false ? t('common.active') : t('common.inactive')}</span>
+                </div>
+                <div class="post-meta-row">
+                  <span class="post-meta-chip"><span class="chip-label">Typ</span> ${post.contentType}</span>
+                  <span class="post-meta-chip"><span class="chip-label">Dauer</span> ${post.duration || 10}s</span>
+                  <span class="post-meta-chip"><span class="chip-label">Priorität</span> ${post.priority || 0}</span>
+                  <span class="post-meta-chip post-meta-time">📅 ${zeitraum}</span>
+                </div>
+                <div class="post-tags-row">
+                  ${post.category ? `<span class="post-tag" style="background: ${post.category.color}; color: white;">${post.category.icon ? post.category.icon + ' ' : ''}${post.category.name}</span>` : ''}
+                  ${post.displayMode === 'all'
+                    ? '<span class="post-tag post-tag-all-displays">Alle Displays</span>'
                     : post.displays && post.displays.length > 0
-                      ? post.displays.map(d => `<span style="background: #6c757d; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${escapeHtml(d.name)}</span>`).join('')
-                      : '<span style="background: #dc3545; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">⚠ Keine Displays</span>'
+                      ? post.displays.map(d => `<span class="post-tag post-tag-display">${escapeHtml(d.name)}</span>`).join('')
+                      : '<span class="post-tag post-tag-no-display">⚠ Keine Displays</span>'
                   }
                 </div>
             </div>
