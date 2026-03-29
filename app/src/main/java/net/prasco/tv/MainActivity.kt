@@ -73,6 +73,17 @@ class MainActivity : AppCompatActivity(),
     private var lastOkPressTime = 0L
     private val DOUBLE_CLICK_THRESHOLD_MS = 600L
 
+    // Geheime D-Pad Kombination: Oben, Oben, Rechts, Links → Menü öffnen
+    private val SECRET_SEQUENCE = intArrayOf(
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_DPAD_UP,
+        KeyEvent.KEYCODE_DPAD_RIGHT,
+        KeyEvent.KEYCODE_DPAD_LEFT
+    )
+    private var secretSequenceIndex = 0
+    private var lastSecretKeyTime = 0L
+    private val SECRET_SEQUENCE_TIMEOUT_MS = 2000L
+
     // Settings-Overlay
     private lateinit var settingsOverlay: FrameLayout
     private var isSettingsVisible = false
@@ -490,14 +501,34 @@ class MainActivity : AppCompatActivity(),
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_CENTER -> {
                 if (!isSettingsVisible) {
+                    // Geheime Sequenz: Oben, Oben, Rechts, Links → Menü öffnen
                     val now = System.currentTimeMillis()
-                    if (now - lastOkPressTime <= DOUBLE_CLICK_THRESHOLD_MS) {
-                        // Doppelklick: Display neu laden
-                        lastOkPressTime = 0L
-                        runOnUiThread { webView.reload() }
-                        return true
+                    if (now - lastSecretKeyTime > SECRET_SEQUENCE_TIMEOUT_MS) {
+                        secretSequenceIndex = 0
                     }
-                    lastOkPressTime = now
+                    if (keyCode == SECRET_SEQUENCE[secretSequenceIndex]) {
+                        secretSequenceIndex++
+                        lastSecretKeyTime = now
+                        if (secretSequenceIndex >= SECRET_SEQUENCE.size) {
+                            secretSequenceIndex = 0
+                            showSettingsOverlay()
+                            return true
+                        }
+                    } else {
+                        // Sequenz zurücksetzen, aber aktuellen Key nochmal prüfen
+                        secretSequenceIndex = if (keyCode == SECRET_SEQUENCE[0]) 1 else 0
+                        lastSecretKeyTime = now
+                    }
+
+                    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+                        if (now - lastOkPressTime <= DOUBLE_CLICK_THRESHOLD_MS) {
+                            // Doppelklick: Display neu laden
+                            lastOkPressTime = 0L
+                            runOnUiThread { webView.reload() }
+                            return true
+                        }
+                        lastOkPressTime = now
+                    }
                     injectDPadEvent(keyCode)
                     return true
                 }
