@@ -3935,8 +3935,8 @@ async function applyBlendTransition(container, renderFn, blendEffect) {
   const effect = (blendEffect && blendEffect !== '') ? blendEffect : getNextBlendEffect();
 
   // Direkt aus CSS bekannte Dauer (sync mit display.css)
-  const OUT_MS = 450;
-  const IN_MS  = 550;
+  const OUT_MS = 300;
+  const IN_MS  = 400;
 
   // Inline-Stil und alte Blend-Klassen bereinigen (inkl. blend-done)
   container.style.animation = '';

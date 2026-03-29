@@ -3,10 +3,10 @@ module.exports = {
     {
       name: 'prasco',
       script: './dist/server.js',
-      instances: 1, // Nur 1 Instanz für RPi3 (kein Cluster wegen 1GB RAM)
+      instances: 1,
       exec_mode: 'fork',
-      max_memory_restart: '400M', // Restart bei >400MB (RPi3 hat nur 1GB total)
-      node_args: '--max-old-space-size=512', // Begrenze Node.js Heap auf 512MB
+      max_memory_restart: '1G',
+      node_args: '--max-old-space-size=4096',
       env: {
         NODE_ENV: 'production',
         PORT: 8443,

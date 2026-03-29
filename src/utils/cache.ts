@@ -1,13 +1,11 @@
 import NodeCache from 'node-cache';
 import { logger } from './logger';
 
-// Cache-Konfiguration für Raspberry Pi 3
-// Kurze TTL wegen begrenztem RAM
+// Cache-Konfiguration
 const cache = new NodeCache({
   stdTTL: 300, // 5 Minuten Standard-TTL
-  checkperiod: 60, // Prüfe jede Minute auf abgelaufene Keys
-  useClones: false, // Performance: Keine Klone erstellen
-  maxKeys: 100, // Max 100 Cache-Einträge
+  checkperiod: 120,
+  useClones: false,
 });
 
 // Cache-Statistiken für Monitoring

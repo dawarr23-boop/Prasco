@@ -1311,14 +1311,14 @@ body {
 .blend-transition-in {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
-  animation-duration: 0.55s;
+  animation-duration: 0.4s;
   will-change: transform, opacity;
 }
 
 .blend-transition-out {
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   animation-fill-mode: both;
-  animation-duration: 0.45s;
+  animation-duration: 0.3s;
   will-change: transform, opacity;
 }
 

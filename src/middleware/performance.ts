@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Caching-Middleware für statische Ressourcen
- * Optimiert für Raspberry Pi 3
  */
 export const cacheControl = (maxAge: number = 86400) => {
   return (req: Request, res: Response, next: NextFunction) => {
