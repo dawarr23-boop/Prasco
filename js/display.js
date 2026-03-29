@@ -813,94 +813,89 @@ async function renderNewsWidget() {
       } catch { return ''; }
     }
 
-    // --- 4-Phasen-Rotation (localStorage) ---
-    // Zyklus:
-    //   Phase 0 (Vollwechsel): W-featured, W-normalA, L-normalB (alle neu)  → phase=1
-    //   Phase 1: neues W-featured, A+B unverändert                          → phase=2
-    //   Phase 2: neues W-featured, altes featured→normalA, B unverändert    → phase=3
-    //   Phase 3: neues W-featured, altes featured→normalA, neues L-normalB  → phase=0
+    function isBreaking(item) {
+      if (!item?.pubDate) return false;
+      return (Date.now() - new Date(item.pubDate).getTime()) < 30 * 60 * 1000;
+    }
+
+    // Entfernt typische Quellen-Attribution am Ende ("Von ...", "Mehr dazu")
+    function cleanDesc(desc) {
+      if (!desc) return '';
+      return desc
+        .replace(/\s*Von\s+[\w\s]+\.?\s*$/, '')
+        .replace(/\s*Mehr dazu.*$/i, '')
+        .trim();
+    }
+
     function storyAt(arr, idx) {
       if (!arr || arr.length === 0) return null;
       return arr[((idx % arr.length) + arr.length) % arr.length];
     }
 
+    // Rotation: pro Aufruf rückt jeder Pointer um 1 weiter
     let state = null;
     try { state = JSON.parse(localStorage.getItem('newsRotationState') || 'null'); } catch {}
-
-    let featured, normalA, normalB;
-
-    if (!state || typeof state.phase !== 'number') {
-      // Erster Start → Phase 0 ausführen
-      featured = storyAt(world, 0);
-      normalA   = storyAt(world, 1);
-      normalB   = storyAt(local, 0);
-      state = { phase: 1, featured, normalA, normalB, worldPtr: 2 % (world.length || 1), localPtr: 1 % (local.length || 1) };
-    } else {
-      const wPtr = state.worldPtr || 0;
-      const lPtr = state.localPtr || 0;
-      const ph   = state.phase;
-
-      if (ph === 1) {
-        // Neues featured, A und B unverändert
-        featured = storyAt(world, wPtr);
-        normalA  = state.normalA;
-        normalB  = state.normalB;
-        state = { phase: 2, featured, normalA, normalB,
-          worldPtr: (wPtr + 1) % (world.length || 1), localPtr: lPtr };
-
-      } else if (ph === 2) {
-        // Neues featured, altes featured → normalA, B unverändert
-        featured = storyAt(world, wPtr);
-        normalA  = state.featured;
-        normalB  = state.normalB;
-        state = { phase: 3, featured, normalA, normalB,
-          worldPtr: (wPtr + 1) % (world.length || 1), localPtr: lPtr };
-
-      } else if (ph === 3) {
-        // Neues featured, altes featured → normalA, neues local → normalB
-        featured = storyAt(world, wPtr);
-        normalA  = state.featured;
-        normalB  = storyAt(local, lPtr);
-        state = { phase: 0, featured, normalA, normalB,
-          worldPtr: (wPtr + 1) % (world.length || 1),
-          localPtr: (lPtr + 1) % (local.length || 1) };
-
-      } else {
-        // Phase 0: Vollwechsel – drei neue Geschichten
-        featured = storyAt(world, wPtr);
-        normalA  = storyAt(world, (wPtr + 1) % (world.length || 1));
-        normalB  = storyAt(local, lPtr);
-        state = { phase: 1, featured, normalA, normalB,
-          worldPtr: (wPtr + 2) % (world.length || 1),
-          localPtr: (lPtr + 1) % (local.length || 1) };
-      }
+    if (!state || typeof state.wPtr !== 'number') {
+      state = { wPtr: 0, lPtr: 0 };
     }
+    const wPtr = state.wPtr;
+    const lPtr = state.lPtr;
 
-    try { localStorage.setItem('newsRotationState', JSON.stringify(state)); } catch {}
+    // 1 Feature-Story (Topthema) + 3 kompakte Meldungen (2× World, 1× Local)
+    const featured  = storyAt(world, wPtr);
+    const compacts  = [
+      storyAt(world, (wPtr + 1) % (world.length || 1)),
+      storyAt(world, (wPtr + 2) % (world.length || 1)),
+      storyAt(local, lPtr),
+    ].filter(Boolean);
 
-    function buildCard(item, isLead) {
-      if (!item) return '';
-      const age = formatAge(item.pubDate);
-      const sourceLabel = item.source || '';
-      return `<div class="news-card${isLead ? ' news-card-lead' : ''}">
+    try { localStorage.setItem('newsRotationState', JSON.stringify({
+      wPtr: (wPtr + 1) % (world.length || 1),
+      lPtr: (lPtr + 1) % (local.length || 1),
+    })); } catch {}
+
+    if (!featured) return [];
+
+    const featDesc    = cleanDesc(featured.description);
+    const featAge     = formatAge(featured.pubDate);
+    const featBreak   = isBreaking(featured);
+
+    const featureHtml = `
+      <div class="news-feature">
         <div class="news-card-meta">
-          <span class="news-source">${sourceLabel}</span>
+          ${featBreak ? '<span class="news-breaking">AKTUELL</span>' : ''}
+          <span class="news-source">${featured.source || ''}</span>
+          ${featAge ? `<span class="news-age">${featAge}</span>` : ''}
+        </div>
+        <div class="news-feature-title">${featured.title || ''}</div>
+        ${featDesc ? `<div class="news-feature-desc">${featDesc}</div>` : ''}
+      </div>`;
+
+    const compactHtml = compacts.map(item => {
+      const desc     = cleanDesc(item.description);
+      const age      = formatAge(item.pubDate);
+      const breaking = isBreaking(item);
+      return `<div class="news-compact-card">
+        <div class="news-card-meta">
+          ${breaking ? '<span class="news-breaking news-breaking-dot">●</span>' : ''}
+          <span class="news-source">${item.source || ''}</span>
           ${age ? `<span class="news-age">${age}</span>` : ''}
         </div>
-        <div class="news-title">${item.title || ''}</div>
-        ${isLead && item.description ? `<div class="news-desc">${item.description}</div>` : ''}
+        <div class="news-compact-title">${item.title || ''}</div>
+        ${desc ? `<div class="news-compact-desc">${desc}</div>` : ''}
       </div>`;
-    }
+    }).join('');
 
     const slideHtml = `<div class="news-screen">
       <div class="news-screen-header">
         <span class="news-header-icon">📰</span>
         <span class="news-header-title">Nachrichten</span>
       </div>
-      <div class="news-grid">
-        ${buildCard(featured, true)}
-        ${buildCard(normalA, false)}
-        ${buildCard(normalB, false)}
+      <div class="news-detail-layout">
+        ${featureHtml}
+        <div class="news-compact-row">
+          ${compactHtml}
+        </div>
       </div>
     </div>`;
 
