@@ -160,6 +160,8 @@ const translations = {
     'settings.backup.restore': 'Backup wiederherstellen',
     'settings.backup.restoreDesc': 'Importiert Beiträge aus einer Backup-Datei. Vorhandene Beiträge mit gleichem Titel und Typ werden übersprungen.',
     'settings.backup.import': '⬆️ Backup importieren',
+    'settings.autoScaleContent': 'Inhalt automatisch skalieren',
+    'settings.autoScaleContentHint': 'Verkleinert Beiträge (Bild, HTML) automatisch, wenn der Inhalt nicht vollständig in die Anzeigefläche passt.',
 
     // App Info
     'appInfo.title': 'Signature Screen für Unternehmen und Organisationen',
@@ -624,6 +626,8 @@ const translations = {
     'settings.backup.restore': 'Restore Backup',
     'settings.backup.restoreDesc': 'Imports posts from a backup file. Existing posts with the same title and type are skipped.',
     'settings.backup.import': '⬆️ Import Backup',
+    'settings.autoScaleContent': 'Auto-scale content',
+    'settings.autoScaleContentHint': 'Automatically shrinks posts (image, HTML) when the content does not fully fit the display area.',
 
     // App Info
     'appInfo.title': 'Signature Screen for Companies and Organizations',
@@ -1086,6 +1090,8 @@ const translations = {
     'settings.backup.restore': 'Ripristina Backup',
     'settings.backup.restoreDesc': 'Importa articoli da un file di backup. Gli articoli esistenti con lo stesso titolo e tipo vengono saltati.',
     'settings.backup.import': '⬆️ Importa Backup',
+    'settings.autoScaleContent': 'Ridimensionamento automatico',
+    'settings.autoScaleContentHint': 'Riduce automaticamente i post (immagine, HTML) quando il contenuto non rientra completamente nell\'area di visualizzazione.',
 
     // App Info
     'appInfo.title': 'Signature Screen per Aziende e Organizzazioni',
@@ -6378,7 +6384,8 @@ window.addEventListener('load', async () => {
           transitionsExternalOnly: data['display.transitionsExternalOnly'],
           liveDataIntervalMinutes: data['display.liveDataIntervalMinutes'],
           liveDataSlideDuration: data['display.liveDataSlideDuration'],
-          showPostCounter: data['display.showPostCounter']
+          showPostCounter: data['display.showPostCounter'],
+          autoScaleContent: data['display.autoScaleContent']
         };
       } else {
         // Fallback zu localStorage
@@ -6409,6 +6416,10 @@ window.addEventListener('load', async () => {
       const showPostCounterEl = document.getElementById('show-post-counter');
       if (showPostCounterEl && settings.showPostCounter !== undefined) {
         showPostCounterEl.checked = (settings.showPostCounter === 'true' || settings.showPostCounter === true);
+      }
+      const autoScaleContentEl = document.getElementById('auto-scale-content');
+      if (autoScaleContentEl && settings.autoScaleContent !== undefined) {
+        autoScaleContentEl.checked = (settings.autoScaleContent === 'true' || settings.autoScaleContent === true);
       }
       const liveDataIntervalEl = document.getElementById('live-data-interval');
       const liveDataSlideDurationEl = document.getElementById('live-data-slide-duration');
@@ -6446,6 +6457,10 @@ window.addEventListener('load', async () => {
           const showPostCounterFb = document.getElementById('show-post-counter');
           if (showPostCounterFb && settings.showPostCounter !== undefined) {
             showPostCounterFb.checked = (settings.showPostCounter === 'true' || settings.showPostCounter === true);
+          }
+          const autoScaleContentFb = document.getElementById('auto-scale-content');
+          if (autoScaleContentFb && settings.autoScaleContent !== undefined) {
+            autoScaleContentFb.checked = (settings.autoScaleContent === 'true' || settings.autoScaleContent === true);
           }
         }
       } catch (fallbackError) {
@@ -9351,6 +9366,7 @@ async function saveDisplaySettings() {
   const liveDataInterval = document.getElementById('live-data-interval');
   const liveDataSlideDuration = document.getElementById('live-data-slide-duration');
   const showPostCounter = document.getElementById('show-post-counter');
+  const autoScaleContent = document.getElementById('auto-scale-content');
 
   if (!refreshInterval || !defaultDuration || !blendEffectsEnabled || !transitionsExternalOnly) return;
 
@@ -9361,7 +9377,8 @@ async function saveDisplaySettings() {
     'display.transitionsExternalOnly': transitionsExternalOnly.checked ? 'true' : 'false',
     'display.liveDataIntervalMinutes': parseInt(liveDataInterval?.value) || 5,
     'display.liveDataSlideDuration': parseInt(liveDataSlideDuration?.value) || 20,
-    'display.showPostCounter': showPostCounter ? (showPostCounter.checked ? 'true' : 'false') : 'true'
+    'display.showPostCounter': showPostCounter ? (showPostCounter.checked ? 'true' : 'false') : 'true',
+    'display.autoScaleContent': autoScaleContent ? (autoScaleContent.checked ? 'true' : 'false') : 'false'
   };
 
   const result = await apiRequest('/settings/bulk', {

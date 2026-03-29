@@ -806,6 +806,14 @@ body {
   color: var(--prasco-black);
 }
 
+/* Wrapper für automatische Skalierung (Bild-/HTML-Posts) */
+.post-auto-scaler {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Category Badge */
 .category-badge {
   position: absolute;

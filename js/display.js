@@ -55,6 +55,7 @@ let displaySettings = {
   liveDataIntervalMinutes: 5, // Standard: Live-Daten alle 5 Minuten
   liveDataSlideDuration: 20, // Standard: 20 Sekunden pro Live-Slide
   showPostCounter: true, // Standard: Beitragsnummerierung anzeigen
+  autoScaleContent: false, // Standard: keine automatische Skalierung
 };
 
 // Prüfe ob Vorschau-Modus aktiv ist (iframe im Admin-Panel)
@@ -1099,6 +1100,9 @@ async function loadDisplaySettings() {
       }
       if (settings['display.showPostCounter'] !== undefined) {
         displaySettings.showPostCounter = (settings['display.showPostCounter'] === 'true' || settings['display.showPostCounter'] === true);
+      }
+      if (settings['display.autoScaleContent'] !== undefined) {
+        displaySettings.autoScaleContent = (settings['display.autoScaleContent'] === 'true' || settings['display.autoScaleContent'] === true);
       }
       
       console.log('Display-Einstellungen geladen:', displaySettings);
@@ -3475,6 +3479,27 @@ function autoScaleTextPost(container) {
   }));
 }
 
+// Automatische Skalierung für Bild-/HTML-Posts (opt-in via displaySettings.autoScaleContent)
+function autoScalePostContent(container) {
+  if (!displaySettings.autoScaleContent) return;
+  const scaler = container.querySelector('.post-auto-scaler');
+  if (!scaler) return;
+  scaler.style.zoom = '';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const cs = window.getComputedStyle(container);
+    const padH = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const padW = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const availH = container.clientHeight - padH;
+    const availW = container.clientWidth - padW;
+    const scalerH = scaler.scrollHeight;
+    const scalerW = scaler.scrollWidth;
+    if (scalerH > availH * 1.01 || scalerW > availW * 1.01) {
+      const scale = Math.min(availH / scalerH, availW / scalerW);
+      scaler.style.zoom = scale.toFixed(4);
+    }
+  }));
+}
+
 // Aktuellen Post anzeigen
 async function displayCurrentPost() {
   if (posts.length === 0) {
@@ -3561,9 +3586,11 @@ async function displayCurrentPost() {
       const imageContent = post.content && !post.content.startsWith('/uploads/') ? post.content : '';
       
       html = `
+                <div class="post-auto-scaler">
                 ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(post.title)}">` : ''}
                 ${imageContent ? `<p>${escapeHtml(imageContent)}</p>` : ''}
+                </div>
             `;
       break;
 
@@ -3703,8 +3730,10 @@ async function displayCurrentPost() {
 
     case 'html':
       html = `
+                <div class="post-auto-scaler">
                 ${post.showTitle === true ? `<h1${buildTitleStyle(post)}>${escapeHtml(post.title)}</h1>` : ''}
                 <div>${post.content || ''}</div>
+                </div>
             `;
       break;
 
@@ -3766,6 +3795,9 @@ async function displayCurrentPost() {
 
   // Auto-Skalierung: Text-Posts auf verfügbare Fläche einpassen
   if (container.classList.contains('type-text')) autoScaleTextPost(container);
+
+  // Auto-Skalierung: Bild- und HTML-Posts (opt-in)
+  autoScalePostContent(container);
 
   // Post-Fläche neu berechnen (Ticker kann sichtbar/versteckt sein)
   recalcPostArea();
