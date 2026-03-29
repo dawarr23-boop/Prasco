@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity(),
     private val DOUBLE_CLICK_THRESHOLD_MS = 600L
 
     // Geheime D-Pad Kombination: Oben, Oben, Rechts, Links → Menü öffnen
+    // Wird durch 20s Halten der OK-Taste entsperrt
     private val SECRET_SEQUENCE = intArrayOf(
         KeyEvent.KEYCODE_DPAD_UP,
         KeyEvent.KEYCODE_DPAD_UP,
@@ -83,6 +84,11 @@ class MainActivity : AppCompatActivity(),
     private var secretSequenceIndex = 0
     private var lastSecretKeyTime = 0L
     private val SECRET_SEQUENCE_TIMEOUT_MS = 2000L
+    private var secretSequenceUnlocked = false
+    private var secretUnlockTime = 0L
+    private val SECRET_UNLOCK_HOLD_MS = 20_000L   // OK 20s halten → entsperrt
+    private val SECRET_UNLOCK_WINDOW_MS = 10_000L  // 10s Zeit zum Eingeben der Sequenz
+    private var okPressStartTime = 0L
 
     // Settings-Overlay
     private lateinit var settingsOverlay: FrameLayout
@@ -494,35 +500,60 @@ class MainActivity : AppCompatActivity(),
                 // Kurzdruck blockieren (Kiosk)
                 return true
             }
-            // D-Pad Tasten an WebView weiterleiten
+            // D-Pad Richtungstasten → WebView; wenn entsperrt: geheime Sequenz prüfen
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_DPAD_LEFT,
-            KeyEvent.KEYCODE_DPAD_RIGHT,
-            KeyEvent.KEYCODE_DPAD_CENTER -> {
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (!isSettingsVisible) {
-                    // Geheime Sequenz: Oben, Oben, Rechts, Links → Menü öffnen
                     val now = System.currentTimeMillis()
-                    if (now - lastSecretKeyTime > SECRET_SEQUENCE_TIMEOUT_MS) {
+                    // Entsperr-Fenster abgelaufen?
+                    if (secretSequenceUnlocked && now - secretUnlockTime > SECRET_UNLOCK_WINDOW_MS) {
+                        secretSequenceUnlocked = false
                         secretSequenceIndex = 0
                     }
-                    if (keyCode == SECRET_SEQUENCE[secretSequenceIndex]) {
-                        secretSequenceIndex++
-                        lastSecretKeyTime = now
-                        if (secretSequenceIndex >= SECRET_SEQUENCE.size) {
+                    if (secretSequenceUnlocked) {
+                        if (now - lastSecretKeyTime > SECRET_SEQUENCE_TIMEOUT_MS) {
                             secretSequenceIndex = 0
-                            showSettingsOverlay()
+                        }
+                        if (keyCode == SECRET_SEQUENCE[secretSequenceIndex]) {
+                            secretSequenceIndex++
+                            lastSecretKeyTime = now
+                            if (secretSequenceIndex >= SECRET_SEQUENCE.size) {
+                                secretSequenceIndex = 0
+                                secretSequenceUnlocked = false
+                                showSettingsOverlay()
+                                return true
+                            }
+                        } else {
+                            secretSequenceIndex = if (keyCode == SECRET_SEQUENCE[0]) 1 else 0
+                            lastSecretKeyTime = now
+                        }
+                    }
+                    injectDPadEvent(keyCode)
+                    return true
+                }
+            }
+            // OK-Taste: 20s Halten → Sequenz-Eingabe entsperren; Doppelklick → Neu laden
+            KeyEvent.KEYCODE_DPAD_CENTER -> {
+                if (!isSettingsVisible) {
+                    val now = System.currentTimeMillis()
+                    if (event?.repeatCount == 0) {
+                        okPressStartTime = now
+                    }
+                    // 20s Langdruck → Sequenz-Eingabe aktivieren (einmalig auslösen)
+                    if (event != null && event.repeatCount > 0 && !secretSequenceUnlocked) {
+                        val held = now - okPressStartTime
+                        if (held >= SECRET_UNLOCK_HOLD_MS) {
+                            secretSequenceUnlocked = true
+                            secretUnlockTime = now
+                            secretSequenceIndex = 0
                             return true
                         }
-                    } else {
-                        // Sequenz zurücksetzen, aber aktuellen Key nochmal prüfen
-                        secretSequenceIndex = if (keyCode == SECRET_SEQUENCE[0]) 1 else 0
-                        lastSecretKeyTime = now
                     }
-
-                    if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+                    // Kurzdruck: Doppelklick → Display neu laden
+                    if (event?.repeatCount == 0) {
                         if (now - lastOkPressTime <= DOUBLE_CLICK_THRESHOLD_MS) {
-                            // Doppelklick: Display neu laden
                             lastOkPressTime = 0L
                             runOnUiThread { webView.reload() }
                             return true
@@ -540,6 +571,10 @@ class MainActivity : AppCompatActivity(),
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             backPressStartTime = 0
+            return true
+        }
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
+            okPressStartTime = 0
             return true
         }
         return super.onKeyUp(keyCode, event)
