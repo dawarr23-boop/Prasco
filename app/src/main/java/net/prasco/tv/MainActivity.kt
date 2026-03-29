@@ -608,9 +608,11 @@ class MainActivity : AppCompatActivity(),
             backPressStartTime = 0
             return true
         }
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
+        // OK-Taste: nur konsumieren wenn Settings NICHT offen ist.
+        // Wenn Settings offen: KEY_UP durchlassen, damit fokussierte Buttons klicken können.
+        if (!isSettingsVisible && (keyCode == KeyEvent.KEYCODE_DPAD_CENTER ||
             keyCode == KeyEvent.KEYCODE_ENTER ||
-            keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER) {
+            keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER)) {
             okPressStartTime = 0
             return true
         }

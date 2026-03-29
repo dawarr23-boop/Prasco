@@ -8,6 +8,8 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Body
 import retrofit2.http.Path
 import retrofit2.http.Query
 import java.security.SecureRandom
@@ -69,6 +71,10 @@ interface PrascoApi {
     /** Einzelne Einstellung */
     @GET("/api/settings/{key}")
     suspend fun getSetting(@Path("key") key: String): SettingDto
+
+    /** Mehrere Einstellungen gleichzeitig speichern */
+    @POST("/api/settings/bulk")
+    suspend fun saveSettings(@Body settings: Map<String, @JvmSuppressWildcards Any>): Map<String, Any>
 
     // ============ Health ============
 

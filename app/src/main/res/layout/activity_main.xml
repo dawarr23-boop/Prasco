@@ -223,6 +223,14 @@
                 android:textSize="15sp" />
 
             <Button
+                android:id="@+id/btnSettingsAutoScale"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginBottom="8dp"
+                android:focusable="true"
+                android:textSize="15sp" />
+
+            <Button
                 android:id="@+id/btnSettingsClose"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"

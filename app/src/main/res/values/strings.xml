@@ -86,6 +86,7 @@
     <string name="settings_change_display">Change Display</string>
     <string name="settings_clear_cache_btn">Clear Cache</string>
     <string name="settings_autostart">Autostart</string>
+    <string name="settings_auto_scale">Auto-Scale</string>
     <string name="settings_close">Close</string>
 
     <!-- Secret sequence prompt -->

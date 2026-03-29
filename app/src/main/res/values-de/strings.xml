@@ -86,6 +86,7 @@
     <string name="settings_change_display">Display ändern</string>
     <string name="settings_clear_cache_btn">Cache leeren</string>
     <string name="settings_autostart">Autostart</string>
+    <string name="settings_auto_scale">Autoskalierung</string>
     <string name="settings_close">Schließen</string>
 
     <!-- Geheimsequenz-Aufforderung -->
