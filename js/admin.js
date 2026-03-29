@@ -2171,6 +2171,7 @@ function navigateTo(section) {
       if (!ssoConfigLoaded) loadSSOConfiguration();
       loadSystemMode(); // Lade System-Modus Einstellungen
       loadGeneralSettings(); // Lade allgemeine Systemeinstellungen
+      initWizardMode(); // Wizard-Toggle mit aktuellem Server-Zustand synchronisieren
     }
   }
 }
@@ -2774,7 +2775,8 @@ async function showPostForm() {
   // Kreativ-Modus anwenden
   applyCreativeMode(isCreativeMode());
   selectTypeCard('text');
-  if (isWizardMode()) wizardGotoStep(1);
+  // Wizard-Modus vollständig neu initialisieren (behebt "noch aktiv nach Deaktivierung")
+  applyWizardMode(isWizardMode());
 
   await loadCategoryDropdown();
   await loadDisplayCheckboxes();
@@ -2998,7 +3000,16 @@ async function editPost(id) {
   document.getElementById('post-type').value = post.contentType || 'text';
   // Kreativ-Modus: passende Kachel markieren
   if (isCreativeMode()) selectTypeCard(post.contentType || 'text');
-  if (isWizardMode()) wizardGotoStep(1);
+  // Beim Bearbeiten: Wizard IMMER ausblenden – alle Felder direkt anzeigen
+  {
+    const indicator = document.getElementById('wizard-indicator');
+    const nav = document.getElementById('wizard-nav');
+    const formActions = document.getElementById('post-form-actions');
+    if (indicator) indicator.style.display = 'none';
+    if (nav) nav.style.display = 'none';
+    if (formActions) formActions.style.display = '';
+    document.querySelectorAll('.wizard-step').forEach(s => { s.style.display = ''; });
+  }
   document.getElementById('post-content').value = post.content || '';
 
   // Display-Auswahl laden und setzen
@@ -7272,10 +7283,21 @@ function wizardPrev() {
 }
 
 function initWizardMode() {
-  // Sync the toggle state from localStorage
   const toggle = document.getElementById('ui-wizard-mode-toggle');
   if (toggle) toggle.checked = isWizardMode();
   applyWizardMode(isWizardMode());
+
+  // Server als Quelle der Wahrheit: async abrufen und ggf. korrigieren
+  apiRequest('/settings/ui.wizardMode')
+    .then(data => {
+      if (data && typeof data.value !== 'undefined') {
+        const serverEnabled = data.value === 'true' || data.value === true;
+        // Server-Wert hat Vorrang vor localStorage
+        localStorage.setItem(WIZARD_MODE_KEY, serverEnabled ? '1' : '0');
+        applyWizardMode(serverEnabled);
+      }
+    })
+    .catch(() => { /* kein Server-Eintrag vorhanden, localStorage-Wert behalten */ });
 }
 
 // ============================================
@@ -7475,8 +7497,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const wizardModeToggle = document.getElementById('ui-wizard-mode-toggle');
   if (wizardModeToggle) {
-    wizardModeToggle.addEventListener('change', () => {
+    wizardModeToggle.addEventListener('change', async () => {
       applyWizardMode(wizardModeToggle.checked);
+      // Auf Server speichern damit der Zustand nach Reload erhalten bleibt
+      try {
+        await apiRequest('/settings/bulk', {
+          method: 'POST',
+          body: JSON.stringify({ settings: { 'ui.wizardMode': wizardModeToggle.checked ? 'true' : 'false' } })
+        });
+      } catch (e) {
+        console.warn('Wizard-Modus konnte nicht auf Server gespeichert werden:', e);
+      }
     });
   }
 
