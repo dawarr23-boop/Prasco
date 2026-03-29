@@ -87,4 +87,9 @@
     <string name="settings_clear_cache_btn">Cache leeren</string>
     <string name="settings_autostart">Autostart</string>
     <string name="settings_close">Schließen</string>
+
+    <!-- Geheimsequenz-Aufforderung -->
+    <string name="secret_sequence_title">Sequenz eingeben</string>
+    <string name="secret_sequence_hint">Geheimsequenz mit dem D-Pad eingeben</string>
+    <string name="secret_sequence_arrows">&#8593;  &#8593;  &#8594;  &#8592;</string>
 </resources>

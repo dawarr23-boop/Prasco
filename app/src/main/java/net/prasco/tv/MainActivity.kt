@@ -94,6 +94,10 @@ class MainActivity : AppCompatActivity(),
     private lateinit var settingsOverlay: FrameLayout
     private var isSettingsVisible = false
 
+    // Sequenz-Prompt-Overlay
+    private lateinit var sequencePromptOverlay: FrameLayout
+    private val sequencePromptHideRunnable = Runnable { hideSequencePrompt() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -155,6 +159,9 @@ class MainActivity : AppCompatActivity(),
         // Settings-Overlay initialisieren
         settingsOverlay = findViewById(R.id.settingsOverlay)
         setupSettingsOverlay()
+
+        // Sequenz-Prompt initialisieren
+        sequencePromptOverlay = findViewById(R.id.sequencePromptOverlay)
 
         isViewsInitialized = true
     }
@@ -236,6 +243,19 @@ class MainActivity : AppCompatActivity(),
     private fun hideSettingsOverlay() {
         settingsOverlay.visibility = View.GONE
         isSettingsVisible = false
+    }
+
+    private fun showSequencePrompt() {
+        handler.removeCallbacks(sequencePromptHideRunnable)
+        runOnUiThread { sequencePromptOverlay.visibility = View.VISIBLE }
+        handler.postDelayed(sequencePromptHideRunnable, SECRET_UNLOCK_WINDOW_MS)
+    }
+
+    private fun hideSequencePrompt() {
+        handler.removeCallbacks(sequencePromptHideRunnable)
+        runOnUiThread { sequencePromptOverlay.visibility = View.GONE }
+        secretSequenceUnlocked = false
+        secretSequenceIndex = 0
     }
 
     private fun setupWebView() {
@@ -509,8 +529,7 @@ class MainActivity : AppCompatActivity(),
                     val now = System.currentTimeMillis()
                     // Entsperr-Fenster abgelaufen?
                     if (secretSequenceUnlocked && now - secretUnlockTime > SECRET_UNLOCK_WINDOW_MS) {
-                        secretSequenceUnlocked = false
-                        secretSequenceIndex = 0
+                        hideSequencePrompt()
                     }
                     if (secretSequenceUnlocked) {
                         if (now - lastSecretKeyTime > SECRET_SEQUENCE_TIMEOUT_MS) {
@@ -520,8 +539,7 @@ class MainActivity : AppCompatActivity(),
                             secretSequenceIndex++
                             lastSecretKeyTime = now
                             if (secretSequenceIndex >= SECRET_SEQUENCE.size) {
-                                secretSequenceIndex = 0
-                                secretSequenceUnlocked = false
+                                hideSequencePrompt()
                                 showSettingsOverlay()
                                 return true
                             }
@@ -541,13 +559,14 @@ class MainActivity : AppCompatActivity(),
                     if (event?.repeatCount == 0) {
                         okPressStartTime = now
                     }
-                    // 20s Langdruck → Sequenz-Eingabe aktivieren (einmalig auslösen)
+                    // 20s Langdruck → Sequenz-Eingabe aktivieren + Prompt anzeigen
                     if (event != null && event.repeatCount > 0 && !secretSequenceUnlocked) {
                         val held = now - okPressStartTime
                         if (held >= SECRET_UNLOCK_HOLD_MS) {
                             secretSequenceUnlocked = true
                             secretUnlockTime = now
                             secretSequenceIndex = 0
+                            showSequencePrompt()
                             return true
                         }
                     }

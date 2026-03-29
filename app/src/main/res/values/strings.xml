@@ -87,4 +87,9 @@
     <string name="settings_clear_cache_btn">Clear Cache</string>
     <string name="settings_autostart">Autostart</string>
     <string name="settings_close">Close</string>
+
+    <!-- Secret sequence prompt -->
+    <string name="secret_sequence_title">Enter Sequence</string>
+    <string name="secret_sequence_hint">Enter the unlock sequence using the D-Pad</string>
+    <string name="secret_sequence_arrows">&#8593;  &#8593;  &#8594;  &#8592;</string>
 </resources>
