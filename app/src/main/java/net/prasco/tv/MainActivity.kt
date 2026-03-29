@@ -487,6 +487,19 @@ class MainActivity : AppCompatActivity(),
 
     // === D-Pad & Remote-Steuerung ===
 
+    /**
+     * dispatchKeyEvent wird VOR der WebView aufgerufen und fängt alle Tasten ab.
+     * onKeyDown kommt nach der View-Hierarchie und wird von der WebView blockiert.
+     */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            if (onKeyDown(event.keyCode, event)) return true
+        } else if (event.action == KeyEvent.ACTION_UP) {
+            if (onKeyUp(event.keyCode, event)) return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         when (keyCode) {
             // Menu-Taste → Settings-Overlay direkt öffnen
