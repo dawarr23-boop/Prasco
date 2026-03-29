@@ -1470,18 +1470,29 @@ async function getOrCreateDeviceToken(displayIdentifier) {
 
   // Geräteinformationen sammeln
   const ua = navigator.userAgent;
+  // Reihenfolge wichtig: Edge/Edg vor Chrome prüfen, da Edge-UA auch "Chrome" enthält
   let deviceModel = 'Web Browser';
-  if (ua.includes('Chrome')) deviceModel = 'Chrome';
+  if (ua.includes('Edg/') || ua.includes('Edge/')) deviceModel = 'Edge';
   else if (ua.includes('Firefox')) deviceModel = 'Firefox';
+  else if (ua.includes('Chrome')) deviceModel = 'Chrome';
   else if (ua.includes('Safari')) deviceModel = 'Safari';
-  else if (ua.includes('Edge')) deviceModel = 'Edge';
+
+  // OS bestimmen – navigator.platform ist deprecated und liefert auf modernen Systemen oft leeren Wert
+  let detectedOs = 'Unknown';
+  if (/Windows NT/.test(ua))          detectedOs = 'Windows';
+  else if (/Android/.test(ua))        detectedOs = 'Android';
+  else if (/iPad|iPhone|iPod/.test(ua)) detectedOs = 'iOS';
+  else if (/Macintosh/.test(ua))      detectedOs = 'macOS';
+  else if (/Linux/.test(ua))          detectedOs = 'Linux';
+  // ARM erkennen
+  if (/aarch64|arm64|armv/.test(ua.toLowerCase())) detectedOs += ' ARM';
 
   try {
     const params = new URLSearchParams({
       serialNumber: serialNumber,
       clientType: 'web',
-      deviceModel: deviceModel + ' (' + navigator.platform + ')',
-      deviceOsVersion: navigator.platform || 'Unknown',
+      deviceModel: deviceModel + ' (' + detectedOs + ')',
+      deviceOsVersion: detectedOs,
       appVersion: 'web-1.0',
     });
     if (displayIdentifier) {
