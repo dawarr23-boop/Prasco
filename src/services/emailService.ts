@@ -87,6 +87,10 @@ export async function sendMeetingNotification(
         user: config.user,
         pass: config.pass,
       },
+      tls: {
+        // mail.prasco.de verwendet ein selbstsigniertes Zertifikat
+        rejectUnauthorized: false,
+      },
     });
 
     const contentSnippet = payload.postContent
