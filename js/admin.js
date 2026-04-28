@@ -379,8 +379,10 @@ const translations = {
     'liveData.news.description': 'Aktuelle Nachrichten aus RSS-Feeds (Tagesschau, SPIEGEL, lokale Quellen) auf dem Display anzeigen.',
     'liveData.news.enable': 'Nachrichten auf Display anzeigen',
     'liveData.news.sources': 'Nachrichtenquellen',
-    'liveData.news.world': 'Weltnachrichten (Tagesschau, Spiegel)',
+    'liveData.news.world': 'Weltnachrichten (Tagesschau, Spiegel, Zeit, Welt, SZ)',
     'liveData.news.local': 'Lokale Nachrichten (WA Ahlen)',
+    'liveData.news.sport': 'Sport (Sportschau)',
+    'liveData.news.tech': 'Technik (Heise Online)',
     'liveData.news.previewTitle': 'Nachrichten-Vorschau',
     'liveData.news.previewHint': 'Klicken Sie auf "Vorschau" um aktuelle Nachrichten zu laden.',
     'liveData.cache.title': 'Cache-Verwaltung',
@@ -841,8 +843,10 @@ const translations = {
     'liveData.news.description': 'Show current news from RSS feeds (Tagesschau, SPIEGEL, local sources) on the display.',
     'liveData.news.enable': 'Show news on display',
     'liveData.news.sources': 'News sources',
-    'liveData.news.world': 'World news (Tagesschau, Spiegel)',
+    'liveData.news.world': 'World news (Tagesschau, Spiegel, Zeit, Welt, SZ)',
     'liveData.news.local': 'Local news (WA Ahlen)',
+    'liveData.news.sport': 'Sports (Sportschau)',
+    'liveData.news.tech': 'Tech (Heise Online)',
     'liveData.news.previewTitle': 'News Preview',
     'liveData.news.previewHint': 'Click "Preview" to load current news.',
     'liveData.cache.title': 'Cache Management',
@@ -1305,8 +1309,10 @@ const translations = {
     'liveData.news.description': 'Mostra notizie aggiornate da feed RSS (Tagesschau, SPIEGEL, fonti locali) sul display.',
     'liveData.news.enable': 'Mostra notizie sul display',
     'liveData.news.sources': 'Fonti di notizie',
-    'liveData.news.world': 'Notizie mondiali (Tagesschau, Spiegel)',
+    'liveData.news.world': 'Notizie mondiali (Tagesschau, Spiegel, Zeit, Welt, SZ)',
     'liveData.news.local': 'Notizie locali (WA Ahlen)',
+    'liveData.news.sport': 'Sport (Sportschau)',
+    'liveData.news.tech': 'Tecnologia (Heise Online)',
     'liveData.news.previewTitle': 'Anteprima Notizie',
     'liveData.news.previewHint': 'Fai clic su "Anteprima" per caricare le notizie.',
     'liveData.cache.title': 'Gestione Cache',
@@ -2174,7 +2180,11 @@ function navigateTo(section) {
 // ============================================
 async function updateDashboardStats() {
   try {
-    // Verwende bereits geladene Daten aus dem Cache statt erneut zu laden
+    // Falls postsCache noch nicht geladen, jetzt laden
+    if (postsCache.length === 0) {
+      const postsResponse = await apiRequest('/posts?limit=100&sort=priority&order=DESC');
+      postsCache = postsResponse?.data || [];
+    }
     const posts = postsCache || [];
     const categories = categoriesCache || [];
     const displays = displaysCache || [];
@@ -2188,7 +2198,8 @@ async function updateDashboardStats() {
     document.getElementById('scheduled-posts').textContent = scheduledPosts;
     document.getElementById('total-categories').textContent = categories.length;
     document.getElementById('total-displays').textContent = displays.length;
-    document.getElementById('total-media').textContent = '0'; // TODO: Media API
+    const mediaCount = posts.filter(p => p.contentType === 'image' || p.contentType === 'video').length;
+    document.getElementById('total-media').textContent = mediaCount;
   } catch (error) {
     console.error('Dashboard Stats Fehler:', error);
     // Fallback auf 0
@@ -2273,6 +2284,7 @@ let aiGeneratedMediaId = null; // Von DALL-E 3 generiertes Media-Objekt
 let lastUploadedImageUrl = null; // Zuletzt hochgeladenes Bild für KI-Analyse
 let aiAssistantLastResult = null; // Letzter KI-Assistent-Vorschlag
 let postsCache = [];
+let activePostTypeFilter = null; // 'media' = nur Bild/Video-Posts
 let draggedItem = null;
 let currentBackgroundMusicUrl = null; // Aktuelle Hintergrundmusik-URL für Bearbeitung
 let rteEditorEl = null; // Native Rich-Text-Editor Instanz
@@ -2553,9 +2565,24 @@ async function loadPosts() {
       return;
     }
 
+    const filteredPosts = activePostTypeFilter === 'media'
+      ? postsCache.filter(p => p.contentType === 'image' || p.contentType === 'video')
+      : postsCache;
+
+    // Medien-Filter-Banner anzeigen/entfernen
+    const existingBanner = document.getElementById('post-type-filter-banner');
+    if (existingBanner) existingBanner.remove();
+    if (activePostTypeFilter === 'media') {
+      const banner = document.createElement('div');
+      banner.id = 'post-type-filter-banner';
+      banner.style.cssText = 'background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;font-size:0.9rem;';
+      banner.innerHTML = `<span>🖼️ Gefiltert: Bild- und Video-Beiträge (${filteredPosts.length})</span><button onclick="activePostTypeFilter=null;loadPosts();" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0 4px;" title="Filter entfernen">✕</button>`;
+      postsList.parentNode.insertBefore(banner, postsList);
+    }
+
     postsList.innerHTML =
       `<div class="drag-drop-hint">${t('hint.dragDropPosts')}</div>` +
-      postsCache
+      filteredPosts
         .map((post, index) => {
           // Zeitraum formatieren mit aktueller Sprache
           const locale = getCurrentLocale();
@@ -3111,6 +3138,9 @@ async function editPost(id) {
     // RTE-Inhalt setzen (nach updateUploadSectionVisibility, damit Editor initialisiert ist)
     rteEditorEl.innerHTML = post.content || '';
   }
+
+  // Vorschau direkt mit geladenen Bearbeitungsdaten aktualisieren
+  _schedulePreviewUpdate();
 }
 
 // Helper: Datum für datetime-local Input formatieren
@@ -3355,7 +3385,14 @@ function initRichTextEditor() {
   // Zeichenzähler auf RTE-Eingaben aktualieren
   editor.addEventListener('input', () => {
     if (window._updatePostCharCount) window._updatePostCharCount();
+    _schedulePreviewUpdate();
   });
+
+  // Sicherstellen, dass auch nicht-Input-Änderungen (z.B. per Kontextmenü/Paste)
+  // in der Live-Vorschau sichtbar werden.
+  editor.addEventListener('keyup', _schedulePreviewUpdate);
+  editor.addEventListener('paste', () => setTimeout(_schedulePreviewUpdate, 0));
+  editor.addEventListener('blur', _schedulePreviewUpdate);
 
   // Formatblock-Select
   const blockSelect = document.getElementById('rte-block');
@@ -3363,6 +3400,7 @@ function initRichTextEditor() {
     blockSelect.addEventListener('change', () => {
       editor.focus();
       document.execCommand('formatBlock', false, blockSelect.value);
+      setTimeout(_schedulePreviewUpdate, 0);
     });
   }
 
@@ -3373,6 +3411,7 @@ function initRichTextEditor() {
       if (!fontFamilySelect.value) return;
       editor.focus();
       document.execCommand('fontName', false, fontFamilySelect.value);
+      setTimeout(_schedulePreviewUpdate, 0);
     });
   }
 
@@ -3391,6 +3430,7 @@ function initRichTextEditor() {
         span.innerHTML = f.innerHTML;
         f.parentNode.replaceChild(span, f);
       });
+      setTimeout(_schedulePreviewUpdate, 0);
     });
   }
 
@@ -3403,6 +3443,7 @@ function initRichTextEditor() {
       e.preventDefault(); // Fokus im Editor behalten
       document.execCommand(btn.dataset.cmd, false, null);
       updateRteToolbarState();
+      setTimeout(_schedulePreviewUpdate, 0);
     });
   }
 
@@ -3416,6 +3457,7 @@ function initRichTextEditor() {
     fcInput.addEventListener('change', () => {
       editor.focus();
       document.execCommand('foreColor', false, fcInput.value);
+      setTimeout(_schedulePreviewUpdate, 0);
     });
     const fcLabel = fcInput.closest('.rte-color-lbl');
     if (fcLabel) {
@@ -3437,6 +3479,7 @@ function initRichTextEditor() {
     bgInput.addEventListener('change', () => {
       editor.focus();
       document.execCommand('hiliteColor', false, bgInput.value);
+      setTimeout(_schedulePreviewUpdate, 0);
     });
     const bgLabel = bgInput.closest('.rte-color-lbl');
     if (bgLabel) {
@@ -4603,6 +4646,9 @@ async function editDisplay(id) {
     clockStyleAnalog.checked = isAnalog;
     clockStyleDigital.checked = !isAnalog;
   }
+  const resolutionValue = display.resolution || 'fullhd';
+  const resolutionEl = document.querySelector(`input[name="resolution"][value="${resolutionValue}"]`);
+  if (resolutionEl) resolutionEl.checked = true;
   document.getElementById('display-form').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -5185,7 +5231,8 @@ async function handleDisplayFormSubmit(e) {
     tickerNews: document.getElementById('display-tickerNews')?.checked === true,
     tickerWeather: document.getElementById('display-tickerWeather')?.checked === true,
     showRainRadar: document.getElementById('display-showRainRadar')?.checked === true,
-    clockStyle: document.querySelector('input[name="clockStyle"]:checked')?.value || 'digital',
+    clockStyle: formData.get('clockStyle') || 'digital',
+    resolution: formData.get('resolution') || 'fullhd',
   };
 
   try {
@@ -6736,8 +6783,16 @@ window.addEventListener('load', async () => {
   document.querySelectorAll('.stat-card.clickable').forEach((card) => {
     card.addEventListener('click', () => {
       const targetSection = card.dataset.target;
+      const filterType = card.dataset.filterType;
       if (targetSection) {
-        navigateTo(targetSection.replace('-section', ''));
+        if (filterType === 'media') {
+          activePostTypeFilter = 'media';
+          navigateTo(targetSection.replace('-section', ''));
+          loadPosts();
+        } else {
+          activePostTypeFilter = null;
+          navigateTo(targetSection.replace('-section', ''));
+        }
       }
     });
   });
@@ -8297,6 +8352,12 @@ async function loadNewsSettings() {
     const showLocal = document.getElementById('news-show-local');
     if (showLocal) showLocal.checked = settings['news.showLocal'] !== 'false' && settings['news.showLocal'] !== false;
 
+    const showSport = document.getElementById('news-show-sport');
+    if (showSport) showSport.checked = settings['news.showSport'] !== 'false' && settings['news.showSport'] !== false;
+
+    const showTech = document.getElementById('news-show-tech');
+    if (showTech) showTech.checked = settings['news.showTech'] !== 'false' && settings['news.showTech'] !== false;
+
     if (settings['news.displayIds']) {
       const selectedIds = String(settings['news.displayIds']).split(',').map(id => id.trim());
       document.querySelectorAll('#news-display-checkboxes input[type="checkbox"]').forEach(cb => {
@@ -8313,6 +8374,8 @@ async function saveNewsSettings() {
     'news.enabled': document.getElementById('news-enabled')?.checked ? 'true' : 'false',
     'news.showWorld': document.getElementById('news-show-world')?.checked ? 'true' : 'false',
     'news.showLocal': document.getElementById('news-show-local')?.checked ? 'true' : 'false',
+    'news.showSport': document.getElementById('news-show-sport')?.checked ? 'true' : 'false',
+    'news.showTech':  document.getElementById('news-show-tech')?.checked  ? 'true' : 'false',
   };
 
   const displayCheckboxes = document.querySelectorAll('#news-display-checkboxes input[type="checkbox"]:checked');
@@ -8342,8 +8405,8 @@ async function previewNewsData() {
     const data = await response.json();
     if (!data.success || !data.data) throw new Error('Ungültige Antwort');
 
-    const { world, local } = data.data;
-    const allItems = [...(world || []).slice(0, 4), ...(local || []).slice(0, 3)];
+    const { world, local, sport, tech } = data.data;
+    const allItems = [...(world || []).slice(0, 3), ...(local || []).slice(0, 2), ...(sport || []).slice(0, 2), ...(tech || []).slice(0, 2)];
 
     if (allItems.length === 0) {
       previewContent.innerHTML = '<p class="text-muted">Keine Nachrichten verfügbar.</p>';
@@ -8352,7 +8415,7 @@ async function previewNewsData() {
 
     previewContent.innerHTML = allItems.map(item => `
       <div style="border-bottom: 1px solid #eee; padding: 0.6rem 0; display: flex; gap: 0.75rem; align-items: baseline;">
-        <span style="font-size: 0.7rem; background: ${item.category === 'local' ? '#d1e7dd' : '#cfe2ff'}; color: ${item.category === 'local' ? '#0f5132' : '#084298'}; padding: 1px 6px; border-radius: 3px; white-space: nowrap;">${item.source}</span>
+        <span style="font-size: 0.7rem; background: ${item.category === 'local' ? '#d1e7dd' : item.category === 'sport' ? '#fff3cd' : item.category === 'tech' ? '#e2e3e5' : '#cfe2ff'}; color: ${item.category === 'local' ? '#0f5132' : item.category === 'sport' ? '#664d03' : item.category === 'tech' ? '#41464b' : '#084298'}; padding: 1px 6px; border-radius: 3px; white-space: nowrap;">${item.source}</span>
         <div>
           <strong style="font-size: 0.88rem;">${item.title}</strong>
           ${item.description ? `<p style="color: #6c757d; font-size: 0.8rem; margin: 0.2rem 0 0;">${item.description.substring(0, 120)}${item.description.length > 120 ? '…' : ''}</p>` : ''}
